@@ -1,0 +1,59 @@
+# --- Secrets ---
+.env
+*.env.local
+*.env.production
+
+# --- Database dumps ---
+*.sql
+*.sql.gz
+*.sql.bz2
+!docs/*.sql.example
+
+# --- WordPress uploads (managed by Docker volume) ---
+wordpress/wp-content/uploads/
+wordpress/wp-content/cache/
+
+# --- Caches & logs ---
+wordpress/wp-content/cache/
+**/.cache/
+**/.DS_Store
+
+# --- Editor / OS ---
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+Thumbs.db
+
+# --- Node / build tooling ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Docker ---
+docker-compose.override.yml
+# --- Scratch / runtime artifacts ---
+.tmp-*
+wordpress/wp-content/mu-trace.php
+wordpress/wp-content/updraft/
+wordpress/wp-content/wflogs/
+
+# --- Stray test artifacts ---
+cookies.txt
+.audit/
+
+# --- WP runtime junk (not project source) ---
+wordpress/wp-content/debug.log
+wordpress/wp-content/advanced-cache.php.bak
+wordpress/wp-content/object-cache.php.bak
+**/.activated
+
+# --- Default WP themes we don't ship ---
+wordpress/wp-content/themes/twentytwentyfour/
+wordpress/wp-content/themes/twentytwentythree/
+wordpress/wp-content/themes/twentytwentytwo/
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

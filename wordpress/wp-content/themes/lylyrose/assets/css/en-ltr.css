@@ -1,0 +1,29 @@
+/**
+ * LTR overrides for non-RTL locales (English).
+ *
+ * The base style.css is RTL-native (`html { direction: rtl; }`), so it loads in
+ * every locale. This small layer flips the document to LTR and corrects the
+ * handful of components that hard-code right/left offsets. It is intentionally
+ * minimal — enough for the English storefront to read correctly, not a full
+ * mirror of the RTL design.
+ */
+
+html, body {
+    direction: ltr;
+}
+
+/* Top bar, header actions and drawer should flow left-to-right. */
+.dk-topbar-left,
+.dk-topbar-right,
+.dk-header-actions {
+    flex-direction: row;
+}
+
+/* Numbers, prices and Latin text read naturally LTR. */
+.dk-price,
+.woocommerce-Price-amount,
+.dk-cart-count,
+.dk-bell-count {
+    direction: ltr;
+    unicode-bidi: embed;
+}

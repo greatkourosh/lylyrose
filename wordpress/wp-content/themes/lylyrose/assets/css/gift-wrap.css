@@ -1,0 +1,39 @@
+/* Gift wrap (P3 #17) */
+.dk-gift-wrap {
+    margin: 12px 0;
+}
+.dk-gift-wrap-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--dk-ink, #333);
+}
+.dk-gift-wrap-toggle {
+    accent-color: #ef394e;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.dk-gift-wrap-text {
+    font-size: 14px;
+    color: var(--dk-ink, #333);
+}
+.dk-cart-gift-wrap {
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+.dk-checkout-gift-wrap {
+    background: #fafafa;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #f0f0f0;
+}
+
+/* Fee row in cart totals */
+.woocommerce-cart-totals .fee .dk-gift-wrap-text {
+    font-weight: 500;
+}

@@ -1,0 +1,582 @@
+# Translation of Plugins - Limit Login Attempts Security &#8211; Login Security, 2FA, Firewall, Brute Force Prevention - Stable (latest release) in Persian
+# This file is distributed under the same license as the Plugins - Limit Login Attempts Security &#8211; Login Security, 2FA, Firewall, Brute Force Prevention - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-10-27 10:08:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.3\n"
+"Language: fa\n"
+"Project-Id-Version: Plugins - Limit Login Attempts Security &#8211; Login Security, 2FA, Firewall, Brute Force Prevention - Stable (latest release)\n"
+
+#: views/app-widgets/active-lockouts.php:13
+msgid "Reload"
+msgstr "نوسازی"
+
+#: views/app-widgets/acl-rules.php:14 views/app-widgets/acl-rules.php:63
+msgid "Documentation"
+msgstr "مستندات"
+
+#. Description of the plugin
+#: limit-login-attempts-reloaded.php
+msgid "Block excessive login attempts and protect your site against brute force attacks. Simple, yet powerful tools to improve site performance."
+msgstr "بلوک کوشش‌های ورود و محافظت از سایت شما در برابر حمله‌های بی‌رحمانه. ساده، هنوز ابزاری قدرتمند برای بهبود عملکرد سایت."
+
+#: views/tab-settings.php:662
+msgid "Hide Dashboard Widget"
+msgstr "پنهان کردن ابزارک پیشخوان"
+
+#: views/app-widgets/event-log.php:24
+msgid "All attempts blocked by access rules are hidden by default. You can see the full log at this link."
+msgstr "تمام تلاش‌های مسدود شده توسط قوانین دسترسی به طور پیش‌فرض پنهان می‌شوند. شما می‌توانید گزارش کامل را در این لینک ببینید."
+
+#: views/app-widgets/event-log.php:19
+msgid "Full Logs"
+msgstr "گزارش کامل"
+
+#: views/tab-settings.php:598
+msgid "You can use a shortcode here to insert links, for example, a link to your Privacy Policy page. <br>The shortcode is: [llar-link url=\"https://example.com\" text=\"Privacy Policy\"]"
+msgstr "شما می توانید از یک کد کوتاه در اینجا برای درج لینک ها، به عنوان مثال، یک لینک به صفحه سیاست حفظ حریم خصوصی خود استفاده کنید. <br>کد کوتاه این است: [llar-link url=\"https://example.com\" text=\"Privacy Policy\"]"
+
+#: views/app-widgets/country-access-rules.php:14
+msgid "Country Access Rules"
+msgstr "قوانین دسترسی کشور"
+
+#: views/app-widgets/country-access-rules.php:22
+msgid "these countries:"
+msgstr "این کشورها:"
+
+#: core/Config.php:117
+msgid "By proceeding you understand and give your consent that your IP address and browser information might be processed by the security plugins installed on this site."
+msgstr "با انجام این، شما درک و رضایت خود را که آدرس آی پی و اطلاعات مرورگر شما ممکن است توسط افزونه‌های امنیتی نصب شده در این سایت پردازش شوند، موافق هستید."
+
+#: views/tab-settings.php:583
+msgid "GDPR message"
+msgstr "پیام GDPR"
+
+#: views/chart-circle-failed-attempts-today.php:31
+#: views/chart-failed-attempts.php:37 views/chart-failed-attempts.php:122
+#: views/chart-failed-attempts.php:132
+msgid "Failed Login Attempts"
+msgstr "تلاش‌های ورود شکست خورده"
+
+#: core/LimitLoginAttempts.php:449
+msgid "Failed Login Attempts Today"
+msgstr "تلاش‌های ورود شکست خورده امروز"
+
+#: views/tab-dashboard.php:140
+msgid "Find the documentation and help you need."
+msgstr "برای کمک به شما مستندات رو پیدا کنید."
+
+#: views/tab-dashboard.php:95
+msgid "As a free user, your local server is absorbing the traffic brought on by brute force attacks, potentially slowing down your website. Upgrade to Premium today to outsource these attacks through our cloud app, and slow down future attacks with advanced throttling."
+msgstr "به عنوان یک کاربر رایگان ، سرور محلی شما ترافیک ناشی از حملات وحشیانه را جذب می‌کند و به طور بالقوه سرعت وب‌سایت شما را کاهش می‌دهد. همین امروز به نسخه ویژه ارتقا دهید تا این حملات را از طریق برنامه ابری ما برون‌سپاری کنید و سرعت حملات آینده را با استفاده از کنترل کننده پیشرفته کاهش دهید."
+
+#: views/tab-dashboard.php:151
+msgid "Global Options"
+msgstr "گزینه‌های سراسری"
+
+#: core/LimitLoginAttempts.php:1825 views/options-page.php:209
+#: views/tab-dashboard.php:136
+msgid "Help"
+msgstr "راهنما"
+
+#: views/tab-dashboard.php:75 views/tab-settings.php:95
+msgid "Learn More"
+msgstr "ادامه مطلب"
+
+#: views/tab-dashboard.php:155
+msgid "Many options such as notifications, alerts, premium status, and more."
+msgstr "گزینه های بیشتری مانند آگاه‌سازی، هشدار، وضعیت ویژه و بیشتر."
+
+#: views/onboarding-popup.php:43
+msgid "Notifications"
+msgstr "اعلان ها"
+
+#: views/tab-dashboard.php:91
+msgid "Premium Protection Disabled"
+msgstr "محافظت ویژه غیرفعال شد"
+
+#: views/tab-dashboard.php:121
+msgid "Tools"
+msgstr "ابزارها"
+
+#: core/LimitLoginAttempts.php:1071 views/tab-dashboard.php:105
+#: views/tab-dashboard.php:261
+msgid "Upgrade to Premium"
+msgstr "ارتقا به ویژه"
+
+#: views/tab-dashboard.php:125
+msgid "View lockouts logs, block or whitelist usernames or IPs, and more."
+msgstr "گزارش‌های قرنطینه، آی‌پی‌ها یا شناسه‌کاربری فهرست سفید یا مسدود شده و بیشتر مشاهده کنید."
+
+#: resources/compare-plans-data.php:80
+msgid "Performance Optimizer"
+msgstr "بهینه‌سازی عملکرد"
+
+#: views/tab-logs-local.php:88
+msgid "Safelist"
+msgstr "فهرست امن"
+
+#: views/app-widgets/active-lockouts.php:8
+msgid "Active Lockouts"
+msgstr "قفل‌ها را فعال کنید"
+
+#: views/chart-failed-attempts.php:45 views/chart-failed-attempts.php:148
+#: views/chart-failed-attempts.php:268
+msgid "Requests"
+msgstr "درخواست‌ها"
+
+#: views/tab-settings.php:369 views/tab-settings.php:374
+msgid "Setup Code"
+msgstr "کد راه‌اندازی"
+
+#: core/LimitLoginAttempts.php:553
+msgid "%d failed login attempt "
+msgid_plural "%d failed login attempts "
+msgstr[0] "%d تلاش ورود ناموفق "
+msgstr[1] ""
+
+#: resources/compare-plans-data.php:144 views/tab-help.php:225
+msgid "Premium Support"
+msgstr "پشتیبانی ویژه"
+
+#: core/LimitLoginAttempts.php:4115
+msgid "Yes, turn on email notifications"
+msgstr "بله، آگاه‌سازی‌های ایمیل را روشن کنید"
+
+#: core/LimitLoginAttempts.php:4116
+msgid "Remind me a month from now"
+msgstr "یک ماه دیگر به من یادآوری کن"
+
+#: core/LimitLoginAttempts.php:4117
+msgid "Don't show this message again"
+msgstr "این پیام را دوباره نشان نده"
+
+#: core/LimitLoginAttempts.php:4110
+msgid "You have been upgraded to the latest version of <strong>Limit Login Attempts Reloaded</strong>.<br> Due to increased security threats around the holidays, we recommend turning on email notifications when you receive a failed login attempt."
+msgstr "شما به آخرین نسخه <strong> محدود کردن ورود مجدد </strong> ارتقا یافته‌اید. <br> به دلیل افزایش تهدیدات امنیتی در روهای تعطیل، توصیه می‌کنیم هنگام دریافت ناموفق ورود به سیستم، آگاهی‌های ایمیل را روشن کنید."
+
+#. Author URI of the plugin
+#: limit-login-attempts-reloaded.php
+msgid "https://www.limitloginattempts.com/"
+msgstr "https://limitloginattempts.com/"
+
+#: core/CloudApp.php:164
+msgid "The app has been successfully imported."
+msgstr "برنامه با موفقیت درون‌ریزی شد."
+
+#: core/Ajax.php:178
+msgid "Please specify the Setup Code"
+msgstr "لطفا کد راه‌اندازی را مشخص کنید"
+
+#: views/app-widgets/event-log.php:37 views/app-widgets/login-attempts.php:49
+msgid "Time"
+msgstr "زمان"
+
+#: views/app-widgets/active-lockouts.php:22 views/app-widgets/event-log.php:38
+#: views/app-widgets/login-attempts.php:51
+msgid "IP"
+msgstr "IP"
+
+#: views/app-widgets/active-lockouts.php:23 views/app-widgets/event-log.php:40
+#: views/app-widgets/login-attempts.php:50
+msgid "Login"
+msgstr "ورود"
+
+#: views/app-widgets/acl-rules.php:38 views/app-widgets/acl-rules.php:87
+msgid "Allow"
+msgstr "اجازه دادن"
+
+#: views/app-widgets/acl-rules.php:39 views/app-widgets/acl-rules.php:88
+msgid "Pass"
+msgstr "عبور"
+
+#: views/app-widgets/acl-rules.php:44 views/app-widgets/acl-rules.php:93
+#: views/app-widgets/country-access-rules.php:26
+msgid "Add"
+msgstr "افزودن"
+
+#: views/app-widgets/event-log.php:14
+msgid "Event Log"
+msgstr "گزارش رویداد"
+
+#: views/app-widgets/acl-rules.php:25 views/app-widgets/acl-rules.php:74
+#: views/app-widgets/event-log.php:41
+msgid "Rule"
+msgstr "قانون"
+
+#: views/app-widgets/event-log.php:42
+msgid "Reason"
+msgstr "دلیل"
+
+#: views/app-widgets/acl-rules.php:24 views/app-widgets/acl-rules.php:33
+#: views/app-widgets/acl-rules.php:73 views/app-widgets/acl-rules.php:82
+#: views/app-widgets/event-log.php:43
+msgid "Pattern"
+msgstr "الگو"
+
+#: views/app-widgets/event-log.php:46
+msgid "Actions"
+msgstr "اقدامات"
+
+#: views/app-widgets/active-lockouts.php:24
+msgid "Count"
+msgstr "تعداد"
+
+#: views/app-widgets/active-lockouts.php:25
+msgid "Expires in (minutes)"
+msgstr "منقضی می شود (دقیقه)"
+
+#: views/app-widgets/acl-rules.php:26 views/app-widgets/acl-rules.php:75
+msgid "Action"
+msgstr "اقدام"
+
+#: views/app-widgets/acl-rules.php:37 views/app-widgets/acl-rules.php:86
+#: views/app-widgets/country-access-rules.php:55
+msgid "Deny"
+msgstr "رد کردن"
+
+#: views/tab-settings.php:391
+msgid "Submit"
+msgstr "ارسال"
+
+#: views/tab-settings.php:403
+msgid "Configuration"
+msgstr "پیکربندی"
+
+#: core/LimitLoginAttempts.php:1815 views/options-page.php:199
+msgid "Logs"
+msgstr "گزارش‌ها"
+
+#: views/tab-settings.php:143
+msgid "Local App"
+msgstr "برنامه محلی"
+
+#: views/tab-settings.php:107
+msgid "Active App"
+msgstr "برنامه فعال"
+
+#: views/tab-settings.php:306 views/tab-settings.php:476
+msgid "Absorb site load caused by attacks"
+msgstr "جذب فشار روی سایت ناشی از حملات"
+
+#: views/tab-settings.php:64
+msgid "App Settings"
+msgstr "تنظیمات برنامه"
+
+#: views/app-widgets/event-log.php:44
+msgid "Attempts Left"
+msgstr "تلاش‌ها باقی‌مانده"
+
+#: views/options-page.php:218
+msgid "Failover"
+msgstr "شکست خورده"
+
+#: views/tab-settings.php:332 views/tab-settings.php:500
+msgid "Get premium support"
+msgstr "دریافت پشتیبانی پولی"
+
+#: views/app-widgets/acl-rules.php:59
+msgid "IP Access Rules"
+msgstr "قوانین دسترسی IP"
+
+#: views/app-widgets/event-log.php:45
+msgid "Lockout Duration"
+msgstr "مدت زمان قرنطینه"
+
+#: views/app-widgets/acl-rules.php:10
+msgid "Login Access Rules"
+msgstr "قوانین دسترسی ورود"
+
+#: core/Ajax.php:731
+msgid "Meanwhile, the app falls over to the <a href=\"%s\">default functionality</a>."
+msgstr "بدین معنی که برنامه <a href=\"%s\">از عملکرد پیش‌فرض</a>از کار می‌افتد."
+
+#: core/Ajax.php:362 core/Ajax.php:665
+msgid "No events yet."
+msgstr "هنوز هیچ رویدادی رخ نداده است."
+
+#: core/Ajax.php:714
+msgid "No lockouts yet."
+msgstr "هم اکنون کاربری در قرنطینه وجود ندارد."
+
+#: core/Ajax.php:782
+msgid "No rules yet."
+msgstr "هنوز هیچ قانونی نیست."
+
+#: views/tab-settings.php:339 views/tab-settings.php:506
+msgid "Run auto backups of access control lists, lockouts and logs"
+msgstr "راه‌اندازی پشتیبان خودکار برای دسترسی به فهرست کنترل، قرنطینه‌ها و گزارش‌ها"
+
+#: core/CloudApp.php:139
+msgid "The endpoint is not responding. Please contact your app provider to settle that."
+msgstr "نقطه پایانی پاسخ نمی‌دهد. لطفاً برای حل این مشکل با ارائه دهنده برنامه خود تماس بگیرید."
+
+#: views/tab-settings.php:300 views/tab-settings.php:456
+msgid "Why Use Our Premium Cloud App?"
+msgstr "چرا از برنامه ابری ویژه ما استفاده کنید؟"
+
+#: views/tab-logs-local.php:142 views/tab-mfa.php:177
+#: views/tab-settings.php:525 views/tab-settings.php:870
+msgid "Save Settings"
+msgstr "ذخیره تنظیمات"
+
+#: views/tab-settings.php:531
+msgid "General Settings"
+msgstr "تنظیمات کلی"
+
+#: core/LimitLoginAttempts.php:3426 core/LimitLoginAttempts.php:3506
+#: core/LimitLoginAttempts.php:3513
+msgid "Settings saved."
+msgstr "تنظیمات ذخیره شدند."
+
+#: core/LimitLoginAttempts.php:1053 core/LimitLoginAttempts.php:1794
+#: views/options-page.php:179
+msgid "Dashboard"
+msgstr "پیشخوان"
+
+#: views/tab-settings.php:67
+msgid "The app absorbs the main load caused by brute-force attacks, analyzes login attempts, and blocks unwanted visitors. It provides other service functions as well."
+msgstr "این برنامه حملات brute-force را بی‌اثر کرده، تلاش برای ورود به سیستم را تجزیه و تحلیل و بازدیدکنندگان ناخواسته را مسدود می کند و همچنین ممکن است توابع سرویس دیگری را نیز ارائه دهند."
+
+#: core/LimitLoginAttempts.php:4023
+msgid "Maybe later"
+msgstr "بعداً"
+
+#: core/LimitLoginAttempts.php:4022
+msgid "Don't show again"
+msgstr "دوباره نمایش نده"
+
+#: core/LimitLoginAttempts.php:4019
+msgid "We would really like to hear your feedback about the plugin! Please take a couple minutes to write a few words <a href=\"https://wordpress.org/support/plugin/limit-login-attempts-reloaded/reviews/#new-post\" target=\"_blank\">here</a>. Thank you!"
+msgstr "ما می‌خواهیم نظر شما را درباره پلاگین بشنویم! لطفآً اندکی زمان گذاشته و آن را در <a href=\"https://wordpress.org/support/plugin/limit-login-attempts-reloaded/reviews/#new-post\" target=\"_blank\">اینجا</a> بنویسید. با سپاس!"
+
+#: core/LimitLoginAttempts.php:4017
+msgid "Hey <strong>Limit Login Attempts Reloaded</strong> user!"
+msgstr "سلام کاربر <strong>Limit Login Attempts Reloaded</strong>!"
+
+#: core/LimitLoginAttempts.php:4018
+msgid "A <strong>crazy idea</strong> we wanted to share! What if we put an image from YOU on the <a href=\"https://wordpress.org/plugins/limit-login-attempts-reloaded/\" target=\"_blank\">LLAR page</a>?! (<a href=\"https://wordpress.org/plugins/hello-dolly/\" target=\"_blank\">example</a>) A drawing made by you or your child would cheer people up! Send us your drawing by <a href=\"mailto:wpchef.me@gmail.com\" target=\"_blank\">email</a> and we like it, we'll add it in the next release. Let's have some fun!"
+msgstr "ما خواستیم تا یک <strong>فکر با حال رو</strong> با شما به اشتراک بگذاریم! نظرتون چیه اگر ما بخواهیم یک عکس از شما را در <a href=\"https://wordpress.org/plugins/limit-login-attempts-reloaded/\" target=\"_blank\">صفحه پلاگ‌این</a> قرار بدهیم؟! (<a href=\"https://wordpress.org/plugins/hello-dolly/\" target=\"_blank\">مثلاً</a>) یک نقاشی که خودتون کشیدید با بچه‌تون کشیده، می‌تونه مشوقی برای مردم باشه! نقاشی‌هاتون رو از طریق <a href=\"mailto:wpchef.me@gmail.com\" target=\"_blank\">ایمیل</a> برای ما ارسال کنید، پس از تأیید، به نسخه بعدی اضافه‌اش می‌کنیم!"
+
+#: core/LimitLoginAttempts.php:4024
+msgid "Leave a review"
+msgstr "نظر خود را بنویسید"
+
+#: core/LimitLoginAttempts.php:1820 views/options-page.php:205
+msgid "Debug"
+msgstr "اشکال‌زدایی"
+
+#: core/LimitLoginAttempts.php:1054 core/LimitLoginAttempts.php:1799
+#: views/options-page.php:183
+msgid "Settings"
+msgstr "تنظیمات"
+
+#: views/tab-settings.php:291
+msgid "Specify the origins you trust in order of priority, separated by commas. We strongly recommend that you <b>do not</b> use anything other than REMOTE_ADDR since other origins can be easily faked. Examples: HTTP_X_FORWARDED_FOR, HTTP_CF_CONNECTING_IP, HTTP_X_SUCURI_CLIENTIP"
+msgstr "منشاء مورد اعتماد خود را به ترتیب اولویت، با کاما جدا کنید. ما تاکید داریم که  <b>استفاده نکنید از</b> غیر از REMOTE_ADDR . زیرا به راحتی غیرقابل تقلب است. مثل: HTTP_X_FORWARDED_FOR, HTTP_CF_CONNECTING_IP, HTTP_X_SUCURI_CLIENTIP"
+
+#: views/tab-settings.php:276
+msgid "Trusted IP Origins"
+msgstr "IP مورد اعتماد"
+
+#: views/tab-settings.php:163
+msgid "after"
+msgstr "بعد از"
+
+#: views/tab-settings.php:159 views/tab-settings.php:617
+msgid "Email to"
+msgstr "ایمیل به"
+
+#: core/LimitLoginAttempts.php:3127
+msgid "<strong>ERROR</strong>: Incorrect email address or password."
+msgstr "<strong>خطا</strong>: شناسه‌کاربری یا گذرواژه اشتباه است."
+
+#: views/tab-settings.php:572
+msgid "GDPR compliance"
+msgstr "یکی بودن با GDPR"
+
+#: views/tab-logs-local.php:93 views/tab-logs-local.php:116
+msgid "One IP or IP range (1.2.3.4-5.6.7.8) per line"
+msgstr "هر آی‌پی یا رنج آی‌پی (1.2.3.4-5.6.7.8) در یک خط"
+
+#: views/tab-logs-local.php:217
+msgid "Date"
+msgstr "تاریخ"
+
+#: views/tab-settings.php:548
+msgid "Use global settings"
+msgstr "استفاده از تنظیمات اولیه"
+
+#: views/tab-settings.php:241
+msgid "hours"
+msgstr "ساعت"
+
+#: core/LimitLoginAttempts.php:2607
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d دقیقه"
+msgstr[1] ""
+
+#: core/LimitLoginAttempts.php:2600
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d ساعت"
+msgstr[1] ""
+
+#: core/Ajax.php:993
+msgid "<strong>%d</strong> attempt remaining."
+msgid_plural "<strong>%d</strong> attempts remaining."
+msgstr[0] "<strong>%d</strong> فرصت دیگر برای شما باقی مانده است."
+msgstr[1] ""
+
+#: core/LimitLoginAttempts.php:1403 core/LimitLoginAttempts.php:2394
+#: core/LimitLoginAttempts.php:3059
+msgid "Please try again in %d minute."
+msgid_plural "Please try again in %d minutes."
+msgstr[0] "لطفا %d دقیقه دیگر مراجعه کنید."
+msgstr[1] ""
+
+#: core/LimitLoginAttempts.php:1401 core/LimitLoginAttempts.php:2392
+#: core/LimitLoginAttempts.php:3056
+msgid "Please try again in %d hour."
+msgid_plural "Please try again in %d hours."
+msgstr[0] "لطفا %d ساعت دیگر مراجعه کنید."
+msgstr[1] ""
+
+#: views/tab-settings.php:543
+msgid "If disabled, the global settings will be forcibly applied to the entire network."
+msgstr "اگر غیرفعال باشد، اجباراً تنظیمات عمومی بر سرتاسر شبکه اعمال خواهد شد."
+
+#: core/LimitLoginAttempts.php:3154
+msgid "WC Error"
+msgstr "خطای WC"
+
+#: views/tab-logs-local.php:71
+msgid "%d IP is currently blocked from trying to log in"
+msgstr "اکنون آی‌پی شما %d برای ورود به سایت مسدود شده است"
+
+#: core/LimitLoginAttempts.php:957 core/LimitLoginAttempts.php:3081
+#: core/LimitLoginAttempts.php:3130 core/LimitLoginAttempts.php:3135
+msgid "<strong>ERROR</strong>: Incorrect username or password."
+msgstr "<strong>خطا</strong>: شناسه‌کاربری یا گذرواژه اشتباه است."
+
+#: core/LimitLoginAttempts.php:1256 core/LimitLoginAttempts.php:1396
+#: core/LimitLoginAttempts.php:2385 core/LimitLoginAttempts.php:3036
+msgid "<strong>ERROR</strong>: Too many failed login attempts."
+msgstr "<strong>خطا</strong>: تلاش ناموفق زیاد برای ورود به سایت."
+
+#: views/tab-logs-local.php:64
+msgid "Active lockouts"
+msgstr "فعال‌کردن تحریم‌ها"
+
+#: views/tab-logs-local.php:202
+msgid "Clear Log"
+msgstr "پاک‌سازی گزارش"
+
+#: core/LimitLoginAttempts.php:3340
+msgid "Cleared IP log"
+msgstr "گزارش آی‌پی‌ها پاک‌شده"
+
+#: core/LimitLoginAttempts.php:3354
+msgid "Cleared current lockouts"
+msgstr "پاک‌کردن تعداد محروم‌شده‌ها"
+
+#: views/tab-settings.php:212
+msgid "allowed retries"
+msgstr "تعداد تلاش مجاز"
+
+#: views/tab-settings.php:254
+msgid "hours until retries are reset"
+msgstr "ساعت بازنشانی‌ تلاش‌ها"
+
+#: views/tab-settings.php:237
+msgid "lockouts increase lockout time to"
+msgstr "افزایش زمان تحریم برای قرنطینه‌ شده‌ها"
+
+#: views/tab-settings.php:166
+msgid "lockouts"
+msgstr "قرنطینه شده‌ها"
+
+#: views/tab-settings.php:225
+msgid "minutes lockout"
+msgstr "دقیقه قرنطینه"
+
+#: views/tab-logs-local.php:218
+msgctxt "Internet address"
+msgid "IP"
+msgstr "آی‌پی"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#: limit-login-attempts-reloaded.php core/LimitLoginAttempts.php:400
+#: views/emails/footer.php:9 views/emails/header.php:37
+msgid "Limit Login Attempts Reloaded"
+msgstr "افزونه بازنشانی تلاش برای ورود"
+
+#: views/tab-settings.php:198
+msgid "Lockout"
+msgstr "قرنطینه"
+
+#: views/tab-logs-local.php:194
+msgid "Lockout log"
+msgstr "گزارش قرنطینه"
+
+#: views/tab-logs-local.php:57
+msgid "No lockouts yet"
+msgstr "هم اکنون کاربری در قرنطینه وجود ندارد"
+
+#: views/tab-settings.php:147
+msgid "Notify on lockout"
+msgstr "آگاهی از قرنطینه"
+
+#: views/tab-logs-local.php:101 views/tab-logs-local.php:124
+msgid "One Username per line"
+msgstr "هر شناسه‌کاربری در یک خط"
+
+#: core/LimitLoginAttempts.php:3044
+msgid "Please try again later."
+msgstr "لطفا در آینده دوباره امتحان کنید."
+
+#: views/tab-logs-local.php:50
+msgid "Reset Counter"
+msgstr "بازنشانی شمارنده"
+
+#: core/LimitLoginAttempts.php:3347
+msgid "Reset lockout count"
+msgstr "بازنشانی تعداد قرنطینه‌ شده‌ها"
+
+#: views/tab-logs-local.php:68
+msgid "Restore Lockouts"
+msgstr "بازگردانی قرنطینه‌ها"
+
+#: views/tab-logs-local.php:35
+msgid "Statistics"
+msgstr "آمار"
+
+#: views/tab-logs-local.php:45
+msgid "Total lockouts"
+msgstr "همه قرنطینه‌ها"
+
+#: views/tab-logs-local.php:219
+msgid "Tried to log in as"
+msgstr "کوشش کرد تا وارد شود با نام"
+
+#: views/app-widgets/event-log.php:39 views/emails/digest-daily-content.php:33
+#: views/emails/digest-monthly-content.php:33
+#: views/emails/digest-weekly-content.php:33 views/tab-logs-local.php:220
+msgid "Gateway"
+msgstr "درگاه"
+
+#: views/tab-logs-local.php:53
+msgid "%d lockout since last reset"
+msgid_plural "%d lockouts since last reset"
+msgstr[0] "%d مرتبه برای بازنشانی قرنطینه"
+msgstr[1] ""
+
+#: views/tab-settings.php:542
+msgid "Let network sites use their own settings"
+msgstr "اجازه بده سایت‎‌های شبکه تنظیمات خودشان را استفاده کنند"

@@ -1,0 +1,630 @@
+<?php
+
+namespace WeDevs\Dokan\Vendor;
+
+use WeDevs\Dokan\Cache;
+use WP_Error;
+use WP_User_Query;
+use WeDevs\Dokan\Vendor\Vendor;
+
+/**
+ * Vendor Manager Class
+ *
+ * @since 2.6.10
+ */
+class Manager {
+
+    /**
+     * The statuses the vendor listing knows how to filter on.
+     *
+     * @since 5.1.1
+     *
+     * @var string[]
+     */
+    const STATUSES = [ 'all', 'approved', 'pending' ];
+
+    /**
+     * Total vendors found
+     *
+     * @var integer
+     */
+    private $total_users;
+
+    /**
+     * Get all vendors
+     *
+     * @param array $args
+     *
+     * @since 2.8.0
+     *
+     * @return array
+     */
+    public function all( $args = [] ) {
+        return $this->get_vendors( $args );
+    }
+
+    /**
+     * Get vendors
+     *
+     * `status` accepts 'all', 'approved' or 'pending' (string or array); asking for both halves
+     * means everyone and anything unrecognised falls back to 'approved'. Pending is applied
+     * through the `dokan_pending_only` query var, which `exclude_approved_vendors()` acts on.
+     *
+     * @param array $args
+     *
+     * @return array
+     */
+    public function get_vendors( $args = [] ) {
+        $vendors = [];
+
+        $defaults = [
+            'role__in'   => [ 'seller', 'administrator' ],
+            'number'     => 10,
+            'offset'     => 0,
+            'orderby'    => 'ID',
+            'order'      => 'ASC',
+            'status'     => [ 'approved' ],
+            'featured'   => '', // yes or no
+            'meta_query' => [],
+            'fields'     => 'all',
+        ];
+
+        $args = wp_parse_args( $args, $defaults );
+
+        $status = $this->resolve_status( $args['status'] );
+
+        if ( 'approved' === $status ) {
+            $args['meta_query']['relation'] = 'AND';
+            $args['meta_query'][]           = [
+                'key'     => 'dokan_enable_selling',
+                'value'   => 'yes',
+                'compare' => '=',
+            ];
+        }
+
+        // if featured
+        if ( 'yes' === $args['featured'] ) {
+            $args['meta_query']['relation'] = 'AND';
+            $args['meta_query'][] = [
+                'key'     => 'dokan_feature_seller',
+                'value'   => 'yes',
+                'compare' => '=',
+            ];
+        }
+
+        unset( $args['status'] );
+        unset( $args['featured'] );
+
+        // Pending is everyone not approved, a missing flag included, exactly as the status counters and dokan_is_seller_enabled() read it.
+        if ( 'pending' === $status ) {
+            // Carried into the query so the callback can tell our query from any other one running inside the same hook.
+            $args['dokan_pending_only'] = true;
+
+            // Hooked once and left in place: it is a no-op without the query var, and unhooking it around the query let a nested listing disarm the outer one.
+            if ( ! has_action( 'pre_user_query', [ $this, 'exclude_approved_vendors' ] ) ) {
+                add_action( 'pre_user_query', [ $this, 'exclude_approved_vendors' ] );
+            }
+        }
+
+        $user_query = new WP_User_Query( $args );
+        $results    = $user_query->get_results();
+
+        $this->total_users = $user_query->total_users;
+
+        if ( $args['fields'] !== 'all' ) {
+            return $results;
+        }
+
+        foreach ( $results as $result ) {
+            $vendors[] = $this->get( $result );
+        }
+
+        return $vendors;
+    }
+
+    /**
+     * Collapse the requested statuses into the single filter the query applies.
+     *
+     * Only 'all', 'approved' and 'pending' are understood. Asking for both halves — or for 'all'
+     * outright — means everyone. Anything else names no status this listing can filter on, so it
+     * falls back to the default rather than widening the result, the same way
+     * `Abilities\Definitions\VendorsQuery::resolve_status()` coerces an unknown status.
+     *
+     * @since 5.1.1
+     *
+     * @param string|string[] $status
+     *
+     * @return string One of 'all', 'approved' or 'pending'.
+     */
+    protected function resolve_status( $status ): string {
+        $known = array_values( array_unique( array_intersect( (array) $status, self::STATUSES ) ) );
+
+        // Never let a typo read as a wider set than the caller asked for.
+        if ( empty( $known ) ) {
+            return 'approved';
+        }
+
+        return 1 === count( $known ) ? $known[0] : 'all';
+    }
+
+    /**
+     * Drop every approved vendor from a user query that asked for pending ones only.
+     *
+     * A correlated NOT EXISTS rides the usermeta index and stops at the first match per row.
+     *
+     * @since 5.1.1
+     *
+     * @param \WP_User_Query $query
+     *
+     * @return void
+     */
+    public function exclude_approved_vendors( $query ) {
+        global $wpdb;
+
+        // Every user query on the site passes through here once hooked, so only the one that asked for pending gets the clause.
+        if ( ! $query->get( 'dokan_pending_only' ) ) {
+            return;
+        }
+
+        $query->query_where .= $wpdb->prepare(
+            " AND NOT EXISTS ( SELECT 1 FROM {$wpdb->usermeta} WHERE user_id = {$wpdb->users}.ID AND meta_key = %s AND meta_value = %s )",
+            'dokan_enable_selling',
+            'yes'
+        );
+    }
+
+    /**
+     * Get total user according to query
+     *
+     * @since 1.0.0
+     *
+     * @return int
+     */
+    public function get_total() {
+        return $this->total_users;
+    }
+
+    /**
+     * Get single vendor data
+     *
+     * @param object|integer $vendor
+     *
+     * @return object|Vendor instance
+     */
+    public function get( $vendor ) {
+        return new Vendor( $vendor );
+    }
+
+    /**
+     * Create a vendor
+     *
+     * @param array $data
+     *
+     * @return Vendor|WP_Error on failure
+     */
+    public function create( $data = [] ) {
+        $defaults = [
+            'user_login' => '', // dokan_generate_username()
+            'user_pass'  => wp_generate_password(),
+        ];
+
+        if ( ! empty( $data['email'] ) ) {
+            $data['user_email'] = $data['email'];
+            unset( $data['email'] );
+        }
+
+        $vendor_data = wp_parse_args( $data, $defaults );
+        $vendor_data['role'] = 'seller'; // this value can't be edited
+        $vendor_id   = wp_insert_user( $vendor_data );
+
+        if ( is_wp_error( $vendor_id ) ) {
+            return $vendor_id;
+        }
+
+        // send vendor registration email to admin and vendor
+        if ( isset( $data['notify_vendor'] ) && dokan_validate_boolean( $data['notify_vendor'] ) ) {
+            wp_send_new_user_notifications( $vendor_id, 'both' );
+        } else {
+            wp_send_new_user_notifications( $vendor_id, 'admin' );
+        }
+
+        /**
+         * @since 3.2.7 added $data parameter
+         */
+        $store_data = apply_filters(
+            'dokan_vendor_create_data', [
+                'store_name'              => ! empty( $data['store_name'] ) ? $data['store_name'] : '',
+                'social'                  => ! empty( $data['social'] ) ? $data['social'] : [],
+                'payment'                 => ! empty( $data['payment'] ) ? $data['payment'] : [
+                    'paypal' => [ 'email' ],
+                    'bank'   => [],
+                ],
+                'phone'                   => ! empty( $data['phone'] ) ? $data['phone'] : '',
+                'show_email'              => ! empty( $data['show_email'] ) ? $data['show_email'] : 'no',
+                'address'                 => ! empty( $data['address'] ) ? $data['address'] : [],
+                'location'                => ! empty( $data['location'] ) ? $data['location'] : '',
+                'banner'                  => ! empty( $data['banner_id'] ) ? $data['banner_id'] : 0,
+                'icon'                    => ! empty( $data['icon'] ) ? $data['icon'] : '',
+                'gravatar'                => ! empty( $data['gravatar_id'] ) ? $data['gravatar_id'] : 0,
+                'enable_tnc'              => ! empty( $data['enable_tnc'] ) ? $data['enable_tnc'] : 'off',
+                'store_tnc'               => ! empty( $data['store_tnc'] ) ? $data['store_tnc'] : '',
+                'show_min_order_discount' => ! empty( $data['show_min_order_discount'] ) ? $data['show_min_order_discount'] : 'no',
+                'store_seo'               => ! empty( $data['store_seo'] ) ? $data['store_seo'] : [],
+                'dokan_store_time'        => ! empty( $data['store_open_close'] ) ? $data['store_open_close'] : [],
+            ], $data
+        );
+
+        $vendor = dokan()->vendor->get( $vendor_id );
+
+        if ( ! $vendor instanceof Vendor || $vendor->get_id() === 0 ) {
+            return new WP_Error(
+                'unable_to_create_vendor',
+                __( 'Unable to create vendor', 'dokan-lite' ),
+                400
+            );
+        }
+
+        if ( current_user_can( 'manage_woocommerce' ) ) {
+            if ( isset( $data['enabled'] ) && dokan_validate_boolean( $data['enabled'] ) ) {
+                $vendor->make_active();
+            }
+
+            if ( isset( $data['featured'] ) && dokan_validate_boolean( $data['featured'] ) ) {
+                $vendor->update_meta( 'dokan_feature_seller', 'yes' );
+            }
+
+            if ( isset( $data['trusted'] ) && dokan_validate_boolean( $data['trusted'] ) ) {
+                $vendor->update_meta( 'dokan_publishing', 'yes' );
+            }
+
+            if ( ! empty( $data['admin_commission_type'] ) ) {
+                $vendor->update_meta( 'dokan_admin_percentage_type', sanitize_text_field( $data['admin_commission_type'] ) );
+            }
+
+            if ( isset( $data['admin_commission'] ) && ( is_numeric( wc_format_decimal( $data['admin_commission'] ) ) || '' === $data['admin_commission'] ) ) {
+                $vendor->update_meta( 'dokan_admin_percentage', wc_format_decimal( $data['admin_commission'] ) );
+            }
+
+            if ( isset( $data['admin_additional_fee'] ) && ( is_numeric( wc_format_decimal( $data['admin_additional_fee'] ) ) || '' === $data['admin_additional_fee'] ) ) {
+                $vendor->update_meta( 'dokan_admin_additional_fee', wc_format_decimal( $data['admin_additional_fee'] ) );
+            }
+
+            if ( isset( $data['admin_category_commission'] ) ) {
+                $vendor->update_meta( 'admin_category_commission', wc_clean( $data['admin_category_commission'] ) );
+            }
+        }
+
+        $vendor->update_meta( 'dokan_profile_settings', $store_data );
+        $vendor->update_meta( 'dokan_store_name', $store_data['store_name'] );
+        $vendor->set_store_name( $store_data['store_name'] );
+
+        /**
+         * @since 3.2.7 hook introduced
+         */
+        do_action( 'dokan_before_create_vendor', $vendor->get_id(), $data );
+
+        $vendor->save();
+
+        do_action( 'dokan_new_vendor', $vendor_id );
+
+        return $this->get( $vendor_id );
+    }
+
+    /**
+     * Update a vendor
+     *
+     * @param int $vendor_id
+     *
+     * @param array $data
+     *
+     * @return object
+     */
+    public function update( $vendor_id, $data = [] ) {
+        $vendor = $this->get( $vendor_id );
+
+        if ( ! $data ) {
+            return $vendor;
+        }
+
+        // default wp based user data
+        if ( ! empty( $data['user_pass'] ) && get_current_user_id() === $vendor->get_id() ) {
+            wp_update_user(
+                [
+                    'ID'        => $vendor->get_id(),
+                    'user_pass' => $data['user_pass'],
+                ]
+            );
+        }
+
+        if ( ! empty( $data['first_name'] ) ) {
+            wp_update_user(
+                [
+                    'ID'         => $vendor->get_id(),
+                    'first_name' => wc_clean( $data['first_name'] ),
+                ]
+            );
+        }
+
+        if ( ! empty( $data['last_name'] ) ) {
+            wp_update_user(
+                [
+                    'ID'        => $vendor->get_id(),
+                    'last_name' => wc_clean( $data['last_name'] ),
+                ]
+            );
+        }
+
+        if ( ! empty( $data['user_nicename'] ) ) {
+            wp_update_user(
+                [
+                    'ID'            => $vendor->get_id(),
+                    'user_nicename' => wc_clean( $data['user_nicename'] ),
+                ]
+            );
+        }
+
+        if ( ! empty( $data['email'] ) ) {
+            if ( ! is_email( $data['email'] ) ) {
+                return new WP_Error( 'invalid_email', __( 'Email is not valid', 'dokan-lite' ) );
+            }
+
+            wp_update_user(
+                [
+                    'ID'         => $vendor->get_id(),
+                    'user_email' => sanitize_email( $data['email'] ),
+                ]
+            );
+        }
+
+        // update vendor other metadata | @todo: move all other metadata to 'dokan_profile_settings' meta
+        if ( current_user_can( 'manage_woocommerce' ) ) {
+            if ( isset( $data['enabled'] ) ) {
+                $previously_enabled = $vendor->is_enabled();
+                $newly_enabled      = dokan_validate_boolean( $data['enabled'] );
+
+                if ( $previously_enabled !== $newly_enabled ) {
+                    $newly_enabled ? $vendor->make_active() : $vendor->make_inactive();
+                }
+            }
+
+            if ( isset( $data['featured'] ) && dokan_validate_boolean( $data['featured'] ) ) {
+                $vendor->update_meta( 'dokan_feature_seller', 'yes' );
+            } else {
+                $vendor->update_meta( 'dokan_feature_seller', 'no' );
+            }
+
+            if ( isset( $data['trusted'] ) && dokan_validate_boolean( $data['trusted'] ) ) {
+                $vendor->update_meta( 'dokan_publishing', 'yes' );
+            } else {
+                $vendor->update_meta( 'dokan_publishing', 'no' );
+            }
+
+            if ( isset( $data['reset_sub_category'] ) && dokan_validate_boolean( $data['reset_sub_category'] ) ) {
+                $vendor->update_meta( 'reset_sub_category', 'yes' );
+            } else {
+                $vendor->update_meta( 'reset_sub_category', 'no' );
+            }
+
+            if ( ! empty( $data['admin_commission_type'] ) ) {
+                $vendor->update_meta( 'dokan_admin_percentage_type', $data['admin_commission_type'] );
+            }
+
+            if ( isset( $data['admin_commission'] ) && ( is_numeric( wc_format_decimal( $data['admin_commission'] ) ) || '' === $data['admin_commission'] ) ) {
+                $vendor->update_meta( 'dokan_admin_percentage', wc_format_decimal( $data['admin_commission'] ) );
+            }
+
+            if ( isset( $data['admin_additional_fee'] ) && ( is_numeric( wc_format_decimal( $data['admin_additional_fee'] ) ) || '' === $data['admin_additional_fee'] ) ) {
+                $vendor->update_meta( 'dokan_admin_additional_fee', wc_format_decimal( $data['admin_additional_fee'] ) );
+            }
+
+            if ( isset( $data['admin_category_commission'] ) ) {
+                $vendor->update_meta( 'admin_category_commission', wc_clean( $data['admin_category_commission'] ) );
+            }
+        }
+
+        // update vendor store data
+        if ( ! empty( $data['store_name'] ) ) {
+            $vendor->set_store_name( $data['store_name'] );
+            $vendor->update_meta( 'dokan_store_name', $data['store_name'] );
+        }
+
+        if ( ! empty( $data['phone'] ) ) {
+            $vendor->set_phone( $data['phone'] );
+        }
+
+        if ( isset( $data['show_email'] ) && dokan_validate_boolean( $data['show_email'] ) ) {
+            $vendor->set_show_email( 'yes' );
+        } else {
+            $vendor->set_show_email( 'no' );
+        }
+
+        if ( isset( $data['gravatar_id'] ) && is_numeric( $data['gravatar_id'] ) ) {
+            $vendor->set_gravatar_id( $data['gravatar_id'] );
+        }
+
+        if ( isset( $data['banner_id'] ) && is_numeric( $data['banner_id'] ) ) {
+            $vendor->set_banner_id( $data['banner_id'] );
+        }
+
+        // for backward compatibility we'll allow both `enable_tnc` and `toc_enabled` to set store trams and condition settings
+        if ( ( isset( $data['enable_tnc'] ) && dokan_validate_boolean( $data['enable_tnc'] ) )
+            || ( isset( $data['toc_enabled'] ) && dokan_validate_boolean( $data['toc_enabled'] ) ) ) {
+            $vendor->set_enable_tnc( 'on' );
+        } else {
+            $vendor->set_enable_tnc( 'off' );
+        }
+
+        if ( ! empty( $data['store_tnc'] ) ) {
+            $vendor->set_store_tnc( $data['store_tnc'] );
+        }
+
+        if ( ! empty( $data['icon'] ) ) {
+            $vendor->set_icon( $data['icon'] );
+        }
+
+        if ( ! empty( $data['social'] ) ) {
+            $socials = $data['social'];
+
+            foreach ( $socials as $key => $value ) {
+                if ( is_callable( [ $vendor, "set_{$key}" ] ) ) {
+                    $vendor->{"set_{$key}"}( $value );
+                }
+            }
+        }
+
+        if ( ! empty( $data['payment']['paypal'] ) ) {
+            $payments = $data['payment']['paypal'];
+
+            foreach ( $payments as $key => $value ) {
+                if ( is_callable( [ $vendor, "set_paypal_{$key}" ] ) ) {
+                    $vendor->{"set_paypal_{$key}"}( $value );
+                }
+            }
+        }
+
+        if ( ! empty( $data['payment']['bank'] ) ) {
+            $payments = $data['payment']['bank'];
+
+            foreach ( $payments as $key => $value ) {
+                if ( is_callable( [ $vendor, "set_bank_{$key}" ] ) ) {
+                    $vendor->{"set_bank_{$key}"}( $value );
+                }
+            }
+        }
+
+        if ( ! empty( $data['address'] ) ) {
+            $address = $data['address'];
+
+            foreach ( $address as $key => $value ) {
+                if ( is_callable( [ $vendor, "set_{$key}" ] ) ) {
+                    $vendor->{"set_{$key}"}( $value );
+                }
+            }
+        }
+
+        if ( isset( $data['store_open_close']['enabled'] ) && dokan_validate_boolean( $data['store_open_close']['enabled'] ) ) {
+            $vendor->set_store_times_enable( 'yes' );
+        } else {
+            $vendor->set_store_times_enable( 'no' );
+        }
+
+        if ( ! empty( $data['store_open_close']['open_notice'] ) ) {
+            $vendor->set_store_times_open_notice( $data['store_open_close']['open_notice'] );
+        }
+
+        if ( ! empty( $data['store_open_close']['close_notice'] ) ) {
+            $vendor->set_store_times_close_notice( $data['store_open_close']['close_notice'] );
+        }
+
+        if ( ! empty( $data['store_open_close']['time'] ) ) {
+            $store_time = $data['store_open_close']['time'];
+
+            if ( is_array( $store_time ) && is_callable( [ $vendor, 'set_store_times' ] ) ) {
+                $vendor->set_store_times( $store_time );
+            }
+        }
+
+        /**
+         * Fires before a vendor is updated.
+         *
+         * @since 2.9.10
+         *
+         * @param int   $vendor_id The ID of the vendor being updated.
+         * @param array $data      The array of vendor data being updated.
+         */
+        do_action( 'dokan_before_update_vendor', $vendor->get_id(), $data );
+
+        $vendor->save();
+
+        /**
+         * Fires after a vendor has been updated.
+         *
+         * @since 2.9.10
+         * @since 3.12.4 added $data parameter
+         *
+         * @param int   $vendor_id The ID of the vendor that was updated.
+         * @param array $data      The array of vendor data that was updated.
+         */
+        do_action( 'dokan_update_vendor', $vendor->get_id(), $data );
+
+        return $vendor->get_id();
+    }
+
+    /**
+     * Delete vendor with reassign data
+     *
+     * @param $vendor_id
+     * @param null $reassign
+     *
+     * @since 2.9.11
+     *
+     * @return array
+     */
+    public function delete( $vendor_id, $reassign = null ) {
+        $vendor = dokan()->vendor->get( $vendor_id )->to_array();
+
+        require_once ABSPATH . 'wp-admin/includes/user.php';
+        wp_delete_user( $vendor_id, $reassign );
+
+        do_action( 'dokan_delete_vendor', $vendor_id );
+
+        return $vendor;
+    }
+
+    /**
+     * Get all featured Vendor
+     *
+     * @param array $args
+     *
+     * @return array
+     */
+    public function get_featured( $args = [] ) {
+        $defaults = [
+            'number'   => 10,
+            'offset'   => 0,
+            'featured' => 'yes',
+        ];
+
+        $args = wp_parse_args( $args, $defaults );
+
+        return $this->get_vendors( $args );
+    }
+
+    /**
+     * Activate a vendor (enable selling).
+     *
+     * @since 5.0.2
+     *
+     * @param int $vendor_id
+     *
+     * @return array|\WP_Error
+     */
+    public function activate( $vendor_id ) {
+        $vendor = $this->get( $vendor_id );
+
+        if ( ! $vendor->get_id() ) {
+            return new \WP_Error( 'invalid_vendor', __( 'Invalid vendor ID.', 'dokan-lite' ), [ 'vendor_id' => $vendor_id ] );
+        }
+
+        return $vendor->make_active();
+    }
+
+    /**
+     * Deactivate a vendor (disable selling).
+     *
+     * @since 5.0.2
+     *
+     * @param int $vendor_id
+     *
+     * @return array|\WP_Error
+     */
+    public function deactivate( $vendor_id ) {
+        $vendor = $this->get( $vendor_id );
+
+        if ( ! $vendor->get_id() ) {
+            return new \WP_Error( 'invalid_vendor', __( 'Invalid vendor ID.', 'dokan-lite' ), [ 'vendor_id' => $vendor_id ] );
+        }
+
+        return $vendor->make_inactive();
+    }
+}

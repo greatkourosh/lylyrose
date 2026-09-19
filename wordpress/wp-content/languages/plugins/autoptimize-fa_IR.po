@@ -1,0 +1,638 @@
+# Translation of Plugins - Autoptimize - Stable (latest release) in Persian
+# This file is distributed under the same license as the Plugins - Autoptimize - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2022-12-09 06:06:31+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: GlotPress/4.0.3\n"
+"Language: fa\n"
+"Project-Id-Version: Plugins - Autoptimize - Stable (latest release)\n"
+
+#: classes/critcss-inc/admin_settings_rules.php:169
+msgid "How To Use Autoptimize CriticalCSS Rules"
+msgstr "قوانین نحوه استفاده از Autoptimize CriticalCSS "
+
+#: classes/autoptimizeMetabox.php:167
+msgid "Generate Critical CSS"
+msgstr "تولید Critical CSS"
+
+#: classes/autoptimizeMetabox.php:224
+msgid "Sorry, something went wrong."
+msgstr "با عرض پوزش، مشکلی پیش آمد."
+
+#: classes/autoptimizeMetabox.php:117
+msgid "Lazyload images?"
+msgstr "بارگزاری تنبل تصاویر؟"
+
+#: classes/autoptimizeMetabox.php:105
+msgid "Inline critical CSS?"
+msgstr "critical CSS درون خطی؟"
+
+#: classes/autoptimizeMetabox.php:90
+msgid "Optimize CSS?"
+msgstr "بهینه سازی CSS؟"
+
+#: classes/autoptimizeMetabox.php:78
+msgid "Optimize JS?"
+msgstr "بهینه سازی JS؟"
+
+#: classes/autoptimizeMetabox.php:66
+msgid "Optimize this page?"
+msgstr "بهینه سازی این صفحه؟"
+
+#: classes/autoptimizeMetabox.php:37
+msgid "Autoptimize this page"
+msgstr "این صفحه را بهینه سازی کن"
+
+#: classes/autoptimizeImages.php:1420
+msgid "Automatically serve AVIF image format to any browser that supports it."
+msgstr "به طور خودکار فرمت تصویر AVIF را به هر مرورگری که از آن پشتیبانی می کند، ارائه دهید."
+
+#: classes/autoptimizeConfig.php:495
+msgid "Enable configuration per post/ page?"
+msgstr "فعال سازی پیکربندی برای هر پست/ صفحه؟"
+
+#: classes/autoptimizeConfig.php:361
+msgid "Remove Unused CSS?"
+msgstr "حذف CSS های استفاده نشده؟"
+
+#: classes/autoptimizeConfig.php:319
+msgid "Eliminate render-blocking CSS?"
+msgstr "CSS مسدودکننده رندر حذف شود؟"
+
+#: classes/autoptimizeConfig.php:278
+msgid "Remove Unused JavaScript?"
+msgstr "JavaScript استفاده نشده حذف شود؟"
+
+#: classes/autoptimizeCriticalCSSCore.php:431
+#: classes/autoptimizeCriticalCSSCore.php:449
+msgid "Invalid"
+msgstr "نامعتبر"
+
+#: classes/autoptimizeCriticalCSSCore.php:424
+#: classes/autoptimizeCriticalCSSCore.php:443
+msgid "Valid"
+msgstr "معتبر"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:292
+#: classes/critcss-inc/admin_settings_rules.js.php:328
+#: classes/critcss-inc/admin_settings_rules.js.php:350
+msgid "Submit"
+msgstr "ارسال"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:158
+msgid "Delete All"
+msgstr "حذف همه"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:102
+msgid "Remove"
+msgstr "پاک کردن"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:102
+msgid "Edit"
+msgstr "ویرایش"
+
+#: classes/critcss-inc/admin_settings_debug.php:45
+msgid "Options"
+msgstr "گزینه‌ها"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:49
+msgid "Target"
+msgstr "هدف"
+
+#: classes/critcss-inc/admin_settings_rules.js.php:49
+msgid "Type"
+msgstr "نوع"
+
+#: classes/critcss-inc/admin_settings_adv.php:44
+msgid "Height"
+msgstr "ارتفاع"
+
+#: classes/critcss-inc/admin_settings_adv.php:43
+msgid "Width"
+msgstr "عرض"
+
+#: classes/critcss-inc/admin_settings_adv.php:32
+msgid "Advanced Settings"
+msgstr "تنظیمات پیشرفته"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:186
+msgid "Retry"
+msgstr "تلاش مجدد"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:153
+#: classes/critcss-inc/admin_settings_queue.js.php:171
+#: classes/critcss-inc/admin_settings_queue.js.php:201
+#: classes/critcss-inc/admin_settings_rules.js.php:145
+#: classes/critcss-inc/admin_settings_rules.js.php:165
+#: classes/critcss-inc/admin_settings_rules.js.php:310
+#: classes/critcss-inc/admin_settings_rules.js.php:333
+#: classes/critcss-inc/admin_settings_rules.js.php:355
+msgid "Cancel"
+msgstr "لغو"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:148
+#: classes/critcss-inc/admin_settings_rules.js.php:140
+msgid "Delete"
+msgstr "حذف"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:119
+msgid "N/A"
+msgstr "N/A"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:82
+msgid "PENDING"
+msgstr "در انتظار"
+
+#: classes/autoptimizeCriticalCSSCore.php:462
+#: classes/critcss-inc/admin_settings_queue.js.php:77
+#: classes/critcss-inc/admin_settings_queue.js.php:83
+msgid "None"
+msgstr "هیچ‌کدام"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:76
+msgid "New"
+msgstr "تازه"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+msgid "Finish Date"
+msgstr "تاریخ پایان"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+msgid "Creation Date"
+msgstr "تاریخ ایجاد"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+msgid "Page Type"
+msgstr "نوع برگه"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+msgid "Page Path"
+msgstr "مسیر برگه"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+msgid "Status"
+msgstr "وضعیت"
+
+#: classes/critcss-inc/admin_settings_queue.php:78
+#: classes/critcss-inc/admin_settings_rules.js.php:49
+msgid "Actions"
+msgstr "اقدامات"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:111
+msgid "UNKNOWN"
+msgstr "ناشناس"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:103
+#: classes/critcss-inc/admin_settings_queue.js.php:112
+msgid "Get Help"
+msgstr "دریافت پشتیبانی"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:102
+msgid "ERROR"
+msgstr "خطا"
+
+#: classes/critcss-inc/admin_settings_queue.js.php:95
+msgid "DONE"
+msgstr "انجام شد"
+
+#: classes/critcss-inc/admin_settings_key.php:53
+msgid "Your API Key"
+msgstr "کلید API شما"
+
+#: classes/critcss-inc/admin_settings_key.php:32
+msgid "API Key"
+msgstr "کلید API"
+
+#: classes/autoptimizeCriticalCSSSettings.php:366
+msgid "Import Settings"
+msgstr "درون‌ریزی تنظیمات"
+
+#: classes/autoptimizeCriticalCSSSettings.php:365
+msgid "Export Settings"
+msgstr "برون‌ریزی تنظیمات"
+
+#: classes/autoptimizeConfig.php:207
+msgid "Multisite Options"
+msgstr "تنظیمات چند سایته"
+
+#: classes/autoptimizeConfig.php:210
+msgid "Enable site configuration?"
+msgstr "پیکربندی سایت فعال شود ؟"
+
+#: classes/autoptimizeConfig.php:977
+msgid "JS, CSS  &amp; HTML"
+msgstr "JS, CSS  &amp; HTML"
+
+#: classes/autoptimizeConfig.php:465
+msgid "When aggregating JS or CSS, excluded files that are not minified (based on filename) are by default minified by Autoptimize despite being excluded. Uncheck this option if anything breaks despite excluding."
+msgstr "هنگامی که فایل های JS یا CSS برای عدم فشرده سازی براساس نام جمع آوری می شود بصورت پیشفرض با Autoptimize فشرده می شود. این گزینه را انتخاب کنید اگر مشکلی ایجاد شد."
+
+#: classes/autoptimizeConfig.php:463
+msgid "Minify excluded CSS and JS files?"
+msgstr "فایل های js و css فشرده سازی نشود؟"
+
+#: classes/autoptimizeImages.php:1440
+msgid "Comma-separated list of to be excluded image classes or filenames."
+msgstr "با کاما لیستی از کلاس تصاویر یا نام آن ها برای صرف نظر کردن درست کنید."
+
+#: classes/autoptimizeImages.php:1438
+msgid "Lazy-load exclusions"
+msgstr "حذف Lazy-load"
+
+#: classes/autoptimizeImages.php:1323
+msgid "Image optimization"
+msgstr "بهینه‌سازی تصویر"
+
+#: classes/autoptimizeImages.php:1262 classes/autoptimizeImages.php:1287
+msgid "Images"
+msgstr "تصاویر"
+
+#: classes/autoptimizeImages.php:1432
+msgid "Lazy-load images?"
+msgstr "تصاویر Lazy-load؟"
+
+#. Description of the plugin
+#: autoptimize.php
+msgid "Makes your site faster by optimizing CSS, JS, Images, Google fonts and more."
+msgstr "سایت خود را با بهینه‌سازی CSS،JS،تصاویر و فونت های گوگل سریعتر کنید."
+
+#: classes/autoptimizeImages.php:1519
+msgid "based on previously fetched data"
+msgstr "بر اساس داده های قبلی بدست آمده"
+
+#: classes/autoptimizeImages.php:1517
+msgid "based on status at "
+msgstr "براساس وضعیت در"
+
+#. translators: link points Async Javascript settings page.
+#: classes/autoptimizeExtra.php:625
+msgid "You have \"Async JavaScript\" installed, %1$sconfiguration of async javascript is best done there%2$s."
+msgstr "شما \"Async JavaScript\" را نصب کردید%1$s در این بخش افزونه ر ا پیکربندی کنید%2$s."
+
+#. translators: link points to shortpixel image test page.
+#: classes/autoptimizeImages.php:1399
+msgid "You can %1$stest compression levels here%2$s."
+msgstr "می توانید%1$s سطح فشرده سازی را اینجا بررسی کنید%2$s."
+
+#. translators: links points to shortpixel TOS & Privacy Policy.
+#: classes/autoptimizeImages.php:1365
+msgid "Usage of this feature is subject to Shortpixel's %1$sTerms of Use%2$s and %3$sPrivacy policy%4$s."
+msgstr "استفاده از این ویژگی موضوع Shortpixel است%1$s شرایط استفاده%2$s و%3$sحفظ حریم خصوصی%4$s."
+
+#. translators: "display:swap" should remain untranslated, will be shown in
+#. code tags.
+#: classes/autoptimizeExtra.php:573
+msgid "Combine and link in head (fonts load fast but are render-blocking)"
+msgstr "ترکیب و لینک در سربرگ (فونت‌ها سریعتر بارگذاری می شود اما render-blocking می شود)"
+
+#: classes/autoptimizeConfig.php:294
+msgid "Aggregate all linked CSS-files? If this option is off, the individual CSS-files will remain in place but will be minified."
+msgstr "تجمیع کردن کل لینک‌های پرونده CSS؟ اگر این گزینه خاموش باشد، پرونده‌های CSS تکی در جای خود باقی می ماند اما فشرده خواهد شد."
+
+#: classes/autoptimizeConfig.php:292
+msgid "Aggregate CSS-files?"
+msgstr "تجمیع پرونده‌های CSS؟"
+
+#: classes/autoptimizeConfig.php:228
+msgid "Aggregate JS-files?"
+msgstr "تجمیع پرونده‌های JS؟"
+
+#: classes/autoptimizeImages.php:1377
+msgid "Image Optimization quality"
+msgstr "کیفیت بهینه سازی تصویر"
+
+#. translators: "Autoptimize support forum" will appear in a "a href".
+#: classes/autoptimizeImages.php:1302
+msgid "The image optimization service is currently down, image optimization will be skipped until further notice. Check the %1$sAutoptimize support forum%2$s for more info."
+msgstr "سرویس بهینه‌سازی تصویر در حال حاضر از کار افتاده است، بهینه سازی تصویر تا اطلاع بعدی نادیده گرفته  می شود. %1$sAutoptimize انجمن پشتیبانی%2$s را برای اطلاعات بیشتر بررسی کنید."
+
+#: classes/autoptimizeImages.php:1349
+msgid "Shortpixel status: "
+msgstr "وضعیت Shortpixel :"
+
+#: classes/autoptimizeImages.php:1309
+msgid "The image optimization service is launching, but not yet available for this domain, it should become available in the next couple of days."
+msgstr "بهینه سازی تصویر در حال اجرا است، اما برای این دامنه دردسترس نیست باید در روزهای آینده دردسترس باشد."
+
+#. translators: "log in to check your account" will appear in a "a href".
+#: classes/autoptimizeImages.php:1504
+msgid "Your ShortPixel image optimization and CDN quota are in good shape, %1$slog in to check your account%2$s."
+msgstr "تصویر بهینه سازی شما ShortPixel وCDN در حالت مناسبی است،%1$sوارد شده وحساب خود را بررسی کنید%2$s."
+
+#: classes/autoptimizeExtra.php:558
+msgid "Most of below Extra optimizations require at least one of HTML, JS, CSS or Image autoptimizations being active."
+msgstr "بهینه‌سازی اکثر موارد زیر نیازمند فعال بودن حداقل یکی از HTML, JS ,CSS می باشد."
+
+#: classes/autoptimizePartners.php:84
+msgid "More info"
+msgstr "اطاعات بیشتر"
+
+#. translators: %s will be replaced by a link to "wp youtube lyte" plugin.
+#: classes/autoptimizeExtra.php:650
+msgid "%s allows you to “lazy load” your videos, by inserting responsive “Lite YouTube Embeds\". "
+msgstr "%s اجازه “lazy load” به ویدئوهای شما می دهد، با وارد کردن واکنشگرای “Lite YouTube Embeds\"."
+
+#: classes/autoptimizeExtra.php:647
+msgid "Click here to configure it."
+msgstr "برای پیکربندی آن اینجا کلیک کنید."
+
+#: classes/autoptimizeExtra.php:645
+msgid "Great, you have WP YouTube Lyte installed."
+msgstr "خوب، شما WP YouTube Lyte نصب کردید."
+
+#: classes/autoptimizeExtra.php:641
+msgid "Optimize YouTube videos"
+msgstr "بهینه‌سازی ویدئوهای یوتیوب"
+
+#: classes/autoptimizeExtra.php:635 classes/autoptimizeExtra.php:652
+msgid "Click here to install and activate it."
+msgstr "برای نصب و فعالسازی کلیک کنید."
+
+#. translators: %s will be replaced by a link to the "async javascript" plugin.
+#: classes/autoptimizeExtra.php:633
+msgid "Configuration of async javascript is easier and more flexible using the %s plugin."
+msgstr "پیکربندی async جاوااسکریپت راحت و منعطف است بااستفاده از افزونه %s."
+
+#: classes/autoptimizeCLI.php:28
+msgid "Flushing the cache..."
+msgstr "تخلیه کردن کش..."
+
+#: classes/autoptimizeCLI.php:30
+msgid "Cache flushed."
+msgstr "کش تخلیه شد."
+
+#: classes/autoptimizeExtra.php:564
+msgid "Extra Auto-Optimizations"
+msgstr "بهینه‌سازی خودکار بیشتر"
+
+#: classes/autoptimizeExtra.php:565
+msgid "The following settings can improve your site's performance even more."
+msgstr "تنظیمات زیر می تواند عملکرد سایت شما را از قبل بهینه تر کند."
+
+#: classes/autoptimizeExtra.php:580
+msgid "Remove emojis"
+msgstr "حذف emojis"
+
+#: classes/autoptimizeExtra.php:582
+msgid "Removes WordPress' core emojis' inline CSS, inline JavaScript, and an otherwise un-autoptimized JavaScript file."
+msgstr "حذف هسته emojis در CSS داخلی وردپرس، جاوااسکریپت داخلی، و دیگر پرونده‌های جاوااسکریپت بهینه‌سازی نشده بطور خودکار."
+
+#: classes/autoptimizeExtra.php:586
+msgid "Remove query strings from static resources"
+msgstr "حذف رشته‌های کوئری از منابع استاتیک"
+
+#: classes/autoptimizeExtra.php:568
+msgid "Google Fonts"
+msgstr "فونت‌های گوگل"
+
+#: classes/autoptimizeExtra.php:570
+msgid "Leave as is"
+msgstr "به حال خودش بگزارید"
+
+#: classes/autoptimizeExtra.php:530 classes/autoptimizeExtra.php:552
+msgid "Extra"
+msgstr "اضافی"
+
+#: classes/autoptimizeConfig.php:262 classes/autoptimizeConfig.php:311
+#: classes/autoptimizeExtra.php:576
+msgid "(deprecated)"
+msgstr "(منسوخ)"
+
+#: classes/autoptimizeConfig.php:449
+msgid "Misc Options"
+msgstr "تنظیمات متفرقه"
+
+#: classes/autoptimizeConfig.php:485
+msgid "Also optimize shop cart/ checkout?"
+msgstr "می خواهید بهینه‌سازی شود فروشگاه سبدخرید/پرداخت؟"
+
+#: classes/autoptimizeConfig.php:487
+msgid "By default Autoptimize is also active on your shop's cart/ checkout, uncheck not to optimize those."
+msgstr "بطور پیشفرض Autoptimize در سبدخرید/پرداخت فروشگاه فعال است،تیک را بردارید تا آن‌ها بهینه‌سازی نشوند."
+
+#. Translators: %s is the cache directory location.
+#: classes/autoptimizeMain.php:753
+msgid "Autoptimize cannot write to the cache directory (%s), please fix to enable CSS/ JS optimization!"
+msgstr "افزونه نمی تواند در پوشه کش بنویسد (%s), لطفا درست کنید تا بهینه‌سازی CSS/ JS فعال شود!"
+
+#: classes/autoptimizeToolbar.php:107
+msgid "Files"
+msgstr "فایل‌ها"
+
+#: classes/autoptimizePartners.php:146
+msgid "These Autoptimize power-ups and related services will improve your site's performance even more!"
+msgstr "این Autoptimize قدرت را افزایش و خدمات مربوط به عملکرد سایت شما را خیلی بیشتر بهبود می دهد!"
+
+#: classes/autoptimizePartners.php:40 classes/autoptimizePartners.php:142
+msgid "Optimize More!"
+msgstr "بهینه‌سازی بیشتر!"
+
+#: classes/autoptimizeToolbar.php:153
+msgid "Dismiss this notice."
+msgstr "حذف این اطلاعیه."
+
+#: classes/autoptimizeCacheChecker.php:66
+msgid "Autoptimize cache size warning"
+msgstr "اخطار حجم کش Autoptimize"
+
+#: classes/autoptimizeCacheChecker.php:67
+msgid "Autoptimize's cache size is getting big, consider purging the cache. Have a look at https://wordpress.org/plugins/autoptimize/faq/ to see how you can keep the cache size under control."
+msgstr "حجم فایل کش بسیار بزرگ شده است،نسبت به تخلیه آن اقدام کنید. نگاه کنید به https://wordpress.org/plugins/autoptimize/faq/ برای کنترل بر روی حجم فایل کش."
+
+#: classes/autoptimizeToolbar.php:106
+msgid "Size"
+msgstr "حجم"
+
+#: classes/autoptimizeConfig.php:388
+msgid "Enable this if you want HTML comments to remain in the page."
+msgstr "اگر می‌خواهید کامنت‌های HTML در صفحه باقی بمانند این گزینه را فعال کنید."
+
+#: classes/autoptimizeConfig.php:957
+msgid "No items"
+msgstr "بدون گزینه(ها)"
+
+#: classes/autoptimizeConfig.php:542
+msgid "Happy with Autoptimize?"
+msgstr "از Autooptimize راضی هستید؟"
+
+#. translators: the variable contains a date.
+#: classes/autoptimizeConfig.php:963
+msgid "Posted %s"
+msgstr "ارسال شده در %s"
+
+#: classes/autoptimizeConfig.php:299
+msgid "Check this option for Autoptimize to also aggregate CSS in the HTML."
+msgstr "اگر می‌خواهید Autoptimize فایل CSS را هم در HTML یکی‌سازی کند این گزینه را فعال کنید."
+
+#: classes/autoptimizeConfig.php:542
+msgid "Try my other plugins!"
+msgstr "افزونه‌های دیگر من را هم امتحان کنید!"
+
+#: classes/autoptimizeConfig.php:233
+msgid "Also aggregate inline JS?"
+msgstr "JS درون خطی نیز یکی‌سازی شود؟"
+
+#: classes/autoptimizeConfig.php:297
+msgid "Also aggregate inline CSS?"
+msgstr "CSS درون خطی نیز یکی‌سازی شود؟"
+
+#: classes/autoptimizeExtra.php:571
+msgid "Remove Google Fonts"
+msgstr "فونت‌های گوگل حذف شوند"
+
+#: classes/autoptimizeConfig.php:94 classes/autoptimizeConfig.php:194
+#: classes/autoptimizeCriticalCSSSettings.php:135
+#: classes/autoptimizeExtra.php:554 classes/autoptimizeImages.php:1289
+#: classes/autoptimizePartners.php:144 classes/autoptimizeProTab.php:83
+msgid "Autoptimize Settings"
+msgstr "تنظیمات Autoptimize"
+
+#: classes/autoptimizeConfig.php:374
+msgid "HTML Options"
+msgstr "تنظیمات HTML"
+
+#: classes/autoptimizeConfig.php:377
+msgid "Optimize HTML Code?"
+msgstr "بهینه سازی کد HTML؟"
+
+#: classes/autoptimizeConfig.php:386
+msgid "Keep HTML comments?"
+msgstr "نگه داشتن کامنت های HTML؟"
+
+#: classes/autoptimizeConfig.php:221
+msgid "JavaScript Options"
+msgstr "تنظیمات Javascript"
+
+#: classes/autoptimizeConfig.php:224
+msgid "Optimize JavaScript Code?"
+msgstr "بهینه سازی کد Javascript؟"
+
+#: classes/autoptimizeConfig.php:238
+msgid "Force JavaScript in &lt;head&gt;?"
+msgstr "بارگذاری Javascript در تگ &lt;head&gt;؟"
+
+#: classes/autoptimizeConfig.php:261
+msgid "Look for scripts only in &lt;head&gt;?"
+msgstr "فقط اسکریپت های موجود در تگ &lt;head&gt; بهینه سازی شوند؟"
+
+#: classes/autoptimizeConfig.php:270
+msgid "Exclude scripts from Autoptimize:"
+msgstr "محروم کردن اسکریپت ها از Autoptimize:"
+
+#: classes/autoptimizeConfig.php:243
+msgid "Add try-catch wrapping?"
+msgstr "اضافه نمودن دسته بندی بوسیله try-catch؟"
+
+#: classes/autoptimizeConfig.php:285
+msgid "CSS Options"
+msgstr "تنظیمات CSS"
+
+#: classes/autoptimizeConfig.php:288
+msgid "Optimize CSS Code?"
+msgstr "بهینه سازی کد CSS؟"
+
+#: classes/autoptimizeConfig.php:302
+msgid "Generate data: URIs for images?"
+msgstr "تولید data: URIs برای تصاویر؟"
+
+#: classes/autoptimizeConfig.php:310
+msgid "Look for styles only in &lt;head&gt;?"
+msgstr "فقط استایل های موجود در تگ &lt;head&gt; بهینه سازی شوند؟"
+
+#: classes/autoptimizeConfig.php:315
+msgid "Don't autoptimize CSS outside the head-section. If the cache gets big, you might want to enable this."
+msgstr "کدهای CSS که خارج از تگ HEAD باشند بهینه سازی نکن. اکر حجم کش بالا رفت، شاید مایل باشید تا از این گزینه استفاده کنید."
+
+#: classes/autoptimizeConfig.php:335
+msgid "Inline all CSS?"
+msgstr "درون خطی (inline) نمودن تمام کدهای CSS؟"
+
+#: classes/autoptimizeConfig.php:340
+msgid "Exclude CSS from Autoptimize:"
+msgstr "محروم کردن CSS ها از Autoptimize:"
+
+#: classes/autoptimizeConfig.php:394
+msgid "CDN Options"
+msgstr "تنظیمات CDN"
+
+#: classes/autoptimizeConfig.php:397
+msgid "CDN Base URL"
+msgstr "ریشه آدرس CDN"
+
+#: classes/autoptimizeConfig.php:421
+msgid "Cache folder"
+msgstr "پوشه CDN"
+
+#: classes/autoptimizeConfig.php:425
+msgid "Can we write?"
+msgstr "دسترسی به نوشتن (write) داریم؟"
+
+#: classes/autoptimizeConfig.php:426
+msgid "Yes"
+msgstr "بله"
+
+#: classes/autoptimizeConfig.php:426
+msgid "No"
+msgstr "خیر"
+
+#: classes/autoptimizeConfig.php:429
+msgid "Cached styles and scripts"
+msgstr "استایل و اسکریپت های کش شده"
+
+#: classes/autoptimizeConfig.php:454
+msgid "By default files saved are static css/js, uncheck this option if your webserver doesn't properly handle the compression and expiry."
+msgstr "در حالت پیش فرض فایل ها به صورت static ذخیره می شوند css و js، اگر وب سرور شما قادر به فشرده سازی و ایجاد expiry برای فایل شما نیست تیک این گزینه را بردارید."
+
+#: classes/autoptimizeConfig.php:511
+#: classes/autoptimizeCriticalCSSSettings.php:346
+#: classes/autoptimizeExtra.php:658 classes/autoptimizeImages.php:1450
+msgid "Save Changes"
+msgstr "ذخیره تغییرات"
+
+#: classes/autoptimizeConfig.php:512
+msgid "Save Changes and Empty Cache"
+msgstr "ذخیره تغییرات و تخلیه کش"
+
+#: classes/autoptimizeConfig.php:557
+msgid "Do not donate for this plugin!"
+msgstr "به این افزونه کمک مالی نکنید!"
+
+#: classes/autoptimizeConfig.php:741 classes/autoptimizeConfig.php:744
+#: classes/autoptimizeConfig.php:747
+msgid "Autoptimize Options"
+msgstr "تنظیمات Autoptimize"
+
+#: classes/autoptimizeConfig.php:810 classes/autoptimizeConfig.php:816
+msgid "Settings"
+msgstr "تنظیمات"
+
+#. Author of the plugin
+#: autoptimize.php
+msgid "Frank Goossens (futtta)"
+msgstr "Frank Goossens (futtta)"
+
+#: classes/autoptimizeConfig.php:452
+msgid "Save aggregated script/css as static files?"
+msgstr "ذخیره نمودن script و CSS یکی‌سازی شده به صورت فایل های ثابت (static)؟"
+
+#: classes/autoptimizeConfig.php:343
+msgid "A comma-separated list of CSS you want to exclude from being optimized."
+msgstr "با کاما جدا کنید لیست CSS که می خواهید از بهینه‌سازی آن جلوگیری کنید."
+
+#: classes/autoptimizeConfig.php:418
+msgid "Cache Info"
+msgstr "اطلاعات کش"
+
+#: classes/autoptimizeConfig.php:266
+msgid "Mostly useful in combination with previous option when using jQuery-based templates, but might help keeping cache size under control."
+msgstr "این گزینه بیشتر زمانی کاربردی است که با گزینه قبلی برای پوسته های تحت jQuery ترکیب شود، اما ممکن است برای تحت کنترل داشتن حجم کش نیز کمک کند."
+
+#. Plugin Name of the plugin
+#: autoptimize.php classes/autoptimizeCacheChecker.php:111
+#: classes/autoptimizeConfig.php:732 classes/autoptimizeToolbar.php:82
+msgid "Autoptimize"
+msgstr "بهینه‌سازی خودکار"

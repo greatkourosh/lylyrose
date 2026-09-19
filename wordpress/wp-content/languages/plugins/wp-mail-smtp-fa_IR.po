@@ -1,0 +1,520 @@
+# Translation of Plugins - WP Mail SMTP by WPForms &#8211; The Most Popular SMTP and Email Log Plugin - Stable (latest release) in Persian
+# This file is distributed under the same license as the Plugins - WP Mail SMTP by WPForms &#8211; The Most Popular SMTP and Email Log Plugin - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2024-03-30 19:05:36+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: GlotPress/4.0.3\n"
+"Language: fa\n"
+"Project-Id-Version: Plugins - WP Mail SMTP by WPForms &#8211; The Most Popular SMTP and Email Log Plugin - Stable (latest release)\n"
+
+#. translators: %1$s - exception message.
+#: src/Queue/Queue.php:404 src/Queue/Queue.php:698
+msgid "[Emails Queue] Skipped processing enqueued email. %1$s. Email ID: %2$d"
+msgstr "[صف ایمیل ها] پردازش ایمیل در نوبت رد شد. %1$s. شناسه ایمیل: %2$d"
+
+#. translators: %1$s - exception message; %2$d - email ID.
+#: src/Queue/Queue.php:231
+msgid "[Emails Queue] Failed to update queue record after sending email from the queue. %1$s. Email ID: %2$d"
+msgstr "[صف ایمیل‌ها] به‌روزرسانی رکورد صف بعد از ارسال ایمیل از صف با خطا مواجه شد. %1$s. شناسه ایمیل: %2$d"
+
+#. translators: %1$d - email ID; %2$s - email status.
+#: src/Queue/Queue.php:173
+msgid "[Emails Queue] Skipped email sending from the queue. Wrong email status. Email ID: %1$d, email status: %2$s."
+msgstr "[صف ایمیل‌ها] ارسال ایمیل از صف نادیده گرفته شد. وضعیت ایمیل نامعتبر است. شناسه ایمیل: %1$d، وضعیت ایمیل: %2$s"
+
+#. translators: %1$s - exception message; %2$s - email ID.
+#: src/Queue/Queue.php:159
+msgid "[Emails Queue] Skipped email sending from the queue. %1$s. Email ID:  %2$s"
+msgstr "[صف ایمیل‌ها] ارسال ایمیل از صف نادیده گرفته شد. %1$s. شناسه ایمیل: %2$s"
+
+#. translators: %1$d - email ID.
+#: src/Queue/Queue.php:143
+msgid "[Emails Queue] Skipped email sending from the queue. Queue::send_email method was called directly. Email ID: %1$d."
+msgstr "[صف ایمیل‌ها] ارسال ایمیل از صف نادیده گرفته شد. تابع Queue::send_email به صورت مستقیم فراخوانی شد. شناسه ایمیل: %1$d"
+
+#. translators: %1$s - exception message.
+#: src/Queue/Queue.php:117
+msgid "[Emails Queue] Skipped enqueueing email. %1$s."
+msgstr "[صف ایمیل‌ها] افزودن ایمیل به صف نادیده گرفته شد. %1$s."
+
+#. translators: %1$s - Database error message.
+#: src/Queue/Email.php:600
+msgid "Insert/update SQL query error: %1$s"
+msgstr "خطای پرس و جوی SQL درج/بروزرسانی: %1$s"
+
+#. translators: %1$s - JSON error message.
+#: src/Queue/Email.php:545
+msgid "Data JSON encoding error: %1$s"
+msgstr "خطای رمزگذاری داده به JSON: %1$s"
+
+#. translators: %1$s - JSON error message.
+#: src/Queue/Email.php:171
+msgid "Data JSON decoding error: %1$s"
+msgstr "خطای رمزگشایی داده JSON: %1$s"
+
+#: src/Queue/Email.php:162
+msgid "Invalid record format"
+msgstr "فرمت رکورد نامعتبر"
+
+#: src/Queue/Email.php:150
+msgid "Record not found in DB"
+msgstr "رکورد در DB یافت نشد."
+
+#: src/Admin/Review.php:164
+msgid "Yes, I'll rate it with 5-stars"
+msgstr "بله، من این را با 5 ستاره ارزیابی خواهم کرد."
+
+#: src/Admin/Review.php:161
+msgid "That's fantastic! Would you consider giving it a 5-star rating on WordPress.org? It will help other users with email issues and it will mean the world to us!"
+msgstr "چه عالی! آیا مایلید به این افزونه در WordPress.org امتیاز ۵ ستاره بدهید؟ این کار به سایر کاربرانی که با مشکلات ایمیل مواجه هستند کمک خواهد کرد و برای ما هم بسیار ارزشمند است!"
+
+#: src/DBRepair.php:209
+msgid "The following DB table is still missing."
+msgid_plural "The following DB tables are still missing."
+msgstr[0] "جداول DB زیر هنوز وجود ندارد."
+
+#: src/Admin/SetupWizard.php:1084
+msgid "Code Snippets by WPCode"
+msgstr "Code Snippets by WPCode"
+
+#: src/Admin/DashboardWidget.php:368
+msgid "Error icon"
+msgstr "نماد خطا"
+
+#: assets/languages/wp-mail-smtp-vue.php:905
+msgid "WordPress SEO Toolkit"
+msgstr "جعبه ابزار سئو وردپرس"
+
+#: src/Admin/DashboardWidget.php:408
+msgid "Dismiss email alert block"
+msgstr "رد کردن بلوک هشدار ایمیل"
+
+#. translators: %s: Tools page URL.
+#: src/Admin/Area.php:286
+msgid "The Email Test tab was moved to <a href=\"%s\">WP Mail SMTP > Tools</a>."
+msgstr "برگه تست ایمیل به <a href=\"%s\">WP Mail SMTP > Tools</a> منتقل شد."
+
+#. Translators: Link to the Mailgun API settings.
+#: assets/languages/wp-mail-smtp-vue.php:938
+msgid "%1$sFollow this link%2$s to get a Mailgun API Key. Generate a key in the \"Mailgun API Keys\" section."
+msgstr "به تنظیمات Mailgun API پیوند دهید."
+
+#: src/Admin/Pages/SmartRoutingTab.php:302
+msgid "Friendly reminder, your Primary Connection will be used for all emails that do not match the conditions above."
+msgstr "یادآوری دوستانه، اتصال اولیه شما برای همه ایمیل‌هایی که با شرایط بالا مطابقت ندارند استفاده می‌شود."
+
+#. translators: %s - WPMailSMTP.com Upgrade page URL.
+#: src/Admin/Pages/SettingsTab.php:343
+msgid "Don’t worry about losing emails. Add an additional connection, then set it as your Backup Connection. Emails that fail to send with the Primary Connection will be sent via the selected Backup Connection. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Upgrade to WP Mail SMTP Pro!</a>"
+msgstr "نگران از دست دادن ایمیل ها نباشید یک اتصال اضافی اضافه کنید، سپس آن را به عنوان اتصال پشتیبان خود تنظیم کنید. ایمیل هایی که با اتصال اصلی ارسال نمی شوند، از طریق اتصال پشتیبان انتخاب شده ارسال می شوند. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">به WP Mail SMTP Pro ارتقا دهید!</a>"
+
+#: assets/languages/wp-mail-smtp-vue.php:436
+msgid "This option must be enabled if you'd like to be able to resend emails. Please be aware that all email content will be stored in your WordPress database. This may include sensitive data, passwords, and personal details."
+msgstr "اگر می خواهید بتوانید دوباره ایمیل بفرستید، این گزینه باید فعال باشد. لطفا توجه داشته باشید که تمام محتوای ایمیل در پایگاه داده وردپرس شما ذخیره می شود. این ممکن است شامل داده های حساس، گذرواژه ها و جزئیات شخصی باشد."
+
+#: assets/languages/wp-mail-smtp-vue.php:430
+msgid "Enable these powerful logging features for more control of your WordPress emails."
+msgstr "برای کنترل بیشتر ایمیل های وردپرس خود، این ویژگی های ثبت قدرتمند را فعال کنید."
+
+#. translators: %1$s - Settings Page URL; %2$s - The aria label; %3$s - The
+#. text that will appear on the link.
+#: src/SiteHealth.php:293
+msgid "WP Mail SMTP is using custom database tables for some of its features. In order to work properly, the custom tables should be created, and it seems they are missing. Please try to <a href=\"%1$s\" target=\"_self\" aria-label=\"%2$s\" rel=\"noopener noreferrer\">%3$s</a>. If this issue persists, please contact our support."
+msgstr "WP Mail SMTP از جداول پایگاه داده سفارشی برای برخی از ویژگی های خود استفاده می کند. برای درست کار کردن، جداول سفارشی باید ایجاد شود و به نظر می رسد که آنها از دست رفته اند. لطفاً <a href=\"%1$s\" target=\"_self\" aria-label=\"%2$s\" rel=\"noopener noreferrer\">%3$s</a> را امتحان کنید. اگر این مشکل ادامه داشت، لطفا با پشتیبانی ما تماس بگیرید."
+
+#: src/Admin/Recommendations/Pages/ActiveLayer.php:171
+#: src/Admin/Recommendations/Pages/Universally.php:171
+#: src/Admin/Recommendations/Pages/WPCode.php:171
+#: src/Admin/Recommendations/Pages/WPConsent.php:189
+#: src/Providers/OptionsAbstract.php:417
+msgid "Learn More"
+msgstr "بیشتر بدانید"
+
+#: src/Providers/PepipostAPI/Options.php:55
+msgid "Get Started with Pepipost"
+msgstr "با Pepipost شروع کنید"
+
+#: src/Providers/SMTPcom/Options.php:164
+msgid "Get Sender Name"
+msgstr "دریافت نام فرستنده"
+
+#: assets/languages/wp-mail-smtp-vue.php:485
+#: src/Providers/SMTPcom/Options.php:146
+msgid "Sender Name"
+msgstr "نام فرستنده"
+
+#: src/Providers/ElasticEmail/Options.php:122
+#: src/Providers/MailerSend/Options.php:117
+#: src/Providers/Mandrill/Options.php:118
+#: src/Providers/Sendlayer/Options.php:212
+#: src/Providers/SMTPcom/Options.php:135
+#: src/Providers/SparkPost/Options.php:120
+msgid "Get API Key"
+msgstr "دریافت کلید API"
+
+#: src/Providers/SMTPcom/Options.php:83
+msgid "SMTP.com"
+msgstr "SMTP.com"
+
+#: assets/languages/wp-mail-smtp-vue.php:496
+#: src/Providers/SMTPcom/Options.php:69
+msgid "Get Started with SMTP.com"
+msgstr "با SMTP.com شروع کنید"
+
+#. translators: %s - Channel/Sender Name link for smtp.com documentation.
+#: src/Providers/SMTPcom/Options.php:162
+msgid "Follow this link to get a Sender Name from SMTP.com: %s."
+msgstr "برای دریافت نام فرستنده از SMTP.com این پیوند را دنبال کنید:  %s."
+
+#. translators: %s - API key link.
+#: src/Providers/SMTPcom/Options.php:133
+msgid "Follow this link to get an API Key from SMTP.com: %s."
+msgstr "Follow this link to get an API Key from SMTP.com: %s."
+
+#: src/Providers/SMTPcom/Mailer.php:478
+msgid "Channel:"
+msgstr "کانال:"
+
+#: src/Providers/SMTPcom/Mailer.php:476
+msgid "Api Key:"
+msgstr "Api Key:"
+
+#: src/Admin/Area.php:1388
+msgid "Go to WP Mail SMTP Settings page"
+msgstr "به صفحه تنظیمات WP Mail SMTP بروید"
+
+#: src/Admin/ConnectionSettings.php:269
+msgid "Don't see what you're looking for?"
+msgstr "نمی‌توانید آنچه به دنبالش هستید را پیدا کنید؟"
+
+#: src/Admin/Area.php:619 src/Admin/Area.php:714 src/Admin/Area.php:722
+#: src/Admin/Pages/AboutTab.php:233 src/Connect.php:55
+msgid "Activate"
+msgstr "فعال"
+
+#: assets/languages/wp-mail-smtp-vue.php:611
+#: src/Providers/OptionsAbstract.php:285
+msgid "For most servers TLS is the recommended option. If your SMTP provider offers both SSL and TLS options, we recommend using TLS."
+msgstr "در اکثر سرورها TLS پیشنهاد میشود. اگر سرویس دهنده شما هر دو SSL - TLS را ارائه میدهد گزینه پیشنهادی TLS است."
+
+#: assets/languages/wp-mail-smtp-vue.php:590
+#: src/Providers/OptionsAbstract.php:307
+msgid "Auto TLS"
+msgstr "TLS خودکار"
+
+#: assets/languages/wp-mail-smtp-vue.php:460
+#: src/Providers/Gmail/Options.php:113
+msgid "Client ID"
+msgstr "Client ID"
+
+#: assets/languages/wp-mail-smtp-vue.php:463
+#: src/Providers/Gmail/Options.php:128
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#: src/Providers/Gmail/Options.php:158
+msgid "Authorized redirect URI"
+msgstr "Authorized redirect URI"
+
+#: src/Providers/Gmail/Options.php:166
+msgid "Copy URL to clipboard"
+msgstr "کپی آدرس"
+
+#: src/Providers/Gmail/Options.php:208
+msgid "Allow plugin to send emails using your Google account"
+msgstr "اجازه به افزونه برای ارسال ایمیل با استفاده از حساب کاربری گوگل شما"
+
+#: src/Providers/Mail/Options.php:26
+msgid "Default (none)"
+msgstr "پیش‌فرض (هیچ‌یک)"
+
+#: src/Providers/Mailgun/Options.php:29
+msgid "Mailgun"
+msgstr "میل‌گان"
+
+#: src/Providers/Gmail/Options.php:211
+msgid "Click the button above to confirm authorization."
+msgstr "برای تایید احراز هویت روی کلید بالا کلیک کنید."
+
+#: assets/languages/wp-mail-smtp-vue.php:219
+msgid "Private API Key"
+msgstr "کلید API خصوصی"
+
+#: assets/languages/wp-mail-smtp-vue.php:222
+#: src/Providers/Mailgun/Options.php:106
+msgid "Domain Name"
+msgstr "نام دامنه"
+
+#. translators: %s - Domain Name link.
+#: src/Providers/Mailgun/Options.php:118
+msgid "Follow this link to get a Domain Name from Mailgun: %s."
+msgstr "با استفاده از این لینک از میل‌گان نام دامنه را دریافت کنید: %s."
+
+#: src/Providers/Mailgun/Options.php:120
+msgid "Get a Domain Name"
+msgstr "دریافت نام دامنه"
+
+#: assets/languages/wp-mail-smtp-vue.php:614
+#: src/Admin/Pages/SettingsTab.php:368 src/Providers/OptionsAbstract.php:263
+msgid "None"
+msgstr "هیچ‌یک"
+
+#: assets/languages/wp-mail-smtp-vue.php:617
+#: src/Providers/OptionsAbstract.php:272
+msgid "SSL"
+msgstr "SSL"
+
+#: assets/languages/wp-mail-smtp-vue.php:620
+#: src/Providers/OptionsAbstract.php:281
+msgid "TLS"
+msgstr "TLS"
+
+#: src/Helpers/UI.php:37
+msgid "On"
+msgstr "روشن"
+
+#: src/Helpers/UI.php:38
+msgid "Off"
+msgstr "خاموش"
+
+#: assets/languages/wp-mail-smtp-vue.php:605
+#: src/Providers/OptionsAbstract.php:348
+msgid "SMTP Username"
+msgstr "نام کاربری SMTP"
+
+#: assets/languages/wp-mail-smtp-vue.php:608
+#: src/Providers/OptionsAbstract.php:362
+msgid "SMTP Password"
+msgstr "رمز عبور SMTP"
+
+#. translators: %1$s - Provider name; %2$s - PHP version required by Provider;
+#. %3$s - current PHP version.
+#: src/Providers/OptionsAbstract.php:478
+msgid "%1$s requires PHP %2$s to work and does not support your current PHP version %3$s. Please contact your host and request a PHP upgrade to the latest one."
+msgstr "%1$s به PHP %2$s نیاز دارد و نسخه %3$s PHP شما را پیشتیبانی نمی‌کند. لطفا برای ارتقا با میزبان خود تماس بگیرید."
+
+#: src/Providers/PepipostAPI/Options.php:63
+msgid "Pepipost"
+msgstr "پپی‌پست"
+
+#: src/Providers/SMTP/Options.php:28
+msgid "Other SMTP"
+msgstr "SMTPهای دیگر"
+
+#: src/Providers/Sendgrid/Options.php:30
+msgid "SendGrid"
+msgstr "سندگرید"
+
+#: assets/languages/wp-mail-smtp-vue.php:292
+#: src/Providers/ElasticEmail/Options.php:93
+#: src/Providers/MailerSend/Options.php:88 src/Providers/Mailjet/Options.php:93
+#: src/Providers/Mandrill/Options.php:89
+#: src/Providers/PepipostAPI/Options.php:96 src/Providers/Resend/Options.php:94
+#: src/Providers/Sendgrid/Options.php:68
+#: src/Providers/Sendinblue/Options.php:112
+#: src/Providers/Sendlayer/Options.php:178 src/Providers/SMTP2GO/Options.php:94
+#: src/Providers/SMTPcom/Options.php:107 src/Providers/SparkPost/Options.php:88
+msgid "API Key"
+msgstr "کلید API"
+
+#. translators: %s - API key link.
+#: src/Providers/Sendgrid/Options.php:95
+msgid "Follow this link to get an API Key from SendGrid: %s."
+msgstr "با استفاده از این لینک کلید API سندگرید را دریافت کنید: %s."
+
+#: src/Providers/Sendgrid/Options.php:97
+msgid "Create API Key"
+msgstr "ایجاد کلید API"
+
+#. translators: %s - SendGrid access level.
+#: src/Providers/Sendgrid/Options.php:105
+msgid "To send emails you will need only a %s access level for this API key."
+msgstr "برای ارسال ایمیل فقط به سطح دسترسی %s برای این کلید API نیاز دارید."
+
+#: src/Admin/Pages/MiscTab.php:40
+msgid "Misc"
+msgstr "متفرقه"
+
+#: src/Admin/Area.php:418 src/Admin/Area.php:424
+#: src/Admin/Pages/SettingsTab.php:38 src/WPCLI/Options/Help.php:186
+msgid "General"
+msgstr "عمومی"
+
+#: src/Admin/Area.php:564 src/Admin/PageAbstract.php:192
+msgid "Save Settings"
+msgstr "ذخیره تنظیمات"
+
+#: src/Admin/Pages/DebugEventsTab.php:376 src/Admin/Pages/MiscTab.php:546
+#: src/Admin/Pages/SettingsTab.php:435
+msgid "Settings were successfully saved."
+msgstr "تنظیمات شما با موفقیت ذخیره شدند."
+
+#: src/WPCLI/Options/Help.php:185
+msgid "Mail"
+msgstr "ایمیل"
+
+#: src/Admin/Pages/TestTab.php:102
+msgid "Email Test"
+msgstr "آزمایش ایمیل"
+
+#: src/Admin/Pages/AlertsTab.php:153 src/Admin/Pages/TestTab.php:237
+msgid "Send To"
+msgstr "ارسال به"
+
+#: src/Admin/Pages/TestTab.php:297
+msgid "Send Email"
+msgstr "ارسال ایمیل"
+
+#: src/Admin/Pages/TestTab.php:163
+msgid "Test failed. Please use a valid email address and try to resend the test email."
+msgstr "آزمایش ناموفق بود. لطفا از یک آدرس ایمیل معتبر برای ارسال ایمیل استفاده کنید."
+
+#. translators: %s - email address a test email will be sent to.
+#: src/TestEmail/TestEmail.php:257 src/TestEmail/TestEmail.php:264
+msgid "Test email to %s"
+msgstr "ارسال ایمیل آزمایشی به %s"
+
+#. translators: %s - error code, returned by Google API.
+#: src/Admin/Area.php:179
+msgid "There was an error while processing the authentication request: %s. Please try again."
+msgstr "در زمان پردازش درخواست احراز هویت خطایی رخ داد: %s. لطفا مجددا تلاش کنید."
+
+#: assets/languages/wp-mail-smtp-vue.php:783 src/Admin/Area.php:186
+msgid "There was an error while processing the authentication request. Please try again."
+msgstr "در زمان پردازش درخواست احراز هویت خطایی رخ داد. لطفا مجددا تلاش کنید."
+
+#: src/Admin/Area.php:193
+msgid "There was an error while processing the authentication request. Please make sure that you have Client ID and Client Secret both valid and saved."
+msgstr "در زمان پردازش درخواست احراز هویت خطایی رخ داد. لطفا مطمئن شوید که هر دو Client ID و Client Secret معتبر هستند و ذخیره شده‌اند."
+
+#: src/Admin/Pages/MiscTab.php:183
+msgid "Hide Announcements"
+msgstr "مخفی کردن اعلان‌ها"
+
+#: src/Admin/ConnectionSettings.php:216
+msgid "Return Path indicates where non-delivery receipts - or bounce messages - are to be sent."
+msgstr "مسیر بازگشت مشخص می‌کند که پیام‌های تحویل داده نشده یا پیام‌های از دست رفته به کجا ارسال شوند."
+
+#: src/Admin/Pages/AboutTab.php:279 src/Admin/Pages/SmartRoutingTab.php:278
+msgid "WPForms"
+msgstr "WPForms"
+
+#: src/Admin/Pages/MiscTab.php:409
+msgid "Uninstall WP Mail SMTP"
+msgstr "حذف نصب  WP Mail SMTP"
+
+#: src/Admin/Pages/MiscTab.php:98
+msgid "Test emails are allowed to be sent, regardless of this option."
+msgstr "ایمیل های آزمایشی بدون در نظر گرفتن این گزینه مجاز به ارسال هستند."
+
+#: src/Admin/Pages/MiscTab.php:96
+msgid "You will need to consult with their documentation to switch them to use default WordPress email delivery."
+msgstr "شما باید اسناد را مطالعه کنید تا بتوانید بوسیله آنها تحویل ایمیل پیش فرض وردپرس را تغییر دهید."
+
+#: src/Admin/Pages/MiscTab.php:79
+msgid "Do Not Send"
+msgstr "ارسال نشود"
+
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:817
+msgid "SSL certificate issue."
+msgstr "مشکل گواهی SSL"
+
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:834
+msgid "Could not connect to host."
+msgstr "به میزبان متصل نشد."
+
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:823
+msgid "Contact your web hosting provider and inform them your site has an issue with SSL certificates."
+msgstr "با ارائه دهنده میزبانی وب خود تماس بگیرید و به آنها اطلاع دهید که سایت شما با گواهینامه های SSL مشکل دارد."
+
+#: src/Admin/Pages/TestTab.php:293
+msgid "You cannot send an email. Mailer is not properly configured. Please check your settings."
+msgstr "شما نمی توانید ایمیل بفرستید. میلر به درستی پیکربندی نشده است. لطفا تنظیمات خود را بررسی کنید."
+
+#: src/Admin/Pages/TestTab.php:273
+msgid "Send this email in HTML or in plain text format."
+msgstr "این ایمیل را در قالب HTML یا متن ساده ارسال کنید."
+
+#: src/Admin/Pages/TestTab.php:260
+msgid "HTML"
+msgstr "HTML"
+
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:931
+msgid "Unauthenticated senders are not allowed."
+msgstr "ارسال کنندگان احراز هویت مجاز نیستند."
+
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:837
+#: src/Admin/EmailSendingErrors/EmailSendingErrors.php:981
+msgid "Your SMTP host is rejecting the connection."
+msgstr "میزبان SMTP شما اتصال را رد می کند."
+
+#: assets/languages/wp-mail-smtp-vue.php:602
+msgid "Enable Authentication"
+msgstr "احراز هویت را فعال کنید"
+
+#: src/Admin/Area.php:337 src/Admin/Area.php:338 src/Admin/Area.php:1389
+msgid "Settings"
+msgstr "تنظیمات"
+
+#: assets/languages/wp-mail-smtp-vue.php:252
+#: src/Admin/ConnectionSettings.php:80 src/Admin/Pages/SmartRoutingTab.php:180
+#: src/Admin/Pages/SmartRoutingTab.php:210
+msgid "From Email"
+msgstr "ایمیل ارسال کننده"
+
+#: assets/languages/wp-mail-smtp-vue.php:242
+#: src/Admin/ConnectionSettings.php:150 src/Admin/Pages/ExportTab.php:111
+msgid "From Name"
+msgstr "نام ارسال کننده"
+
+#: src/Admin/ConnectionSettings.php:200
+msgid "Return Path"
+msgstr "مسیر بازگشت"
+
+#: assets/languages/wp-mail-smtp-vue.php:587
+#: src/Providers/OptionsAbstract.php:293
+msgid "SMTP Port"
+msgstr "پورت SMTP"
+
+#: assets/languages/wp-mail-smtp-vue.php:532 src/Admin/Pages/TestTab.php:203
+#: src/SiteHealth.php:352
+msgid "Send a Test Email"
+msgstr "ارسال ایمیل آزمایشی"
+
+#: assets/languages/wp-mail-smtp-vue.php:584
+#: src/Providers/OptionsAbstract.php:253
+msgid "Encryption"
+msgstr "رمزنگاری"
+
+#: src/Admin/DashboardWidget.php:587
+msgid "Save Changes"
+msgstr "ذخیره تغییرات"
+
+#: assets/languages/wp-mail-smtp-vue.php:650
+#: src/Admin/ConnectionSettings.php:225 src/Admin/Pages/ExportTab.php:125
+msgid "Mailer"
+msgstr "ارسال کننده ایمیل"
+
+#: assets/languages/wp-mail-smtp-vue.php:599
+#: src/Providers/OptionsAbstract.php:329
+msgid "Authentication"
+msgstr "احراز هویت"
+
+#: assets/languages/wp-mail-smtp-vue.php:581
+#: src/Providers/OptionsAbstract.php:239
+msgid "SMTP Host"
+msgstr "میزبان SMTP (Host)"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#: wp_mail_smtp.php src/Abilities/AbilityRegistrar.php:130
+#: src/Admin/Area.php:326 src/Admin/Area.php:327 src/Admin/Area.php:390
+#: src/Admin/Area.php:391 src/Admin/DashboardWidget.php:172
+#: src/Admin/DashboardWidget.php:579 src/Providers/Outlook/Provider.php:57
+#: src/SiteHealth.php:43
+msgid "WP Mail SMTP"
+msgstr "ایمیل"

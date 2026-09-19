@@ -1,0 +1,106 @@
+services:
+  wordpress:
+    # Reuse the aroma_store-wordpress image which already has the PHP redis
+    # extension compiled (pecl.php.net is unreachable from this network, so
+    # docker/Dockerfile's build-time pecl install would time out).
+    image: aroma_store-wordpress:latest
+    container_name: lylyrose-wp
+    restart: unless-stopped
+    ports:
+      - "${WORDPRESS_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: "${WORDPRESS_DEBUG:-0}"
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://localhost:${WORDPRESS_PORT:-8080}');
+        define('WP_SITEURL', 'http://localhost:${WORDPRESS_PORT:-8080}');
+        define('FS_METHOD', 'direct');
+        define('DISABLE_WP_CRON', true);
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        define('WP_REDIS_MAXTTL', 86400);
+        define('WP_REDIS_GRACEFUL', true);
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./wordpress/wp-content:/var/www/html/wp-content
+      - ./docker/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cron:
+    image: 192.168.1.40:5001/curlimages/curl:8.22.0
+    container_name: lylyrose-cron
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          curl -sf -m 60 "http://wordpress/wp-cron.php?doing_wp_cron" >/dev/null 2>&1 || true
+          sleep 60
+        done
+    depends_on:
+      - wordpress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-o", "/dev/null", "http://wordpress/wp-cron.php?doing_wp_cron"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 40s
+
+  redis:
+    # image: 192.168.1.40:5001/library/redis:7-alpine
+    image: 192.168.1.40:5001/library/redis:8.10.1-alpine
+    container_name: lylyrose-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+
+  db:
+    # image: 192.168.1.40:5001/library/mariadb:10.11
+    image: 192.168.1.40:5001/library/mariadb:13.0.2
+    container_name: lylyrose-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-allowed-packet=128M
+      - --innodb-buffer-pool-size=256M
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "db", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  phpmyadmin:
+    image: 192.168.1.40:5001/library/phpmyadmin:5.2.3-apache
+    container_name: lylyrose-pma
+    restart: unless-stopped
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  wordpress_data:
+  db_data:
+  redis_data:
