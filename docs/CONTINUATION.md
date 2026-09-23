@@ -2,16 +2,19 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 
-## Verified Lyly Rose state — 2026-09-17
+## Verified Lyly Rose state — 2026-09-19
 
-- **Production target**: `https://lylyrose.ir`, addon domain on the vegacodex.ir hosting account, document-root folder `lylyroseir`. Domain registration was pending approval when requested; DNS, addon-domain configuration, TLS, and deployment have not yet been verified. No Lyly Rose subdomain has been provisioned or verified.
-- **Repository**: GitHub repository creation was reported earlier, but local Git initialization, token access verification, commit, and push remain outstanding.
+- **Production target**: `https://lylyrose.ir`, addon domain on the vegacodex.ir hosting account, document-root folder `lylyroseir`. The domain is now **registered** (confirmed 2026-09-19). Addon-domain configuration in cPanel, DNS records (`ns875`/`ns876.mihanwebhost.com`), TLS issuance, and file/database deployment have **not** yet been performed or verified. Live site is not serving Lyly Rose yet.
+- **Hosting credentials**: the cPanel account details are in `.env` (git-ignored) — `PHP_HOST`, `PHP_HOST_USERNAME`, `PHP_HOST_PASSWORD`, `PHP_HOST_IP=89.39.208.244`, `PHP_HOST_SERVER_NAME=ircpanel181`, `LYLYROSE_DOMAIN=lylyrose.ir`, `LYLYROSE_FOLDER=lylyroseir`. The existing site on that account is **vegacodex.ir**; Lyly Rose is an addon, so do not disturb the primary domain's document root.
+- **Repository**: local Git initialized and the full tree committed (`1eea959`, 20,302 files) and **pushed** to https://github.com/greatkourosh/lylyrose (`master` tracks `origin/master`). The push needed the PAT from `project_manager/secrets/github.env`; the repo URL now embeds that token, so `git push` works without re-auth. `.env` is git-ignored and was not committed.
 - **Local**: `http://localhost:8080`, phpMyAdmin on port 8081; active theme `lylyrose`, plugin `lylyrose-core`. Legacy themes remain unchanged. Database branding still needs verification independently of source-code branding.
 - **Core compatibility**: WooCommerce 11.1.0 requires WordPress 7.0 or later. The original Docker image initializes WordPress 6.5.5, which caused a missing `WP_Block_Templates_Registry` fatal error. The existing local volume was upgraded to WordPress 7.1 using core files from the source project's container, excluding its configuration and wp-content; the database upgrade completed. A fresh-volume reproducible setup still needs correction.
 - **Verified fixes**: gift-wrap rendering uses `wp_kses_post(wc_price(...))` instead of the removed theme helper. A real cookie-based add-to-cart request renders the coupon form and nonce. Shop returns 200. Generated JPEG and PNG uploads and their six sizes are WebP.
 - **Testing**: a complete, untruncated `bash docker/run-tests.sh` run is in progress, with output at `/tmp/lylyrose-full-tests.log`. Earlier runs piped to `head` were incomplete and are not full-suite results. Actual SMS gateway resolves to `PW\PWSMS\Gateways\Logger`; ZarinPal is enabled in sandbox mode.
 - **Safety**: the suite deletes local orders and wallet data; never run against production or Aroma Store. Pre-test database and pre-upgrade core backups are in `/tmp/lylyrose-before-tests.sql` and `/tmp/lylyrose-core-before-upgrade.tar.gz`, excluded from version control. WP-CLI is not currently installed at `/tmp/wp-cli.phar`.
-- **Remaining**: resolve full-suite failures, browser verification, reproducible setup, production preparation, documentation cleanup, Obsidian update, GitHub access verification, commit, and push.
+- **Deployment prep complete (2026-09-20)**: local artifacts are staged and ready to upload — WordPress 7.1 core (fa_IR, `wp-content` excluded) + repo `wp-content` (runtime files excluded) assembled in `/tmp/lylyrose_deploy/`, a production `wp-config.php` with fresh salts written there, DB dump `/tmp/lylyrose.sql` (1.6 MB), uploads at `/tmp/lylyrose_uploads/`. See [DEPLOY_PREP.md](DEPLOY_PREP.md) and [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md).
+- **Fixed (2026-09-20)**: notifications my-account endpoint fired the wrong action — `lylyrose-core` hooked `woocommerce_account_notifications`, but WC fires `woocommerce_account_{endpoint}_endpoint`, so the page rendered empty; the theme `my-account.php` no longer branches on the endpoint and just calls `woocommerce_account_content` (WC dispatches the endpoint action itself).
+- **Next**: deploy to the host (see the `deploy-host` task below) — no Lyly Rose files or database exist on the host yet. DNS already resolves (`dig +short lylyrose.ir` → `89.39.208.244`), so step 2 (addon domain) is the next action.
 
 ## Inherited Aroma Store history
 
@@ -118,10 +121,82 @@ The entries below were copied and mechanically rebranded from the source project
 
 ## Known open items
 
+- **Deploy to host — not started**. Ordered task list below.
 - **Live Dokan update pending**: live site still on Dokan 5.0.16. Upgrade to 5.1.1 via
   WP admin (`/secure-login`) or FTP chunk+assembler deploy. Verify live site health
   (home 200, shop 200) after.
 - See [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) for prioritized next features.
+
+## Task: deploy lylyrose to the host
+
+Goal: serve the rebranded store at `https://lylyrose.ir` from the existing cPanel
+account, without touching the `vegacodex.ir` primary site.
+
+Host facts are in `.env` (git-ignored): `PHP_HOST_IP=89.39.208.244`,
+`PHP_HOST_USERNAME=bqwyvowk`, `PHP_HOST_PASSWORD=…`, cPanel at
+`http://cp181.unitedhost.org:2082`, server name `ircpanel181`, DNS
+`ns875`/`ns876.mihanwebhost.com`, addon folder `lylyroseir`.
+
+### Steps
+
+1. **DNS** — point `lylyrose.ir` at the host: `A` record to `89.39.208.244`, or NS
+   records to `ns875`/`ns876.mihanwebhost.com` if the registrar delegates. Confirm with
+   `dig +short lylyrose.ir` before continuing; cPanel will not issue an addon domain's
+   TLS certificate until the domain resolves here.
+2. **Addon domain** — cPanel → Domains → Create A New Domain: `lylyrose.ir` with
+   document root `lylyroseir`. Verify it created `/home/bqwyvowk/lylyroseir` (or the
+   cPanel-reported path) and that `vegacodex.ir` still serves.
+3. **PHP** — set PHP 8.1+ (8.2 preferred) for the addon domain via MultiPHP Manager,
+   and `upload_max_filesize`/`post_max_size=64M`, `max_execution_time=300`,
+   `memory_limit=256M` via MultiPHP INI Editor.
+4. **WordPress core** — download the fa_IR package locally
+   (`https://fa.wordpress.org/latest-fa_IR.zip`), unzip, and upload its contents
+   (minus `wp-content`) into `lylyroseir/`. Do **not** use the Docker image's
+   WordPress 6.5.5 core — WooCommerce 11.1.0 needs WP 7.0+, and the local volume was
+   upgraded to 7.1.
+5. **wp-content** — upload `wordpress/wp-content/` from the repo (themes `lylyrose`,
+   `digikala-v1.0.0`, `aroma-store`; plugins including `lylyrose-core`; `languages`).
+   **Exclude** the runtime files that must be regenerated on the new host:
+   `advanced-cache.php`, `object-cache.php`, `wp-cache-config.php`, and
+   `wp-content/uploads/` (uploads are git-ignored — migrate them separately in step 7).
+   `docker/migrate-from-remote.sh` and the chunk+assembler flow in
+   [04_DEPLOYMENT.md](04_DEPLOYMENT.md) are the existing patterns for this.
+6. **Database** — create db + user in cPanel, then export local and import:
+   `docker exec lylyrose-db mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines --triggers lylyrose > lylyrose.sql`.
+   The dump contains customer/order data — move it over an encrypted channel and
+   delete it from any shared location right after import.
+7. **Uploads** — `docker cp lylyrose-wp:/var/www/html/wp-content/uploads ./uploads`,
+   then upload to `lylyroseir/wp-content/uploads/`. Set permissions to the cPanel
+   user (usually `644` files / `755` dirs, no `www-data`).
+8. **wp-config.php** — set DB credentials and `WP_HOME`/`WP_SITEURL` to
+   `https://lylyrose.ir`; fresh salts from `https://api.wordpress.org/secret-key/1.1/salt/`;
+   add `DISALLOW_FILE_EDIT`, `FS_METHOD=direct`, `WP_MEMORY_LIMIT=256M`.
+9. **URL rewrite** — replace `http://localhost:8080` with `https://lylyrose.ir` across
+   all tables (WP-CLI `wp search-replace … --all-tables --precise`, or Better Search
+   Replace). Verify `wp_options.siteurl` and `home` afterwards.
+10. **TLS** — AutoSSL in cPanel → SSL/TLS Status; force HTTPS once issued.
+11. **Permalinks & cron** — flush rewrite rules (Settings → Permalinks → Save); add a
+    cPanel cron job hitting `wp-cron.php` every minute.
+12. **Re-point per-host settings** — Redis Object Cache **deactivate** (no Redis on
+    shared hosting); WP Super Cache re-configure; UpdraftPlus re-point remote storage;
+    WP Mail SMTP re-enter credentials; **ZarinPal** — real merchant code and
+    `sandbox: no` (currently sandbox-only); **Persian SMS** — real gateway credentials
+    (currently the `Logger` sink); Wordfence scan + firewall mode; confirm
+    `/secure-login` loads.
+13. **Verify** — home 200, shop 200, single product, add-to-cart, cart, checkout,
+    order created, admin order visible, media resolving from `lylyrose.ir` (no
+    `localhost` URLs left). Check `vegacodex.ir` is untouched.
+
+### Notes
+
+- **Do not run `docker/run-tests.sh` against production** — the suite deletes orders
+  and wallet data.
+- Plugin dirs on cPanel are owned by the cPanel user, so the local
+  `root:root` ownership bug does not apply here.
+- The prior "deployment to cPanel host complete" claim in the inherited Aroma Store
+  history below describes the **source** project. Those steps must still be run for
+  Lyly Rose.
+
 
 ## 2026-09-14 — Dokan add-to-cart fix + suite re-green (in progress)
 
