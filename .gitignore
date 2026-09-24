@@ -57,3 +57,6 @@ wordpress/wp-content/themes/twentytwentytwo/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+
+# --- Test logs (durable across reboots) ---
+.test-logs/

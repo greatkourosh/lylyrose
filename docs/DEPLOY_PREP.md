@@ -1,0 +1,184 @@
+# LYLY ROSE — Production Deploy Prep (host-specific runbook)
+
+**Prepared:** 2026-09-20
+**Target:** `https://lylyrose.ir` — addon domain on the `vegacodex.ir` cPanel account
+**Docroot:** `/home/bqwyvowk/lylyroseir`
+
+This is the concrete runbook for the current deployment. The generic host guide is
+[04_DEPLOYMENT.md](04_DEPLOYMENT.md); the human-facing checklist and credentials
+reference are in [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md) at the repo root.
+
+---
+
+## Status: staged locally, nothing uploaded yet
+
+No Lyly Rose files or database exist on the host. DNS already resolves
+(`dig +short lylyrose.ir` → `89.39.208.244`), so the next action is creating the
+addon domain in cPanel (step 2 below).
+
+---
+
+## What is staged locally
+
+| Artifact | Path | Notes |
+|----------|------|-------|
+| WordPress 7.1 core (fa_IR) | `/tmp/lylyrose_deploy/` | Official `latest-fa_IR.zip`, `wp-content` excluded; **452 MB tree total** |
+| `wp-content` (repo) | `/tmp/lylyrose_deploy/wp-content/` | themes, plugins, languages; runtime files + uploads excluded |
+| Production `wp-config.php` | `/tmp/lylyrose_deploy/wp-config.php` | fresh salts; `WP_HOME`/`WP_SITEURL` = `https://lylyrose.ir`; **DB name/user/password are placeholders — fill in step 8** |
+| Database dump | `/tmp/lylyrose.sql` | 1.7 MB, `--single-transaction --routines --triggers`; test data scrubbed (see below) |
+| Uploads | `/tmp/lylyrose_uploads/` | 9.7 MB / 1780 files, from `docker cp lylyrose-wp:.../uploads`; wc-logs + ao_ccss stripped |
+
+Regenerated 2026-09-24 from the green local stack. The deploy tree ships only the
+**active** `lylyrose` theme plus stock `twentytwenty*`; inactive dev themes
+(`aroma-store`, `aroma-store-old`, `digikala-v1.0.0`) were removed.
+
+### Test data scrubbed from the dump
+
+The local suite creates and deletes its own fixtures; before dumping, the following
+were removed so no test residue ships:
+
+- Test users `wallet_tester`, `sn_tester`, `user_362223344` (OTP fixture) — left
+  `admin`, `demo_customer`, `kouroshvega`
+- Dokan denormalized order tables (`wp_dokan_orders` etc. — test orders 1419–1440)
+- PWSMS SMS archive rows (`wp_woocommerce_ir_sms_archive`)
+- `wp-content/uploads/wc-logs/` (fatal-error traces + `pwsms.log` with OTP codes)
+  and `wp-content/uploads/ao_ccss/` (Autoptimize critical-CSS cache)
+
+The assembled tree at `/tmp/lylyrose_deploy/` is a complete WordPress install: upload
+its **contents** into `lylyroseir/` (i.e. `lylyroseir/wp-config.php`,
+`lylyroseir/wp-admin/`, `lylyroseir/wp-content/`, …). Do not nest it under an extra
+directory.
+
+### Excluded from `wp-content` (regenerated on the host)
+
+- `advanced-cache.php`, `object-cache.php`, `wp-cache-config.php`
+- `autoptimize_404_handler.php`
+- `cache/`, `updraft/`, `upgrade/`, `upgrade-temp-backup/`
+- `uploads/` — migrated separately (step 7)
+
+### Why WordPress 7.1 (not the Docker image's 6.5.5)
+
+WooCommerce 11.1.0 requires WordPress 7.0+. The Docker image initializes 6.5.5, which
+fatals with a missing `WP_Block_Templates_Registry` class. The local volume was upgraded
+to 7.1; production must ship 7.1 core too.
+
+---
+
+## How the artifacts were produced
+
+```bash
+# DB dump (mariadb-dump; the MariaDB 13 container has no `mysqldump` binary)
+docker exec lylyrose-db mariadb-dump -u root -plylyrose_root_dev \
+  --single-transaction --routines --triggers lylyrose > /tmp/lylyrose.sql
+
+# Uploads
+docker cp lylyrose-wp:/var/www/html/wp-content/uploads /tmp/lylyrose_uploads
+
+# Core (fa_IR), excluding wp-content
+curl -s https://fa.wordpress.org/latest-fa_IR.zip -o /tmp/latest-fa_IR.zip
+unzip -q /tmp/latest-fa_IR.zip -d /tmp/wp_core
+rsync -av /tmp/wp_core/wordpress/ /tmp/lylyrose_deploy/ --exclude=wp-content/
+
+# Repo wp-content, excluding runtime + uploads
+mkdir -p /tmp/lylyrose_deploy/wp-content
+rsync -av wordpress/wp-content/ /tmp/lylyrose_deploy/wp-content/ \
+  --exclude=advanced-cache.php --exclude=object-cache.php \
+  --exclude=wp-cache-config.php --exclude=autoptimize_404_handler.php \
+  --exclude=uploads/ --exclude=cache/ --exclude=updraft/ \
+  --exclude=upgrade/ --exclude=upgrade-temp-backup/
+
+# Fresh salts
+curl -s https://api.wordpress.org/secret-key/1.1/salt/   # pasted into wp-config.php
+```
+
+---
+
+## Step order on the host
+
+> Full detail and per-host setting changes: [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md).
+> The 13 numbered steps there match CONTINUATION.md's `deploy-host` task.
+
+1. **DNS** — already done (`lylyrose.ir` → `89.39.208.244`).
+2. **Addon domain** — cPanel → Domains → Create A New Domain: `lylyrose.ir`,
+   docroot `lylyroseir`. Confirm `vegacodex.ir` still serves afterwards.
+3. **PHP** — MultiPHP Manager: PHP 8.2 (8.1 min). MultiPHP INI Editor:
+   `upload_max_filesize=64M`, `post_max_size=64M`, `max_execution_time=300`,
+   `memory_limit=256M`.
+4. **Database** — cPanel → MySQL Databases: create db + user (ALL PRIVILEGES).
+   Record the real names (cPanel may prefix them, e.g. `bqwyvowk_lylyrose`).
+5. **Files** — upload `/tmp/lylyrose_deploy/` contents into `lylyroseir/`.
+6. **Import** — phpMyAdmin → select db → Import → `/tmp/lylyrose.sql`.
+   **Delete the dump from every location it touched afterwards.**
+7. **Uploads** — upload `/tmp/lylyrose_uploads/` → `lylyroseir/wp-content/uploads/`.
+   Permissions: files `644`, dirs `755`, owned by the cPanel user (not `www-data`).
+8. **wp-config.php** — edit `lylyroseir/wp-config.php`: fill `DB_NAME` / `DB_USER` /
+   `DB_PASSWORD` with the step-4 values. `WP_HOME` / `WP_SITEURL` already point at
+   `https://lylyrose.ir`; salts are fresh.
+9. **URL rewrite** — if any `http://localhost:8080` URLs survive in the data:
+   `wp search-replace 'http://localhost:8080' 'https://lylyrose.ir' --all-tables --precise`,
+   then confirm `wp_options.siteurl` and `home`.
+10. **TLS** — cPanel → SSL/TLS Status → AutoSSL for `lylyrose.ir`; force HTTPS.
+11. **Permalinks & cron** — Settings → Permalinks → Save; cPanel Cron Jobs:
+    `* * * * * /usr/local/bin/php /home/bqwyvowk/lylyroseir/wp-cron.php >/dev/null 2>&1`
+    (and add `DISABLE_WP_CRON` to `wp-config.php`).
+12. **Per-host settings** — Redis Object Cache **deactivate** (no Redis on shared
+    hosting, and remove/ignore the `WP_REDIS_*` defines); WP Super Cache reconfigure;
+    UpdraftPlus re-point remote storage; WP Mail SMTP re-enter credentials;
+    **ZarinPal** real merchant code + `sandbox: no`; **Persian SMS (PWSMS)** real
+    gateway credentials (currently the `Logger` sink); Wordfence scan + firewall;
+    confirm `/secure-login` loads.
+13. **Verify** — home 200, shop 200, single product, add-to-cart, cart, checkout →
+    order created, admin order visible, media resolving from `lylyrose.ir` (no
+    `localhost` URLs), and `vegacodex.ir` untouched.
+
+---
+
+## Warnings
+
+- **Never run `docker/run-tests.sh` against production** — the suite deletes orders
+  and wallet data.
+- The DB dump contains customer/order data. Move it over an encrypted channel and
+  delete it from any shared location right after import.
+- `wp-config.php` in `/tmp/lylyrose_deploy/` ships with
+  `DB_PASSWORD = 'REPLACE_WITH_DB_PASSWORD'` — it is a template, not a secret.
+- Plugin dirs on cPanel are owned by the cPanel user, so the local `root:root`
+  ownership bug does not apply here.
+
+---
+
+## Credentials reference
+
+All host values live in `.env` (git-ignored). Names only here, no secrets in git.
+
+| Variable | Value |
+|----------|-------|
+| cPanel URL | `http://cp181.unitedhost.org:2082` |
+| cPanel user | `bqwyvowk` |
+| Server IP | `89.39.208.244` |
+| Server name | `ircpanel181` |
+| DNS | `ns875` / `ns876.mihanwebhost.com` |
+| Primary domain (do not disturb) | `vegacodex.ir` |
+| Addon domain / folder | `lylyrose.ir` / `lylyroseir` |
+
+## Quick commands (cPanel SSH/terminal, if available)
+
+```bash
+cd ~/lylyroseir
+
+# Permissions after upload
+find . -type f -exec chmod 644 {} \;
+find . -type d -exec chmod 755 {} \;
+
+# Flush permalinks, verify DB
+wp rewrite flush --hard
+wp db check
+```
+
+## Core / theme versions shipped
+
+| Component | Version |
+|-----------|---------|
+| WordPress core | 7.1 (fa_IR) |
+| WooCommerce | 11.1.0 |
+| `lylyrose-core` plugin | 2.3.0 |
+| `lylyrose` theme | 1.10.0 |

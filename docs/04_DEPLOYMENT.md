@@ -37,6 +37,19 @@ PHP settings: `upload_max_filesize=64M`, `post_max_size=64M`,
 
 ---
 
+## Deploy runbook index
+
+This project also keeps a concrete, host-specific runbook for the current
+deployment (cPanel account `bqwyvowk`, addon domain `lylyrose.ir`, docroot
+`lylyroseir`):
+
+- `docs/DEPLOY_PREP.md` — what is staged locally and the exact upload/import order
+- `DEPLOYMENT_SUMMARY.md` (repo root) — the 13-step checklist, credentials reference,
+  and per-host setting changes (Redis off, ZarinPal live keys, SMS gateway, etc.)
+
+Use those when deploying to this account; the generic steps below remain the
+reference for any other PHP+MySQL host.
+
 ## Step 0 — Export the database from the current environment
 
 If the live/dev site still runs in Docker:

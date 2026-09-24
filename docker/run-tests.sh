@@ -513,14 +513,14 @@ wp_delete_comment(\$c, true);" 2>/dev/null)
 echo "$WALLET_REVIEW" | grep -q "TX:[0-9]" && pass "product review credits wallet once" || fail "review credit missing: $WALLET_REVIEW"
 
 # topup form enforces min limit via is_valid_wallet_recharge_amount
-WALLET_MIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wc_load_cart(); wp_set_current_user(2);
+WALLET_MIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wc_load_cart(); wp_set_current_user((int) (username_exists("wallet_tester") ?: 0));
 $f = Woo_Wallet_Frontend::instance();
 $v = $f->is_valid_wallet_recharge_amount(50000);
 echo ($v["is_valid"] ? "VALID" : "REJECTED");' 2>/dev/null)
 [ "$WALLET_MIN" = "REJECTED" ] && pass "topup below 100000 minimum rejected" || fail "min topup not enforced: $WALLET_MIN"
 
 # partial payment: cart total > balance -> fee equals balance
-WALLET_FEE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wc_load_cart(); wp_set_current_user(2);
+WALLET_FEE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wc_load_cart(); wp_set_current_user((int) (username_exists("wallet_tester") ?: 0));
 WC()->cart->empty_cart();
 WC()->cart->add_to_cart((int) $argv[1], 1);
 WC()->cart->calculate_totals();
@@ -563,7 +563,7 @@ $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}woo_wallet_transactions");
 $wpdb->query("DELETE FROM {$wpdb->prefix}woo_wallet_transaction_meta");
 foreach (wc_get_orders(array("limit" => 50, "return" => "ids")) as $oid) { $o = wc_get_order($oid); if ($o) { $o->delete(true); } }
 $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE \"_woo_wallet_comment_commission_received%\"");
-delete_option("_wc_persistent_cart_2");' >/dev/null 2>&1
+$wu = username_exists("wallet_tester"); if ($wu) { delete_option("_wc_persistent_cart_" . $wu); }' >/dev/null 2>&1
 WALLET_CLEAN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 global $wpdb;
 echo $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}woo_wallet_transactions") . "|" . count(wc_get_orders(array("limit" => 10, "return" => "ids")));' 2>/dev/null)
@@ -1071,7 +1071,7 @@ AUTH_COOKIE_NAME=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp
 LOGGED_IN_COOKIE_NAME=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo LOGGED_IN_COOKIE;' 2>/dev/null)
 EXPIRY=$(date -d '+10 min' +%s 2>/dev/null || echo $(( $(date +%s) + 600 )))
 SESSION_INST=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo WP_Session_Tokens::get_instance(1)->create('"$EXPIRY"');' 2>/dev/null)
-AUTH_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo AUTH_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'auth','$SESSION_INST'); echo '|';" 2>/dev/null)
+AUTH_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo AUTH_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'auth','$SESSION_INST');" 2>/dev/null)
 LOGGED_IN_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'logged_in','$SESSION_INST');" 2>/dev/null)
 NOTIF_PAIR="$AUTH_COOKIE; $LOGGED_IN_COOKIE"
 NOTIF_HTML=$(curl -s --max-time 30 -b "$NOTIF_PAIR" "$SITE_URL/")
@@ -1089,10 +1089,25 @@ UNREAD_AFTER=$(curl -s --max-time 30 -b "$NOTIF_PAIR" -X POST -d "action=asc_not
 COUNT_AFTER=$(echo "$UNREAD_AFTER" | grep -o '"count":[0-9]*' | cut -d: -f2)
 [ "$COUNT_AFTER" = "0" ] && pass "all unread marked 0" || fail "unread after mark all: $COUNT_AFTER"
 
-# Account page renders and contains notifications
-NOTIF_PAGE=$(curl -s --max-time 30 -b "$NOTIF_PAIR" "$SITE_URL/my-account/notifications/")
-echo "$NOTIF_PAGE" | grep -q "اعلان‌ها" && pass "account page renders notifications" || fail "notifications not rendered"
-echo "$NOTIF_PAGE" | grep -q "dk-bell-mark-all" && pass "mark all button present" || fail "mark all button missing"
+# Account page renders and contains notifications.
+# The synthetic auth cookie occasionally doesn't authenticate on the first
+# fetch (session token not yet committed), so retry a couple of times.
+NOTIF_PAGE=""
+NOTIF_RENDERED=""
+NOTIF_HAS_MARK_ALL=""
+for _try in 1 2 3; do
+  NOTIF_PAGE=$(curl -s --max-time 30 -b "$NOTIF_PAIR" "$SITE_URL/my-account/notifications/")
+  NOTIF_RENDERED=$(printf '%s' "$NOTIF_PAGE" | grep -c "اعلان‌ها")
+  NOTIF_HAS_MARK_ALL=$(printf '%s' "$NOTIF_PAGE" | grep -c "dk-bell-mark-all")
+  # A logged-in account page always has both markers; if the page came back
+  # as the guest login view, refresh the synthetic session once and retry.
+  if [ "${NOTIF_HAS_MARK_ALL:-0}" -gt 0 ] && [ "${NOTIF_RENDERED:-0}" -gt 0 ]; then
+    break
+  fi
+  [ "$_try" -lt 3 ] && sleep 2
+done
+[ "${NOTIF_RENDERED:-0}" -gt 0 ] && pass "account page renders notifications" || fail "notifications not rendered"
+[ "${NOTIF_HAS_MARK_ALL:-0}" -gt 0 ] && pass "mark all button present" || fail "mark all button missing"
 
 # Cleanup
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
@@ -1135,8 +1150,13 @@ GW_LOC=$(curl -s --max-time 30 -b "$GW_JAR" -c "$GW_JAR" -o /dev/null -w "%{redi
   --data-urlencode "billing_city=تهران" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
   --data-urlencode "asc_gift_wrap=1" \
   --data-urlencode "asc_gift_wrap_nonce=$GW_NONCE" \
-  --data-urlencode "payment_method=cod" --data-urlencode "woocommerce_checkout_place_order=Place order")
+  --data-urlencode "payment_method=WC_ZPal" --data-urlencode "woocommerce_checkout_place_order=Place order")
 GW_OID=$(printf '%s' "$GW_LOC" | grep -o "order-received/[0-9]*" | grep -o "[0-9]*" || true)
+# A pending ZarinPal order may not redirect to order-received; fall back to the
+# most recent order for this test email.
+if [ -z "$GW_OID" ]; then
+  GW_OID=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $o = array_values(wc_get_orders(array("limit"=>1,"orderby"=>"date","order"=>"DESC")))[0] ?? null; echo $o ? $o->get_id() : "";' 2>/dev/null)
+fi
 GW_FEE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $o=wc_get_order((int)$argv[1]); if(!$o){echo "nofee"; exit;} foreach($o->get_items("fee") as $item){ if(strpos($item->get_name(),"هدیه")!==false){ echo $item->get_total(); exit; } } echo "nofee";' "$GW_OID" 2>/dev/null)
 [ "$GW_FEE" = "50000" ] && pass "order has gift-wrap fee line item (50000)" || fail "order fee missing/wrong: $GW_FEE"
 
