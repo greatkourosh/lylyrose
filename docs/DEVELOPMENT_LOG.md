@@ -1051,3 +1051,93 @@ Plugin: lylyrose-core v2.1.0; Theme: digikala v1.8.0
   review, order fee line item (50000), soft gift-card plugin check.
 - Server-side fee verified directly (session flag → fee 50000, cart total
   ۸۵۰,۰۰۰ for product 17 + wrap).
+
+## 2026-09-26 — Rebrand: residual Aroma Store DB branding -> Lyly Rose
+
+Follow-up to the 2026-08-31 Digikala->Aromaland pass, which fixed **UI strings only**
+and never touched the database. The source project it was forked from was itself branded
+"Aromaland" (English), "آرومالند" (Persian), with a misspelled mail domain
+`@aromalnd.test` ("aromalnd", not "aromaland"). Those survived in the DB and were
+inherited by production on 2026-09-24 — so the claim in `CONTINUATION.md` that
+"the production site at `lylyrose.ir` is correctly branded" was **wrong**; the live
+`<title>` on every page read `Aromaland`, and the public REST API returned
+`{"name":"Aromaland"}` at `/wp-json/`.
+
+The code tree was already clean (`lylyrose` theme and `lylyrose-core` had zero hits);
+all residue was data.
+
+### What changed
+
+| Table | Rows | Before | After |
+|---|---|---|---|
+| `wp_options` | `blogname` | `Aromaland` | `Lyly Rose` |
+| `wp_options` | `woocommerce_email_from_name` | `آرومالند` | `لیلی رز` |
+| `wp_options` | 5 mail-address options | `admin@aromalnd.test` | `info@lylyrose.ir` |
+| `wp_options` | `wp_mail_smtp`, `cartflows_ca_email_admin_settings`, `woocommerce_paypal_settings`, `auto_core_update_notified` | embedded old brand | re-serialized |
+| `wp_users` | `admin`, `demo_customer` | `*@aromalnd.test` | `info@lylyrose.ir` |
+| `wp_usermeta` | 1 (`billing_email`) | `admin@aromalnd.test` | `info@lylyrose.ir` |
+| `wp_comments` | 1 | `riya-test@aromalnd.test` | `riya-test@lylyrose.ir` |
+| `wp_wpmailsmtp_debug_events` | 55 | old outbound headers | purged (log) |
+
+The `aromalnd.test` domain also appeared in the **WC session cache**, which re-persisted
+the old address on the next request after a naive fix. Fixed by flushing the object cache
+and rewriting the session row.
+
+### Deliberately NOT changed
+
+- **`wp_wfconfig`** (`wordpressPluginVersions`, `wordpressThemeVersions`,
+  `vulnerabilities_plugin`) still contain the strings `aroma-store*`. These are
+  Wordfence inventories of plugin/theme *slugs* that existed on the source project.
+  Rewriting them would misreport what is actually installed, and they are never rendered
+  to a visitor. A full text-column sweep of every varchar/text/blob/JSON column in the
+  schema returns these 3 rows as the only remaining `aroma` hits.
+- **`wordpress/wp-content/themes/aroma-store{,-old}` and `digikala-v1.0.0`** — inactive
+  dev-look-alikes kept for rollback. Not deployed to production (only `lylyrose` ships).
+- Login names, table prefix, slugs, and CSS class names (`aroma-store-rtl` etc.) are code
+  identifiers, not visitor-facing branding.
+
+### Method
+
+One helper (`rebrand_aromaland.php`) uploaded to the docroot, fetched, then deleted —
+no SSH/phpMyAdmin on this host. It boots WordPress to obtain a correctly configured
+`$wpdb` (so no credentials are hard-coded into the webroot), writes a
+`rebrand-backup.json` of every row it touches **before** modifying anything, and is
+idempotent via a `.rebrand_done` guard.
+
+Serialized options are the real hazard: a blind SQL `REPLACE` leaves the `s:<length>:`
+prefixes stale and corrupts the blob. The helper substitutes in PHP and re-serializes
+with `maybe_serialize()` so lengths are recomputed. User emails are written straight
+through `$wpdb->update()` rather than `wp_update_user()` — the latter fires a
+"new user" mail and its cache write restored the old address within the same request.
+
+Full pre-change dump at `/tmp/lylyrose-rebrand-backup.sql` (97 tables).
+
+### Verification
+
+- Sweep of all text columns in every table: only the 3 intentional `wfconfig` rows.
+- `<title>` on `/`, `/shop/`, `/cart/`, `/checkout/`, `/my-account/` = `Lyly Rose`.
+- `/wp-json/` → `{"name":"Lyly Rose"}`.
+- Stable across 3 consecutive page loads (session row does not regress).
+- **Test suite: 217 passed / 0 failed** (`.test-logs/full-tests-20260926-0858.log`),
+  matching the documented baseline. Re-swept after the suite — branding intact, since
+  the suite creates and deletes its own users.
+
+### Applied to production (2026-09-26)
+
+Same helper uploaded to `lylyroseir/` over passive FTP, fetched once over HTTPS, then
+deleted — all four files (`rebrand_aromaland.php`, `rebrand-backup.json`, `.rebrand_done`,
+`verify_prod.php`) confirmed gone afterwards by HTTP 404 *and* an FTP directory listing
+that no longer contains them. The pre-change values were pulled back to
+`/tmp/lylyrose-prod-rebrand-backup.json` before deletion, so the change is reversible.
+
+Live verification after the change: `/`, `/shop/`, `/cart/`, `/checkout/`, `/my-account/`,
+`/feed/` all HTTP 200 with `<title>` = `Lyly Rose`, zero `aroma` hits in the HTML;
+`/wp-json/` returns `{"name":"Lyly Rose"}`; `vegacodex.ir` (primary domain) still 200.
+In-DB sweep on production: `options` NONE, `users` NONE, `usermeta` 0, `comments` 0, with
+the 3 intentional `wfconfig` inventory rows remaining.
+
+One harmless warning appeared in the live run: `Undefined property: wpdb::$woocommerce_sessions`.
+WooCommerce's session table is registered by the WC bootstrap, which does not run when
+`wp-settings.php` is loaded this way, so that one UPDATE was skipped. Production had 0 rows
+to change in that table anyway, and the object cache was flushed afterwards; verified clean.
+Worth noting for any future helper that touches WC tables from a bare bootstrap.
