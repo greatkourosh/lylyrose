@@ -10,14 +10,32 @@ reference are in [DEPLOYMENT_SUMMARY.md](../DEPLOYMENT_SUMMARY.md) at the repo r
 
 ---
 
-## Status: staged locally, nothing uploaded yet
+## Status: DEPLOYED (2026-09-24)
 
-No Lyly Rose files or database exist on the host. DNS already resolves
-(`dig +short lylyrose.ir` → `89.39.208.244`), so the next action is creating the
-addon domain in cPanel (step 2 below).
+Lyly Rose is live at `https://lylyrose.ir`. Files uploaded, database created and
+imported, and the site verified (home/shop/cart/checkout/secure-login all 200;
+`vegacodex.ir` untouched).
+
+Two silent config bugs had to be fixed in the staged tree — see
+[Post-deploy findings](#post-deploy-findings-2026-09-24) at the bottom. Fix them
+in the local source before the next deploy.
 
 ---
 
+## Post-deploy findings (2026-09-24)
+
+1. **`wp-config.php` was missing `$table_prefix`.** Without
+   `$table_prefix = 'wp_';` WordPress ignores the imported tables and redirects
+   every request to `install.php`. Added to the deployed config (and should be
+   added to the template in the source tree).
+2. **`.htaccess` shipped without the WordPress rewrite block**, so every
+   pretty-permalink page 404'd. Appended the standard `# BEGIN WordPress` block.
+
+Host-access quirks for re-deploys (no SSH; FTP is passive-only; DB import is
+done with an uploaded PHP script): see the notes accompanying this run and
+`DEPLOYMENT_SUMMARY.md`.
+
+---
 ## What is staged locally
 
 | Artifact | Path | Notes |

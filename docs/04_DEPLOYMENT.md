@@ -1,5 +1,10 @@
 # DEPLOY — LYLY ROSE on a normal PHP + MySQL host
 
+> **Status: deployed 2026-09-24.** `https://lylyrose.ir` is live on cPanel host
+> `bqwyvowk` and verified. This file stays the *generic* runbook for any PHP+MySQL
+> host; the host-specific runbook and the two bugs that bit during the live deploy
+> live in [DEPLOY_PREP.md](DEPLOY_PREP.md) and [CONTINUATION.md](CONTINUATION.md).
+
 This branch (`hosting-ready`) contains only what production needs. All Docker /
 local-dev configuration lives on `master` and is intentionally absent here.
 
@@ -35,17 +40,23 @@ is ignored on purpose; migrate it separately from the current site (Step 3).
 PHP settings: `upload_max_filesize=64M`, `post_max_size=64M`,
 `max_execution_time=300`, `memory_limit=256M`.
 
+> The live host runs **PHP 8.1.34**, not 8.2. Everything works on 8.1; the 8.2 bump is
+> optional and not yet done.
+
 ---
 
 ## Deploy runbook index
 
 This project also keeps a concrete, host-specific runbook for the current
 deployment (cPanel account `bqwyvowk`, addon domain `lylyrose.ir`, docroot
-`lylyroseir`):
+`/home3/bqwyvowk/lylyroseir`):
 
-- `docs/DEPLOY_PREP.md` — what is staged locally and the exact upload/import order
-- `DEPLOYMENT_SUMMARY.md` (repo root) — the 13-step checklist, credentials reference,
-  and per-host setting changes (Redis off, ZarinPal live keys, SMS gateway, etc.)
+- `docs/DEPLOY_PREP.md` — what is staged locally, the exact upload/import order, and
+  the two config bugs that blocked the live deploy
+- [CONTINUATION.md](CONTINUATION.md) — current verified state of the live site, host
+  access constraints, and the remaining per-host settings
+- `DEPLOYMENT_SUMMARY.md` (repo root) — the 13-step checklist as actually executed on
+  this host, plus what is blocked (no SSH, passive FTP only, no phpMyAdmin)
 
 Use those when deploying to this account; the generic steps below remain the
 reference for any other PHP+MySQL host.
@@ -138,6 +149,16 @@ define( 'WP_SITEURL', 'https://yourdomain.com' );
 // Salts: paste fresh values from https://api.wordpress.org/secret-key/1.1/salt/
 ```
 
+> **Also set the table prefix**, which `wp-config-sample.php` does not contain —
+> the installer normally appends it on first run. Importing a dump into a host
+> whose config lacks it means WordPress looks at `wp_options` (prefix `wp_`),
+> finds nothing, and redirects every request to `/wp-admin/install.php` even
+> though every table is present.
+>
+> ```php
+> $table_prefix = 'wp_';   // must match the prefix in the dump
+> ```
+
 Add hardening at the bottom, **above** `/* That's all… */`:
 
 ```php
@@ -211,6 +232,13 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
 ```
 
+> On a cPanel addon domain the existing `.htaccess` holds only PHP-ini directives
+> (`php_value`/`php_flag`); WordPress does not add its rewrite block there. The
+> `# BEGIN WordPress … # END WordPress` block has to be appended **below** them,
+> or every pretty permalink (`/shop/`, `/cart/`, `/checkout/`, `/my-account/`)
+> returns 404 even though the `rewrite_rules` option is populated. Saving
+> Settings → Permalinks only writes to the DB — it never creates the file.
+
 Nginx (VPS):
 
 ```nginx
@@ -233,6 +261,8 @@ wp db check
 
 - [ ] Site loads over `https://` with valid certificate (no mixed content)
 - [ ] Homepage renders Digikala theme RTL correctly
+- [ ] **Shop, cart and checkout all return 200** — the home page alone does not prove
+      permalinks work; a missing `.htaccess` rewrite block fails only these
 - [ ] Product pages show Toman prices in Persian digits
 - [ ] Cart → Checkout works end-to-end (place one real test order)
 - [ ] ZarinPal/Gateland sandbox→live keys active; test payment round-trips
@@ -243,6 +273,7 @@ wp db check
 - [ ] UpdraftPlus backup runs once successfully
 - [ ] Torob feed / SEO sitemap reachable (`sitemap_index.xml`)
 - [ ] Delete `lylyrose.sql` from everywhere it touched
+- [ ] No helper scripts left in the webroot (SQL importer, `.dbpass`, `diag.php`, …)
 
 ## Rollback
 
