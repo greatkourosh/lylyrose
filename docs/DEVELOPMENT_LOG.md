@@ -1146,3 +1146,57 @@ WooCommerce's session table is registered by the WC bootstrap, which does not ru
 `wp-settings.php` is loaded this way, so that one UPDATE was skipped. Production had 0 rows
 to change in that table anyway, and the object cache was flushed afterwards; verified clean.
 Worth noting for any future helper that touches WC tables from a bare bootstrap.
+
+## 2026-09-26 — Fresh-volume setup fixed: WP 7.1 overlay + working entrypoint
+
+Closed the long-standing "a fresh-volume reproducible setup still needs correction"
+note in CONTINUATION.md. A new clone (`docker compose up`) could not have produced a
+working site, for two independent reasons.
+
+**1. WordPress core too old for WooCommerce.** WooCommerce 11.1.0 requires WP >= 7.0
+and calls `WP_Block_Templates_Registry`; the shared `aroma_store-wordpress` image
+ships 6.5.5 core, where that class does not exist. The local volume had been
+hand-upgraded to 7.1 by copying core files out of the upstream container, so the
+broken path was invisible locally — a fresh volume seeded 6.5.5 and would fatal on
+the first WooCommerce page. Confirmed by control test: 6.5 fresh volume, class absent.
+
+`docker/Dockerfile` now builds **on** `aroma_store-wordpress:latest` and overlays
+current WordPress core into `/usr/src/wordpress`, which is what the official
+entrypoint seeds from. Building on the shared image rather than the bare 6.5 base
+matters: the shared image carries the compiled redis extension and the
+`aroma-entrypoint.sh` wp-content ownership fix. The build asserts the class exists
+and the version clears the WooCommerce minimum, so a bad core fails the build instead
+of a deploy. Extraction uses PHP's ZipArchive — the image has no `unzip`.
+
+**2. The entrypoint never ran the official one.** `aroma-entrypoint.sh` does
+`exec "$@"`, which skips the official `docker-entrypoint.sh` entirely. That script is
+what copies core out of `/usr/src/wordpress` and renders `wp-config.php`, so a fresh
+volume contained only `wp-content` — no core, no config, no site at all. A separate
+symptom: the shared image sets ENTRYPOINT but leaves CMD empty, so there was nothing
+in `"$@"` to hand off.
+
+`docker/entrypoint.sh` keeps the chown, then execs the official entrypoint with
+`apache2-foreground` as the default argument (it dereferences `$1` unguarded).
+
+**One trap worth recording:** the core overlay must preserve
+`/usr/src/wordpress/wp-config-docker.php`. It is an image file, not part of the
+WordPress zip, so a blanket `rm -rf /usr/src/wordpress/*` deletes it and fresh
+volumes then generate no `wp-config.php` — a failure that looks like a credentials
+problem, not a missing file.
+
+**Verification**
+- Fresh volume: core 7.1.2, `wp-config.php` generated, installer reachable, WooCommerce
+  11.1.0 activates, `class_exists(WP_Block_Templates_Registry)` YES.
+- Fresh volume pages: `/` 200, `/shop/` 200, `/cart/` 200, `/checkout/` 302, `/wp-admin/` 302,
+  zero fatals in the Apache log.
+- Control (original 6.5 image, fresh volume): class absent — reproduces the defect.
+- Existing stack after the image swap: volume still 7.1, `/` `/shop/` `/cart/`
+  `/checkout/` `/my-account/` all 200, `<title>` still `Lyly Rose` (guards the
+  documented stale-instance trap on 8080).
+- Suite: **217 passed / 0 failed**, two consecutive clean runs.
+
+One false alarm worth noting for the next person: an intermediate run showed 6 wallet
+failures. They were residue from abandoned scratch containers, not a regression — the
+control run on the original image was 217/0, and re-running after cleaning up the
+scratch databases was also 217/0. Anything that connects to the shared `db` service
+should use its own throwaway database rather than the live one.

@@ -1,9 +1,14 @@
 services:
   wordpress:
-    # Reuse the aroma_store-wordpress image which already has the PHP redis
-    # extension compiled (pecl.php.net is unreachable from this network, so
-    # docker/Dockerfile's build-time pecl install would time out).
-    image: aroma_store-wordpress:latest
+    # Build on the aroma_store-wordpress image: it already has the PHP redis
+    # extension compiled. The build overlays WordPress 7.1 core on top, because
+    # the 6.5 core that base image ships predates the
+    # WP_Block_Templates_Registry class WooCommerce 11.1.0 calls, and a fresh
+    # volume would fatal on the first WooCommerce page.
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    image: lylyrose-wordpress:local
     container_name: lylyrose-wp
     restart: unless-stopped
     ports:
