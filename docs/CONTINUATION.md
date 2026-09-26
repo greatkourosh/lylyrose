@@ -30,7 +30,7 @@ projects shared a codebase. Upstream is the parent, not the ancestor-of-record.
 
 - **LIVE**: `https://lylyrose.ir` is deployed and serving. Files uploaded (25,844 files / 342 MB, 0 failures), database `bqwyvowk_lylyrose` created and imported (1,218 statements, 97 tables, 0 failures), `wp-config.php` with real credentials + fresh salts, and `.htaccess` carries the WordPress rewrite block. Verified: home, `/shop/`, `/cart/`, `/checkout/`, `/my-account/`, `/secure-login/` all 200; add-to-cart works (WooCommerce fragment confirms 1 item @ 7,800,000 Toman); product pages and media load from `lylyrose.ir`; no `localhost` URLs remain; `vegacodex.ir` untouched.
 - **Login is `/secure-login/`**, not `wp-login.php` (WPS Hide Login) — a `wp-login.php` 404 is expected, not a fault.
-- **Two silent config bugs blocked the deploy** and are fixed on the host, but **the local source templates are still unfixed** — fix before any re-deploy:
+- **Two silent config bugs blocked the deploy.** Both are fixed on the host **and** now fixed at the source (2026-09-26) — `docker/stage-deploy.sh` generates both and verifies them, so a re-deploy cannot regress:
   1. `wp-config.php` was missing `$table_prefix = 'wp_';` → WordPress ignored the imported tables and 302-redirected every request to `/wp-admin/install.php` (looks like an empty DB when all 97 tables are present).
   2. `.htaccess` shipped with only cPanel's PHP-ini directives, no WordPress rewrite block → every pretty-permalink page 404'd (shop/cart/checkout/login) despite 24 KB of `rewrite_rules` sitting in the DB.
   Gate the next deploy on: home 200 **and** `/shop/ /cart/ /checkout/` 200 — not the home page alone.
@@ -51,8 +51,8 @@ projects shared a codebase. Upstream is the parent, not the ancestor-of-record.
 - **MySQL grant gotcha**: after `create_user`, `set_privileges_on_database` can return `status: 1` while the grant is **not actually live**. Symptom: mysqli says "Access denied ... to database X" but a bare connect succeeds and `SHOW DATABASES` omits X. Re-calling `set_privileges_on_database` fixes it. Verify with a PHP `SHOW DATABASES` from the host, not with cPanel's metadata, which falsely reports the user as attached.
 - **URL rewrite**: all 319 `http://localhost:8080` occurrences are in **plain** columns (options, GUIDs, postmeta, page content) — **none** are inside WP-serialized blobs, so a plain replace is safe and no length recompute is needed. `siteurl`/`home` are literal plain rows.
 - **PHP is 8.1.34 on the host**, not the 8.2 the runbook prefers. WooCommerce 11.1.0's WP 7.0+ requirement is satisfied, so the site works; bump the domain to 8.2 via MultiPHP Manager only if you want parity with the recommendation.
-- **Fixed (2026-09-20)**: notifications my-account endpoint fired the wrong action — `lylyrose-core` hooked `woocommerce_account_notifications`, but WC fires `woocommerce_account_{endpoint}_endpoint`, so the page rendered empty; the theme `my-account.php` no longer branches on the endpoint and just calls `woocommerce_account_content` (WC dispatches the endpoint action itself).
-- **Next**: the deploy is done — what remains is the per-host settings pass (see **Known open items**) and fixing the two template bugs above in the local source tree.
+- **Notifications endpoint — fixed and committed (2026-09-26)**: `lylyrose-core` hooked `woocommerce_account_notifications`, but WC fires `woocommerce_account_{endpoint}_endpoint` and only dispatches when a handler is registered there (otherwise it falls back to the dashboard), so the page rendered the account shell with no notification list. The theme `my-account.php` also branched on the endpoint itself and called `do_action('woocommerce_account_notifications')`, duplicating dispatch for every other endpoint; it now just calls `woocommerce_account_content`. The fix was made 2026-09-20 but sat uncommitted in the working tree until 2026-09-26 — it is now in `master` and the suite is green 217/0 (section 25 covers the authenticated render).
+- **Next**: the deploy is done and the deploy-template bugs are fixed in a script. What remains is the per-host settings pass (see **Known open items**).
 - **Full-suite green root causes fixed & test hardened (2026-09-24)**: the suite went from 207/10 to **217/0**. Four distinct issues: (1) `wp-content/uploads` + `wp-content/cache` were owned `1000:1000` (rebind bind-mount), so the web user (`www-data`/33) could not write — OTP SMS sink, autoptimize cache generation, and media uploads silently failed; fixed with `chown -R 33:33`. (2) The notifications synthetic auth cookie had a stray trailing `|` appended in `run-tests.sh` (`echo '|'`), corrupting the cookie header — fixed. (3) The notifications account endpoint rewrite rule was missing on a fresh volume (self-heal only flushes on version bump), so `/my-account/notifications/` rendered the generic account page; `flush_rewrite_rules()` resolves it. (4) The gift-wrap order test POSTed `payment_method=cod`, but COD isn't enabled (only ZarinPal + wallet) so checkout rejected with "پرداختی انجام نمی شود" — now uses `WC_ZPal` and falls back to the latest order when the pending-order URL lacks `order-received`. Also added a retry to the notifications account-page checks against a transient empty `get_posts` result. (5) The wallet section hardcoded `wp_set_current_user(2)` / `_wc_persistent_cart_2`; after the deploy-prep scrub deleted and the suite recreated `wallet_tester` at a new id, the wallet fee/nav/page checks cascaded (6 failures) — the suite now resolves the uid via `username_exists("wallet_tester")`.
 
 ## Aroma Store history (mirrored from upstream)
@@ -168,10 +168,15 @@ copy rather than branching from it.
 
 ## Known open items
 
-- **Fix the two deploy-template bugs in the local source** (highest value — they silently
-  break any re-deploy): add `$table_prefix = 'wp_';` to the `wp-config.php` template,
-  and add the `# BEGIN WordPress` rewrite block to the `.htaccess` you ship. Both are
-  currently only fixed in the deployed copies on the host.
+- ~~**Fix the two deploy-template bugs in the local source**~~ — **DONE 2026-09-26.**
+  `docker/stage-deploy.sh` now builds the whole deploy artifact set (DB dump, uploads,
+  fa_IR core, repo `wp-content`, `wp-config.php`, `.htaccess`) and refuses to report
+  success unless `$table_prefix = 'wp_';` and the `# BEGIN WordPress` block are both
+  present. It also `php -l`s the generated config, because a config that fails to parse
+  breaks the site in the same misleading way (redirect to `install.php`). Verified end to
+  end: 25,845 files / 452 MB, 16/16 checks pass. The tree is assembled from the script
+  now, so a re-deploy cannot silently regress. DB credentials ship as placeholders
+  (cPanel may prefix the db name/user); fill them on the host.
 - **Per-host settings still to do from `/secure-login/`** (no SSH needed, just admin access):
   ZarinPal real merchant code + `sandbox: no`; PWSMS real gateway credentials (currently
   the `Logger` sink, so production SMS is a no-op); WP Mail SMTP credentials; UpdraftPlus
