@@ -1350,6 +1350,14 @@ was corrected here — it is the script that *rewrites* URLs into the local DB, 
 stale default would have written `localhost:8080` back into a 8020 stack. That is
 the same silent-wrong-target class as the trap itself.
 
+`docker/stage-deploy.sh` was **not** hardcoded to a new port. Its "dump still carries
+the local URL" guard was written against a literal `localhost:8080`; find-and-replace
+would have left the guard matching a string no dump can contain, so it would have gone
+silent on the exact failure it exists to catch. It now derives
+`LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8020}"` from the `.env` it already
+sources, so a future port move cannot break it again. Verified both ways: fires on a
+dump carrying 8020, silent on one already rewritten.
+
 **Deliberately not rewritten:** the `localhost:8080` occurrences in
 `DEPLOYMENT_SUMMARY.md` (the 2026-09-24 deploy record) and
 `DEVELOPMENT_LOG.md` line 241. Those describe what was true on the day they were
