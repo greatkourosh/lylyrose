@@ -199,10 +199,13 @@ else
     && pass "wordpress:80 reachable from sidecar" \
     || fail "wordpress unreachable from sidecar"
 fi
-# No overdue Action Scheduler actions
+# No overdue Action Scheduler actions.
+# The suite itself schedules async work (wc_run_batch_process every minute), so a
+# handful of actions can sit in `pending` a few seconds past their schedule while
+# the sidecar's next tick claims them. Only a real backlog means cron is broken.
 OVERDUE=$(docker exec "$DB_CONTAINER" sh -c \
-  'mariadb -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM wp_actionscheduler_actions WHERE status=\"pending\" AND scheduled_date_gmt < UTC_TIMESTAMP();"' 2>/dev/null)
-[ "${OVERDUE:-1}" = "0" ] && pass "no overdue Action Scheduler actions" || fail "$OVERDUE overdue Action Scheduler actions"
+  'mariadb -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM wp_actionscheduler_actions WHERE status=\"pending\" AND scheduled_date_gmt < UTC_TIMESTAMP() - INTERVAL 5 MINUTE;"' 2>/dev/null)
+[ "${OVERDUE:-1}" = "0" ] && pass "no overdue Action Scheduler actions" || fail "$OVERDUE Action Scheduler actions overdue by >5min"
 
 section "7. Redis object cache"
 REDIS_UP=$(docker exec lylyrose-redis redis-cli ping 2>/dev/null)
@@ -788,23 +791,37 @@ esac
 ZP_AUTH=$(printf '%s' "$ZP_STARTPAY" | grep -o "StartPay/[A-Za-z0-9]*" | cut -d/ -f2)
 
 # simulate payment: StartPay page -> verify token -> hit verify OK (marks session paid)
-ZP_VTOKEN=$(curl -s --max-time 60 "https://sandbox.zarinpal.com/pg/StartPay/$ZP_AUTH" | grep -o "pg/verify/[a-z0-9]*/?status=OK" | head -1 | cut -d/ -f3)
+# ZarinPal's shared sandbox merchant intermittently serves an HTML "Server Error"
+# instead of the payment page (~1 in 5 under rapid runs), so retry the token fetch
+# separately from the redirect above.
+ZP_VTOKEN=""
+for _ in 1 2 3 4 5 6; do
+  ZP_VTOKEN=$(curl -s --max-time 60 "https://sandbox.zarinpal.com/pg/StartPay/$ZP_AUTH" | grep -o "pg/verify/[a-z0-9]*/?status=OK" | head -1 | cut -d/ -f3)
+  [ -n "$ZP_VTOKEN" ] && break
+  sleep 5
+done
 [ -n "$ZP_VTOKEN" ] && pass "sandbox payment page reached, verify token extracted" || fail "StartPay page/verify token failed"
-curl -s --max-time 60 -o /dev/null "https://sandbox.zarinpal.com/pg/verify/$ZP_VTOKEN/?status=OK"
+[ -n "$ZP_VTOKEN" ] && curl -s --max-time 60 -o /dev/null "https://sandbox.zarinpal.com/pg/verify/$ZP_VTOKEN/?status=OK"
 
-# gateway callback with Authority + Status=OK -> order completed
-ZP_CB=$(curl -s --max-time 90 -b "$ZP_JAR" -o /dev/null -w "%{redirect_url}" "$SITE_URL/wc-api/WC_ZPal/?wc_order=$ZP_OID&Authority=$ZP_AUTH&Status=OK")
-case "$ZP_CB" in
-  *order-received*) pass "callback redirects to order-received" ;;
-  *) fail "callback redirect: $ZP_CB" ;;
-esac
-ZP_ORDER=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
-$o = wc_get_order((int) $argv[1]);
-echo $o ? $o->get_status() . "|" . ($o->is_paid() ? "paid" : "unpaid") . "|" . $o->get_transaction_id() : "gone";' "$ZP_OID" 2>/dev/null)
-case "$ZP_ORDER" in
-  *"|paid|"*) pass "order $ZP_OID completed with transaction id" ;;
-  *) fail "order state after OK: $ZP_ORDER" ;;
-esac
+# gateway callback with Authority + Status=OK -> order completed.
+# Without a token the gateway never saw a successful payment, so skip rather
+# than report three cascading failures for one upstream sandbox outage.
+if [ -n "$ZP_VTOKEN" ]; then
+  ZP_CB=$(curl -s --max-time 90 -b "$ZP_JAR" -o /dev/null -w "%{redirect_url}" "$SITE_URL/wc-api/WC_ZPal/?wc_order=$ZP_OID&Authority=$ZP_AUTH&Status=OK")
+  case "$ZP_CB" in
+    *order-received*) pass "callback redirects to order-received" ;;
+    *) fail "callback redirect: $ZP_CB" ;;
+  esac
+  ZP_ORDER=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+  $o = wc_get_order((int) $argv[1]);
+  echo $o ? $o->get_status() . "|" . ($o->is_paid() ? "paid" : "unpaid") . "|" . $o->get_transaction_id() : "gone";' "$ZP_OID" 2>/dev/null)
+  case "$ZP_ORDER" in
+    *"|paid|"*) pass "order $ZP_OID completed with transaction id" ;;
+    *) fail "order state after OK: $ZP_ORDER" ;;
+  esac
+else
+  fail "StartPay unavailable (upstream sandbox error) - callback + order state not verifiable"
+fi
 
 # cancel path: fresh order, pay, then callback with Status=NOK stays pending
 ZP_JAR2="$(mktemp -u)"
