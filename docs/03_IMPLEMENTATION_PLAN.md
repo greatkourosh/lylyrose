@@ -1,5 +1,10 @@
 # LYLY ROSE — Implementation Plan
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 ## Phase 0 — Inspect
 
 Before changing anything:

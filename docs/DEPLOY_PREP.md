@@ -1,5 +1,10 @@
 # LYLY ROSE — Production Deploy Prep (host-specific runbook)
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 **Prepared:** 2026-09-20
 **Target:** `https://lylyrose.ir` — addon domain on the `vegacodex.ir` cPanel account
 **Docroot:** `/home/bqwyvowk/lylyroseir`

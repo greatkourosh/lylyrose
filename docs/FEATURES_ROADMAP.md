@@ -1,5 +1,10 @@
 # Features Roadmap — Prioritized Recommendations
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 Date: 2026-08-29 · Branch: master · Plugin count: 22 active
 
 Gap analysis of the current stack (WooCommerce, lylyrose-core 1.1.0, Persian/Rial stack,

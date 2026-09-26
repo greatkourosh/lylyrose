@@ -1,5 +1,10 @@
 # LYLY ROSE — Functional Requirements
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 ## 1. Homepage
 
 Create a professional Persian RTL e-commerce homepage.

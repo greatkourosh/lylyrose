@@ -2,6 +2,12 @@
 
 A production-ready Persian RTL e-commerce website for selling perfumes and fragrance-related products, styled after Digikala.
 
+> **This project is downstream of [`aroma_store`](../aroma_store), which is the source of
+> truth.** Develop and test every feature upstream first; mirror it here only when
+> Lyly Rose needs it. Upstream currently leads by one feature (`ASC_Flash_Sales` /
+> `/incredible-offers/`). Full rules, rename map, and mirror procedure:
+> [`docs/UPSTREAM_RELATIONSHIP.md`](docs/UPSTREAM_RELATIONSHIP.md).
+
 ## Features
 
 - **Language**: Persian (Farsi) with RTL support
@@ -34,6 +40,7 @@ lylyrose/
 │   ├── 04_DEPLOYMENT.md        # Production deployment guide (hosting-ready branch)
 │   ├── CONTINUATION.md         # Continuation points
 │   ├── DEVELOPMENT_LOG.md      # Development progress log
+│   ├── UPSTREAM_RELATIONSHIP.md # aroma_store → lylyrose relationship, rename map, mirror rules
 │   └── FEATURES_ROADMAP.md     # Prioritized feature recommendations
 └── wordpress/
     └── wp-content/

@@ -1,5 +1,10 @@
 # سناریوی دموی کامل لیلی رز — صفر تا صد خرید
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 **آدرس**: `http://localhost:8080`
 **پیش‌نیاز**: `docker compose up -d` (کانتینرها فعال باشند)
 **مدت تقریبی**: ۱۵–۲۰ دقیقه

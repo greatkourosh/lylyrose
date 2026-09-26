@@ -2,6 +2,24 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 
+## ⚠️ Read first — this project is DOWNSTREAM of `aroma_store`
+
+**`aroma_store` is the source of truth. This project (`lylyrose`) is downstream of it.**
+
+Every feature and fix is developed and tested in `aroma_store` **first**, and mirrored
+here only when `lylyrose` needs it. Never the reverse.
+
+The full rule set, the rename map, the current upstream/downstream divergence, and the
+mirror procedure live in **[UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)** — read
+it before changing shared code.
+
+`aroma_store` is currently **ahead** by one feature (`ASC_Flash_Sales` /
+`/incredible-offers/`), which is absent here.
+
+Note the "Inherited Aroma Store history" section below is historical shorthand, not a
+description of the relationship: those entries were copied into this file when the two
+projects shared a codebase. Upstream is the parent, not the ancestor-of-record.
+
 ## Verified Lyly Rose state — 2026-09-26
 
 - **LIVE**: `https://lylyrose.ir` is deployed and serving. Files uploaded (25,844 files / 342 MB, 0 failures), database `bqwyvowk_lylyrose` created and imported (1,218 statements, 97 tables, 0 failures), `wp-config.php` with real credentials + fresh salts, and `.htaccess` carries the WordPress rewrite block. Verified: home, `/shop/`, `/cart/`, `/checkout/`, `/my-account/`, `/secure-login/` all 200; add-to-cart works (WooCommerce fragment confirms 1 item @ 7,800,000 Toman); product pages and media load from `lylyrose.ir`; no `localhost` URLs remain; `vegacodex.ir` untouched.
@@ -31,9 +49,19 @@
 - **Next**: the deploy is done — what remains is the per-host settings pass (see **Known open items**) and fixing the two template bugs above in the local source tree.
 - **Full-suite green root causes fixed & test hardened (2026-09-24)**: the suite went from 207/10 to **217/0**. Four distinct issues: (1) `wp-content/uploads` + `wp-content/cache` were owned `1000:1000` (rebind bind-mount), so the web user (`www-data`/33) could not write — OTP SMS sink, autoptimize cache generation, and media uploads silently failed; fixed with `chown -R 33:33`. (2) The notifications synthetic auth cookie had a stray trailing `|` appended in `run-tests.sh` (`echo '|'`), corrupting the cookie header — fixed. (3) The notifications account endpoint rewrite rule was missing on a fresh volume (self-heal only flushes on version bump), so `/my-account/notifications/` rendered the generic account page; `flush_rewrite_rules()` resolves it. (4) The gift-wrap order test POSTed `payment_method=cod`, but COD isn't enabled (only ZarinPal + wallet) so checkout rejected with "پرداختی انجام نمی شود" — now uses `WC_ZPal` and falls back to the latest order when the pending-order URL lacks `order-received`. Also added a retry to the notifications account-page checks against a transient empty `get_posts` result. (5) The wallet section hardcoded `wp_set_current_user(2)` / `_wc_persistent_cart_2`; after the deploy-prep scrub deleted and the suite recreated `wallet_tester` at a new id, the wallet fee/nav/page checks cascaded (6 failures) — the suite now resolves the uid via `username_exists("wallet_tester")`.
 
-## Inherited Aroma Store history
+## Aroma Store history (mirrored from upstream)
 
-The entries below were copied and mechanically rebranded from the source project. Their dates, deployment claims, credentials, fixture IDs, and test counts describe the source project's history, not verified Lyly Rose results. Do not execute legacy deployment workarounds or treat these entries as proof of production readiness.
+The entries below were copied and mechanically rebranded from `aroma_store`, which is the
+**upstream source of truth** — see [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+Shared architecture, features, and gotchas have their canonical home in
+`aroma_store/docs/`; this is a downstream copy kept for local convenience.
+
+Their dates, deployment claims, credentials, fixture IDs, and test counts describe
+upstream's history, not verified Lyly Rose results. Do not execute legacy deployment
+workarounds or treat these entries as proof of production readiness.
+
+**When these entries and `aroma_store`'s docs disagree, upstream wins** — correct this
+copy rather than branching from it.
 
 ## Dokan 5.1.1 upgrade + plugin ownership fix (2026-09-12)
 

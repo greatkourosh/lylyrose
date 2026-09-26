@@ -1,5 +1,10 @@
 # DEVELOPMENT LOG - Phase 1 Complete
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 ## Project: LYLY ROSE - Persian RTL E-commerce Perfume Store
 **Date:** 2026-08-20
 **Status:** Phase 1 Complete - Core Store Operational (Digikala-style UI)

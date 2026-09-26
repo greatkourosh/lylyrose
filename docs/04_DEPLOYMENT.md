@@ -1,5 +1,10 @@
 # DEPLOY — LYLY ROSE on a normal PHP + MySQL host
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 > **Status: deployed 2026-09-24.** `https://lylyrose.ir` is live on cPanel host
 > `bqwyvowk` and verified. This file stays the *generic* runbook for any PHP+MySQL
 > host; the host-specific runbook and the two bugs that bit during the live deploy

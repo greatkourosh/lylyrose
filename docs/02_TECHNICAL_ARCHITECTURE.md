@@ -1,5 +1,10 @@
 # LYLY ROSE — Technical Architecture
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 ## 1. Architecture
 
 Use a standard WordPress + WooCommerce architecture.

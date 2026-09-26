@@ -1,5 +1,10 @@
 # Lyly Rose Production Deployment Summary
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 **Prepared:** 2026-09-20
 **Deployed:** 2026-09-24 — `https://lylyrose.ir` is **live and verified**
 **Target:** `https://lylyrose.ir` (addon domain on vegacodex.ir hosting)

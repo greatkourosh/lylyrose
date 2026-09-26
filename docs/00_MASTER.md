@@ -1,5 +1,10 @@
 # LYLY ROSE — Master Instructions
 
+> **Upstream:** this project is **downstream** of `aroma_store`, which is the source of
+> truth. Develop and test features upstream first; mirror here only when needed.
+> See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
+
+
 ## 1. Project
 
 Build a production-ready Persian RTL e-commerce website for selling perfumes and fragrance-related products.
