@@ -50,10 +50,20 @@ wordpress/wp-content/advanced-cache.php.bak
 wordpress/wp-content/object-cache.php.bak
 **/.activated
 
+# Drop-in caches regenerated at runtime, excluded from deploy artifacts
+wordpress/wp-content/advanced-cache.php
+wordpress/wp-content/object-cache.php
+wordpress/wp-content/wp-cache-config.php
+wordpress/wp-content/autoptimize_404_handler.php
+
 # --- Default WP themes we don't ship ---
 wordpress/wp-content/themes/twentytwentyfour/
 wordpress/wp-content/themes/twentytwentythree/
 wordpress/wp-content/themes/twentytwentytwo/
+wordpress/wp-content/themes/twentytwentyfive/
+
+# --- Agent tooling ---
+.claude/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md

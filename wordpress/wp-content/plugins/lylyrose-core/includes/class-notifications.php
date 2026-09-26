@@ -44,8 +44,8 @@ class ASC_Notifications {
         add_action( 'wp_ajax_asc_notifications_unread', array( $this, 'ajax_unread_count' ) );
         add_action( 'wp_ajax_asc_notifications_mark_read', array( $this, 'ajax_mark_read' ) );
 
-        // Account endpoint renderer
-        add_action( 'woocommerce_account_notifications', array( $this, 'render_account_page' ) );
+        // Account endpoint renderer (WC fires woocommerce_account_{endpoint}_endpoint)
+        add_action( 'woocommerce_account_notifications_endpoint', array( $this, 'render_account_page' ) );
 
         // Producers: order status changes
         add_action( 'woocommerce_order_status_changed', array( $this, 'on_order_status_change' ), 10, 3 );

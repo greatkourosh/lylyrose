@@ -67,14 +67,7 @@ if ( class_exists( 'Woo_Wallet_Frontend' ) ) {
                 </aside>
 
                 <div class="dk-account-content">
-                    <?php
-                    // Fire endpoint-specific action for proper rendering
-                    if ( is_wc_endpoint_url( 'notifications' ) ) {
-                        do_action( 'woocommerce_account_notifications' );
-                    } else {
-                        do_action( 'woocommerce_account_content' );
-                    }
-                    ?>
+                    <?php do_action( 'woocommerce_account_content' ); ?>
                 </div>
             </div>
         <?php endif; ?>
