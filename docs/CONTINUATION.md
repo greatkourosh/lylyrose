@@ -33,6 +33,24 @@ turned out to hide a live-site problem. The other two: the `$table_prefix` and
 reported "Everything up-to-date" on a failed push. **Read state off the live site;
 do not infer it from this file.**
 
+### The backup situation — worse than "no remote target"
+
+Chased down the same day, because it is the thing the update pass depends on.
+UpdraftPlus is **active**, which makes production look backed up. It is not:
+
+- `updraft_interval` = **manual** — nothing has ever run on a schedule.
+- Backup history is **empty** (the history endpoint returns nothing at all).
+- The only destination, **UpdraftVault**, has `email: ""` and unknown quota —
+  configured but **never connected**.
+
+So production has **no backup, local or remote**. The plugin's presence was doing the
+work of an assurance it could not back up. Do not read "UpdraftPlus is active" as
+"production is backed up."
+
+The full unblock-and-run procedure is
+**[PRODUCTION_UPDATE_RUNBOOK.md](PRODUCTION_UPDATE_RUNBOOK.md)** — it is blocked on
+step 1, connecting a destination, and nothing past that has been run.
+
 ## ⚠️ Read first — this project is DOWNSTREAM of `aroma_store`
 
 **`aroma_store` is the source of truth. This project (`lylyrose`) is downstream of it.**

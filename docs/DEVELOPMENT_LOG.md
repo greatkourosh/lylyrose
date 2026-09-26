@@ -1354,3 +1354,30 @@ the same silent-wrong-target class as the trap itself.
 `DEPLOYMENT_SUMMARY.md` (the 2026-09-24 deploy record) and
 `DEVELOPMENT_LOG.md` line 241. Those describe what was true on the day they were
 written; changing them would make the changelog lie about its own history.
+
+---
+
+## Production backup reality check (2026-09-26 21:5x)
+
+The update pass is blocked on a backup, so the backup was the next thing to verify.
+UpdraftPlus is **active** on production, which is what made this look covered. It is
+not, on any of the three counts:
+
+| Check | Found |
+|---|---|
+| `updraft_interval` | **manual** — no scheduled backup has ever run |
+| Backup history endpoint | returns **nothing** (empty, 0 bytes) |
+| UpdraftVault destination | configured, but `email: ""` and unknown quota — **never connected** |
+
+So production has **no backup, local or remote**. The plugin was doing the work of an
+assurance it could not back up — the same shape as every other finding in the audit:
+something present in the UI that reads as protection and is not.
+
+The blocker is not something I can resolve alone — connecting a destination needs an
+account (UpdraftVault, or credentials for Google Drive / Dropbox / S3). Procedure
+written up in [PRODUCTION_UPDATE_RUNBOOK.md](PRODUCTION_UPDATE_RUNBOOK.md), blocked on
+step 1; nothing past that has been run.
+
+**How to apply:** when auditing whether a store is protected, check the *schedule* and
+the *history* and the *destination connection* separately. A plugin being active answers
+none of those three.
