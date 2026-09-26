@@ -4,6 +4,11 @@
 > truth. Develop and test features upstream first; mirror here only when needed.
 > See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
 
+> **Feature requests route upstream.** This store is downstream of `aroma_store`,
+> which is the source of truth and is always ahead on features. A feature requested
+> here is referred to `aroma_store`, built and tested there, and mirrored back only
+> once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
+
 
 ## 1. Project
 

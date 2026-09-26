@@ -4,6 +4,11 @@
 > truth. Develop and test features upstream first; mirror here only when needed.
 > See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
 
+> **Feature requests route upstream.** This store is downstream of `aroma_store`,
+> which is the source of truth and is always ahead on features. A feature requested
+> here is referred to `aroma_store`, built and tested there, and mirrored back only
+> once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
+
 
 Date: 2026-08-29 · Branch: master · Plugin count: 22 active
 
@@ -225,8 +230,23 @@ Current-state facts this list is built on:
 
 ## Process for adding any feature
 
-1. Install/configure in Docker dev (localhost:8080).
-2. Run `bash docker/run-tests.sh` — must stay green (152 checks across 22 sections).
-3. Add test cases to `docker/run-tests.sh` when the feature has an HTTP surface.
-4. Update `docs/DEVELOPMENT_LOG.md` (plugin count table) + commit on master.
-5. Mirror plugin to `hosting-ready` branch before deploy.
+**This store is downstream — features do not start here.** The full procedure, including
+the store-specific exceptions, is in
+[FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
+
+1. **Refer the request to `aroma_store`** (upstream, source of truth). Nothing is
+   installed or built in this repo yet.
+2. Implement in `aroma_store` on `master`; add test cases to that repo's
+   `docker/run-tests.sh` when the feature has an HTTP surface.
+3. Upstream suite must be green. **A red upstream test is never mirrored.**
+4. Mirror the change here with the rename map
+   ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)):
+   `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
+   ports 8010 → 8080. The `ASC_` prefix is unchanged.
+5. `bash docker/run-tests.sh` in this repo (localhost:8080) must stay green — currently
+   **217 checks across 26 sections**.
+6. Update `docs/DEVELOPMENT_LOG.md` and commit on `master`.
+
+Store-specific changes (branding, a campaign page, host config) skip steps 1–3 and are
+built here directly — but say so explicitly rather than quietly building shared code
+here.

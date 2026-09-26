@@ -7,6 +7,10 @@ A production-ready Persian RTL e-commerce website for selling perfumes and fragr
 > Lyly Rose needs it. Upstream currently leads by one feature (`ASC_Flash_Sales` /
 > `/incredible-offers/`). Full rules, rename map, and mirror procedure:
 > [`docs/UPSTREAM_RELATIONSHIP.md`](docs/UPSTREAM_RELATIONSHIP.md).
+>
+> **A feature requested here is not implemented here.** It is referred to `aroma_store`,
+> built and tested there, and mirrored back only once that suite is green — see
+> [`docs/FEATURE_REQUEST_POLICY.md`](docs/FEATURE_REQUEST_POLICY.md).
 
 ## Features
 
@@ -41,6 +45,7 @@ lylyrose/
 │   ├── CONTINUATION.md         # Continuation points
 │   ├── DEVELOPMENT_LOG.md      # Development progress log
 │   ├── UPSTREAM_RELATIONSHIP.md # aroma_store → lylyrose relationship, rename map, mirror rules
+│   ├── FEATURE_REQUEST_POLICY.md # how a feature request routes upstream first
 │   └── FEATURES_ROADMAP.md     # Prioritized feature recommendations
 └── wordpress/
     └── wp-content/

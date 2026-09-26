@@ -9,9 +9,15 @@
 Every feature and fix is developed and tested in `aroma_store` **first**, and mirrored
 here only when `lylyrose` needs it. Never the reverse.
 
+**A feature requested in this repo is not a task to implement here — it is a request to
+route upstream.** Refer it to `aroma_store`, build and test it there, and mirror it back
+only once that suite is green. The step-by-step procedure, the decision flow, and the
+store-specific exceptions are in
+**[FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md)** — read it before starting any
+feature work.
+
 The full rule set, the rename map, the current upstream/downstream divergence, and the
-mirror procedure live in **[UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)** — read
-it before changing shared code.
+mirror procedure live in **[UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)**.
 
 `aroma_store` is currently **ahead** by one feature (`ASC_Flash_Sales` /
 `/incredible-offers/`), which is absent here.
