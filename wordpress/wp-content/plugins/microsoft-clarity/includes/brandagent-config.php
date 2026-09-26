@@ -417,6 +417,191 @@ function brandagent_normalize_store_url( $store_url ) {
 }
 
 /**
+ * Return the immutable URL identity for the current Brand Agent connection.
+ *
+ * WordPress can filter home_url() by locale, request type, or front-end host. That makes it a
+ * useful display/current-location value, but not a stable credential identifier. The URL accepted
+ * by the backend at Connect is persisted once the secret is stored and is used for every HMAC,
+ * callback, webhook, and teardown operation thereafter.
+ *
+ * Existing installations predate this option. They deliberately retain their legacy home_url()
+ * behavior until either an authenticated callback self-heals the identity or their next successful
+ * connect, rather than guessing which URL their backend credential was registered against.
+ *
+ * @return string Connected store URL, or the canonical current URL before a successful reconnect.
+ */
+function brandagent_get_connected_store_url() {
+    $store_url = get_option( 'brandagent_connected_store_url', '' );
+    if ( is_string( $store_url ) && $store_url !== '' ) {
+        return $store_url;
+    }
+
+    return brandagent_canonicalize_connected_store_url( home_url() );
+}
+
+/**
+ * Match the server's stable connection-URL representation.
+ *
+ * The backend removes surrounding whitespace and a trailing slash before it builds callback URLs,
+ * headers, or HMAC input. Keep path segments intact: `/en` is a distinct connection identity,
+ * while `/en/` is its equivalent spelling.
+ *
+ * @param string $store_url Store URL to canonicalize.
+ * @return string Canonical URL, or an empty string for non-string input.
+ */
+function brandagent_canonicalize_connected_store_url( $store_url ) {
+    if ( ! is_string( $store_url ) ) {
+        return '';
+    }
+
+    return rtrim( trim( $store_url ), '/' );
+}
+
+/**
+ * Whether this site has persisted its Brand Agent connection identity.
+ *
+ * @return bool True after a successful connect or verified legacy callback migration.
+ */
+function brandagent_has_connected_store_url() {
+    $store_url = get_option( 'brandagent_connected_store_url', '' );
+    return is_string( $store_url ) && $store_url !== '';
+}
+
+/**
+ * Prepare the stable URL used for a WooCommerce OAuth handoff.
+ *
+ * A confirmed connection always wins. Before OAuth completes, retain a short-lived candidate so
+ * the dashboard handoff and browser return use the same URL without making an iframe view a
+ * permanent connection identity.
+ *
+ * @return string|WP_Error Stable URL, or an error when setup should be retried.
+ */
+function brandagent_prepare_woocommerce_oauth_url() {
+    if ( brandagent_has_connected_store_url() ) {
+        return brandagent_get_connected_store_url();
+    }
+
+    // Two admin views can resolve home_url() differently. Share Connect's per-site lock so the
+    // first dashboard handoff wins and a later view cannot replace its pending OAuth URL.
+    if ( ! function_exists( 'brandagent_wordpress_acquire_connect_lock' ) ) {
+        return new WP_Error( 'brandagent_oauth_lock_unavailable', 'Could not prepare Brand Agent setup.' );
+    }
+    $connect_lock = brandagent_wordpress_acquire_connect_lock();
+    if ( false === $connect_lock ) {
+        return new WP_Error( 'brandagent_oauth_lock_busy', 'Brand Agent setup is already in progress. Please try again.' );
+    }
+
+    try {
+        // A direct lock operation may have raced a negative option lookup in this request.
+        wp_cache_delete( 'brandagent_connected_store_url', 'options' );
+        wp_cache_delete( 'notoptions', 'options' );
+        if ( brandagent_has_connected_store_url() ) {
+            return brandagent_get_connected_store_url();
+        }
+
+        $pending_key = 'brandagent_woocommerce_oauth_store_url';
+        $pending_url = get_transient( $pending_key );
+        if ( is_string( $pending_url ) && $pending_url !== '' ) {
+            return brandagent_canonicalize_connected_store_url( $pending_url );
+        }
+
+        $candidate = brandagent_canonicalize_connected_store_url( home_url() );
+        if ( $candidate === '' || ! set_transient( $pending_key, $candidate, HOUR_IN_SECONDS ) ) {
+            return new WP_Error( 'brandagent_oauth_url_persist_failed', 'Could not prepare Brand Agent setup.' );
+        }
+
+        return $candidate;
+    } finally {
+        brandagent_wordpress_release_connect_lock( $connect_lock );
+    }
+}
+
+/**
+ * Return the URL an OAuth callback is permitted to confirm.
+ *
+ * @return string|WP_Error Confirmed or pending URL, never a fresh request-context URL.
+ */
+function brandagent_get_woocommerce_oauth_callback_url() {
+    $pending_url = brandagent_canonicalize_connected_store_url( get_transient( 'brandagent_woocommerce_oauth_store_url' ) );
+    if ( brandagent_has_connected_store_url() ) {
+        $connected_url = brandagent_get_connected_store_url();
+        if ( $pending_url !== '' && $pending_url !== $connected_url ) {
+            return new WP_Error( 'brandagent_oauth_url_conflict', 'Brand Agent setup conflicts with the established connection.' );
+        }
+        return $connected_url;
+    }
+
+    if ( $pending_url !== '' ) {
+        return $pending_url;
+    }
+
+    return new WP_Error( 'brandagent_oauth_url_missing', 'Brand Agent setup has expired. Return to the Clarity page and try again.' );
+}
+
+/**
+ * Persist a newly connected URL, or atomically claim it for a legacy connection.
+ *
+ * @param string $store_url URL registered with the backend.
+ * @return bool True when this URL is the persisted identity.
+ */
+function brandagent_persist_connected_store_url( $store_url ) {
+    $store_url = brandagent_canonicalize_connected_store_url( $store_url );
+    if ( $store_url === '' ) {
+        return false;
+    }
+
+    if ( brandagent_has_connected_store_url() ) {
+        return $store_url === get_option( 'brandagent_connected_store_url', '' );
+    }
+
+    // add_option() is an UPSERT after its cache-assisted existence check. A stale notoptions cache
+    // would therefore let a second verified callback replace the first URL. Insert-ignore gives
+    // the option-name unique key true first-writer-wins semantics.
+    global $wpdb;
+    $inserted = $wpdb->query( $wpdb->prepare(
+        "INSERT IGNORE INTO `{$wpdb->options}` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s)",
+        'brandagent_connected_store_url',
+        $store_url,
+        'no'
+    ) );
+
+    // This direct write bypasses WordPress's option-cache maintenance. Clear both the per-option
+    // and negative caches before checking the winner, including when another request won.
+    wp_cache_delete( 'brandagent_connected_store_url', 'options' );
+    wp_cache_delete( 'notoptions', 'options' );
+
+    if ( 1 === $inserted ) {
+        return true;
+    }
+
+    return $store_url === get_option( 'brandagent_connected_store_url', '' );
+}
+
+/**
+ * Read a secret from the legacy URL-derived option key without consulting home_url().
+ *
+ * @param string $store_url URL whose credential should be read.
+ * @return string|false Decrypted secret, or false when absent/unreadable.
+ */
+function brandagent_get_hmac_secret_for_store_url( $store_url ) {
+    $normalized_store_url = brandagent_normalize_store_url( $store_url );
+    $option_key           = 'brandagent_secret_key_' . $normalized_store_url;
+    $stored_value         = get_option( $option_key, false );
+
+    if ( $stored_value === false ) {
+        return false;
+    }
+
+    $decrypted = brandagent_decrypt( $stored_value );
+    if ( $decrypted === false ) {
+        brandagent_log( 'BrandAgent: ERROR - Decryption failed for HMAC secret' );
+        return false;
+    }
+
+    return $decrypted;
+}
+
+/**
  * Get client ID from request URL query parameter
  *
  * @return string|false Client ID or false if not found
@@ -435,10 +620,27 @@ function brandagent_get_client_id() {
  *
  * @param string $hmac_secret The HMAC secret
  * @param string $platform    Flow that issued this secret: 'woocommerce' or 'wordpress'.
+ * @param string|null $store_url Optional URL captured by Connect or a URL-bound refresh; legacy refreshes
+ *                                may omit it only after connection identity is established.
  * @return bool True on success
  */
-function brandagent_store_hmac_secret( $hmac_secret, $platform ) {
-    $store_url = home_url();
+function brandagent_store_hmac_secret( $hmac_secret, $platform, $store_url = null ) {
+    // Connect or a verified refresh supplies the URL. Rotations must agree with an existing
+    // identity, never rebind a site because the callback ran in another URL context.
+    $connected_store_url = brandagent_canonicalize_connected_store_url( get_option( 'brandagent_connected_store_url', '' ) );
+    $store_url = null === $store_url ? $connected_store_url : $store_url;
+    $store_url = brandagent_canonicalize_connected_store_url( $store_url );
+    if ( $store_url === '' ) {
+        brandagent_log( 'BrandAgent: ERROR - Secret storage requires an explicit store URL or an established connection identity' );
+        return false;
+    }
+    if ( $connected_store_url !== '' && $store_url !== $connected_store_url ) {
+        brandagent_log( 'BrandAgent: ERROR - Refusing to replace connected store URL during secret storage', array(
+            'connected_store_url' => $connected_store_url,
+            'received_store_url'  => $store_url,
+        ) );
+        return false;
+    }
     $normalized_store_url = brandagent_normalize_store_url( $store_url );
     $option_key = 'brandagent_secret_key_' . $normalized_store_url;
 
@@ -454,6 +656,17 @@ function brandagent_store_hmac_secret( $hmac_secret, $platform ) {
     }
 
     update_option( $option_key, $encrypted );
+
+    // Do not claim a connection identity unless the secret it names was stored and is readable.
+    // A later request must never derive its identity from a context-sensitive home_url().
+    if ( get_option( $option_key, false ) !== $encrypted ) {
+        brandagent_log( 'BrandAgent: ERROR - HMAC secret storage did not persist', array( 'store_url' => $store_url ) );
+        return false;
+    }
+    if ( ! brandagent_persist_connected_store_url( $store_url ) ) {
+        brandagent_log( 'BrandAgent: ERROR - Connected store URL did not persist', array( 'store_url' => $store_url ) );
+        return false;
+    }
 
     // Record which flow issued this credential, in the same write path as the credential itself so
     // the two can never disagree. Signing has to follow the secret we hold, not the plugins that
@@ -471,21 +684,8 @@ function brandagent_store_hmac_secret( $hmac_secret, $platform ) {
  * @return string|false The HMAC secret key or false if not found
  */
 function brandagent_get_hmac_secret() {
-    $store_url = home_url();
-    $normalized_store_url = brandagent_normalize_store_url( $store_url );
-    $option_key = 'brandagent_secret_key_' . $normalized_store_url;
-
-    $stored_value = get_option( $option_key, false );
-    if ( $stored_value === false ) {
-        return false;
-    }
-
-    $decrypted = brandagent_decrypt( $stored_value );
-    if ( $decrypted === false ) {
-        brandagent_log( 'BrandAgent: ERROR - Decryption failed for HMAC secret' );
-        return false;
-    }
-    return $decrypted;
+    $store_url = brandagent_get_connected_store_url();
+    return brandagent_get_hmac_secret_for_store_url( $store_url );
 }
 
 /**
@@ -527,18 +727,25 @@ function brandagent_get_hmac_platform() {
  * @return bool True on success, false on failure
  */
 function brandagent_delete_hmac_secret() {
-    $store_url = home_url();
+    $store_url = brandagent_get_connected_store_url();
     $normalized_store_url = brandagent_normalize_store_url( $store_url );
     $option_key = 'brandagent_secret_key_' . $normalized_store_url;
 
+    $secret_was_present = get_option( $option_key, false ) !== false;
     $result = delete_option( $option_key );
-    delete_option( 'brandagent_hmac_platform' );
-    if ( $result ) {
+    if ( $result || ! $secret_was_present ) {
+        // Clearing an already-absent secret is idempotent. If deletion genuinely failed, retain
+        // the URL and platform so a later teardown attempt can still address the same credential.
+        delete_option( 'brandagent_hmac_platform' );
+        delete_option( 'brandagent_connected_store_url' );
+        delete_transient( 'brandagent_woocommerce_oauth_store_url' );
+    }
+    if ( $result || ! $secret_was_present ) {
         brandagent_log( 'BrandAgent: HMAC secret deleted successfully for ' . $store_url );
     } else {
         brandagent_log( 'BrandAgent: HMAC secret delete skipped or failed', array( 'store_url' => $store_url ) );
     }
-    return $result;
+    return $result || ! $secret_was_present;
 }
 
 /**
@@ -551,7 +758,30 @@ function brandagent_delete_hmac_secret() {
  * @return bool True if signature is valid
  */
 function brandagent_verify_incoming_hmac_signature( $received_signature, $timestamp, $request_body = '' ) {
-    $secret_key = brandagent_get_hmac_secret();
+    return brandagent_verify_incoming_hmac_signature_for_store_url(
+        brandagent_get_connected_store_url(),
+        $received_signature,
+        $timestamp,
+        $request_body
+    );
+}
+
+/**
+ * Verify an inbound callback against a specific connection URL.
+ *
+ * Legacy connections did not persist their URL. On the first valid callback, callers may set
+ * $migrate_legacy_identity so the exact backend URL is atomically pinned only after its secret,
+ * timestamp, and HMAC all verify. This avoids trusting an unauthenticated request header.
+ *
+ * @param string $store_url               Callback's X-BA-Store-Url value.
+ * @param string $received_signature      Callback HMAC.
+ * @param string $timestamp               Callback Unix timestamp.
+ * @param string $request_body            Raw signed payload.
+ * @param bool   $migrate_legacy_identity Persist the URL after successful verification.
+ * @return bool True when valid (and migration, if requested, persisted).
+ */
+function brandagent_verify_incoming_hmac_signature_for_store_url( $store_url, $received_signature, $timestamp, $request_body = '', $migrate_legacy_identity = false ) {
+    $secret_key = brandagent_get_hmac_secret_for_store_url( $store_url );
     if ( ! $secret_key ) {
         brandagent_log( 'BrandAgent: Cannot verify signature - no HMAC secret stored' );
         return false;
@@ -565,14 +795,75 @@ function brandagent_verify_incoming_hmac_signature( $received_signature, $timest
     }
 
     // Message: store_url + timestamp + sha256(body)
-    $store_url = home_url();
     $body_hash = hash( 'sha256', $request_body );
     $message = $store_url . $timestamp . $body_hash;
 
     $expected_signature = base64_encode( hash_hmac( 'sha256', $message, $secret_key, true ) );
 
     // Constant-time comparison to prevent timing attacks
-    return hash_equals( $expected_signature, $received_signature );
+    if ( ! hash_equals( $expected_signature, $received_signature ) ) {
+        return false;
+    }
+
+    if ( $migrate_legacy_identity ) {
+        // Share Connect's lock so a callback cannot pin a legacy identity between Connect's remote
+        // credential rotation and its local secret/identity commit. Connect itself calls the store
+        // helper while it owns this lock, so only the migration path acquires it here.
+        $connect_lock = function_exists( 'brandagent_wordpress_acquire_connect_lock' )
+            ? brandagent_wordpress_acquire_connect_lock()
+            : false;
+        if ( false === $connect_lock ) {
+            brandagent_log( 'BrandAgent: Verified legacy callback deferred while WordPress Connect is in progress', array( 'store_url' => $store_url ) );
+            return false;
+        }
+
+        try {
+            // Connect may have completed a secret rotation after the first verification but before
+            // this callback acquired the shared lock. Re-read the credential and verify again while
+            // ownership is stable; otherwise an old signed callback could pin an identity after the
+            // backend no longer accepts its credential.
+            $secret_option_key = 'brandagent_secret_key_' . brandagent_normalize_store_url( $store_url );
+            // A raw write from the concurrent Connect request can leave this PHP request holding
+            // the secret it used before waiting for the lock. Evict all option cache layers so the
+            // in-lock check reads the durable credential rather than its own stale value.
+            wp_cache_delete( $secret_option_key, 'options' );
+            wp_cache_delete( 'alloptions', 'options' );
+            wp_cache_delete( 'notoptions', 'options' );
+            $secret_key = brandagent_get_hmac_secret_for_store_url( $store_url );
+            $time_difference = abs( time() - intval( $timestamp ) );
+            $expected_signature = $secret_key
+                ? base64_encode( hash_hmac( 'sha256', $message, $secret_key, true ) )
+                : '';
+            if ( $time_difference > BRANDAGENT_HMAC_TIMESTAMP_WINDOW || ! $secret_key || ! hash_equals( $expected_signature, $received_signature ) ) {
+                brandagent_log( 'BrandAgent: Verified legacy callback no longer matches the current HMAC secret', array( 'store_url' => $store_url ) );
+                return false;
+            }
+
+            $pending_key = 'brandagent_woocommerce_oauth_store_url';
+            if ( wp_using_ext_object_cache() ) {
+                // External transients are authoritative storage: force-read, never delete to refresh.
+                $pending_url = wp_cache_get( $pending_key, 'transient', true );
+            } else {
+                wp_cache_delete( '_transient_' . $pending_key, 'options' );
+                wp_cache_delete( '_transient_timeout_' . $pending_key, 'options' );
+                $pending_url = get_transient( $pending_key );
+            }
+            $pending_url = brandagent_canonicalize_connected_store_url( $pending_url );
+            if ( $pending_url !== '' && $pending_url !== brandagent_canonicalize_connected_store_url( $store_url ) ) {
+                brandagent_log( 'BrandAgent: Verified legacy callback deferred while another OAuth URL is pending' );
+                return false;
+            }
+
+            if ( ! brandagent_persist_connected_store_url( $store_url ) ) {
+                brandagent_log( 'BrandAgent: ERROR - Verified legacy callback could not persist connection URL', array( 'store_url' => $store_url ) );
+                return false;
+            }
+        } finally {
+            brandagent_wordpress_release_connect_lock( $connect_lock );
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -585,7 +876,7 @@ function brandagent_verify_incoming_hmac_signature( $received_signature, $timest
  * @return array|WP_Error Response array or WP_Error on failure
  */
 function brandagent_sign_outbound_request( $url, $body = '', $method = 'POST', $timeout = 30 ) {
-    $store_url  = home_url();
+    $store_url  = brandagent_get_connected_store_url();
     $secret_key = brandagent_get_hmac_secret();
     if ( ! $secret_key ) {
         brandagent_log( 'BrandAgent: Cannot sign request - no HMAC secret available' );

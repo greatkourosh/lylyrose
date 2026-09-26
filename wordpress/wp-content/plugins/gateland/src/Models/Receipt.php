@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int         $attachment_id
  * @property string      $attachment_url
  * @property string      $card_number
- * @property string      $formatted_card_number
  * @property string      $tracking_number
  * @property int         $amount
  * @property int         $accepted_amount
@@ -59,17 +58,28 @@ class Receipt extends Model {
 		return wp_get_attachment_url( $this->attachment_id );
 	}
 
-	public function getFormattedCardNumberAttribute(): string {
-		return implode( '-', str_split( $this->card_number, 4 ) );
-	}
-
 	public function save( array $options = [] ) {
 
-		if ( isset( $this->getDirty()['status'] ) ) {
-			do_action( 'nabik/gateland/receipt_status_changed', $this->getOriginal( 'status' ), $this->getDirty()['status'], $this );
+		$dirty = $this->getDirty();
+
+		$saved = parent::save( $options );
+
+		if ( ! $saved ) {
+			return false;
 		}
 
-		return parent::save( $options );
+		if ( isset( $dirty['status'] ) ) {
+
+			do_action(
+				'nabik/gateland/receipt_status_changed',
+				$this->getOriginal( 'status' ),
+				$dirty['status'],
+				$this
+			);
+
+		}
+
+		return $saved;
 	}
 
 	public function transaction() {

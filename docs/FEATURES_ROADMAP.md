@@ -10,7 +10,9 @@
 > once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
 
 
-Date: 2026-08-29 · Branch: master · Plugin count: 22 active
+Date: 2026-08-29 · Branch: master · Plugin count: 19 active locally (25 shipped
+including 6 shipped-but-inactive: Wordfence, Rank Math, WP Super Cache, Gateland,
+Persian shipping, Limit Login Attempts — corrected 2026-09-26)
 
 Gap analysis of the current stack (WooCommerce, lylyrose-core 1.1.0, Persian/Rial stack,
 Dokan, ZarinPal/Gateland, SMS, Rank Math, Torob feed, Wordfence, Redis, Super Cache,
@@ -147,7 +149,10 @@ Current-state facts this list is built on:
 ## P2 — Scale & retention
 
 ### 11. ✅ DONE 2026-09-02 — Loyalty points / wallet (see DEVELOPMENT_LOG)
-- Shipped as woo-wallet («کیف پول برای ووکامرس», v2.4.x, fa_IR pack installed): 2% cart
+- Shipped as woo-wallet («کیف پول برای ووکامرس» / TeraWallet, **v1.6.14 at the
+  time, updated to v1.7.0 on 2026-09-26** — the "v2.4.x" previously written here was
+  wrong; fa_IR translation from translate.wordpress.org, installed and loading):
+  2% cart
   cashback on completed orders capped at 5M Toman, min cart 500k; topup product «شارژ کیف
   پول لیلی رز» with 100k–20M limits; partial payment auto-deduct (fee = balance, remainder
   via gateway); product-review credit 50k once per product/user; transfers + gateway charge

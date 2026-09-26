@@ -4,7 +4,7 @@ namespace Nabik\Gateland\API\CardToCard;
 
 use Nabik\Gateland\API\RestAPI;
 use Nabik\Gateland\Models\Card;
-use Nabik\GatelandPro\Services\CardToCardService;
+use Nabik\Gateland\Services\CardToCardService;
 use WP_REST_Request;
 
 class CardAPI extends RestAPI {
@@ -66,27 +66,38 @@ class CardAPI extends RestAPI {
 
 		$name        = $request->get_param( 'name' );
 		$card_number = $request->get_param( 'card_number' );
+		$iban        = $request->get_param( 'iban' );
 
-		if ( empty( $name ) || empty( $card_number ) ) {
-			self::response( false, 'نام یا شماره کارت نمی‌تواند خالی باشد.' );
+		if ( empty( $name ) ) {
+			self::response( false, 'نام نمی‌تواند خالی باشد.' );
 		}
 
-		if ( ! Card::isValidCardNumber( $card_number ) ) {
-			self::response( false, 'شماره کارت وارد شده معتیر نمی‌باشد.' );
+		if ( empty( $card_number ) && empty( $iban ) ) {
+			self::response( false, 'شماره کارت یا شبا الزامی است.' );
+		}
+
+		if ( $card_number && ! Card::isValidCardNumber( $card_number ) ) {
+			self::response( false, 'شماره کارت وارد شده معتبر نمی‌باشد.' );
+		}
+
+		if ( $iban && ! Card::isValidIBAN( $iban ) ) {
+			self::response( false, 'شماره شبا وارد شده معتبر نمی‌باشد.' );
 		}
 
 		$is_duplicate_card_number = Card::query()
 		                                ->where( 'card_number', $card_number )
+		                                ->orWhere( 'iban', $iban )
 		                                ->first();
 
 		if ( $is_duplicate_card_number ) {
-			self::response( false, 'شماره کارت تکراری می‌باشد.' );
+			self::response( false, 'شماره کارت یا شبا تکراری می‌باشد.' );
 		}
 
 		/** @var Card $card */
 		$card = Card::create( [
 			'name'        => $name,
 			'card_number' => $card_number,
+			'iban'        => $iban,
 			'status'      => 'active',
 			'is_failover' => Card::all()->count() === 0,
 		] );
@@ -99,11 +110,25 @@ class CardAPI extends RestAPI {
 
 	public function update( WP_REST_Request $request ) {
 
-		$card_id = $request->get_param( 'card_id' );
-		$name    = $request->get_param( 'name' );
+		$card_id     = $request->get_param( 'card_id' );
+		$name        = $request->get_param( 'name' );
+		$card_number = $request->get_param( 'card_number' );
+		$iban        = $request->get_param( 'iban' );
 
 		if ( empty( $name ) ) {
 			self::response( false, 'نام نمی‌تواند خالی باشد.' );
+		}
+
+		if ( empty( $card_number ) && empty( $iban ) ) {
+			self::response( false, 'شماره کارت یا شبا الزامی است.' );
+		}
+
+		if ( $card_number && ! Card::isValidCardNumber( $card_number ) ) {
+			self::response( false, 'شماره کارت وارد شده معتبر نمی‌باشد.' );
+		}
+
+		if ( $iban && ! Card::isValidIBAN( $iban ) ) {
+			self::response( false, 'شماره شبا وارد شده معتبر نمی‌باشد.' );
 		}
 
 		try {
@@ -116,7 +141,11 @@ class CardAPI extends RestAPI {
 		}
 
 		$card->name = $name;
-		$card->save();
+		$card->update( [
+			'name'        => $name,
+			'card_number' => $card_number,
+			'iban'        => $iban,
+		] );
 
 		self::response( true, 'کارت با موفقیت بروزرسانی شد.', [
 			'cards' => $this->cards(),
@@ -256,6 +285,7 @@ class CardAPI extends RestAPI {
 			'id'           => $card->id,
 			'name'         => $card->name,
 			'card_number'  => $card->card_number,
+			'iban'         => $card->iban,
 			'max_quantity' => $card->max_quantity,
 			'max_amount'   => $card->max_amount,
 			'is_failover'  => $card->is_failover,

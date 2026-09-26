@@ -384,6 +384,10 @@ class Plugin {
             [
                 'jQuery' => 'jQuery',
                 'is_wp7' => version_compare( get_bloginfo( 'version' ), '7.0-dev', '>=' ),
+                'chart_color' => (
+                    defined( 'WP_REDIS_CHART_COLOR' )
+                    && preg_match( '/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i', (string) WP_REDIS_CHART_COLOR )
+                ) ? WP_REDIS_CHART_COLOR : null,
                 'disable_pro' => $screen->id !== $this->screen
                     || ( defined( 'WP_REDIS_DISABLE_BANNERS' ) && WP_REDIS_DISABLE_BANNERS )
                     || self::acceleratewp_install(),
@@ -420,13 +424,15 @@ class Plugin {
             return;
         }
 
-        wp_enqueue_script(
-            'redis-cache-charts',
-            plugins_url( 'assets/js/apexcharts.min.js', WP_REDIS_FILE ),
-            [],
-            WP_REDIS_VERSION,
-            true
-        );
+        if ( ! defined( 'WP_REDIS_LOAD_APEXCHARTS' ) || WP_REDIS_LOAD_APEXCHARTS ) {
+            wp_enqueue_script(
+                'redis-cache-charts',
+                plugins_url( 'assets/js/apexcharts.min.js', WP_REDIS_FILE ),
+                [],
+                WP_REDIS_VERSION,
+                true
+            );
+        }
 
         if ( ! $this->get_redis_status() ) {
             return;
@@ -539,7 +545,7 @@ class Plugin {
         global $wp_object_cache;
 
         if ( defined( 'WP_REDIS_DISABLED' ) && WP_REDIS_DISABLED ) {
-            return __( 'Disabled', 'redis-cache' );
+            return __( 'Disabled (via config constant)', 'redis-cache' );
         }
 
         if ( ! $this->object_cache_dropin_exists() ) {

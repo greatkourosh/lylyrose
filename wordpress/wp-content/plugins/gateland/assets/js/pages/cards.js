@@ -19,6 +19,11 @@ document.addEventListener('alpine:init', () => {
                         value: null,
                         errorMsg: ""
                     },
+                    iban:{
+                        label: "شماره شبا",
+                        value: null,
+                        errorMsg: ""
+                    },
                     name: {
                         label: "نام و نام خانوادگی صاحب کارت",
                         value: null,
@@ -46,9 +51,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init(){
-            gatelandLoadTippyInPage();
-
             await this.getCards();
+            gatelandLoadTippyInPage();
         },
 
         //request functions
@@ -91,17 +95,30 @@ document.addEventListener('alpine:init', () => {
 
             //validation
             let hasError = false;
-            for (const key in this.modals.add.data) {
-                if(!this.modals.add.data[key].value){
-                    this.modals.add.data[key].errorMsg = this.modals.add.data[key].label + " نمی تواند خالی باشد. "
-                    hasError = true;
-                }else{
-                    this.modals.add.data[key].errorMsg = "";
-                }
+
+            if(!this.modals.add.data.name.value){
+                this.modals.add.data.name.errorMsg = this.modals.add.data.name.label + " نمی تواند خالی باشد. "
+                hasError = true;
+            }else{
+                this.modals.add.data.name.errorMsg = "";
             }
 
-           if(this.modals.add.data.cardNumber.value && this.modals.add.data.cardNumber.value.length !== 19){
+            if(!this.modals.add.data.cardNumber.value && !this.modals.add.data.iban.value){
+                this.modals.add.data.cardNumber.errorMsg = 'شماره کارت یا شماره شبا نمی تواند خالی باشد.'
+                this.modals.add.data.iban.errorMsg = 'شماره کارت یا شماره شبا نمی تواند خالی باشد.'
+                hasError = true;
+            }else{
+                this.modals.add.data.cardNumber.errorMsg = ''
+                this.modals.add.data.iban.errorMsg = ''
+            }
+
+            if(this.modals.add.data.cardNumber.value && this.modals.add.data.cardNumber.value.length !== 19){
                 this.modals.add.data.cardNumber.errorMsg = this.modals.add.data.cardNumber.label + " باید 16 رقمی باشد. "
+                hasError = true;
+            }
+
+            if(this.modals.add.data.iban.value && this.modals.add.data.iban.value.length !== 30){
+                this.modals.add.data.iban.errorMsg = this.modals.add.data.iban.label + " باید 24 رقمی باشد. "
                 hasError = true;
             }
 
@@ -119,7 +136,8 @@ document.addEventListener('alpine:init', () => {
                     method: 'POST',
                     data:{
                         name: this.modals.add.data.name.value,
-                        card_number: gatelandCardNumberToString(this.modals.add.data.cardNumber.value)
+                        card_number: gatelandCardNumberToString(this.modals.add.data.cardNumber.value),
+                        iban: gatelandCardNumberToString(this.modals.add.data.iban.value)
                     }
                 })
 
@@ -130,6 +148,8 @@ document.addEventListener('alpine:init', () => {
 
                     this.skeletonIds.pop();
                     this.skeletonIds.push(data.card_id);
+
+                    gatelandLoadTippyInPage();
                 }else{
                     this.skeletonIds.pop();
                     this.modals.add.active = true;
@@ -149,13 +169,31 @@ document.addEventListener('alpine:init', () => {
         async updateCard(){
             //validation
             let hasError = false;
-            for (const key in this.modals.edit.data) {
-                if(!this.modals.edit.data[key].value){
-                    this.modals.edit.data[key].errorMsg = this.modals.edit.data[key].label + " نمی تواند خالی باشد. "
-                    hasError = true;
-                }else{
-                    this.modals.edit.data[key].errorMsg = "";
-                }
+
+            if(!this.modals.edit.data.name.value){
+                this.modals.edit.data.name.errorMsg = this.modals.edit.data.name.label + " نمی تواند خالی باشد. "
+                hasError = true;
+            }else{
+                this.modals.edit.data.name.errorMsg = "";
+            }
+
+            if(!this.modals.edit.data.cardNumber.value && !this.modals.edit.data.iban.value){
+                this.modals.edit.data.cardNumber.errorMsg = 'شماره کارت یا شماره شبا نمی تواند خالی باشد.'
+                this.modals.edit.data.iban.errorMsg = 'شماره کارت یا شماره شبا نمی تواند خالی باشد.'
+                hasError = true;
+            }else{
+                this.modals.edit.data.cardNumber.errorMsg = ''
+                this.modals.edit.data.iban.errorMsg = ''
+            }
+
+            if(this.modals.edit.data.cardNumber.value && this.modals.edit.data.cardNumber.value.length !== 19){
+                this.modals.edit.data.cardNumber.errorMsg = this.modals.edit.data.cardNumber.label + " باید 16 رقمی باشد. "
+                hasError = true;
+            }
+
+            if(this.modals.edit.data.iban.value && this.modals.edit.data.iban.value.length !== 30){
+                this.modals.edit.data.iban.errorMsg = this.modals.edit.data.iban.label + " باید 24 رقمی باشد. "
+                hasError = true;
             }
 
             if(hasError){
@@ -169,7 +207,9 @@ document.addEventListener('alpine:init', () => {
                     method: 'POST',
                     data:{
                         card_id: this.modals.edit.card.id,
-                        name: this.modals.edit.data.name.value
+                        name: this.modals.edit.data.name.value,
+                        card_number: gatelandCardNumberToString(this.modals.edit.data.cardNumber.value),
+                        iban: gatelandCardNumberToString(this.modals.edit.data.iban.value)
                     }
                 })
 
@@ -177,9 +217,11 @@ document.addEventListener('alpine:init', () => {
                     const data = result.data;
                     gatelandNotyf.success(result.message ? result.message : 'درخواست با موفقیت انجام شد.');
                     this.tableLoaderIsActive = true;
+                    this.modals.edit.active = false;
                     this.tableData = data.cards;
                     setTimeout(()=>{
                         this.tableLoaderIsActive = false;
+                        gatelandLoadTippyInPage();
                     }, 1000)
                 }else{
                     gatelandNotyf.error(result.message ? result.message : 'حطایی رخ داده است!');
@@ -194,13 +236,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         async bulkUpdate(){
+
             this.tableLoaderIsActive = true;
 
             const cards = {};
             this.tableData.forEach(card=>{
                 cards[card.id] = {
-                    max_amount: gatelandPriceToNumber(card.max_amount.toString()),
-                    max_quantity: gatelandPriceToNumber(card.max_quantity.toString())
+                    max_amount: card.max_amount ? gatelandPriceToNumber(card.max_amount.toString()) : null,
+                    max_quantity: card.max_quantity ? gatelandPriceToNumber(card.max_quantity.toString()) : null
                 }
             })
 
@@ -323,13 +366,18 @@ document.addEventListener('alpine:init', () => {
             this.modals.add.data = {
                 cardNumber: {
                     label: "شماره کارت",
-                        value: null,
-                        errorMsg: ""
+                    value: null,
+                    errorMsg: ""
+                },
+                iban:{
+                    label: "شماره شبا",
+                    value: null,
+                    errorMsg: ""
                 },
                 name: {
                     label: "نام و نام خانوادگی صاحب کارت",
-                        value: null,
-                        errorMsg: ""
+                    value: null,
+                    errorMsg: ""
                 }
             }
         },
@@ -338,6 +386,16 @@ document.addEventListener('alpine:init', () => {
             this.modals.edit.active = true;
             this.modals.edit.card = data;
             this.modals.edit.data = {
+                cardNumber: {
+                    label: "شماره کارت",
+                    value: gatelandFormatCardNumber(data.card_number),
+                    errorMsg: ""
+                },
+                iban:{
+                    label: "شماره شبا",
+                    value: gatelandFormatIban(data.iban),
+                    errorMsg: ""
+                },
                 name: {
                     label: "نام و نام خانوادگی صاحب کارت",
                     value: data.name,

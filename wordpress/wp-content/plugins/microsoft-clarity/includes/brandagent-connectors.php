@@ -49,9 +49,46 @@ function brandagent_connectors_ajax() {
 		);
 	}
 
-	$operation   = isset( $_POST['operation'] ) ? sanitize_key( wp_unslash( $_POST['operation'] ) ) : 'status';
-	$provider_id = isset( $_POST['providerId'] ) ? sanitize_key( wp_unslash( $_POST['providerId'] ) ) : '';
-	$result      = brandagent_connectors_execute_operation( $operation, $provider_id );
+	$operation                     = isset( $_POST['operation'] ) ? sanitize_key( wp_unslash( $_POST['operation'] ) ) : 'status';
+	$provider_id                   = isset( $_POST['providerId'] ) ? sanitize_key( wp_unslash( $_POST['providerId'] ) ) : '';
+	$replace_pending_authorization = false;
+	if ( isset( $_POST['replacePendingAuthorization'] ) ) {
+		$replace_pending_authorization = brandagent_connectors_parse_boolean(
+			wp_unslash( $_POST['replacePendingAuthorization'] )
+		);
+		if ( null === $replace_pending_authorization ) {
+			wp_send_json_error(
+				array(
+					'code'    => 'invalid_request',
+					'message' => 'Invalid connector request.',
+				),
+				400
+			);
+		}
+	}
+
+	$expected_authorization_version = null;
+	if ( isset( $_POST['expectedAuthorizationVersion'] ) ) {
+		$raw_expected_authorization_version = wp_unslash( $_POST['expectedAuthorizationVersion'] );
+		if ( ! is_scalar( $raw_expected_authorization_version ) ) {
+			wp_send_json_error(
+				array(
+					'code'    => 'invalid_request',
+					'message' => 'Invalid connector request.',
+				),
+				400
+			);
+		}
+		$expected_authorization_version = sanitize_text_field(
+			(string) $raw_expected_authorization_version
+		);
+	}
+	$result = brandagent_connectors_execute_operation(
+		$operation,
+		$provider_id,
+		$replace_pending_authorization,
+		$expected_authorization_version
+	);
 
 	if ( is_wp_error( $result ) ) {
 		$error_data = $result->get_error_data();
@@ -61,26 +98,65 @@ function brandagent_connectors_ajax() {
 		if ( $status < 400 || $status > 599 ) {
 			$status = 500;
 		}
-		wp_send_json_error(
-			array(
-				'code'    => $result->get_error_code(),
-				'message' => $result->get_error_message(),
-			),
-			$status
+		$error = array(
+			'code'    => $result->get_error_code(),
+			'message' => $result->get_error_message(),
 		);
+		if ( is_array( $error_data ) && isset( $error_data['connector'] ) ) {
+			$error['connector'] = brandagent_connectors_project_connector_for_ui( $error_data['connector'] );
+		}
+		wp_send_json_error( $error, $status );
 	}
 
 	wp_send_json_success( $result );
 }
 
 /**
+ * Parse a strict boolean value from an admin-ajax field.
+ *
+ * @param mixed $value Candidate value.
+ * @return bool|null Parsed value, or null when invalid.
+ */
+function brandagent_connectors_parse_boolean( $value ) {
+	if ( is_bool( $value ) ) {
+		return $value;
+	}
+
+	if ( is_int( $value ) && ( 0 === $value || 1 === $value ) ) {
+		return 1 === $value;
+	}
+
+	if ( ! is_string( $value ) ) {
+		return null;
+	}
+
+	$normalized = strtolower( trim( $value ) );
+	if ( '1' === $normalized || 'true' === $normalized ) {
+		return true;
+	}
+
+	if ( '0' === $normalized || 'false' === $normalized ) {
+		return false;
+	}
+
+	return null;
+}
+
+/**
  * Run one allowlisted Square connector operation.
  *
- * @param string $operation   Requested operation.
- * @param string $provider_id Target provider id (required for every operation but status).
+ * @param string          $operation                      Requested operation.
+ * @param string          $provider_id                    Target provider id (required for every operation but status).
+ * @param bool            $replace_pending_authorization  Whether to replace the observed pending authorization.
+ * @param int|string|null $expected_authorization_version Version required when replacing pending authorization.
  * @return array|WP_Error Result payload.
  */
-function brandagent_connectors_execute_operation( $operation, $provider_id ) {
+function brandagent_connectors_execute_operation(
+	$operation,
+	$provider_id,
+	$replace_pending_authorization = false,
+	$expected_authorization_version = null
+) {
 	if ( 'status' === $operation ) {
 		return brandagent_connectors_get_status();
 	}
@@ -97,6 +173,38 @@ function brandagent_connectors_execute_operation( $operation, $provider_id ) {
 		return new WP_Error(
 			'unsupported_provider',
 			'This plugin only supports connecting Square.',
+			array( 'status' => 400 )
+		);
+	}
+
+	$reauthorization_payload = null;
+	if ( 'reauthorize' === $operation ) {
+		if ( $replace_pending_authorization ) {
+			$expected_authorization_version = brandagent_connectors_parse_authorization_version(
+				$expected_authorization_version
+			);
+			if ( null === $expected_authorization_version ) {
+				return new WP_Error(
+					'expected_authorization_version_required',
+					'A positive expected authorization version is required to replace pending authorization.',
+					array( 'status' => 400 )
+				);
+			}
+			$reauthorization_payload = array(
+				'replacePendingAuthorization'  => true,
+				'expectedAuthorizationVersion' => $expected_authorization_version,
+			);
+		} elseif ( null !== $expected_authorization_version && '' !== $expected_authorization_version ) {
+			return new WP_Error(
+				'replace_pending_authorization_required',
+				'Expected authorization version is only valid when replacing pending authorization.',
+				array( 'status' => 400 )
+			);
+		}
+	} elseif ( $replace_pending_authorization || null !== $expected_authorization_version ) {
+		return new WP_Error(
+			'invalid_request',
+			'Pending authorization replacement is only valid for reauthorization.',
 			array( 'status' => 400 )
 		);
 	}
@@ -127,7 +235,11 @@ function brandagent_connectors_execute_operation( $operation, $provider_id ) {
 	$connector_id = rawurlencode( $connector['connectorId'] );
 	switch ( $operation ) {
 		case 'reauthorize':
-			$response = brandagent_connectors_api_request( 'POST', '/' . $connector_id . ':reauthorize' );
+			$response = brandagent_connectors_api_request(
+				'POST',
+				'/' . $connector_id . ':reauthorize',
+				$reauthorization_payload
+			);
 			return is_wp_error( $response ) ? $response : brandagent_connectors_validate_authorization_response( $response );
 		case 'sync':
 			$response = brandagent_connectors_api_request( 'POST', '/' . $connector_id . ':sync' );
@@ -142,6 +254,27 @@ function brandagent_connectors_execute_operation( $operation, $provider_id ) {
 		'Unsupported connector operation.',
 		array( 'status' => 400 )
 	);
+}
+
+/**
+ * Parse a positive AdsAgentServer authorization version.
+ *
+ * @param mixed $value Candidate version.
+ * @return int|null Parsed version.
+ */
+function brandagent_connectors_parse_authorization_version( $value ) {
+	if ( is_int( $value ) ) {
+		return $value > 0 && $value <= 2147483647 ? $value : null;
+	}
+
+	if ( ! is_string( $value ) || ! preg_match( '/^[1-9][0-9]*$/', $value ) ) {
+		return null;
+	}
+
+	$parsed = (int) $value;
+	return $parsed > 0 && $parsed <= 2147483647 && (string) $parsed === $value
+		? $parsed
+		: null;
 }
 
 /**
@@ -219,6 +352,8 @@ function brandagent_connectors_project_connector_for_ui( $connector ) {
 		array(
 			'providerId',
 			'authorizationStatus',
+			'authorizationVersion',
+			'authorizationExpiresAtUtc',
 			'readinessStatus',
 			'failureCode',
 			'lastSynchronizedAtUtc',
@@ -362,7 +497,11 @@ function brandagent_connectors_validate_authorization_response( $response ) {
 		);
 	}
 
-	return array( 'authorizationUrl' => $url );
+	$projected = array( 'authorizationUrl' => $url );
+	if ( isset( $response['connector'] ) && is_array( $response['connector'] ) ) {
+		$projected['connector'] = brandagent_connectors_project_connector_for_ui( $response['connector'] );
+	}
+	return $projected;
 }
 
 /**
@@ -439,7 +578,11 @@ function brandagent_connectors_api_request( $method, $suffix = '', $payload = nu
 				$status
 			);
 		}
-		return new WP_Error( $code, $message, array( 'status' => $status ) );
+		$error_data = array( 'status' => $status );
+		if ( is_array( $decoded ) && isset( $decoded['connector'] ) ) {
+			$error_data['connector'] = brandagent_connectors_project_connector_for_ui( $decoded['connector'] );
+		}
+		return new WP_Error( $code, $message, $error_data );
 	}
 
 	if ( ! is_array( $decoded ) ) {

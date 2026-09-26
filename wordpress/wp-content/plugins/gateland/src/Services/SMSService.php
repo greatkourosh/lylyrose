@@ -9,18 +9,7 @@ use Nabik\Gateland\Models\Transaction;
 class SMSService {
 
 	public function __construct() {
-		add_action( 'nabik/gateland/transaction_created', [ $this, 'transaction_created' ] );
 		add_action( 'nabik/gateland/transaction_status_changed', [ $this, 'transaction_status_changed' ], 10, 3 );
-	}
-
-	/**
-	 * @param Transaction $transaction
-	 *
-	 * @return void
-	 * @throws \Exception
-	 */
-	public static function transaction_created( Transaction $transaction ): void {
-		self::transaction_status_changed( null, 'created', $transaction );
 	}
 
 	/**
@@ -32,6 +21,10 @@ class SMSService {
 	 * @throws \Exception
 	 */
 	public static function transaction_status_changed( ?string $old_status, string $new_status, Transaction $transaction ) {
+
+		if ( is_null( $old_status ) ) {
+			$new_status = 'created';
+		}
 
 		$sms = Gateland::get_option( "sms.transaction_{$new_status}_sms" );
 

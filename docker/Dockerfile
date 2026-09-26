@@ -4,6 +4,13 @@
 # Building from the bare base would regress that ownership fix.
 FROM aroma_store-wordpress:latest
 
+# unzip is not in the base image, and WordPress's own upgrader shells out to it
+# (WP_Filesystem::unzip_file), so every core/plugin/theme update failed at the
+# install step with a bare "process_failed" until it was added here.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 # WooCommerce 11.1.0 requires WordPress >= 7.0 and calls
 # WP_Block_Templates_Registry, which does not exist in the 6.5.5 core this
 # image ships. A fresh volume seeds /var/www/html from /usr/src/wordpress, so

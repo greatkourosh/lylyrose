@@ -39,7 +39,7 @@ class FeedReader {
       'cache_key'    => '',
       'cache_time'   => DAY_IN_SECONDS,
       'items_number' => 10,
-      'timeout'      => 3,
+      'timeout'      => 6,
       'fields'       => [ 'link', 'title', 'description', 'author', 'datetime' ],
     );
     $this->setArgs( $args );
@@ -176,7 +176,7 @@ class FeedReader {
     add_action( 'wp_feed_cache_transient_lifetime',
       function ( $cacheTime, $url ) use ( $requestUrl ) {
         if ( $url === $requestUrl || ! Validating::isUrl( $url ) ) {
-          return 1;
+          return 5;
         }
 
         return $cacheTime;

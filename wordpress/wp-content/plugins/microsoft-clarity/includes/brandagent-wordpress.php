@@ -21,9 +21,11 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Run the plain-WordPress connect handshake.
  *
+ * @param array|null $request Optional AJAX request whose project and retry state must be prepared
+ *                            under the same lock as Connect.
  * @return array Result with at least a boolean 'success' key.
  */
-function brandagent_wordpress_connect() {
+function brandagent_wordpress_connect( $request = null ) {
 	$connect_lock = brandagent_wordpress_acquire_connect_lock();
 	if ( false === $connect_lock ) {
 		return array(
@@ -34,7 +36,7 @@ function brandagent_wordpress_connect() {
 	}
 
 	try {
-		return brandagent_wordpress_connect_locked();
+		return brandagent_wordpress_connect_locked( $request );
 	} finally {
 		brandagent_wordpress_release_connect_lock( $connect_lock );
 	}
@@ -135,18 +137,54 @@ function brandagent_wordpress_release_connect_lock( $owner ) {
 }
 
 /**
+ * Update the Clarity project while excluding an in-flight WordPress Connect.
+ *
+ * @param mixed $project_id Project value accepted by the existing project-change endpoint.
+ * @return array Result with a boolean success key and a machine-readable error code on failure.
+ */
+function brandagent_wordpress_update_project_id( $project_id ) {
+	$connect_lock = brandagent_wordpress_acquire_connect_lock();
+	if ( false === $connect_lock ) {
+		return array(
+			'success'    => false,
+			'error'      => 'Brand Agent connection is already in progress.',
+			'error_code' => 'connect_in_progress',
+		);
+	}
+
+	try {
+		update_option( 'clarity_project_id', $project_id );
+		// update_option() also returns false when the requested value is already stored, so verify
+		// the readback instead of treating its return value as a persistence failure.
+		if ( $project_id !== get_option( 'clarity_project_id', null ) ) {
+			return array(
+				'success'    => false,
+				'error'      => 'Clarity project ID failed to persist.',
+				'error_code' => 'project_id_persist_failed',
+			);
+		}
+
+		return array( 'success' => true );
+	} finally {
+		brandagent_wordpress_release_connect_lock( $connect_lock );
+	}
+}
+
+/**
  * Execute Connect while the caller owns brandagent_wp_connect_lock.
  *
+ * @param array|null $request                      Optional AJAX request to prepare before Connect.
+ * @param bool       $allow_stale_site_id_recovery Whether one stale-ID recovery retry is allowed.
  * @return array Result with at least a boolean 'success' key.
  */
-function brandagent_wordpress_connect_locked() {
+function brandagent_wordpress_connect_locked( $request = null, $allow_stale_site_id_recovery = true ) {
 	// WooCommerce stores must onboard through the wc-auth flow. The plugin is the only component
 	// that knows this reliably at request time: the dashboard decides eligibility from the
 	// hasWooCommerce flag recorded on the integration, which goes stale when WooCommerce is
-	// activated after Clarity. Without this guard a stale-eligibility connect would overwrite the
-	// shared brandagent_secret_key_{store} option with a WordPress-scoped secret while the backend
-	// still holds woocommerce-{store}-hmac-secret, silently 401ing every WooCommerce Brand Agent
-	// call. Backstop for every entry point, including the admin-only REST route below.
+	// activated after Clarity. Without this guard a stale-eligibility connect would be interpreted
+	// by the backend as an explicit WooCommerce-to-WordPress transition, tearing down commerce
+	// artifacts and replacing the shared local credential while WooCommerce is still active.
+	// Backstop every entry point, including the admin-only REST route below.
 	//
 	// Uses the activation state rather than class_exists(): a store whose WooCommerce is active but
 	// did not load this request (its own PHP-version guard bailing, a missing plugin file) is still
@@ -157,22 +195,25 @@ function brandagent_wordpress_connect_locked() {
 		return array( 'success' => false, 'error' => 'WooCommerce site must use the WooCommerce connect flow.' );
 	}
 
-	// A credential minted by the WooCommerce flow remains WooCommerce-owned even if that plugin is
-	// later deactivated. Reusing the option for a WordPress secret would strand the backend's Woo
-	// credentials, webhooks and indexes under a record the plugin now treats as plain WordPress.
-	if ( 'woocommerce' === brandagent_get_hmac_platform() ) {
-		brandagent_log( 'BrandAgent WordPress Connect: refused, stored credential belongs to WooCommerce' );
-		brandagent_wordpress_clear_connect_retry_state();
-		return array(
-			'success'    => false,
-			'error'      => 'Store is registered as WooCommerce and must be offboarded before connecting as WordPress.',
-			'error_code' => 'platform_mismatch',
-		);
+	if ( null !== $request ) {
+		$project_result = brandagent_wordpress_prepare_connect_project_id( $request );
+		if ( empty( $project_result['success'] ) ) {
+			return $project_result;
+		}
+
+		// Clicking Continue is the opt-in. Initialize recovery only after project validation and
+		// persistence succeed, while the project write and ensuing Connect still share this lock.
+		update_option( 'brandagent_wp_connect_optin', 1 );
+		delete_option( 'brandagent_wp_connect_attempts' );
+		delete_transient( 'brandagent_wp_connect_throttle' );
 	}
 
-	$store_url  = home_url();
-	$project_id = get_option( 'clarity_project_id', '' );
-	$wp_site_id = get_option( 'clarity_wordpress_site_id', '' );
+	// Reconnects rotate credentials for the existing connection; they do not let a request-context
+	// home_url() (locale, proxy, or alternate domain) silently rebind its backend identity.
+	$store_url          = brandagent_get_connected_store_url();
+	$project_id         = get_option( 'clarity_project_id', '' );
+	$wp_site_id         = get_option( 'clarity_wordpress_site_id', '' );
+	$recover_wp_site_id = '' === $wp_site_id;
 
 	$clarity_server_url = BrandAgent_Config::get_clarity_server_url();
 	if ( empty( $clarity_server_url ) ) {
@@ -188,13 +229,29 @@ function brandagent_wordpress_connect_locked() {
 	$nonce_digest  = hash( 'sha256', $connect_nonce );
 	$attempt_id    = substr( $nonce_digest, 0, 16 );
 	set_transient( brandagent_wordpress_connect_nonce_key( $connect_nonce ), $nonce_digest, 10 * MINUTE_IN_SECONDS );
+	if ( $recover_wp_site_id ) {
+		// Keep recovery state separate from the nonce digest. Older plugin/backend combinations expect
+		// the nonce transient itself to be a string, and changing its shape would break ownership proof
+		// during a rolling deployment.
+		set_transient(
+			brandagent_wordpress_connect_recovery_key( $connect_nonce ),
+			array( 'clarityProjectId' => $project_id ),
+			10 * MINUTE_IN_SECONDS
+		);
+	}
 
-	$body = wp_json_encode( array(
+	$connect_request = array(
 		'storeUrl'         => $store_url,
 		'clarityProjectId' => $project_id,
 		'wordpressSiteId'  => $wp_site_id,
 		'connectNonce'     => $connect_nonce,
-	) );
+	);
+	if ( $recover_wp_site_id ) {
+		// This opt-in is intentionally absent for every healthy/new install. An older dashboard safely
+		// ignores the additive field and continues to reject the empty ID as it does today.
+		$connect_request['wordpressSiteIdRecovery'] = true;
+	}
+	$body = wp_json_encode( $connect_request );
 
 	brandagent_log( 'BrandAgent WordPress Connect: starting', array( 'store_url' => $store_url, 'endpoint' => $connect_url, 'attempt_id' => $attempt_id ) );
 
@@ -226,8 +283,47 @@ function brandagent_wordpress_connect_locked() {
 		$error_code = brandagent_wordpress_connect_error_code( $data );
 		brandagent_log( 'BrandAgent WordPress Connect: unexpected response', array( 'status' => $code, 'error_code' => $error_code, 'attempt_id' => $attempt_id ) );
 
-		// A platform conflict is durable until an explicit WooCommerce offboard/migration runs. Do not
-		// let admin_init retry it on every admin visit and create an avoidable request storm.
+		// The legacy in-dashboard updater can reactivate an existing install whose local site ID is
+		// empty, generating a new UUID that does not match the integration already stored
+		// in Clarity. Only the exact binding failure is eligible for a single retry through the existing
+		// empty-ID recovery protocol. Clearing uses compare-and-swap under the connect lock so a
+		// concurrent lifecycle write is never overwritten; the backend still requires the project,
+		// URL and nonce-loopback ownership checks before it can return and persist the canonical UUID.
+		if (
+			$allow_stale_site_id_recovery &&
+			403 === $code &&
+			'wordpressintegrationverificationfailed' === $error_code &&
+			is_string( $wp_site_id ) &&
+			brandagent_wordpress_is_valid_site_id( $wp_site_id ) &&
+			brandagent_wordpress_replace_site_id_if_matches( $wp_site_id, '' )
+		) {
+			// This rejected attempt never needs to remain challengeable while the retry uses a fresh
+			// nonce. Recovery is explicitly disabled on the nested attempt to bound the operation even
+			// if another lifecycle request writes a different UUID while the retry is in flight.
+			delete_transient( brandagent_wordpress_connect_nonce_key( $connect_nonce ) );
+			delete_transient( brandagent_wordpress_connect_recovery_key( $connect_nonce ) );
+			brandagent_log( 'BrandAgent WordPress Connect: retrying after stale site ID rejection', array( 'attempt_id' => $attempt_id ) );
+
+			$retry_result = null;
+			try {
+				$retry_result = brandagent_wordpress_connect_locked( null, false );
+			} finally {
+				if ( ( ! is_array( $retry_result ) || empty( $retry_result['success'] ) ) && '' === get_option( 'clarity_wordpress_site_id', null ) ) {
+					// An older backend, failed ownership callback or thrown request hook cannot repair the
+					// UUID. Restore it only while the option is still empty; never replace a canonical UUID
+					// persisted by the callback or a value written/deleted by a concurrent lifecycle request.
+					if ( ! brandagent_wordpress_replace_site_id_if_matches( '', $wp_site_id ) ) {
+						brandagent_log( 'BrandAgent WordPress Connect: stale site ID rollback skipped after concurrent option change', array( 'attempt_id' => $attempt_id ) );
+					}
+				}
+			}
+
+			return $retry_result;
+		}
+
+		// A remaining platform conflict means an unsupported owner or a concurrent ownership change.
+		// Do not let admin_init retry it on every admin visit and create an avoidable request storm;
+		// the next explicit Continue starts a fresh, authenticated attempt.
 		if ( 409 === $code && 'platform_mismatch' === $error_code ) {
 			brandagent_wordpress_clear_connect_retry_state();
 		}
@@ -276,8 +372,9 @@ function brandagent_wordpress_connect_locked() {
 	// A secret that normalizes to empty (e.g. all whitespace) would otherwise store and read back as
 	// "" and compare equal to itself, passing the check below while leaving the site unable to sign.
 	// Short-circuit so it is never written over a credential that still works.
+	$migrating_from_woocommerce = 'woocommerce' === brandagent_get_hmac_platform();
 	$expected_secret = str_replace( array( "\r", "\n", " " ), '', trim( $raw_secret ) );
-	$secret_stored   = '' !== $expected_secret && brandagent_store_hmac_secret( $raw_secret, 'wordpress' );
+	$secret_stored   = '' !== $expected_secret && brandagent_store_hmac_secret( $raw_secret, 'wordpress', $store_url );
 	$secret_readback = $secret_stored ? brandagent_get_hmac_secret() : false;
 
 	if ( ! $secret_stored || ! is_string( $secret_readback ) || ! hash_equals( $expected_secret, $secret_readback ) ) {
@@ -297,6 +394,10 @@ function brandagent_wordpress_connect_locked() {
 
 	// Only now is the credential confirmed to match what the server committed.
 	delete_option( 'brandagent_wp_connect_unverified' );
+	if ( $migrating_from_woocommerce ) {
+		update_option( 'BAInjectFrontendScript', 'false' );
+		delete_option( 'BAWebhooksCreated' );
+	}
 
 	update_option( 'BAOauthSuccess', true );
 	brandagent_wordpress_clear_connect_retry_state();
@@ -333,6 +434,16 @@ function brandagent_wordpress_connect_error_code( $data ) {
  */
 function brandagent_wordpress_connect_nonce_key( $nonce ) {
 	return 'brandagent_connect_nonce_' . hash( 'sha256', (string) $nonce );
+}
+
+/**
+ * Build the transient key for optional WordPress site-ID recovery context.
+ *
+ * @param string $nonce Raw one-time ownership nonce.
+ * @return string Fixed-length transient key derived from the nonce.
+ */
+function brandagent_wordpress_connect_recovery_key( $nonce ) {
+	return 'brandagent_connect_recovery_' . hash( 'sha256', (string) $nonce );
 }
 
 /**
@@ -379,20 +490,168 @@ add_action( 'rest_api_init', function () {
 	register_rest_route( 'adsagent/v1', '/wordpress/connect-verify', array(
 		'methods'             => 'POST',
 		'permission_callback' => '__return_true',
-		'callback'            => function ( WP_REST_Request $request ) {
-			$received = (string) $request->get_param( 'connectNonce' );
-			$key      = brandagent_wordpress_connect_nonce_key( $received );
-			$stored   = get_transient( $key );
-
-			if ( ! empty( $received ) && ! empty( $stored ) && hash_equals( (string) $stored, hash( 'sha256', $received ) ) ) {
-				delete_transient( $key );
-				return new WP_REST_Response( array( 'verified' => true ), 200 );
-			}
-
-			return new WP_REST_Response( array( 'verified' => false ), 401 );
-		},
+		'callback'            => 'brandagent_wordpress_connect_verify',
 	) );
 } );
+
+/**
+ * Verify a one-time ownership challenge and, when explicitly requested by Connect, recover the
+ * existing integration UUID selected by the Clarity dashboard.
+ *
+ * The initiating Connect request still owns brandagent_wp_connect_lock while the dashboard makes
+ * this nested callback. Do not reacquire it here: doing so would reject every legitimate callback.
+ *
+ * @param WP_REST_Request $request Ownership callback from the Clarity dashboard.
+ * @return WP_REST_Response Verification and optional persistence acknowledgement.
+ */
+function brandagent_wordpress_connect_verify( WP_REST_Request $request ) {
+	$received = $request->get_param( 'connectNonce' );
+	$received = is_string( $received ) ? $received : '';
+	$key      = brandagent_wordpress_connect_nonce_key( $received );
+	$stored   = get_transient( $key );
+
+	if ( empty( $received ) || empty( $stored ) || ! hash_equals( (string) $stored, hash( 'sha256', $received ) ) ) {
+		return new WP_REST_Response( array( 'verified' => false ), 401 );
+	}
+
+	$recovery_key     = brandagent_wordpress_connect_recovery_key( $received );
+	$recovery_context = get_transient( $recovery_key );
+
+	// Consume a valid challenge before doing any recovery checks. A malformed or conflicting
+	// callback must not remain replayable with different values during the nonce TTL.
+	delete_transient( $key );
+	delete_transient( $recovery_key );
+
+	// Existing non-empty-ID connects have no recovery context and retain their exact legacy reply.
+	if ( false === $recovery_context ) {
+		return new WP_REST_Response( array( 'verified' => true ), 200 );
+	}
+
+	if (
+		! is_array( $recovery_context ) ||
+		! isset( $recovery_context['clarityProjectId'] ) ||
+		! is_string( $recovery_context['clarityProjectId'] ) ||
+		'' === $recovery_context['clarityProjectId'] ||
+		1 !== preg_match( '/\A[a-zA-Z0-9]+\z/', $recovery_context['clarityProjectId'] )
+	) {
+		return new WP_REST_Response( array( 'verified' => false, 'error' => 'invalid_recovery_context' ), 400 );
+	}
+
+	$expected_project_id = $recovery_context['clarityProjectId'];
+	$received_project_id = $request->get_param( 'clarityProjectId' );
+	$current_project_id  = get_option( 'clarity_project_id', '' );
+	if (
+		! is_string( $received_project_id ) ||
+		! is_string( $current_project_id ) ||
+		! hash_equals( $expected_project_id, $received_project_id ) ||
+		! hash_equals( $expected_project_id, $current_project_id )
+	) {
+		return new WP_REST_Response( array( 'verified' => false, 'error' => 'project_mismatch' ), 409 );
+	}
+
+	$candidate = $request->get_param( 'wordpressSiteId' );
+	if ( ! is_string( $candidate ) || ! brandagent_wordpress_is_valid_site_id( $candidate ) ) {
+		return new WP_REST_Response( array( 'verified' => false, 'error' => 'invalid_wordpress_site_id' ), 400 );
+	}
+
+	$current_site_id = get_option( 'clarity_wordpress_site_id', '' );
+	if ( ! is_string( $current_site_id ) || ( '' !== $current_site_id && ! hash_equals( $candidate, $current_site_id ) ) ) {
+		return new WP_REST_Response( array( 'verified' => false, 'error' => 'wordpress_site_id_conflict' ), 409 );
+	}
+
+	if ( '' === $current_site_id ) {
+		brandagent_wordpress_persist_recovered_site_id( $candidate );
+	}
+
+	$persisted_site_id = get_option( 'clarity_wordpress_site_id', '' );
+	if ( ! is_string( $persisted_site_id ) || ! hash_equals( $candidate, $persisted_site_id ) ) {
+		return new WP_REST_Response( array( 'verified' => false, 'error' => 'wordpress_site_id_persist_failed' ), 500 );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'verified'                 => true,
+			'wordpressSiteIdPersisted' => true,
+			'wordpressSiteId'          => $persisted_site_id,
+		),
+		200
+	);
+}
+
+/**
+ * Whether a candidate is a canonical RFC 4122 version-4 UUID.
+ *
+ * @param string $candidate Candidate WordPress integration ID.
+ * @return bool Whether the value is a valid UUID generated by wp_generate_uuid4().
+ */
+function brandagent_wordpress_is_valid_site_id( $candidate ) {
+	return 1 === preg_match( '/\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/i', $candidate );
+}
+
+/**
+ * Atomically replace an exact local site ID during a guarded recovery retry.
+ *
+ * Unlike recovered-ID persistence, this never inserts a missing option row: a concurrent uninstall
+ * must not be undone by restoring the stale UUID after a failed retry.
+ *
+ * @param string $expected_site_id    Exact site ID expected in the existing option row.
+ * @param string $replacement_site_id Replacement value for that row.
+ * @return bool Whether the exact value was replaced.
+ */
+function brandagent_wordpress_replace_site_id_if_matches( $expected_site_id, $replacement_site_id ) {
+	global $wpdb;
+	$option_key = 'clarity_wordpress_site_id';
+	$updated    = $wpdb->query( $wpdb->prepare(
+		"UPDATE `{$wpdb->options}` SET `option_value` = %s WHERE `option_name` = %s AND `option_value` = %s",
+		$replacement_site_id,
+		$option_key,
+		$expected_site_id
+	) );
+
+	if ( 1 !== $updated ) {
+		return false;
+	}
+
+	wp_cache_delete( $option_key, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+	wp_cache_delete( 'notoptions', 'options' );
+	return true;
+}
+
+/**
+ * Atomically persist a recovered site ID only while the local option remains empty.
+ *
+ * update_option() is a read-then-write operation and could overwrite a UUID generated by a
+ * concurrent lifecycle request. The conditional update/insert below makes that race fail closed;
+ * the caller always decides success from an exact readback.
+ *
+ * @param string $candidate Valid candidate WordPress integration ID.
+ * @return void
+ */
+function brandagent_wordpress_persist_recovered_site_id( $candidate ) {
+	global $wpdb;
+	$option_key = 'clarity_wordpress_site_id';
+
+	$updated = $wpdb->query( $wpdb->prepare(
+		"UPDATE `{$wpdb->options}` SET `option_value` = %s WHERE `option_name` = %s AND `option_value` = %s",
+		$candidate,
+		$option_key,
+		''
+	) );
+
+	if ( 0 === $updated ) {
+		$wpdb->query( $wpdb->prepare(
+			"INSERT IGNORE INTO `{$wpdb->options}` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s)",
+			$option_key,
+			$candidate,
+			'yes'
+		) );
+	}
+
+	wp_cache_delete( $option_key, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+	wp_cache_delete( 'notoptions', 'options' );
+}
 
 /**
  * Whether the plugin already holds a usable Brand Agent connection.
@@ -479,7 +738,7 @@ function brandagent_wordpress_build_signed_headers( $backend_path, $body = '', $
 		return new WP_Error( 'hmac_missing', 'HMAC secret key not found' );
 	}
 
-	$site_url            = home_url();
+	$site_url            = brandagent_get_connected_store_url();
 	$normalized_site_url = brandagent_normalize_store_url( $site_url );
 	$timestamp           = (string) time();
 	$nonce               = wp_generate_password( 32, false );
@@ -529,7 +788,7 @@ function brandagent_wordpress_notify_uninstall() {
 
 	$backend_path  = '/api/wordpress/uninstall';
 	$uninstall_url = trailingslashit( $clarity_server_url ) . 'wordpress/uninstall';
-	$site_url      = home_url();
+	$site_url      = brandagent_get_connected_store_url();
 
 	brandagent_log( 'BrandAgent WordPress Uninstall: calling backend', array( 'site_url' => $site_url, 'endpoint' => $uninstall_url ) );
 
@@ -581,24 +840,54 @@ function brandagent_wordpress_connect_ajax() {
 		wp_send_json( array( 'success' => false, 'error' => 'WooCommerce site must use the WooCommerce connect flow.' ) );
 	}
 
-	// Resolve credential provenance before writing the opt-in marker. Legacy WooCommerce credentials
-	// predate brandagent_hmac_platform; setting opt-in first would otherwise misclassify them as WordPress.
-	if ( 'woocommerce' === brandagent_get_hmac_platform() ) {
-		brandagent_wordpress_clear_connect_retry_state();
-		wp_send_json( array(
-			'success'    => false,
-			'error'      => 'Store is registered as WooCommerce and must be offboarded before connecting as WordPress.',
-			'error_code' => 'platform_mismatch',
-		) );
+	$result = brandagent_wordpress_connect( $_POST );
+	wp_send_json( $result );
+}
+
+/**
+ * Persist the project selected by the dashboard before starting WordPress Connect.
+ *
+ * Older dashboard versions do not send project_id, so its absence deliberately preserves the
+ * legacy flow. The caller must own brandagent_wp_connect_lock: when the field is present, the exact
+ * value must read back and remain protected until the ensuing Connect has consumed it.
+ *
+ * @param array $request AJAX request data.
+ * @return array Result with at least a boolean 'success' key.
+ */
+function brandagent_wordpress_prepare_connect_project_id( $request ) {
+	if ( ! is_array( $request ) || ! array_key_exists( 'project_id', $request ) ) {
+		return array( 'success' => true );
 	}
 
-	// Record the opt-in and start a fresh attempt budget for the server-side resume fallback.
-	update_option( 'brandagent_wp_connect_optin', 1 );
-	delete_option( 'brandagent_wp_connect_attempts' );
-	delete_transient( 'brandagent_wp_connect_throttle' );
+	$raw_project_id = $request['project_id'];
+	if ( ! is_string( $raw_project_id ) ) {
+		return array(
+			'success'    => false,
+			'error'      => 'Invalid Clarity project ID.',
+			'error_code' => 'invalid_project_id',
+		);
+	}
 
-	$result = brandagent_wordpress_connect();
-	wp_send_json( $result );
+	$raw_project_id = wp_unslash( $raw_project_id );
+	$project_id     = sanitize_text_field( $raw_project_id );
+	if ( $project_id !== $raw_project_id || '' === $project_id || 1 !== preg_match( '/\A[a-zA-Z0-9]+\z/', $project_id ) ) {
+		return array(
+			'success'    => false,
+			'error'      => 'Invalid Clarity project ID.',
+			'error_code' => 'invalid_project_id',
+		);
+	}
+
+	update_option( 'clarity_project_id', $project_id );
+	if ( $project_id !== get_option( 'clarity_project_id', '' ) ) {
+		return array(
+			'success'    => false,
+			'error'      => 'Unable to save the Clarity project ID.',
+			'error_code' => 'project_id_persist_failed',
+		);
+	}
+
+	return array( 'success' => true );
 }
 
 /**

@@ -47,8 +47,7 @@ class AdminSettings {
           if ( in_array( $setting['type'], [ 'checkbox', 'toggle' ] ) ) {
             // PHPCS ignore reason: Nonce check is already happening before this logic in `AdminPages` class.
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing
-            $value = isset( $_POST[ WP_PARSI_INPUT_PREFIX . $setting['id'] ] ) ? Param::post( WP_PARSI_INPUT_PREFIX . $setting['id'],
-              $default ) : false;
+            $value = isset( $_POST[ WP_PARSI_INPUT_PREFIX . $setting['id'] ] ) ? Param::post( WP_PARSI_INPUT_PREFIX . $setting['id'], $default ) : false;
           } else {
             $value = Param::post( WP_PARSI_INPUT_PREFIX . $setting['id'], $default );
           }
@@ -75,12 +74,10 @@ class AdminSettings {
 
         if ( $saved ) {
           Cache::set( 'settings_saved', true );
-          Notice::add( $tab, apply_filters( 'wp_parsidate_save_settings_success_message',
-            esc_html__( 'Settings saved.', 'wp-parsidate' ), $tab ), 'success' );
+          Notice::add( $tab, apply_filters( 'wp_parsidate_save_settings_success_message', esc_html__( 'Settings saved.', 'wp-parsidate' ), $tab ), 'success' );
           do_action( 'wp_parsidate_save_settings_success', $tab, $currentSection, $options );
         } else {
-          Notice::add( $tab, apply_filters( 'wp_parsidate_save_settings_error_message',
-            esc_html__( 'Error saving settings!', 'wp-parsidate' ), $tab ), 'error' );
+          Notice::add( $tab, apply_filters( 'wp_parsidate_save_settings_error_message', esc_html__( 'Error saving settings!', 'wp-parsidate' ), $tab ), 'error' );
         }
       }
     }
@@ -114,8 +111,7 @@ class AdminSettings {
           ] ) ) {
           $setting['is_repeatable'] = true;
           $default                  = self::getSettingDefault( $setting );
-          $rowKey                   = str_replace( WP_PARSI_INPUT_PREFIX . $repeatableSettingId . '_', '',
-            WP_PARSI_INPUT_PREFIX . $setting['id'] );
+          $rowKey                   = str_replace( WP_PARSI_INPUT_PREFIX . $repeatableSettingId . '_', '', WP_PARSI_INPUT_PREFIX . $setting['id'] );
           $value                    = Param::post( WP_PARSI_INPUT_PREFIX . $setting['id'], $default );
 
           if ( is_array( $value ) ) {
@@ -158,13 +154,13 @@ class AdminSettings {
     $default = ! empty( $setting['default'] ) ? $setting['default'] : null;
 
     // Set default value for toggle, checkbox, addon
-    if ( empty( $setting['default'] ) && in_array( $setting['type'], [
-        'toggle',
-        'checkbox',
-        'addon'
-      ], true ) ) {
+    if ( empty( $setting['default'] ) && in_array( $setting['type'], [ 'toggle', 'checkbox', 'addon', 'tinyaddon' ], true ) ) {
       $default = 0;
     }
+
+    /*if ( empty( $setting['default'] ) && in_array( $setting['type'], [ 'addon', 'tinyaddon' ], true ) ) {
+      $default = false;
+    }*/
 
     // Set default value for imageSizeSelect
     if ( empty( $setting['default'] ) && $setting['type'] === 'imagesizeselect' ) {
@@ -281,8 +277,8 @@ class AdminSettings {
       } elseif ( in_array( $setting['type'], [ 'postselect', 'termselect', 'menuselect', 'userselect' ] ) ) {
         $setting['sanitize'] = 'absint';
 
-      } elseif ( $setting['type'] === 'addon' ) {
-        $setting['sanitize'] = 'int';
+      } elseif ( in_array( $setting['type'], [ 'addon', 'tinyaddon' ] ) ) {
+        $setting['sanitize'] = 'bool';
 
       } elseif ( $setting['type'] === 'gradientcolorpicker' ) {
         $setting['sanitize'] = 'jsonArray';
@@ -457,7 +453,7 @@ class AdminSettings {
 
     echo '<header id="wppd-settings-header" class="wppd-header ' . ( $headerImage ? 'wppd-has-header-image' : '' ) . '">';
     echo '<div class="wppd-header-title" style="' . ( $headerImage ? 'background-image: url(' . esc_url_raw( $headerImage ) . ');' : '' ) . '">';
-    echo '<h1>' . esc_html( $settings['title'] ) . '</h1>';
+    echo '<h1 class="wppd-header-tab-title">' . esc_html( $settings['title'] ) . '</h1>';
     if ( ! empty( $settings['desc'] ) ) {
       echo '<p class="wppd-description">' . $settings['desc'] . '</p>';
     }

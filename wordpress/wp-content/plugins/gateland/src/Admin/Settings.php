@@ -3,6 +3,7 @@
 namespace Nabik\Gateland\Admin;
 
 use Nabik\Gateland\Gateland;
+use Nabik\Gateland\Helpers\SQID;
 use Nabik\GatelandPro\GatelandPro;
 use Nabik_Net_License;
 
@@ -55,6 +56,10 @@ class Settings extends \Nabik\Utils\V1\Settings {
 			[
 				'id'    => 'gateland_zohal',
 				'title' => 'زحل',
+			],
+			[
+				'id'    => 'gateland_advanced',
+				'title' => 'پیشرفته',
 			],
 			class_exists( GatelandPro::class ) ? [
 				'id'    => 'gateland_license',
@@ -125,7 +130,7 @@ class Settings extends \Nabik\Utils\V1\Settings {
 		$message = sprintf( '<span style="color: %s">%s</span>', $color, $message );
 
 		return [
-			'gateland_general' => [
+			'gateland_general'  => [
 				[
 					'id'      => 'gateway_order',
 					'label'   => 'نوع انتخاب درگاه',
@@ -147,7 +152,7 @@ class Settings extends \Nabik\Utils\V1\Settings {
 					'desc'    => 'در صورت فعالسازی این گزینه، پرداخت صرفا از طریق آی.پی‌های ایرانی امکان پذیر خواهد بود.' . ( $has_pro ? '' : '(این امکان فقط در <a href="https://l.nabik.net/gateland-pro/?utm_source=iran_access" target="_blank">نسخه حرفه‌ای</a> فعال می‌باشد)' ),
 				],
 			],
-			'gateland_sms'     => [
+			'gateland_sms'      => [
 				[
 					'id'    => 'shortcode',
 					'label' => 'راهنما',
@@ -165,16 +170,6 @@ class Settings extends \Nabik\Utils\V1\Settings {
 								<li><strong>{amount}</strong> مبلغ تراکنش</li>
 								</ul>',
 					'type'  => 'html',
-				],
-				[
-					'label'   => 'آدرس پرداخت',
-					'id'      => 'pay_link',
-					'default' => 'pay',
-					'type'    => 'text',
-					'desc'    => sprintf( 'لینک پرداختی که برای کاربر ارسال می‌شود.
-					</br>
-					برای مثال اگر شما pay‌ وارد کنید، آدرس پرداخت می‌شود: %s', site_url( 'pay' ) ),
-					// @todo add more description, move to advanced section
 				],
 				[
 					'label'   => 'پیامک ایجاد تراکنش',
@@ -206,7 +201,7 @@ class Settings extends \Nabik\Utils\V1\Settings {
 //				],
 
 			],
-			'gateland_bot'     => [
+			'gateland_bot'      => [
 				$has_pro ? [] : [
 					'id'   => 'gateway_bot',
 					'type' => 'html',
@@ -229,7 +224,7 @@ class Settings extends \Nabik\Utils\V1\Settings {
 					'desc'    => 'در هر سطر یک شناسه یکتا وارد کنید. (حداکثر ۵ شناسه یکتا)',
 				],
 			],
-			'gateland_proxy'   => [
+			'gateland_proxy'    => [
 				[
 					'id'      => 'enable',
 					'label'   => 'فعالسازی پروکسی',
@@ -278,7 +273,7 @@ class Settings extends \Nabik\Utils\V1\Settings {
 					'desc'    => 'Password',
 				],
 			],
-			'gateland_zohal'   => [
+			'gateland_zohal'    => [
 				[
 					'id'   => 'introduce',
 					'type' => 'html',
@@ -292,7 +287,24 @@ class Settings extends \Nabik\Utils\V1\Settings {
 					'desc'    => 'برای دریافت توکن زحل، <a href="https://l.nabik.net/zohal?utm_source=gateland" target="_blank"> ثبت نام کرده و وارد شوید</a>، سپس از منو توسعه‌دهنگان یک توکن ایجاد کنید',
 				],
 			],
-			'gateland_license' => [
+			'gateland_advanced' => [
+				[
+					'label'   => 'پیشوند آدرس پرداخت',
+					'id'      => 'pay_url_prefix',
+					'default' => 'pay',
+					'type'    => 'text',
+					'desc'    => sprintf(
+						'<p>پیشوند آدرس پرداخت تراکنش را مشخص می‌کند. مقدار پیش‌فرض این گزینه pay است و برای اکثر کاربران نیازی به تغییر آن نیست.</p>
+								<p>
+									<b>مثال:</b> اگر مقدار این گزینه را <b>pay</b> قرار دهید، آدرس پرداخت تراکنش شبیه لینک روبرو خواهد بود:
+									%s/<b>pay</b>/%s
+								</p>',
+						site_url(),
+						SQID::encode( rand() )
+					),
+				],
+			],
+			'gateland_license'  => [
 				[
 					'label' => 'وضعیت',
 					'id'    => 'status',
@@ -336,7 +348,8 @@ class Settings extends \Nabik\Utils\V1\Settings {
 	function admin_init() {
 		parent::admin_init();
 
-		Gateland::addRewriteRules();
+		Gateland::add_rewrite_rule();
+
 		// Flush rules for custom urls
 		flush_rewrite_rules();
 	}

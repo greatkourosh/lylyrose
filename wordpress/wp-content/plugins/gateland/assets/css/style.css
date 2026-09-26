@@ -580,6 +580,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .-left-\[1px\] {
   left: -1px;
 }
+.gateland-container .-right-\[1px\] {
+  right: -1px;
+}
 .gateland-container .bottom-0 {
   bottom: 0px;
 }
@@ -615,6 +618,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .top-\[50\%\] {
   top: 50%;
+}
+.gateland-container .top-\[62px\] {
+  top: 62px;
 }
 .gateland-container .top-\[calc\(100\%\+4px\)\] {
   top: calc(100% + 4px);
@@ -667,6 +673,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .col-span-full {
   grid-column: 1 / -1;
 }
+.gateland-container .\!col-span-full {
+  grid-column: 1 / -1 !important;
+}
 .gateland-container .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -683,9 +692,16 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
+.gateland-container .my-3 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
 .gateland-container .my-auto {
   margin-top: auto;
   margin-bottom: auto;
+}
+.gateland-container .-mt-0\.5 {
+  margin-top: -0.125rem;
 }
 .gateland-container .-mt-\[1px\] {
   margin-top: -1px;
@@ -729,6 +745,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .mb-8 {
   margin-bottom: 2rem;
 }
+.gateland-container .mb-\[198px\] {
+  margin-bottom: 198px;
+}
 .gateland-container .ml-1 {
   margin-left: 0.25rem;
 }
@@ -741,11 +760,17 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .mr-auto {
   margin-right: auto;
 }
+.gateland-container .mt-1 {
+  margin-top: 0.25rem;
+}
 .gateland-container .mt-10 {
   margin-top: 2.5rem;
 }
 .gateland-container .mt-2 {
   margin-top: 0.5rem;
+}
+.gateland-container .mt-3 {
+  margin-top: 0.75rem;
 }
 .gateland-container .mt-4 {
   margin-top: 1rem;
@@ -877,9 +902,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .h-11 {
   height: 2.75rem;
 }
-.gateland-container .h-12 {
-  height: 3rem;
-}
 .gateland-container .h-2 {
   height: 0.5rem;
 }
@@ -888,6 +910,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .h-20 {
   height: 5rem;
+}
+.gateland-container .h-3 {
+  height: 0.75rem;
 }
 .gateland-container .h-3\.5 {
   height: 0.875rem;
@@ -913,6 +938,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .h-9 {
   height: 2.25rem;
 }
+.gateland-container .h-\[172px\] {
+  height: 172px;
+}
 .gateland-container .h-\[2px\] {
   height: 2px;
 }
@@ -930,9 +958,6 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .h-\[440px\] {
   height: 440px;
-}
-.gateland-container .h-\[70px\] {
-  height: 70px;
 }
 .gateland-container .h-full {
   height: 100%;
@@ -960,6 +985,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .w-16 {
   width: 4rem;
+}
+.gateland-container .w-2\/3 {
+  width: 66.666667%;
 }
 .gateland-container .w-20 {
   width: 5rem;
@@ -991,6 +1019,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .w-5 {
   width: 1.25rem;
 }
+.gateland-container .w-5\/6 {
+  width: 83.333333%;
+}
 .gateland-container .w-52 {
   width: 13rem;
 }
@@ -1009,8 +1040,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .w-9 {
   width: 2.25rem;
 }
+.gateland-container .w-\[1200px\] {
+  width: 1200px;
+}
 .gateland-container .w-\[140px\] {
   width: 140px;
+}
+.gateland-container .w-\[18px\] {
+  width: 18px;
 }
 .gateland-container .w-\[200px\] {
   width: 200px;
@@ -1027,11 +1064,17 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .w-\[500px\] {
   width: 500px;
 }
+.gateland-container .w-\[600px\] {
+  width: 600px;
+}
 .gateland-container .w-\[900px\] {
   width: 900px;
 }
 .gateland-container .w-\[calc\(100\%\+2px\)\] {
   width: calc(100% + 2px);
+}
+.gateland-container .w-\[calc\(100\%-20px\)\] {
+  width: calc(100% - 20px);
 }
 .gateland-container .w-\[calc\(100\%-36px\)\] {
   width: calc(100% - 36px);
@@ -1041,6 +1084,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .w-screen {
   width: 100vw;
+}
+.gateland-container .min-w-1\.5 {
+  min-width: 0.375rem;
 }
 .gateland-container .min-w-10 {
   min-width: 2.5rem;
@@ -1084,6 +1130,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .min-w-\[120px\] {
   min-width: 120px;
 }
+.gateland-container .min-w-\[18px\] {
+  min-width: 18px;
+}
 .gateland-container .min-w-\[250px\] {
   min-width: 250px;
 }
@@ -1115,6 +1164,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .list-disc {
   list-style-type: disc;
 }
+.gateland-container .grid-cols-10 {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
 .gateland-container .grid-cols-12 {
   grid-template-columns: repeat(12, minmax(0, 1fr));
 }
@@ -1138,6 +1190,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .justify-center {
   justify-content: center;
+}
+.gateland-container .justify-between {
+  justify-content: space-between;
 }
 .gateland-container .justify-around {
   justify-content: space-around;
@@ -1172,17 +1227,28 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .gap-x-2 {
   column-gap: 0.5rem;
 }
+.gateland-container .gap-x-4 {
+  column-gap: 1rem;
+}
 .gateland-container .gap-y-1 {
   row-gap: 0.25rem;
 }
 .gateland-container .gap-y-10 {
   row-gap: 2.5rem;
 }
+.gateland-container .gap-y-2 {
+  row-gap: 0.5rem;
+}
 .gateland-container .gap-y-4 {
   row-gap: 1rem;
 }
 .gateland-container .gap-y-6 {
   row-gap: 1.5rem;
+}
+.gateland-container .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
 }
 .gateland-container .space-y-3 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
@@ -1230,6 +1296,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .rounded-md {
   border-radius: 0.375rem;
 }
+.gateland-container .rounded-sm {
+  border-radius: 0.125rem;
+}
 .gateland-container .rounded-xl {
   border-radius: 0.75rem;
 }
@@ -1243,6 +1312,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .border {
   border-width: 1px;
+}
+.gateland-container .border-2 {
+  border-width: 2px;
 }
 .gateland-container .border-4 {
   border-width: 4px;
@@ -1266,6 +1338,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .border-t {
   border-top-width: 1px;
 }
+.gateland-container .border-dashed {
+  border-style: dashed;
+}
+.gateland-container .\!border-none {
+  border-style: none !important;
+}
 .gateland-container .\!border-gray-300 {
   --tw-border-opacity: 1 !important;
   border-color: rgb(208 213 221 / var(--tw-border-opacity, 1)) !important;
@@ -1278,9 +1356,21 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-border-opacity: 1;
   border-color: rgb(115 141 191 / var(--tw-border-opacity, 1));
 }
+.gateland-container .border-\[\#D98A00\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(217 138 0 / var(--tw-border-opacity, 1));
+}
+.gateland-container .border-\[\#D9E2FF\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(217 226 255 / var(--tw-border-opacity, 1));
+}
 .gateland-container .border-\[\#E2E8F0\] {
   --tw-border-opacity: 1;
   border-color: rgb(226 232 240 / var(--tw-border-opacity, 1));
+}
+.gateland-container .border-\[\#E6E9F0\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(230 233 240 / var(--tw-border-opacity, 1));
 }
 .gateland-container .border-\[\#EAECF0\] {
   --tw-border-opacity: 1;
@@ -1347,6 +1437,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .border-opacity-0 {
   --tw-border-opacity: 0;
 }
+.gateland-container .border-opacity-30 {
+  --tw-border-opacity: 0.3;
+}
 .gateland-container .\!bg-gray-100 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(242 244 247 / var(--tw-bg-opacity, 1)) !important;
@@ -1363,6 +1456,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-bg-opacity: 1;
   background-color: rgb(98 116 142 / var(--tw-bg-opacity, 1));
 }
+.gateland-container .bg-\[\#D98A00\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(217 138 0 / var(--tw-bg-opacity, 1));
+}
 .gateland-container .bg-\[\#E2E8F0\] {
   --tw-bg-opacity: 1;
   background-color: rgb(226 232 240 / var(--tw-bg-opacity, 1));
@@ -1371,12 +1468,32 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-bg-opacity: 1;
   background-color: rgb(234 58 61 / var(--tw-bg-opacity, 1));
 }
+.gateland-container .bg-\[\#EAEFFF\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(234 239 255 / var(--tw-bg-opacity, 1));
+}
+.gateland-container .bg-\[\#EEF1F7\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(238 241 247 / var(--tw-bg-opacity, 1));
+}
+.gateland-container .bg-\[\#EFF2F7\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 242 247 / var(--tw-bg-opacity, 1));
+}
+.gateland-container .bg-\[\#F1F4FA\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 244 250 / var(--tw-bg-opacity, 1));
+}
 .gateland-container .bg-\[\#F1F5F980\] {
   background-color: #F1F5F980;
 }
 .gateland-container .bg-\[\#F1F5F9\] {
   --tw-bg-opacity: 1;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity, 1));
+}
+.gateland-container .bg-\[\#F5FBFF\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 251 255 / var(--tw-bg-opacity, 1));
 }
 .gateland-container .bg-\[\#F8FAFC\] {
   --tw-bg-opacity: 1;
@@ -1385,6 +1502,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .bg-\[\#F9FAFB\] {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
+}
+.gateland-container .bg-\[\#FFF4E0\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 244 224 / var(--tw-bg-opacity, 1));
 }
 .gateland-container .bg-black {
   --tw-bg-opacity: 1;
@@ -1513,17 +1634,26 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .bg-opacity-0 {
   --tw-bg-opacity: 0;
 }
+.gateland-container .bg-opacity-20 {
+  --tw-bg-opacity: 0.2;
+}
 .gateland-container .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
 .gateland-container .bg-opacity-90 {
   --tw-bg-opacity: 0.9;
 }
+.gateland-container .bg-\[linear-gradient\(130\.24deg\2c \#FF7A45_0\%\2c \#FF4D6D_99\.96\%\)\] {
+  background-image: linear-gradient(130.24deg,#FF7A45 0%,#FF4D6D 99.96%);
+}
 .gateland-container .object-contain {
   object-fit: contain;
 }
 .gateland-container .object-cover {
   object-fit: cover;
+}
+.gateland-container .p-0\.5 {
+  padding: 0.125rem;
 }
 .gateland-container .p-1 {
   padding: 0.25rem;
@@ -1609,6 +1739,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
 }
+.gateland-container .py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
 .gateland-container .py-10 {
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
@@ -1657,11 +1791,23 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .pl-2\.5 {
   padding-left: 0.625rem;
 }
+.gateland-container .pl-3 {
+  padding-left: 0.75rem;
+}
 .gateland-container .pl-5 {
   padding-left: 1.25rem;
 }
+.gateland-container .pr-2 {
+  padding-right: 0.5rem;
+}
+.gateland-container .pr-3 {
+  padding-right: 0.75rem;
+}
 .gateland-container .pr-5 {
   padding-right: 1.25rem;
+}
+.gateland-container .pr-6 {
+  padding-right: 1.5rem;
 }
 .gateland-container .pt-0\.5 {
   padding-top: 0.125rem;
@@ -1687,12 +1833,18 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .text-right {
   text-align: right;
 }
+.gateland-container .text-justify {
+  text-align: justify;
+}
 .gateland-container .\!text-base {
   font-size: 1rem !important;
   line-height: 1.5rem !important;
 }
 .gateland-container .text-\[10px\] {
   font-size: 10px;
+}
+.gateland-container .text-\[11px\] {
+  font-size: 11px;
 }
 .gateland-container .text-base {
   font-size: 1rem;
@@ -1717,6 +1869,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .font-bold {
   font-weight: 700;
 }
+.gateland-container .font-extrabold {
+  font-weight: 800;
+}
 .gateland-container .font-light {
   font-weight: 300;
 }
@@ -1735,6 +1890,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 .gateland-container .italic {
   font-style: italic;
 }
+.gateland-container .\!leading-none {
+  line-height: 1 !important;
+}
 .gateland-container .leading-3 {
   line-height: .75rem;
 }
@@ -1745,21 +1903,53 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   --tw-text-opacity: 1 !important;
   color: rgb(16 24 40 / var(--tw-text-opacity, 1)) !important;
 }
+.gateland-container .text-\[\#0F172A\] {
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
+}
 .gateland-container .text-\[\#1D293D\] {
   --tw-text-opacity: 1;
   color: rgb(29 41 61 / var(--tw-text-opacity, 1));
+}
+.gateland-container .text-\[\#1E40C4\] {
+  --tw-text-opacity: 1;
+  color: rgb(30 64 196 / var(--tw-text-opacity, 1));
 }
 .gateland-container .text-\[\#314158\] {
   --tw-text-opacity: 1;
   color: rgb(49 65 88 / var(--tw-text-opacity, 1));
 }
+.gateland-container .text-\[\#344054\] {
+  --tw-text-opacity: 1;
+  color: rgb(52 64 84 / var(--tw-text-opacity, 1));
+}
+.gateland-container .text-\[\#3A4658\] {
+  --tw-text-opacity: 1;
+  color: rgb(58 70 88 / var(--tw-text-opacity, 1));
+}
+.gateland-container .text-\[\#475569\] {
+  --tw-text-opacity: 1;
+  color: rgb(71 85 105 / var(--tw-text-opacity, 1));
+}
 .gateland-container .text-\[\#62748E\] {
   --tw-text-opacity: 1;
   color: rgb(98 116 142 / var(--tw-text-opacity, 1));
 }
+.gateland-container .text-\[\#7A8696\] {
+  --tw-text-opacity: 1;
+  color: rgb(122 134 150 / var(--tw-text-opacity, 1));
+}
 .gateland-container .text-\[\#90A1B9\] {
   --tw-text-opacity: 1;
   color: rgb(144 161 185 / var(--tw-text-opacity, 1));
+}
+.gateland-container .text-\[\#94A3B8\] {
+  --tw-text-opacity: 1;
+  color: rgb(148 163 184 / var(--tw-text-opacity, 1));
+}
+.gateland-container .text-\[\#D1E9FF\] {
+  --tw-text-opacity: 1;
+  color: rgb(209 233 255 / var(--tw-text-opacity, 1));
 }
 .gateland-container .text-blue-700 {
   --tw-text-opacity: 1;
@@ -1852,6 +2042,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 }
 .gateland-container .opacity-80 {
   opacity: 0.8;
+}
+.gateland-container .\!shadow-none {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
 }
 .gateland-container .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -1985,6 +2180,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
   font-weight: 600;
   src: url("../fonts/roboto/Roboto-Medium.ttf");
 }
+@font-face {
+  font-family: Cousine;
+  font-style: normal;
+  font-weight: 500;
+  src: url("../fonts/cousine/Cousine-Regular.ttf");
+}
 body, html {
   background-color: #F9FBFE;
 }
@@ -2021,6 +2222,10 @@ body, html {
 
 .gateland-container .font-roboto {
   font-family: "Roboto", serif !important;
+}
+
+.gateland-container .font-cousine {
+  font-family: "Cousine", serif !important;
 }
 
 .gateland-container input, .gateland-container textarea {
@@ -2161,7 +2366,7 @@ body, html {
   border: none !important;
 }
 
-.gateland-container .tippy-box[data-theme~=tomato] {
+.tippy-box[data-theme~=tomato] {
   background-color: #101828;
   color: #FFFFFF;
   font-weight: 600;
@@ -2170,6 +2375,9 @@ body, html {
   text-align: center;
   padding: 6px;
   border-radius: 8px;
+}
+.tippy-box[data-theme~=tomato] .tippy-content {
+  text-align: center !important;
 }
 
 .notyf {
@@ -2192,6 +2400,23 @@ body, html {
 }
 .gateland-container .gateway-row.active .status .status-circle {
   right: 2px !important;
+}
+
+.gateland-container .blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.gateland-container .placeholder\:text-right::placeholder {
+  text-align: right;
 }
 
 .gateland-container .empty\:my-0:empty {
@@ -2265,6 +2490,10 @@ body, html {
 
 .gateland-container .hover\:bg-opacity-20:hover {
   --tw-bg-opacity: 0.2;
+}
+
+.gateland-container .hover\:bg-opacity-30:hover {
+  --tw-bg-opacity: 0.3;
 }
 
 .gateland-container .hover\:\!text-white:hover {
@@ -2409,6 +2638,10 @@ body, html {
     width: 7rem;
   }
 
+  .gateland-container .sm\:w-\[150px\] {
+    width: 150px;
+  }
+
   .gateland-container .sm\:w-\[180px\] {
     width: 180px;
   }
@@ -2421,8 +2654,16 @@ body, html {
     width: auto;
   }
 
+  .gateland-container .sm\:w-full {
+    width: 100%;
+  }
+
   .gateland-container .sm\:min-w-7 {
     min-width: 1.75rem;
+  }
+
+  .gateland-container .sm\:min-w-\[150px\] {
+    min-width: 150px;
   }
 
   .gateland-container .sm\:flex-nowrap {
@@ -2433,8 +2674,31 @@ body, html {
     gap: 0.5rem;
   }
 
+  .gateland-container .sm\:rounded-xl {
+    border-radius: 0.75rem;
+  }
+
+  .gateland-container .sm\:border {
+    border-width: 1px;
+  }
+
+  .gateland-container .sm\:bg-\[\#F8FAFC\] {
+    --tw-bg-opacity: 1;
+    background-color: rgb(248 250 252 / var(--tw-bg-opacity, 1));
+  }
+
   .gateland-container .sm\:p-10 {
     padding: 2.5rem;
+  }
+
+  .gateland-container .sm\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .gateland-container .sm\:py-2\.5 {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
   }
 
   .gateland-container .sm\:py-8 {
@@ -2492,6 +2756,11 @@ body, html {
     grid-column: span 7 / span 7;
   }
 
+  .gateland-container .md\:my-6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
   .gateland-container .md\:mb-0 {
     margin-bottom: 0px;
   }
@@ -2506,6 +2775,10 @@ body, html {
 
   .gateland-container .md\:mb-8 {
     margin-bottom: 2rem;
+  }
+
+  .gateland-container .md\:mt-0 {
+    margin-top: 0px;
   }
 
   .gateland-container .md\:mt-6 {
@@ -2524,6 +2797,11 @@ body, html {
     display: flex;
   }
 
+  .gateland-container .md\:size-14 {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
   .gateland-container .md\:size-9 {
     width: 2.25rem;
     height: 2.25rem;
@@ -2534,12 +2812,36 @@ body, html {
     height: 70px;
   }
 
+  .gateland-container .md\:h-11 {
+    height: 2.75rem;
+  }
+
   .gateland-container .md\:h-12 {
     height: 3rem;
   }
 
+  .gateland-container .md\:h-5 {
+    height: 1.25rem;
+  }
+
   .gateland-container .md\:h-52 {
     height: 13rem;
+  }
+
+  .gateland-container .md\:h-8 {
+    height: 2rem;
+  }
+
+  .gateland-container .md\:h-\[28px\] {
+    height: 28px;
+  }
+
+  .gateland-container .md\:w-20 {
+    width: 5rem;
+  }
+
+  .gateland-container .md\:w-28 {
+    width: 7rem;
   }
 
   .gateland-container .md\:w-auto {
@@ -2548,6 +2850,10 @@ body, html {
 
   .gateland-container .md\:max-w-\[50\%\] {
     max-width: 50%;
+  }
+
+  .gateland-container .md\:flex-row {
+    flex-direction: row;
   }
 
   .gateland-container .md\:flex-nowrap {
@@ -2564,6 +2870,10 @@ body, html {
 
   .gateland-container .md\:gap-10 {
     gap: 2.5rem;
+  }
+
+  .gateland-container .md\:gap-3 {
+    gap: 0.75rem;
   }
 
   .gateland-container .md\:gap-4 {
@@ -2594,12 +2904,21 @@ body, html {
     overflow: hidden;
   }
 
+  .gateland-container .md\:rounded-\[10px\] {
+    border-radius: 10px;
+  }
+
   .gateland-container .md\:rounded-\[8px\] {
     border-radius: 8px;
   }
 
   .gateland-container .md\:rounded-none {
     border-radius: 0px;
+  }
+
+  .gateland-container .md\:rounded-t-none {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
   }
 
   .gateland-container .md\:border {
@@ -2673,6 +2992,15 @@ body, html {
     line-height: 2rem;
   }
 
+  .gateland-container .md\:text-\[28px\] {
+    font-size: 28px;
+  }
+
+  .gateland-container .md\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
   .gateland-container .md\:text-lg {
     font-size: 1.125rem;
     line-height: 1.75rem;
@@ -2694,6 +3022,10 @@ body, html {
 }
 
 @media (min-width: 1024px) {
+
+  .gateland-container .lg\:static {
+    position: static;
+  }
 
   .gateland-container .lg\:col-span-1 {
     grid-column: span 1 / span 1;
@@ -2719,6 +3051,69 @@ body, html {
     grid-column: span 8 / span 8;
   }
 
+  .gateland-container .lg\:col-span-full {
+    grid-column: 1 / -1;
+  }
+
+  .gateland-container .lg\:mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .gateland-container .lg\:my-6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .gateland-container .lg\:mb-0 {
+    margin-bottom: 0px;
+  }
+
+  .gateland-container .lg\:mb-1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .gateland-container .lg\:mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .gateland-container .lg\:mb-3 {
+    margin-bottom: 0.75rem;
+  }
+
+  .gateland-container .lg\:mb-6 {
+    margin-bottom: 1.5rem;
+  }
+
+  .gateland-container .lg\:mr-0 {
+    margin-right: 0px;
+  }
+
+  .gateland-container .lg\:block {
+    display: block;
+  }
+
+  .gateland-container .lg\:flex {
+    display: flex;
+  }
+
+  .gateland-container .lg\:hidden {
+    display: none;
+  }
+
+  .gateland-container .lg\:size-14 {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .gateland-container .lg\:h-5 {
+    height: 1.25rem;
+  }
+
+  .gateland-container .lg\:h-\[180px\] {
+    height: 180px;
+  }
+
   .gateland-container .lg\:grid-cols-9 {
     grid-template-columns: repeat(9, minmax(0, 1fr));
   }
@@ -2735,6 +3130,118 @@ body, html {
     row-gap: 2rem;
   }
 
+  .gateland-container .lg\:rounded-2xl {
+    border-radius: 1rem;
+  }
+
+  .gateland-container .lg\:rounded-3xl {
+    border-radius: 1.5rem;
+  }
+
+  .gateland-container .lg\:rounded-\[20px\] {
+    border-radius: 20px;
+  }
+
+  .gateland-container .lg\:rounded-none {
+    border-radius: 0px;
+  }
+
+  .gateland-container .lg\:rounded-b-3xl {
+    border-bottom-right-radius: 1.5rem;
+    border-bottom-left-radius: 1.5rem;
+  }
+
+  .gateland-container .lg\:rounded-b-none {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+
+  .gateland-container .lg\:rounded-t-3xl {
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+  }
+
+  .gateland-container .lg\:border {
+    border-width: 1px;
+  }
+
+  .gateland-container .lg\:border-0 {
+    border-width: 0px;
+  }
+
+  .gateland-container .lg\:border-x {
+    border-left-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .gateland-container .lg\:border-x-0 {
+    border-left-width: 0px;
+    border-right-width: 0px;
+  }
+
+  .gateland-container .lg\:border-b {
+    border-bottom-width: 1px;
+  }
+
+  .gateland-container .lg\:border-t {
+    border-top-width: 1px;
+  }
+
+  .gateland-container .lg\:border-t-0 {
+    border-top-width: 0px;
+  }
+
+  .gateland-container .lg\:border-\[\#DDE7FF\] {
+    --tw-border-opacity: 1;
+    border-color: rgb(221 231 255 / var(--tw-border-opacity, 1));
+  }
+
+  .gateland-container .lg\:border-\[\#E6E9F0\] {
+    --tw-border-opacity: 1;
+    border-color: rgb(230 233 240 / var(--tw-border-opacity, 1));
+  }
+
+  .gateland-container .lg\:bg-\[\#F8FAFC\] {
+    --tw-bg-opacity: 1;
+    background-color: rgb(248 250 252 / var(--tw-bg-opacity, 1));
+  }
+
+  .gateland-container .lg\:bg-white {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+  }
+
+  .gateland-container .lg\:bg-\[linear-gradient\(180deg\2c \#F0F7FF_0\%\2c \#FFFFFF_100\%\)\] {
+    background-image: linear-gradient(180deg,#F0F7FF 0%,#FFFFFF 100%);
+  }
+
+  .gateland-container .lg\:p-0 {
+    padding: 0px;
+  }
+
+  .gateland-container .lg\:p-5 {
+    padding: 1.25rem;
+  }
+
+  .gateland-container .lg\:px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .gateland-container .lg\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .gateland-container .lg\:py-5 {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .gateland-container .lg\:pb-4 {
+    padding-bottom: 1rem;
+  }
+
   .gateland-container .lg\:pt-7 {
     padding-top: 1.75rem;
   }
@@ -2742,6 +3249,35 @@ body, html {
   .gateland-container .lg\:text-2xl {
     font-size: 1.5rem;
     line-height: 2rem;
+  }
+
+  .gateland-container .lg\:text-\[24px\] {
+    font-size: 24px;
+  }
+
+  .gateland-container .lg\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .gateland-container .lg\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .gateland-container .lg\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .gateland-container .lg\:font-medium {
+    font-weight: 500;
+  }
+
+  .gateland-container .lg\:shadow-\[0_28\.63px_71\.56px_-40\.55px_\#10162266\] {
+    --tw-shadow: 0 28.63px 71.56px -40.55px #10162266;
+    --tw-shadow-colored: 0 28.63px 71.56px -40.55px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
   }
 }
 
@@ -2755,6 +3291,22 @@ body, html {
     grid-column: span 2 / span 2;
   }
 
+  .gateland-container .xl\:col-span-6 {
+    grid-column: span 6 / span 6;
+  }
+
+  .gateland-container .xl\:\!col-span-full {
+    grid-column: 1 / -1 !important;
+  }
+
+  .gateland-container .xl\:col-span-full {
+    grid-column: 1 / -1;
+  }
+
+  .gateland-container .xl\:w-\[calc\(120\%\+2px\)\] {
+    width: calc(120% + 2px);
+  }
+
   .gateland-container .xl\:grid-cols-9 {
     grid-template-columns: repeat(9, minmax(0, 1fr));
   }
@@ -2765,6 +3317,11 @@ body, html {
 
   .gateland-container .xl\:pt-7 {
     padding-top: 1.75rem;
+  }
+
+  .gateland-container .xl\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 }
 

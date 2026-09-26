@@ -4,6 +4,64 @@
  */
 $changelog = [
     [
+        'version'  => 'Version 5.1.3',
+        'released' => '2026-09-24',
+        'changes'  => [
+            'Fix' => [
+                [
+                    'title'       => 'The vendor dashboard navigation is no longer rebuilt on every request, so cron, Action Scheduler, and other background requests no longer do that work on each hit.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'The vendor product list now shows each product\'s real type instead of labeling unrecognized types as Simple.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'Prices on the vendor dashboard now follow the store\'s configured number of decimals, so a zero-decimal currency no longer shows trailing decimals.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'Vendors can now reorder product gallery images by dragging them in the new product editor.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'REST pagination links now point at the endpoint that actually served the request instead of the controller\'s shared base route.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'Stopped listening to a deprecated WooCommerce hook that flooded the debug log with notices on every vendor analytics page.',
+                    'description' => '',
+                ],
+            ],
+        ],
+    ],
+    [
+        'version'  => 'Version 5.1.2',
+        'released' => '2026-09-17',
+        'changes'  => [
+            'Improvement' => [
+                [
+                    'title'       => 'Added FlyCRM to the setup wizard\'s recommended add-ons and removed Texty from that step.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'Added FlyCRM to the admin Extensions page as an installable add-on.',
+                    'description' => '',
+                ],
+            ],
+            'Fix' => [
+                [
+                    'title'       => 'Dokan now falls back to a current AI model when the saved one has been retired, so AI content generation no longer fails and the admin AI model dropdown no longer appears blank.',
+                    'description' => '',
+                ],
+                [
+                    'title'       => 'The Single Product Multi Vendor search field now renders correctly in the new product editor instead of showing a plain text box and a debug notice.',
+                    'description' => '',
+                ],
+            ],
+        ],
+    ],
+    [
         'version'  => 'Version 5.1.1',
         'released' => '2026-09-09',
         'changes'  => [

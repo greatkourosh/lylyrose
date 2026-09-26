@@ -17,6 +17,7 @@ abstract class Addon {
 
   public function __construct() {
     add_filter( 'wp_parsidate_addons', [ $this, 'registerAddon' ] );
+
     add_action( 'wp_parsidate_admin_init', [ $this, 'registerMenu' ] );
     add_filter( 'wp_parsidate_settings', [ $this, 'allSettings' ] );
 
@@ -189,10 +190,8 @@ abstract class Addon {
 
     $addon     = $this->getInfo();
     $addonCats = Addons::getAddonCats();
-    $cat       = empty( $addon['cat'] ) || ! array_key_exists( $addon['cat'],
-      $addonCats ) ? 'other' : $addon['cat'];
-    $icon      = ! empty( $addon['icon'] ) && Assets::isSvgImageString( $addon['icon'] ) ? Assets::setSvgDimensions( $addon['icon'],
-      50 ) : '';
+    $cat       = empty( $addon['cat'] ) || ! array_key_exists( $addon['cat'], $addonCats ) ? 'other' : $addon['cat'];
+    $icon      = ! empty( $addon['icon'] ) && Assets::isSvgImageString( $addon['icon'] ) ? Assets::setSvgDimensions( $addon['icon'], 50 ) : '';
 
     if ( $this->getInfo( 'has_page', false ) ) {
       $link = AdminPages::link( [
@@ -217,9 +216,15 @@ abstract class Addon {
   }
 
   public function registerAddon( $addons ) {
-    $addons[] = $this->getInfo();
+    if ( $this->canDisplay() ) {
+      $addons[] = $this->getInfo();
+    }
 
     return $addons;
+  }
+
+  private function canDisplay(): bool {
+    return ! $this->getInfo( 'is_demo', false ) || ! $this->isActivated();
   }
 
   private function getInfo( $key = null, $default = null ) {
@@ -238,8 +243,7 @@ abstract class Addon {
   }
 
   public function isActivated(): bool {
-    if ( ! $this->getInfo( 'force_enable', false ) &&
-         Settings::get( 'internal_addon_' . $this->addonID, false ) !== 1 ) {
+    if ( ! $this->getInfo( 'force_enable', false ) && ! Settings::get( 'internal_addon_' . $this->addonID, false ) ) {
       return false;
     }
 

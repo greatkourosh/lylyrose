@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: WP-Parsidate
- * Version: 6.2.1
+ * Version: 6.4
  * Plugin URI: https://wp-parsi.com/support/
  * Description: Persian package for WordPress, Adds full RTL and Shamsi (Jalali) support for: posts, comments, pages, archives, search, categories, permalinks and all admin sections and TinyMce editor, lists, quick editor. This package has Jalali archive widget.
  * Author: WP-Parsi Team
@@ -32,6 +32,12 @@
  *
  * Developers:
  *              Mobin Ghasempoor ( Developer & Founder )
+ *                Rest in peace, my friend. 🖤
+ *                You were not just a great developer, but a genuinely kind person and a wonderful friend. Your passion for technology, your creativity, and the moments we shared will always be remembered.
+ *                The world has lost a great developer, but your code, your ideas, and the memories you left behind will live on.
+ *                You may be gone, but you will never be forgotten.
+ *                RIP, my friend. 🕊️
+ *
  *              Morteza Geransayeh ( Developer & Founder )
  *              HamidReza Yazdani ( Developer )
  *              Saeed Fard ( Analyst & Developer )
@@ -53,9 +59,10 @@ defined( 'ABSPATH' ) || exit;
 use WPParsidate\Addons\Addons;
 use WPParsidate\Admin\Admin;
 use WPParsidate\App\App;
+use WPParsidate\Block\Blocks;
 use WPParsidate\Core\Core;
 use WPParsidate\Helper\WordPress;
-use WPParsidate\Plugin\{Install, Plugin};
+use WPParsidate\Plugin\{Install, Plugin, WpNotice};
 use WPParsidate\Settings\Settings;
 use WPParsidate\Widget\Widget;
 
@@ -94,7 +101,7 @@ final class WP_Parsidate {
     }
 
     if ( ! defined( 'WP_PARSI_DIR' ) ) {
-      define( 'WP_PARSI_DIR', plugin_dir_path( WP_PARSI_ROOT ) );
+      define( 'WP_PARSI_DIR', rtrim( plugin_dir_path( WP_PARSI_ROOT ), '/' ) );
     }
 
     if ( ! defined( 'WP_PARSI_URL' ) ) {
@@ -113,7 +120,7 @@ final class WP_Parsidate {
       if ( ! function_exists( 'get_plugin_data' ) ) {
         require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
       }
-      $pluginData = get_plugin_data( WP_PARSI_ROOT );
+      $pluginData = get_plugin_data( WP_PARSI_ROOT, false, false );
       define( 'WP_PARSI_VER', $pluginData['Version'] );
     }, 0 );
   }
@@ -137,6 +144,7 @@ final class WP_Parsidate {
       define( 'WP_PARSI_DEBUG_MODE', Settings::get( 'debug_mode', false ) );
     }
 
+    new Install();
     new Admin();
     new Addons();
 
@@ -149,10 +157,12 @@ final class WP_Parsidate {
       }
     }
 
+    new WpNotice();
     new Plugin();
     new App();
     new Core();
     new Widget();
+    new Blocks();
   }
 
   /**
@@ -171,4 +181,4 @@ final class WP_Parsidate {
 }
 
 WP_Parsidate::getInstance();
-register_activation_hook( __FILE__, array( Install::class, 'run' ) );
+register_activation_hook( __FILE__, array( Install::class, 'update' ) );

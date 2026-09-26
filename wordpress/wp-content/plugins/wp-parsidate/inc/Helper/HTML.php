@@ -173,11 +173,13 @@ class HTML {
       $isList = array_is_list( $data['options'] );
 
       foreach ( $data['options'] as $key => $value ) {
-        $selected = isset( $data['multiple'] ) && $data['multiple'] && is_array( $data['setting_value'] ) ? in_array( ( $isList ? $value : $key ),
-          $data['setting_value'], true ) : $data['setting_value'] == ( $isList ? $value : $key );
+        if ( isset( $data['multiple'] ) && $data['multiple'] && is_array( $data['setting_value'] ) ) {
+          $selected = in_array( ( $isList ? $value : $key ), $data['setting_value'], true );
+        } else {
+          $selected = $data['setting_value'] == ( $isList ? $value : $key );
+        }
 
-        $field .= '<option value="' . ( $isList ? $value : $key ) . '" ' . selected( $selected, true,
-            false ) . '>' . $value . '</option>';
+        $field .= '<option value="' . ( $isList ? $value : $key ) . '" ' . selected( $selected, true, false ) . '>' . $value . '</option>';
       }
     }
 
@@ -724,13 +726,32 @@ class HTML {
       return '';
     }
 
-    $canActivate = isset( $data['can_activate'] ) && $data['can_activate'];
-    $class       = self::getclass( $data );
+    $addonTagTitle = '';
+    $canActivate   = $data['can_activate'] ?? false;
+    $class         = self::getclass( $data );
     if ( ! $canActivate ) {
       $class .= ' ' . self::prefix . 'addon-inactive';
     }
 
+    if ( $data['is_demo'] ?? false ) {
+      $class .= ' ' . self::prefix . 'addon-demo';
+    }
+
+    if ( $data['is_suggested'] ?? false ) {
+      $class         .= ' ' . self::prefix . 'addon-suggested';
+      $addonTagTitle = esc_html__( 'Suggested', 'wp-parsidate' );
+    }
+
+    if ( $data['is_sponsor'] ?? false ) {
+      $class         .= ' ' . self::prefix . 'addon-sponsor';
+      $addonTagTitle = esc_html__( 'Sponsor', 'wp-parsidate' );
+    }
+
     $addon = '<div class="' . self::prefix . 'tiny-addon-wrap' . $class . '" title="' . $data['desc'] . '"><div class="' . self::prefix . 'title-image">';
+
+    if ( ! empty( $addonTagTitle ) ) {
+      $addon .= "<span class='" . self::prefix . "addon-tag'>" . $addonTagTitle . "</span>";
+    }
 
     if ( ! empty( $data['icon'] ) ) {
       if ( ! empty( $data['image_link'] ) ) {
@@ -740,7 +761,13 @@ class HTML {
       }
     }
 
-    $addon .= '<span class="' . self::prefix . 'title">' . $data['title'] . '</span></div>';
+    if ( ! empty( $data['image_link'] ) ) {
+      $addon .= '<a href="' . $data['image_link'] . '" target="_blank" class="' . self::prefix . 'title">' . $data['title'] . '</a>';
+    } else {
+      $addon .= '<span class="' . self::prefix . 'title">' . $data['title'] . '</span>';
+    }
+
+    $addon .= '</div>';
 
     if ( $canActivate ) {
       $addon .= self::toggle( array(
@@ -753,7 +780,7 @@ class HTML {
       ) );
 
     } elseif ( ! empty( $data['action_link'] ) ) {
-      $addon .= '<a href="' . $data['action_link'] . '" ' . ( $data['action_link_external'] ? 'target="_blank"' : '' ) . ' class="' . self::prefix . 'action-link ' . self::prefix . 'button ' . self::prefix . 'button-secondary">' . $data['action_title'] . '</a>';
+      $addon .= '<a href="' . $data['action_link'] . '" ' . ( $data['action_link_external'] ? 'target="_blank"' : '' ) . ' class="' . self::prefix . 'action-link ' . self::prefix . 'button ' . self::prefix . 'button-secondary" title="' . $data['action_title'] . '">' . ( $data['action_icon'] ?? $data['action_title'] ) . '</a>';
 
     }
 

@@ -1200,3 +1200,81 @@ failures. They were residue from abandoned scratch containers, not a regression 
 control run on the original image was 217/0, and re-running after cleaning up the
 scratch databases was also 217/0. Anything that connects to the shared `db` service
 should use its own throwaway database rather than the live one.
+
+## 2026-09-26 — Updates: core 7.1→7.1.2, 19 plugins, 1 theme (all verified)
+
+Full update pass, core first then plugins one at a time with a smoke check after
+each. Backup first: DB dump + `wp-content` tarball + the three `woo_wallet_*`
+tables, in `.test-logs/pre-update-backup-20260926-132143/` (git-ignored).
+
+| Component | From | To |
+|---|---|---|
+| WordPress core | 7.1 | 7.1.2 |
+| WooCommerce | 11.1.0 | 11.1.2 |
+| woo-wallet | 1.6.14 | **1.7.0** (major) |
+| redis-cache | 2.8.0 | **3.0.0** (major) |
+| Dokan | 5.1.1 | 5.1.3 |
+| wp-parsidate | 6.2.1 | 6.4 |
+| persian-woocommerce | 10.0.4 | 10.0.5 |
+| gateland | 2.4.5 | 2.5.0 *(inactive)* |
+| wordfence | 9.0.0 | 9.0.1 *(inactive)* |
+| seo-by-rank-math | 1.0.276 | 1.0.279 *(inactive)* |
+| limit-login-attempts-reloaded | 3.3.5 | 3.3.10 *(inactive)* |
+| wp-super-cache | 3.1.1 | 3.1.3 *(inactive)* |
+| persian-woocommerce-shipping | 4.4.6 | 4.4.8 *(inactive)* |
+| autoptimize / clarity / site-kit / updraftplus / wcpe / ti-wishlist / persian-wc-sms | — | patch bumps |
+| twentytwentytwo | 1.7 | 2.2 *(unused default)* |
+
+Suite **217 passed / 0 failed**, two consecutive runs. `active_plugins` unchanged
+at 19 — the six inactive plugins ship in the deploy artifact and were updated
+via `--inactive` so their code matches, but none was silently activated.
+The active `lylyrose` theme (1.10.0) was already current.
+
+### Three bugs that made updating impossible before
+
+Updating anything in this environment failed for three separate reasons, none of
+which produced a useful error message:
+
+1. **`unzip` missing from the image.** WordPress's own upgrader shells out to it
+   (`WP_Filesystem::unzip_file`), so every core/plugin/theme update died at
+   `installing_package` with a bare `process_failed`. Added to the Dockerfile —
+   this blocks *all* future updates, not just this pass.
+
+2. **`abort_if_destination_exists` defaults to true.** `WP_Upgrader::run()` sets it
+   that way, which is right for a fresh plugin install and wrong for a core update
+   into an existing docroot: it aborts with an empty `folder_exists` error because
+   `/var/www/html` is never empty. Core updates must pass `false`.
+
+3. **My own harness bug, worth recording because the error was useless.** Passing
+   the plugin *file* as the upgrader's `package` (rather than the URL from the
+   update transient) makes it try to HTTP-GET that literal string, surfacing as an
+   empty `download_failed` with the message buried in `get_error_data()`. The
+   plugin file must never be used as the package.
+
+A red herring cost some time: `download_url($url, $t, true)` fails with
+`signature_verification_no_signature` for **every** plugin here, because
+downloads.wordpress.org does not return the `X-Content-Signature` header in this
+network. But `WP_Upgrader::run()` calls `download_package($package, false, ...)` —
+signatures are already off in the real path. Signature failure is not what was
+breaking updates; don't disable anything to "fix" it.
+
+### Utilities kept
+
+- `docker/update-core.php` — core update; backs up wp-config + languages, installs
+  the fa_IR pack, asserts prefix intact. `WP_ADMIN` must NOT be defined: it makes
+  wp-load take the admin auth path, which `die()`s silently in CLI.
+- `docker/update-plugin.php` — one plugin at a time, `--inactive` to update a
+  plugin that is shipped but not active locally.
+- `docker/smoke.sh` — every plugin still loads, `/` `/shop/` `/cart/` still 200,
+  no new fatals in the Apache log.
+
+### Doc corrections
+
+- `FEATURES_ROADMAP.md` claims **woo-wallet v2.4.x with a fa_IR pack**; the real
+  installed version was **1.6.14** (now 1.7.0). The plugin is TeraWallet; the fa_IR
+  translation is installed and loading, but it is the translate.wordpress.org pack,
+  not a bundled one. Worth reconciling that claim.
+- `FEATURES_ROADMAP.md` claims "22 active" plugins; there are **19** active locally.
+  The other 6 shipping plugins (Wordfence, Rank Math, WP Super Cache, Gateland,
+  Persian shipping, Limit Login Attempts) are **inactive locally**. Production
+  plugin state is not necessarily identical to local.

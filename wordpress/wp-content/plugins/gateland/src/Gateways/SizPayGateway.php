@@ -32,8 +32,6 @@ class SizPayGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Feat
 			'transaction' => $transaction->toArray(),
 		] );
 
-		$this->checkAmount( $transaction, 1_000, 50_000_000 );
-
 		$parameters = [
 			'sizPayKey'              => $this->options['key'],
 			'Amount'                 => intval( $transaction->amount * 10 ),

@@ -27,14 +27,22 @@ class Load {
 		add_filter( 'edd_currencies', [ $this, 'currencies' ] );
 		add_filter( 'edd_sanitize_amount_decimals', [ $this, 'amount_decimals' ] );
 		add_filter( 'edd_format_amount_decimals', [ $this, 'amount_decimals' ] );
+
 		add_filter( 'edd_irt_currency_filter_before', [ $this, 'currency_filter' ], 10, 1 );
 		add_filter( 'edd_rial_currency_filter_before', [ $this, 'currency_filter' ], 10, 1 );
+		add_filter( 'edd_irht_currency_filter_before', [ $this, 'currency_filter' ], 10, 1 );
+		add_filter( 'edd_irhr_currency_filter_before', [ $this, 'currency_filter' ], 10, 1 );
+
 		add_filter( 'edd_irt_currency_filter_after', [ $this, 'currency_filter' ], 10, 1 );
 		add_filter( 'edd_rial_currency_filter_after', [ $this, 'currency_filter' ], 10, 1 );
+		add_filter( 'edd_irht_currency_filter_after', [ $this, 'currency_filter' ], 10, 1 );
+		add_filter( 'edd_irhr_currency_filter_after', [ $this, 'currency_filter' ], 10, 1 );
 	}
 
 	public function currencies( $currencies ) {
-		$currencies['IRT'] = 'تومان';
+		$currencies['IRT']  = 'تومان';
+		$currencies['IRHT'] = 'هزار تومان';
+		$currencies['IRHR'] = 'هزار ریال';
 
 		return $currencies;
 	}
@@ -44,7 +52,7 @@ class Load {
 
 		$currency = function_exists( 'edd_get_currency' ) ? edd_get_currency() : $edd_options['currency'] ?? null;
 
-		if ( $currency == 'IRT' || $currency == 'RIAL' ) {
+		if ( $currency == 'IRT' || $currency == 'RIAL' || $currency == 'IRHT' || $currency == 'IRHR' ) {
 			return 0;
 		}
 
@@ -52,18 +60,19 @@ class Load {
 	}
 
 	public function currency_filter( $formatted ) {
+
 		$formatted = str_replace( [
 			'IRT',
-			'rial',
+			'IRHT',
+			'RIAL',
+			'IRHR'
 		], [
 			'تومان',
+			'هزار تومان',
 			'ریال',
+			'هزار ریال'
 		], $formatted );
 
-		return str_replace(
-			range( 0, 9 ),
-			[ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ],
-			$formatted
-		);
+		return str_replace( range( 0, 9 ), [ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ], $formatted );
 	}
 }

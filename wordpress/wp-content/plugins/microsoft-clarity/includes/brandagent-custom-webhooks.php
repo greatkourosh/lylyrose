@@ -284,7 +284,7 @@ function brandagent_deliver_custom_webhook( $webhook, $resource, $topic, $event 
     $signature = base64_encode( hash_hmac( 'sha256', $body, $secret, true ) );
 
     // Get store URL for X-WC-Webhook-Source header (standard WooCommerce header)
-    $store_url = home_url();
+    $store_url = brandagent_get_connected_store_url();
 
     // Generate HMAC authentication headers for Brand Agent server
     $hmac_secret    = brandagent_get_hmac_secret();

@@ -5,6 +5,9 @@ document.addEventListener('alpine:init', () => {
         pageLoaderIsActive: false,
         uploadLoaderIsActive: false,
 
+        addReceiptIsActive: true,
+        addNewReceiptIsActive: false,
+
         //page data
         inputs: {
             cardNumber: {
@@ -32,14 +35,15 @@ document.addEventListener('alpine:init', () => {
         },
 
         pageDetails: null,
+        pageUpdateIsActive: false,
 
         time: {
-            uration: 120, //2 minutes in seconds
+            duration: 120, //2 minutes in seconds
             timerInterval: null,
             textTime: null,
             textTimeHours: '00',
-            textTimeMinutes: '03',
-            textTimeSeconds: '00',
+            textTimeMinutes: '',
+            textTimeSeconds: '',
             btnResendIsActive: false
         },
 
@@ -64,13 +68,17 @@ document.addEventListener('alpine:init', () => {
         },
 
         async init() {
-            await this.getPageDetails();
+            await this.getPageDetails(true);
         },
 
         //request functions
-        async getPageDetails() {
-            this.pageLoaderIsActive = true;
-            this.tableLoaderIsActive = true;
+        async getPageDetails(byLoading = false) {
+
+            if(byLoading){
+                this.pageLoaderIsActive = true;
+                this.tableLoaderIsActive = true;
+                clearInterval(this.pageUpdateIsActive);
+            }
 
             try {
 
@@ -99,13 +107,21 @@ document.addEventListener('alpine:init', () => {
                     gatelandNotyf.error(result.message ? result.message : 'حطایی رخ داده است!');
                 }
 
-                this.pageLoaderIsActive = false;
-                this.tableLoaderIsActive = false;
+                if(byLoading){
+                    this.addReceiptIsActive = !(this.tableData.length > 0);
+                }
 
             } catch (error) {
                 console.error('Error fetching posts:', error);
+            } finally {
                 this.pageLoaderIsActive = false;
                 this.tableLoaderIsActive = false;
+            }
+
+            if(byLoading){
+                this.pageUpdateIsActive = setInterval(()=>{
+                    this.getPageDetails(false);
+                }, 60000)
             }
 
         },
@@ -161,12 +177,6 @@ document.addEventListener('alpine:init', () => {
                 })
 
                 if (result.success) {
-                    const data = result.data;
-                    this.tableLoaderIsActive = true;
-                    this.tableData.unshift(data.receipt)
-                    setTimeout(() => {
-                        this.tableLoaderIsActive = false;
-                    }, 1000)
                     gatelandNotyf.success(result.message ? result.message : 'درخواست با موفقیت انجام شد.');
 
                     //reset
@@ -176,11 +186,19 @@ document.addEventListener('alpine:init', () => {
                     this.inputs.receiptImage.value = null;
                     this.inputs.receiptImage.file = null;
                     this.inputs.receiptImage.fileName = null;
+
+                    this.addReceiptIsActive = false;
+                    this.addNewReceiptIsActive = true;
+
+                    await this.getPageDetails(true);
+
+                    setTimeout(()=>{
+                        this.uploadLoaderIsActive = false;
+                    }, 750)
                 } else {
                     gatelandNotyf.error(result.message ? result.message : 'حطایی رخ داده است!');
+                    this.uploadLoaderIsActive = false;
                 }
-
-                this.uploadLoaderIsActive = false;
 
             } catch (error) {
                 console.error('Error fetching posts:', error);
@@ -232,6 +250,8 @@ document.addEventListener('alpine:init', () => {
             this.time.btnResendIsActive = false;
             const endTime = Date.now() + this.time.duration;
 
+            this.updateTimer(this.time.duration);
+
             this.time.timerInterval = setInterval(() => {
 
                 const remaining = endTime - Date.now();
@@ -243,22 +263,26 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                const totalSeconds = Math.floor(remaining / 1000);
-                let hours = Math.floor(totalSeconds / 3600);
-                let minutes = Math.floor((totalSeconds % 3600 ) / 60);
-                let seconds = Math.floor(totalSeconds % 60);
-
-                hours = hours < 10 ? '0' + hours : hours;
-                minutes = minutes < 10 ? '0' + minutes : minutes;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-
-                this.time.textTime = `${hours}:${minutes}:${seconds}`;
-
-                this.time.textTimeHours = hours.toString();
-                this.time.textTimeMinutes = minutes.toString();
-                this.time.textTimeSeconds = seconds.toString();
+                this.updateTimer(remaining);
 
             }, 1000);
+        },
+
+        updateTimer(remaining){
+            const totalSeconds = Math.floor(remaining / 1000);
+            let hours = Math.floor(totalSeconds / 3600);
+            let minutes = Math.floor((totalSeconds % 3600 ) / 60);
+            let seconds = Math.floor(totalSeconds % 60);
+
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            this.time.textTime = `${hours}:${minutes}:${seconds}`;
+
+            this.time.textTimeHours = hours.toString();
+            this.time.textTimeMinutes = minutes.toString();
+            this.time.textTimeSeconds = seconds.toString();
         },
 
         uploadReceiptImage(event) {
@@ -308,6 +332,22 @@ document.addEventListener('alpine:init', () => {
         openDeleteModal(data) {
             this.modals.delete.active = true;
             this.modals.delete.receipt = data;
+        },
+
+        goBack() {
+            try {
+                if (
+                    document.referrer &&
+                    new URL(document.referrer).origin === location.origin
+                ) {
+                    history.back();
+                    return;
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+            location.href = '/';
         }
 
     }))

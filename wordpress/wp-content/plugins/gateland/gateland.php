@@ -3,7 +3,7 @@
  * Plugin Name: گیت‌لند
  * Plugin URI: https://wordpress.org/plugins/gateland
  * Description: درگاه پرداخت جامع، ایمن و هوشمند وردپرس برای تمامی درگاه‌های پرداخت با قابلیت اتصال به همه افزونه‌های وردپرس
- * Version: 2.4.5
+ * Version: 2.5.0
  * Author: نابیک [Nabik.Net]
  * Author URI: https://Nabik.Net
  *
@@ -14,13 +14,13 @@
  * Requires PHP: 7.4
  *
  * WC requires at least: 7.6.0
- * WC tested up to: 10.8.1
+ * WC tested up to: 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'GATELAND_VERSION' ) ) {
-	define( 'GATELAND_VERSION', '2.4.5' );
+	define( 'GATELAND_VERSION', '2.5.0' );
 }
 
 if ( ! defined( 'GATELAND_DIR' ) ) {
@@ -62,7 +62,14 @@ add_action( 'plugins_loaded', function () {
 
 add_action( 'init', function () {
 	Nabik\Gateland\Plugins\Bookly\Load::instance();
+	Nabik\Gateland\Plugins\WalletForWoo\Load::instance();
+	Nabik\Gateland\Plugins\JetEngine\Load::instance();
 } );
+
+add_action( 'after_setup_theme', function () {
+	Nabik\Gateland\Plugins\JetAppointments\Load::instance();
+	Nabik\Gateland\Plugins\JetBooking\Load::instance();
+}, 0 );
 
 add_action( 'learn-press/ready', function () {
 	Nabik\Gateland\Plugins\LearnPress\Load::instance();

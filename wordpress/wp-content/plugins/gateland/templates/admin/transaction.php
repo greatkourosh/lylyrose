@@ -340,9 +340,9 @@ wp_localize_script('global-script', 'gateland', [
                                                 <button
                                                         @click="inquiryTransaction(transaction.id)"
                                                         :disabled="inquiryLoaderIsActive"
-                                                        class="sm:inline-flex items-center gap-2 bg-primary-50 hover:bg-primary-100 rounded-[8px] py-2 md:px-3.5 px-2"
+                                                        class="sm:inline-flex hidden items-center gap-2 justify-center bg-primary-50 hover:bg-primary-100 rounded-[8px] py-2 md:px-3.5 px-2"
                                                 >
-                                                <span  class="size-5 md:block hidden" :class="{'rotation-animation' : inquiryLoaderIsActive}">
+                                                    <span  class="sm:size-5 size-4" :class="{'rotation-animation' : inquiryLoaderIsActive}">
                                                     <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh.svg">
                                                 </span>
                                                     <span class="font-semibold text-primary-700 md:text-sm md:leading-5 text-[10px] leading-3">استعلام تایید تراکنش </span>
@@ -383,9 +383,9 @@ wp_localize_script('global-script', 'gateland', [
                                         :disabled="inquiryLoaderIsActive"
                                         class="sm:hidden flex w-full items-center gap-2 justify-center bg-primary-50 hover:bg-primary-100 rounded-[8px] py-2 md:px-3.5 px-2 mt-2"
                                 >
-                                            <span  class="sm:size-5 size-4" :class="{'rotation-animation' : inquiryLoaderIsActive}">
-                                                <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh.svg">
-                                            </span>
+                                    <span  class="sm:size-5 size-4" :class="{'rotation-animation' : inquiryLoaderIsActive}">
+                                        <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh.svg">
+                                    </span>
                                     <span class="font-semibold text-primary-700 md:text-sm text-xs md:leading-5">استعلام تایید تراکنش </span>
                                 </button>
                             </template>
@@ -395,10 +395,10 @@ wp_localize_script('global-script', 'gateland', [
                                     <button
                                             @click="inquiryTransaction(transaction.id)"
                                             :disabled="inquiryLoaderIsActive"
-                                            class="sm:hidden flex items-center gap-2 bg-primary-50 hover:bg-primary-100 rounded-[8px] py-2 md:px-3.5 px-2 mt-2"
+                                            class="sm:hidden flex w-full items-center gap-2 justify-center bg-primary-50 hover:bg-primary-100 rounded-[8px] py-2 md:px-3.5 px-2 mt-2"
                                     >
-                                        <span  class="size-5 md:block hidden" :class="{'rotation-animation' : inquiryLoaderIsActive}">
-                                            <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh.svg">
+                                        <span  class="sm:size-5 size-4" :class="{'rotation-animation' : inquiryLoaderIsActive}">
+                                                <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh.svg">
                                         </span>
                                         <span class="font-semibold text-primary-700 md:text-sm md:leading-5 text-[10px] leading-3">استعلام تایید تراکنش </span>
                                     </button>

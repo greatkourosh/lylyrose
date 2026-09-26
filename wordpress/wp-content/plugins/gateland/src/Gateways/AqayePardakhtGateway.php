@@ -25,8 +25,6 @@ class AqayePardakhtGateway extends BaseGateway implements \Nabik\Gateland\Gatewa
 			'transaction' => $transaction->toArray(),
 		] );
 
-		$this->checkAmount( $transaction, 1000, 100000000 );
-
 		$pin_file = __DIR__ . DIRECTORY_SEPARATOR . 'aqayepardakht.txt';
 
 		try {

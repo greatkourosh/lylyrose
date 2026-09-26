@@ -40,7 +40,7 @@ const BRANDAGENT_UCP_BACKEND_BASE_URL_OPTION = 'brandagent_ucp_backend_base_url'
 /** Administrator opt-in for publishing the UCP discovery endpoint. */
 const BRANDAGENT_UCP_ENABLED_OPTION = 'brandagent_ucp_enabled';
 
-/** Administrator opt-in for sending the UCP flight to a development backend. */
+/** Administrator opt-in for sending the UCP flight to the selected backend. */
 const BRANDAGENT_UCP_DEVELOPMENT_FLIGHT_OPTION = 'brandagent_ucp_development_flight';
 
 /** Brand Agents flight that exposes the UCP and MCP endpoints. */
@@ -192,7 +192,7 @@ function brandagent_render_experimental_features_page() {
 			<div class="brandagent-feature-header">
 				<div>
 					<h2>UCP endpoint</h2>
-					<p>Publish <code>/.well-known/ucp</code> so compatible agents can discover this store's Brand Agents commerce capabilities. This requires a WooCommerce Brand Agents connection. Production also requires the Brand Agents <code>global.EnableUCPMCPEndpoints</code> feature flag; development requests can use the feature flight configured below.</p>
+					<p>Publish <code>/.well-known/ucp</code> so compatible agents can discover this store's Brand Agents commerce capabilities. This requires a WooCommerce Brand Agents connection. Production normally requires the Brand Agents <code>global.EnableUCPMCPEndpoints</code> feature flag; test requests can use the feature flight configured below.</p>
 				</div>
 				<form method="post" action="options.php" class="brandagent-toggle-form">
 					<?php settings_fields( 'brandagent_ucp_endpoint_toggle' ); ?>
@@ -249,7 +249,7 @@ function brandagent_render_experimental_features_page() {
 										/>
 										Send <code>setflight=<?php echo esc_html( BRANDAGENT_UCP_DEVELOPMENT_FLIGHT ); ?></code>
 									</label>
-									<p class="description">Applied only when a custom development URL is configured. Normal production requests never include this flight.</p>
+									<p class="description">Applied to the selected Brand Agents environment, including production when the development URL is blank. Leave unchecked for normal production requests.</p>
 								</td>
 							</tr>
 						</table>
@@ -343,16 +343,15 @@ function brandagent_ucp_is_enabled() {
  */
 function brandagent_ucp_build_upstream_url() {
 	$backend_base_url   = (string) get_option( BRANDAGENT_UCP_BACKEND_BASE_URL_OPTION, '' );
-	$is_development_url = ! empty( $backend_base_url );
 	$development_flight = 1 === (int) get_option( BRANDAGENT_UCP_DEVELOPMENT_FLIGHT_OPTION, 0 );
-	if ( ! $is_development_url ) {
+	if ( empty( $backend_base_url ) ) {
 		$backend_base_url = BrandAgent_Config::get_backend_base_url();
 	}
 	if ( empty( $backend_base_url ) ) {
 		return '';
 	}
 
-	$normalized_store_url = brandagent_normalize_store_url( home_url() );
+	$normalized_store_url = brandagent_normalize_store_url( brandagent_get_connected_store_url() );
 	if ( empty( $normalized_store_url ) ) {
 		return '';
 	}
@@ -372,9 +371,9 @@ function brandagent_ucp_build_upstream_url() {
 		$url .= '?' . $query_string;
 	}
 
-	// A development store may force this one feature without changing the server's
-	// global rollout. Production requests must always preserve the backend kill switch.
-	if ( $is_development_url && $development_flight ) {
+	// The explicit administrator opt-in may force this feature in any selected
+	// environment without changing the server's global rollout.
+	if ( $development_flight ) {
 		$url = add_query_arg( 'setflight', BRANDAGENT_UCP_DEVELOPMENT_FLIGHT, $url );
 	}
 

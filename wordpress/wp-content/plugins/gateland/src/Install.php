@@ -104,7 +104,8 @@ class Install extends \Nabik\Utils\V1\Install {
 			Nabik_Net_Database::Schema()->create( 'gateland_cards', function ( Blueprint $table ) {
 				$table->id();
 				$table->string( 'name' );
-				$table->string( 'card_number' )->unique();
+				$table->string( 'card_number' )->unique()->nullable();
+				$table->string( 'iban' )->unique()->nullable();
 				$table->string( 'status' );
 				$table->integer( 'max_quantity' )->nullable();
 				$table->integer( 'max_amount' )->nullable();

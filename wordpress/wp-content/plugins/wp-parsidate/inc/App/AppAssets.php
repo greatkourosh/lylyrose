@@ -10,17 +10,18 @@ namespace WPParsidate\App;
 defined( 'ABSPATH' ) || exit;
 
 use WPParsidate\Core\Names;
-use WPParsidate\Helper\{Assets, Param};
+use WPParsidate\Helper\{Assets, Debug, Param};
 use WPParsidate\Settings\Settings;
 
 class AppAssets {
   public function __construct() {
     add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueueScripts' ) );
+    add_action( 'after_setup_theme', [ $this, 'addThemeSupport' ] );
     add_filter( 'admin_init', [ $this, 'fixTinyMceFont' ], PHP_INT_MAX );
+    add_filter( 'theme_file_path', [ $this, 'fixThemeFilePath' ], 10, 2 );
     //add_filter( 'wp_theme_json_data_theme', [ $this, 'addFontToThemeJson' ] );
-    add_action( 'admin_print_styles-plugin-editor.php', [ $this, 'fixCodeEditor' ] );
-    add_action( 'admin_print_styles-theme-editor.php', [ $this, 'fixCodeEditor' ] );
-    add_action( 'wpp_jalali_datepicker_enqueued', [ $this, 'localizeMonthsName' ] );
+    add_action( 'wp_parsidate_jalali_datepicker_enqueue', [ $this, 'enqueueJalaliDatepicker' ], 0 );
+    add_action( 'wp_parsidate_jalali_datepicker_enqueued', [ $this, 'localizeMonthsName' ] );
     add_action( 'enqueue_block_editor_assets', [ $this, 'blockEditorAssets' ] );
   }
 
@@ -45,6 +46,33 @@ class AppAssets {
     }
 
     $pluginVersion = Assets::getVersion();
+    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
+
+    if ( Settings::get( 'new_gutenberg_datepicker_enabled', true ) ) {
+      wp_enqueue_script( WP_PARSI_KEY . '_jalali_date', Assets::url( "js-admin/jalali-date$debugName.js" ), [], $pluginVersion, true );
+
+      wp_enqueue_script(
+        WP_PARSI_KEY . '_gutenberg_datepicker',
+        Assets::url( "js-admin/gutenberg-datepicker$debugName.js" ),
+        array( WP_PARSI_KEY . '_jalali_date', 'wp-data', 'wp-i18n' ),
+        $pluginVersion,
+        true
+      );
+
+      $monthNames = Names::getMonths();
+      array_shift( $monthNames ); // Remove first item (null string) from name of
+      $settings = array(
+        'debug'            => Debug::plugin(),
+        'usePersianDigits' => true,
+        'enableOverlay'    => true,
+        'monthNames'       => $monthNames,
+        'weekdayShort'     => array( 'ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج' ),
+      );
+
+      wp_localize_script( WP_PARSI_KEY . '_gutenberg_datepicker', 'WpPdGdp_SETTINGS', $settings );
+
+      return;
+    }
 
     wp_enqueue_script( 'wpp_gutenberg_jalali_calendar_editor_scripts',
       Assets::url( 'js-admin/gutenberg-jalali-calendar.build.js' ),
@@ -70,6 +98,20 @@ class AppAssets {
     );
   }
 
+  public function enqueueJalaliDatepicker( $moduleName ) {
+    $pluginVersion = Assets::getVersion();
+    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
+
+    wp_enqueue_script( WP_PARSI_KEY . '_jalali_datepicker', Assets::url( 'js-admin/jalalidatepicker.min.js' ), array(), $pluginVersion, [ 'in_footer' => true ] );
+    wp_enqueue_script( WP_PARSI_KEY . '_datepicker', Assets::url( "js-admin/datepicker$debugName.js" ), array(
+      'jquery',
+      WP_PARSI_KEY . '_jalali_datepicker'
+    ), $pluginVersion, [ 'in_footer' => true ] );
+    wp_enqueue_style( WP_PARSI_KEY . '_jalali_datepicker', Assets::url( "css-admin/jalalidatepicker$debugName.css" ), null, $pluginVersion );
+
+    do_action( 'wp_parsidate_jalali_datepicker_enqueued', $moduleName );
+  }
+
   /**
    * Localize name of months after date picker enqueued
    *
@@ -81,25 +123,11 @@ class AppAssets {
     // Remove first item (null string) from name of months array
     array_shift( $months_name );
 
-    wp_localize_script( 'wpp_jalali_datepicker', 'WPP_I18N',
+    wp_localize_script( WP_PARSI_KEY . '_jalali_datepicker', 'WPP_I18N',
       array(
         'months' => $months_name
       )
     );
-  }
-
-  /**
-   * Fixes themes and plugins RTL style, they should be LTR
-   *
-   * @return              void
-   * @since               2.0
-   */
-  public function fixCodeEditor(): void {
-    $pluginVersion = Assets::getVersion();
-    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
-
-    wp_enqueue_style( WP_PARSI_KEY_SLUG . '-admin-fix', Assets::url( 'css-admin/admin-fix' . $debugName . '.css' )
-      , false, $pluginVersion );
   }
 
   /**
@@ -196,6 +224,38 @@ class AppAssets {
   }
 
   /**
+   * Add theme support
+   *
+   * @return void
+   *
+   * @since 6.3
+   */
+  public function addThemeSupport() {
+    if ( Settings::get( 'enable_fonts', false ) ) {
+      add_theme_support( 'editor-styles' );
+    }
+  }
+
+  /**
+   * Fix theme path file when in plugin dir
+   *
+   * @param string $path The file path.
+   * @param string $file The requested file to search for.
+   *
+   * @return string Path file
+   *
+   * @since 6.3
+   *
+   */
+  public function fixThemeFilePath( $path, $file ): string {
+    if ( strpos( $file, WP_PARSI_DIR ) !== false ) {
+      return $file;
+    }
+
+    return $path;
+  }
+
+  /**
    * Fixes TinyMCE font
    *
    * @return              void
@@ -210,7 +270,11 @@ class AppAssets {
       // Reference: /wp-includes/block-editor.php, get_block_editor_theme_styles function, wp_remote_get
       // add_editor_style( Assets::url( 'css-admin/tinymce-editor' . $debugName . '.css?v=' . $pluginVersion ) );
 
+      // TinyMCE editor
       add_editor_style( '../../plugins/wp-parsidate/assets/css-admin/tinymce-editor' . $debugName . '.css' );
+
+      // Gutenberg Editor
+      add_editor_style( Assets::path( 'css-admin/tinymce-editor' . $debugName . '.css' ) );
     }
   }
 
@@ -219,11 +283,6 @@ class AppAssets {
     $pluginVersion = Assets::getVersion();
     $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
 
-    if ( Settings::get( 'enable_fonts', false ) ) {
-      wp_enqueue_style( WP_PARSI_KEY_SLUG . '-vazir-font',
-        Assets::url( 'css-admin/vazir-font' . $debugName . '.css' ), false, $pluginVersion );
-    }
-
     wp_enqueue_script( WP_PARSI_KEY_SLUG . '-admin', Assets::url( 'js-admin/admin' . $debugName . '.js' ), false,
       $pluginVersion, [ 'in_footer' => true ] );
     wp_localize_script(
@@ -231,6 +290,11 @@ class AppAssets {
       'WPP_I18N',
       array( 'months' => Names::getMonths() )
     );
+    wp_enqueue_style( WP_PARSI_KEY_SLUG . '-admin', Assets::url( 'css-admin/admin' . $debugName . '.css' ), false, $pluginVersion );
+
+    if ( Settings::get( 'enable_fonts', false ) ) {
+      wp_enqueue_style( WP_PARSI_KEY_SLUG . '-vazir-font', Assets::url( 'css-admin/vazir-font' . $debugName . '.css' ), false, $pluginVersion );
+    }
 
     if ( $pagenow == 'edit.php' ) {
       $postType = Param::get( 'post_type', 'post' );

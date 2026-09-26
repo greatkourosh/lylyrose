@@ -151,7 +151,7 @@ class BrandAgent_Endpoint {
      */
     private static function handle_config_read() {
         // Get HMAC secret for this specific store (decrypted from wp_options)
-        $store_url = home_url();
+        $store_url = brandagent_get_connected_store_url();
         $secret_key = brandagent_get_hmac_secret();
 
         if ( ! $secret_key ) {
@@ -224,7 +224,7 @@ class BrandAgent_Endpoint {
      */
     private static function handle_init() {
         // Get HMAC secret for this specific store (decrypted from wp_options)
-        $store_url = home_url();
+        $store_url = brandagent_get_connected_store_url();
         $secret_key = brandagent_get_hmac_secret();
 
         if ( ! $secret_key ) {
@@ -320,10 +320,13 @@ class BrandAgent_Endpoint {
             wp_send_json_error( array( 'message' => 'Missing authentication headers' ), 401 );
         }
 
-        // Verify store URL matches this site
-        if ( $store_url_header !== home_url() ) {
+        // Persisted connections must continue to match exactly. Legacy connections are migrated
+        // only after their callback HMAC proves that this header names the stored credential.
+        $has_connected_store_url = brandagent_has_connected_store_url();
+        $connected_store_url = brandagent_get_connected_store_url();
+        if ( $has_connected_store_url && $store_url_header !== $connected_store_url ) {
             brandagent_log( 'BrandAgent Config Update: Store URL mismatch', array(
-                'expected_store_url' => home_url(),
+                'expected_store_url' => $connected_store_url,
                 'received_store_url' => $store_url_header,
             ) );
             wp_send_json_error( array( 'message' => 'Store URL mismatch' ), 403 );
@@ -350,8 +353,8 @@ class BrandAgent_Endpoint {
             wp_send_json_error( array( 'message' => 'Missing BAInjectFrontendScript parameter' ), 400 );
         }
 
-        // Verify HMAC signature
-        if ( ! brandagent_verify_incoming_hmac_signature( $signature, $timestamp, $hmac_payload ) ) {
+        // Verify HMAC signature and, for a legacy connection, atomically pin the authenticated URL.
+        if ( ! brandagent_verify_incoming_hmac_signature_for_store_url( $store_url_header, $signature, $timestamp, $hmac_payload, ! $has_connected_store_url ) ) {
             brandagent_log( 'BrandAgent Config Update: HMAC signature verification failed' );
             wp_send_json_error( array( 'message' => 'Invalid signature' ), 401 );
         }
@@ -434,16 +437,18 @@ class BrandAgent_Endpoint {
             wp_send_json_error( array( 'message' => 'Missing authentication headers' ), 401 );
         }
 
-        if ( $store_url_header !== home_url() ) {
+        $has_connected_store_url = brandagent_has_connected_store_url();
+        $connected_store_url = brandagent_get_connected_store_url();
+        if ( $has_connected_store_url && $store_url_header !== $connected_store_url ) {
             brandagent_log( 'BrandAgent Content Fetch: Store URL mismatch', array(
-                'expected_store_url' => home_url(),
+                'expected_store_url' => $connected_store_url,
                 'received_store_url' => $store_url_header,
             ) );
             wp_send_json_error( array( 'message' => 'Store URL mismatch' ), 403 );
         }
 
         $raw_body = file_get_contents( 'php://input' );
-        if ( ! brandagent_verify_incoming_hmac_signature( $signature, $timestamp, (string) $raw_body ) ) {
+        if ( ! brandagent_verify_incoming_hmac_signature_for_store_url( $store_url_header, $signature, $timestamp, (string) $raw_body, ! $has_connected_store_url ) ) {
             brandagent_log( 'BrandAgent Content Fetch: HMAC signature verification failed' );
             wp_send_json_error( array( 'message' => 'Invalid signature' ), 401 );
         }

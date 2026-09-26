@@ -1,15 +1,16 @@
+/******/ (() => { // webpackBootstrap
+/*!**************************************!*\
+  !*** ./assets/js-admin-src/admin.js ***!
+  \**************************************/
 jQuery(document).ready(function ($) {
-	//var wpp_months_name = WPP_I18N.months;
-	var wpp_months_name = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+  //var wpp_months_name = WPP_I18N.months;
+  var wpp_months_name = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
 
   $('.wp-editor-wrap.html-active #content').css("direction", "ltr");
 
   function IsLeapYear(year) {
-    if (((year % 4) === 0 && (year % 100) !== 0) || (year % 400) === 0 && (year % 100) === 0)
-      return true;
-    else
-      return false;
+    if (((year % 4) === 0 && (year % 100) !== 0) || (year % 400) === 0 && (year % 100) === 0) return true; else return false;
   }
 
   function persian_to_gregorian(jy, jm, jd) {
@@ -58,43 +59,36 @@ jQuery(document).ready(function ($) {
    * Edit inline
    */
   function create_stampdiv(year, mon, day, hour, minu) {
-    var div = '<div class="timestamp-wrap persian">' +
-        '<select id="mma" name="mma">';
-    for (var i = 1; i < 13; i++) {
-      if (i === parseInt(mon))
-        div += '<option value="' + i + '" selected="selected">' + wpp_months_name[i] + '</option>';
-      else
-        div += '<option value="' + i + '">' + wpp_months_name[i] + '</option>';
+    let monthSelect = '<select id="mma" name="mma">';
+    for (let i = 1; i < 13; i++) {
+      monthSelect += '<option value="' + i + '" ' + (i === parseInt(mon) ? 'selected="selected"' : '') + '>' + wpp_months_name[i] + '</option>';
     }
-    div += '</select>' +
-        '<input type="text" id="jja" name="jja" value="' + day + '" size="2" maxlength="2" autocomplete="off" />,' +
-        '<input type="text" id="aaa" name="aaa" value="' + year + '" size="4" maxlength="4" autocomplete="off" /> در ' +
-        '<input type="text" id="hha" name="hha" value="' + hour + '" size="2" maxlength="2" autocomplete="off" /> : ' +
-        '<input type="text" id="mna" name="mna" value="' + minu + '" size="2" maxlength="2" autocomplete="off" />' +
-        '</div>';
-    return div;
+    monthSelect += '</select>';
+
+    return '<div class="timestamp-wrap wp-parsidate-timestamp-wrap">' + '<input type="text" id="jja" name="jja" value="' + day + '" placeholder="روز" size="2" maxlength="2" autocomplete="off" />' + monthSelect + '<input type="text" id="aaa" name="aaa" value="' + year + '" placeholder="سال" size="4" maxlength="4" autocomplete="off" /> در ' + '<input type="text" id="mna" name="mna" value="' + minu + '" placeholder="دقیقه" size="2" maxlength="2" autocomplete="off" /> :' + '<input type="text" id="hha" name="hha" value="' + hour + '" placeholder="ساعت" size="2" maxlength="2" autocomplete="off" />' + '</div>';
   }
 
   $('a.edit-timestamp').on('click', function () {
-    $('.persian').remove();
-    var date = gregorian_to_persian($('#aa').val(), $('#mm').val(), $('#jj').val());
-    var div = create_stampdiv(date[0], date[1], date[2], $('#hh').val(), $('#mn').val());
+    $('.wp-parsidate-timestamp-wrap').remove();
+    const date = gregorian_to_persian($('#aa').val(), $('#mm').val(), $('#jj').val());
+    const div = create_stampdiv(date[0], date[1], date[2], $('#hh').val(), $('#mn').val());
     $('#timestampdiv').prepend(div);
     $('#timestampdiv .timestamp-wrap:eq(1)').hide();
   });
 
   $('#the-list').on('click', '.editinline', function () {
-    var tr = $(this).closest('td');
-    var year = tr.find('.aa').html();
-    if (year > 1400) {
-      var month = tr.find('.mm').html();
-      var day = tr.find('.jj').html();
-      var hour = tr.find('.hh').html();
-      var minu = tr.find('.mn').html();
-      var date = gregorian_to_persian(year, month, day);
-      $('.persian').remove();
-      $('.inline-edit-date').prepend(create_stampdiv(date[0], date[1], date[2], hour, minu));
-      $('.inline-edit-date div:eq(1)').hide();
+    const postTableRow = $(this).closest('tr');
+    const year = parseInt(postTableRow.find('.aa').html());
+    $('.wp-parsidate-timestamp-wrap').remove();
+
+    if (year > 1500) {
+      const month = postTableRow.find('.mm').html();
+      const day = postTableRow.find('.jj').html();
+      const hour = postTableRow.find('.hh').html();
+      const minu = postTableRow.find('.mn').html();
+      const date = gregorian_to_persian(year, month, day);
+      $('table.wp-list-table .inline-edit-date div:eq(0)').hide();
+      $('table.wp-list-table .inline-edit-date').append(create_stampdiv(date[0], date[1], date[2], hour, minu));
     }
   });
 
@@ -146,16 +140,17 @@ jQuery(document).ready(function ($) {
   }
 
   $('#timestampdiv').on('keypress', function (e) {
-    if (e.which == 13)
-      timer = setInterval(function () {
-        change_date();
-      }, 50);
+    if (e.which == 13) timer = setInterval(function () {
+      change_date();
+    }, 50);
   });
 
   $('.save-timestamp , .cancel-timestamp , #publish').on('click', function () {
-    if ($('#aaa').length)
-      timer = setInterval(function () {
-        change_date();
-      }, 50);
+    if ($('#aaa').length) timer = setInterval(function () {
+      change_date();
+    }, 50);
   });
 });
+
+/******/ })()
+;

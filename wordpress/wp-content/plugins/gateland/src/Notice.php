@@ -11,7 +11,8 @@ class Notice {
 	public function __construct() {
 		add_action( 'admin_notices', [ $this, 'admin_notices' ], 5 );
 		add_action( 'wp_ajax_gateland_dismiss_notice', [ $this, 'dismiss_notice' ] );
-		add_action( 'wp_ajax_gateland_update_notice', [ $this, 'update_notice' ] );
+		add_action( 'admin_init', [ $this, 'schedule_update_notice_cron' ] );
+		add_action( 'hourly_update_notice', [ $this, 'update_notice' ] );
 	}
 
 	public function admin_notices() {
@@ -34,7 +35,8 @@ class Notice {
 			$notice_content = strip_tags( $notice['content'], '<p><a><b><img><ul><ol><li>' );
 
 			printf(
-				'<div class="notice gateland_notice notice-success %s" id="gateland_%s"><p>%s</p></div>',
+				'<div class="notice gateland_notice notice-%s %s" id="gateland_%s"><p>%s</p></div>',
+				esc_attr( $notice['class'] ?? 'success' ),
 				esc_attr( $dismissible ),
 				esc_attr( $notice['id'] ),
 				$notice_content
@@ -72,27 +74,6 @@ class Notice {
             });
 		</script>
 		<?php
-
-		if ( get_transient( 'gateland_update_notices' ) ) {
-			return;
-		}
-
-		?>
-		<script type="text/javascript">
-            jQuery(document).ready(function ($) {
-
-                jQuery.ajax({
-                    url: "<?php echo esc_url( admin_url( 'admin-ajax.php' ) ) ?>",
-                    type: 'post',
-                    data: {
-                        action: 'gateland_update_notice',
-                        nonce: '<?php echo esc_attr( wp_create_nonce( 'gateland_update_notice' ) ); ?>'
-                    }
-                });
-
-            });
-		</script>
-		<?php
 	}
 
 	public function notices(): array {
@@ -102,7 +83,13 @@ class Notice {
 		$tab  = sanitize_text_field( $_GET['tab'] ?? null );
 
 		$notices = [
-
+			[
+				'id'        => 'plain_permalink_structure',
+				'class'     => 'warning',
+				'content'   => '<b>گیت‌لند:</b> ساختار پیوند یکتای وردپرس در حالت «ساده» تنظیم شده است و باعث اختلال در عملکرد گیت‌لند و دریافت خطای ۴۰۴ می‌شود. لطفاً از بخش <a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">تنظیمات > پیوندهای یکتا</a>، ساختار دیگری را انتخاب و ذخیره کنید.',
+				'condition' => empty( get_option( 'permalink_structure' ) ),
+				'dismiss'   => false,
+			],
 //			[
 //				'id'        => 'gateland_video',
 //				'content'   => '<b>آموزش:</b> برای پیکربندی گیت‌لند می توانید از <a href="https://yun.ir/gatelandvideo" target="_blank">اینجا</a> فیلم های آموزشی افزونه را مشاهده کنید.',
@@ -157,17 +144,13 @@ class Notice {
 		die();
 	}
 
-	public function update_notice() {
-
-		$update = get_transient( 'gateland_update_notices' );
-
-		if ( $update ) {
-			return;
+	function schedule_update_notice_cron() {
+		if ( ! wp_next_scheduled( 'hourly_update_notice' ) ) {
+			wp_schedule_event( time(), 'hourly', 'hourly_update_notice' );
 		}
+	}
 
-		set_transient( 'gateland_update_notices', 1, DAY_IN_SECONDS / 10 );
-
-		check_ajax_referer( 'gateland_update_notice', 'nonce' );
+	public function update_notice() {
 
 		$notices = wp_remote_get( 'https://wpnotice.ir/gateland.json', [ 'timeout' => 5, ] );
 		$sign    = wp_remote_get( 'https://wphash.ir/gateland.hash', [ 'timeout' => 5, ] );

@@ -12,7 +12,8 @@ class PWS_Notice {
 	public function __construct() {
 		add_action( 'admin_notices', [ $this, 'admin_notices' ], 5 );
 		add_action( 'wp_ajax_pws_dismiss_notice', [ $this, 'dismiss_notice' ] );
-		add_action( 'wp_ajax_pws_update_notice', [ $this, 'update_notice' ] );
+		add_action( 'admin_init', [ $this, 'schedule_update_notice_cron' ] );
+		add_action( 'hourly_update_notice', [ $this, 'update_notice' ] );
 	}
 
 	public function admin_notices() {
@@ -65,27 +66,6 @@ class PWS_Notice {
                         });
                     }
 
-                });
-
-            });
-		</script>
-		<?php
-
-		if ( get_transient( 'pws_update_notices' ) ) {
-			return;
-		}
-
-		?>
-		<script type="text/javascript">
-            jQuery(document).ready(function ($) {
-
-                jQuery.ajax({
-                    url: "<?php echo esc_url( admin_url( 'admin-ajax.php' ) ) ?>",
-                    type: 'post',
-                    data: {
-                        action: 'pws_update_notice',
-                        nonce: '<?php echo wp_create_nonce( 'pws_update_notice' ); ?>'
-                    }
                 });
 
             });
@@ -147,7 +127,7 @@ class PWS_Notice {
 				'dismiss'   => 6 * MONTH_IN_SECONDS,
 			],
 			[
-				'id'        => '_gateland',
+				'id'        => 'gateland',
 				'content'   => sprintf( '<b>افزونه درگاه پرداخت هوشمند «گیت لند»:</b> یک افزونه رایگان دیگر از نابیک، تجمیع ۴۱ درگاه پرداخت فقط در یک افزونه! همین حالا میتونی به صورت کاملا رایگان تست کنی: <a href="%s" target="_blank"><input type="button" class="button button-primary" value="نصب سریع و رایگان از مخزن وردپرس"></a>', $gateland_install_url ),
 				'condition' => $gateland_install_url,
 				'dismiss'   => 2 * MONTH_IN_SECONDS,
@@ -203,17 +183,13 @@ class PWS_Notice {
 		die();
 	}
 
-	public function update_notice() {
-
-		$update = get_transient( 'pws_update_notices' );
-
-		if ( $update ) {
-			return;
+	function schedule_update_notice_cron() {
+		if ( ! wp_next_scheduled( 'hourly_update_notice' ) ) {
+			wp_schedule_event( time(), 'hourly', 'hourly_update_notice' );
 		}
+	}
 
-		set_transient( 'pws_update_notices', 1, HOUR_IN_SECONDS );
-
-		check_ajax_referer( 'pws_update_notice', 'nonce' );
+	public function update_notice() {
 
 		$notices = wp_remote_get( 'https://wpnotice.ir/pws.json', [ 'timeout' => 5, ] );
 		$sign    = wp_remote_get( 'https://wphash.ir/pws.hash', [ 'timeout' => 5, ] );

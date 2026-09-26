@@ -114,51 +114,70 @@ function brandagent_handle_oauth_callback() {
     ) );
 
     if ($wc_success && !empty($oauth_token)) {
-        // Pull the HMAC secret from Clarity server (server-to-server, secret in response body)
-        if ( ! class_exists( 'BrandAgent_Config' ) ) {
-            $config_path = plugin_dir_path( __FILE__ ) . 'includes/brandagent-config.php';
-            if ( file_exists( $config_path ) ) {
-                require_once $config_path;
-            } else {
-                brandagent_log( 'BrandAgent OAuth: ERROR - Config file not found at ' . $config_path );
-            }
-        }
-
-        $clarity_server_url = BrandAgent_Config::get_clarity_server_url();
-        $fetch_url = $clarity_server_url . '/woocommerce/fetch-secret';
-
-        $request_body = wp_json_encode( array( 'oauth_token' => $oauth_token ) );
-
-        $response = wp_remote_post( $fetch_url, array(
-            'timeout' => 15,
-            'headers' => array( 'Content-Type' => 'application/json' ),
-            'body'    => $request_body,
-        ) );
-
-        if ( is_wp_error( $response ) ) {
-            brandagent_log( 'BrandAgent OAuth: ERROR - wp_remote_post failed: ' . $response->get_error_message() );
+        $oauth_store_url = brandagent_get_woocommerce_oauth_callback_url();
+        if ( is_wp_error( $oauth_store_url ) ) {
+            brandagent_log( 'BrandAgent OAuth: ERROR - missing or conflicting confirmed/pending store URL for callback' );
         } else {
-            $status_code = wp_remote_retrieve_response_code( $response );
-            $response_body = wp_remote_retrieve_body( $response );
-
-            if ( $status_code === 200 ) {
-                $body = json_decode( $response_body, true );
-                if ( json_last_error() !== JSON_ERROR_NONE ) {
-                    brandagent_log( 'BrandAgent OAuth: ERROR - JSON parse failed: ' . json_last_error_msg() );
-                } elseif ( isset( $body['success'] ) && $body['success'] === true && ! empty( $body['hmac_secret'] ) ) {
-                    $hmac_secret_stored = brandagent_store_hmac_secret( $body['hmac_secret'], 'woocommerce' );
-                    update_option( 'BAOauthSuccess', true );
-                    $success = true;
-                    brandagent_log( 'BrandAgent OAuth: SUCCESS - HMAC secret handled, BAOauthSuccess set.', array( 'hmac_stored' => $hmac_secret_stored ) );
+            // Pull the HMAC secret from Clarity server (server-to-server, secret in response body)
+            if ( ! class_exists( 'BrandAgent_Config' ) ) {
+                $config_path = plugin_dir_path( __FILE__ ) . 'includes/brandagent-config.php';
+                if ( file_exists( $config_path ) ) {
+                    require_once $config_path;
                 } else {
-                    brandagent_log( 'BrandAgent OAuth: ERROR - Unexpected response from fetch-secret', array(
-                        'status_code' => $status_code,
-                        'success_present' => isset( $body['success'] ),
-                        'hmac_present' => isset( $body['hmac_secret'] ) && ! empty( $body['hmac_secret'] ),
-                    ) );
+                    brandagent_log( 'BrandAgent OAuth: ERROR - Config file not found at ' . $config_path );
                 }
+            }
+
+            $clarity_server_url = BrandAgent_Config::get_clarity_server_url();
+            $fetch_url = $clarity_server_url . '/woocommerce/fetch-secret';
+            $request_body = wp_json_encode( array( 'oauth_token' => $oauth_token ) );
+            $response = wp_remote_post( $fetch_url, array(
+                'timeout' => 15,
+                'headers' => array( 'Content-Type' => 'application/json' ),
+                'body'    => $request_body,
+            ) );
+
+            if ( is_wp_error( $response ) ) {
+                brandagent_log( 'BrandAgent OAuth: ERROR - wp_remote_post failed: ' . $response->get_error_message() );
             } else {
-                brandagent_log( 'BrandAgent OAuth: ERROR - fetch-secret returned non-success status', array( 'status_code' => $status_code ) );
+                $status_code = wp_remote_retrieve_response_code( $response );
+                $response_body = wp_remote_retrieve_body( $response );
+
+                if ( $status_code === 200 ) {
+                    $body = json_decode( $response_body, true );
+                    if ( json_last_error() !== JSON_ERROR_NONE ) {
+                        brandagent_log( 'BrandAgent OAuth: ERROR - JSON parse failed: ' . json_last_error_msg() );
+                    } elseif ( ! isset( $body['store_url'] ) || brandagent_canonicalize_connected_store_url( $body['store_url'] ) !== $oauth_store_url ) {
+                        // The dashboard binds the credential to a URL. Never save a token issued
+                        // for another identity (including origin-only tokens from cached launchers).
+                        brandagent_log( 'BrandAgent OAuth: ERROR - Credential URL does not match the prepared store URL' );
+                    } elseif ( isset( $body['success'] ) && $body['success'] === true && ! empty( $body['hmac_secret'] ) ) {
+                        $migrating_from_wordpress = 'wordpress' === brandagent_get_hmac_platform();
+                        // Confirm the exact URL sent in the dashboard handoff rather than letting this
+                        // callback's request context silently rebind the site.
+                        $hmac_secret_stored = brandagent_store_hmac_secret( $body['hmac_secret'], 'woocommerce', $oauth_store_url );
+                        if ( $hmac_secret_stored && $migrating_from_wordpress ) {
+                            update_option( 'BAInjectFrontendScript', 'false' );
+                            delete_option( 'BAWebhooksCreated' );
+                        }
+                        if ( $hmac_secret_stored ) {
+                            update_option( 'BAOauthSuccess', true );
+                            delete_transient( 'brandagent_woocommerce_oauth_store_url' );
+                            $success = true;
+                            brandagent_log( 'BrandAgent OAuth: SUCCESS - HMAC secret handled, BAOauthSuccess set.' );
+                        } else {
+                            brandagent_log( 'BrandAgent OAuth: ERROR - HMAC secret failed to persist' );
+                        }
+                    } else {
+                        brandagent_log( 'BrandAgent OAuth: ERROR - Unexpected response from fetch-secret', array(
+                            'status_code' => $status_code,
+                            'success_present' => isset( $body['success'] ),
+                            'hmac_present' => isset( $body['hmac_secret'] ) && ! empty( $body['hmac_secret'] ),
+                        ) );
+                    }
+                } else {
+                    brandagent_log( 'BrandAgent OAuth: ERROR - fetch-secret returned non-success status', array( 'status_code' => $status_code ) );
+                }
             }
         }
     } else {
@@ -203,60 +222,8 @@ function brandagent_handle_refresh_credentials_callback() {
     }
 
     $oauth_token = isset( $_GET['oauth_token'] ) ? sanitize_text_field( $_GET['oauth_token'] ) : '';
-    $success = false;
     brandagent_log( 'BrandAgent Refresh: Callback received', array( 'oauth_present' => ! empty( $oauth_token ) ) );
-
-    if ( ! empty( $oauth_token ) ) {
-        // Ensure BrandAgent_Config is loaded
-        if ( ! class_exists( 'BrandAgent_Config' ) ) {
-            $config_path = plugin_dir_path( __FILE__ ) . 'includes/brandagent-config.php';
-            if ( file_exists( $config_path ) ) {
-                require_once $config_path;
-            } else {
-                brandagent_log( 'BrandAgent Refresh: ERROR - Config file not found at ' . $config_path );
-            }
-        }
-
-        // Fetch the new HMAC secret from Clarity server using the opaque token
-        $clarity_server_url = BrandAgent_Config::get_clarity_server_url();
-        $fetch_url = $clarity_server_url . '/woocommerce/fetch-secret';
-
-        $request_body = wp_json_encode( array( 'oauth_token' => $oauth_token ) );
-
-        $response = wp_remote_post( $fetch_url, array(
-            'timeout' => 15,
-            'headers' => array( 'Content-Type' => 'application/json' ),
-            'body'    => $request_body,
-        ) );
-
-        if ( is_wp_error( $response ) ) {
-            brandagent_log( 'BrandAgent Refresh: ERROR - wp_remote_post failed: ' . $response->get_error_message() );
-        } else {
-            $status_code = wp_remote_retrieve_response_code( $response );
-            $response_body = wp_remote_retrieve_body( $response );
-
-            if ( $status_code === 200 ) {
-                $body = json_decode( $response_body, true );
-                if ( json_last_error() !== JSON_ERROR_NONE ) {
-                    brandagent_log( 'BrandAgent Refresh: ERROR - JSON parse failed: ' . json_last_error_msg() );
-                } elseif ( isset( $body['success'] ) && $body['success'] === true && ! empty( $body['hmac_secret'] ) ) {
-                    $hmac_secret_stored = brandagent_store_hmac_secret( $body['hmac_secret'], 'woocommerce' );
-                    $success = true;
-                    brandagent_log( 'BrandAgent Refresh: SUCCESS - New HMAC secret handled.', array( 'hmac_stored' => $hmac_secret_stored ) );
-                } else {
-                    brandagent_log( 'BrandAgent Refresh: ERROR - Unexpected response from fetch-secret', array(
-                        'status_code' => $status_code,
-                        'success_present' => isset( $body['success'] ),
-                        'hmac_present' => isset( $body['hmac_secret'] ) && ! empty( $body['hmac_secret'] ),
-                    ) );
-                }
-            } else {
-                brandagent_log( 'BrandAgent Refresh: ERROR - fetch-secret returned non-success status', array( 'status_code' => $status_code ) );
-            }
-        }
-    } else {
-        brandagent_log( 'BrandAgent Refresh: ERROR - Missing oauth_token parameter' );
-    }
+    $success = ! empty( $oauth_token ) && brandagent_refresh_woocommerce_credentials( $oauth_token );
 
     header( 'Content-Type: application/json' );
     if ( $success ) {
@@ -266,6 +233,101 @@ function brandagent_handle_refresh_credentials_callback() {
         echo json_encode( array( 'success' => false, 'error' => 'Failed to refresh credentials' ) );
     }
     exit;
+}
+
+/**
+ * Refresh an existing WooCommerce credential using the dashboard's token-bound URL.
+ *
+ * @param string $oauth_token Single-use credential token.
+ * @return bool Whether the credential and connection identity were verified after storage.
+ */
+function brandagent_refresh_woocommerce_credentials( $oauth_token ) {
+    $connect_lock = function_exists( 'brandagent_wordpress_acquire_connect_lock' )
+        ? brandagent_wordpress_acquire_connect_lock()
+        : false;
+    if ( false === $connect_lock ) {
+        brandagent_log( 'BrandAgent Refresh: Connection is busy; retry with a new refresh request' );
+        return false;
+    }
+
+    try {
+        // Read durable connection state while excluding Connect and legacy callback migration.
+        wp_cache_delete( 'brandagent_connected_store_url', 'options' );
+        wp_cache_delete( 'brandagent_hmac_platform', 'options' );
+        wp_cache_delete( 'alloptions', 'options' );
+        wp_cache_delete( 'notoptions', 'options' );
+        $connected_url = brandagent_canonicalize_connected_store_url( get_option( 'brandagent_connected_store_url', '' ) );
+        $pending_key = 'brandagent_woocommerce_oauth_store_url';
+        if ( wp_using_ext_object_cache() ) {
+            $pending_url = wp_cache_get( $pending_key, 'transient', true );
+        } else {
+            wp_cache_delete( '_transient_' . $pending_key, 'options' );
+            wp_cache_delete( '_transient_timeout_' . $pending_key, 'options' );
+            $pending_url = get_transient( $pending_key );
+        }
+        $pending_url = brandagent_canonicalize_connected_store_url( $pending_url );
+        if ( ( $connected_url !== '' && $pending_url !== '' && $connected_url !== $pending_url )
+            || get_option( 'brandagent_hmac_platform', '' ) === 'wordpress' ) {
+            brandagent_log( 'BrandAgent Refresh: Conflicting connection state' );
+            return false;
+        }
+
+        $clarity_server_url = BrandAgent_Config::get_clarity_server_url();
+        $fetch_url = $clarity_server_url . '/woocommerce/fetch-secret';
+        $request_body = wp_json_encode( array( 'oauth_token' => $oauth_token ) );
+        $response = wp_remote_post( $fetch_url, array(
+            'timeout' => 15,
+            'headers' => array( 'Content-Type' => 'application/json' ),
+            'body'    => $request_body,
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            brandagent_log( 'BrandAgent Refresh: ERROR - wp_remote_post failed: ' . $response->get_error_message() );
+            return false;
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        if ( wp_remote_retrieve_response_code( $response ) !== 200 || ! is_array( $body )
+            || ( $body['success'] ?? false ) !== true || ! isset( $body['hmac_secret'] ) || ! is_string( $body['hmac_secret'] ) ) {
+            brandagent_log( 'BrandAgent Refresh: Invalid fetch-secret response' );
+            return false;
+        }
+
+        // Only older dashboard results may omit the URL, and only an already-confirmed site
+        // can accept those. A refresh never establishes an identity from home_url() or pending state.
+        $store_url = array_key_exists( 'store_url', $body )
+            ? brandagent_canonicalize_connected_store_url( $body['store_url'] )
+            : $connected_url;
+        if ( $store_url === '' || ( $connected_url !== '' && $store_url !== $connected_url )
+            || ( $pending_url !== '' && $store_url !== $pending_url ) ) {
+            brandagent_log( 'BrandAgent Refresh: Credential URL does not match the existing connection' );
+            return false;
+        }
+
+        $secret_key = 'brandagent_secret_key_' . brandagent_normalize_store_url( $store_url );
+        wp_cache_delete( $secret_key, 'options' );
+        if ( $connected_url === '' && ! brandagent_get_hmac_secret_for_store_url( $store_url ) ) {
+            brandagent_log( 'BrandAgent Refresh: No readable legacy credential for the token-bound URL' );
+            return false;
+        }
+
+        $expected_secret = str_replace( array( "\r", "\n", " " ), '', trim( $body['hmac_secret'] ) );
+        if ( $expected_secret === '' ) {
+            return false;
+        }
+        $stored = brandagent_store_hmac_secret( $body['hmac_secret'], 'woocommerce', $store_url );
+        $readback = $stored ? brandagent_get_hmac_secret_for_store_url( $store_url ) : false;
+        $success = $stored && is_string( $readback ) && hash_equals( $expected_secret, $readback );
+        if ( $success ) {
+            delete_transient( $pending_key );
+        }
+        brandagent_log( $success
+            ? 'BrandAgent Refresh: SUCCESS - New HMAC secret handled.'
+            : 'BrandAgent Refresh: ERROR - HMAC secret failed to persist' );
+        return $success;
+    } finally {
+        brandagent_wordpress_release_connect_lock( $connect_lock );
+    }
 }
 
 function generate_wordpress_id_option_if_empty()
@@ -309,21 +371,40 @@ function clarity_section_iframe_callback()
         /* default */
     );
 
-    $site_url = home_url();
+    $is_woocommerce = class_exists('woocommerce');
+    $can_manage_options = current_user_can('manage_options');
+    // Page viewers may read an existing identity; only administrators may reserve an OAuth URL.
+    $site_url = $is_woocommerce
+        ? ( $can_manage_options ? brandagent_prepare_woocommerce_oauth_url() : brandagent_get_woocommerce_oauth_callback_url() )
+        : brandagent_get_connected_store_url();
+    if ( $is_woocommerce && ! $can_manage_options && is_wp_error( $site_url )
+        && in_array( $site_url->get_error_code(), array( 'brandagent_oauth_url_missing', 'brandagent_oauth_url_conflict' ), true ) ) {
+        // Ordinary Clarity viewing needs a display URL, not a reserved OAuth identity.
+        $site_url = brandagent_get_connected_store_url();
+    }
+    if ( is_wp_error( $site_url ) ) {
+        echo '<div class="notice notice-error"><p>'
+            . esc_html__( 'Brand Agent setup could not be prepared. Please refresh this page and try again.', 'microsoft-clarity' )
+            . '</p></div>';
+        return;
+    }
     $hosting_type = clarity_is_wordpress_com_hosted() ? 'wpcom' : 'selfhosted';
 
     $clarity_domain = clarity_get_embed_base_url();
 
-    $query_params = "?nonce=$nonce&integration=Wordpress&wpsite=$clarity_wp_site&siteurl=$site_url&hostingtype=$hosting_type";
+    $encoded_site_url = rawurlencode( $site_url );
+    $query_params = "?nonce=$nonce&integration=Wordpress&wpsite=$clarity_wp_site&siteurl=$encoded_site_url&hostingtype=$hosting_type";
 
     // set a QP if user is admin
-    if (current_user_can('manage_options')) {
+    if ($can_manage_options) {
         $query_params = $query_params . "&WPAdmin=1";
     }
 
     // set a QP if user is WooCommerce plugin is active
-    if (class_exists('woocommerce')) {
+    if ($is_woocommerce) {
         $query_params = $query_params . "&WooCommerce=1";
+        // Older dashboards ignore this marker; release the matching dashboard contract first.
+        $query_params = $query_params . "&WooCommercePathIdentitySupported=1";
     }
 
     // set a QP if permalink structure is plain (required for Brand Agent rewrite rules)
@@ -343,6 +424,10 @@ function clarity_section_iframe_callback()
     // Additive connector-bridge marker. Older plugins omit it so the dashboard hides
     // Square UI; older dashboards ignore unknown query params.
     $query_params = $query_params . "&WordPressBrandAgentConnectorsSupported=1";
+
+    // 0.10.32+ acknowledges project-id persistence. The dashboard waits only when this marker is
+    // present, so older plugin versions retain their historical fire-and-forget behavior.
+    $query_params = $query_params . "&WordPressProjectPersistenceAckSupported=1";
 
     // initially set iframe src to the new users path
     $iframe_src = $clarity_domain . $query_params;
@@ -475,9 +560,9 @@ function add_event_listeners($hook)
 
     wp_register_script(
         'window_listeners_js', /* handle */
-        plugins_url('js\add_window_listeners.js', __FILE__), /* src */
-        array(), /* deps  */
-        false, /* ver  */
+        plugins_url('js/add_window_listeners.js', __FILE__), /* src */
+        array('jquery'), /* deps  */
+        get_installed_plugin_version(), /* ver  */
         false /* in_footer */
     );
     wp_enqueue_script(
@@ -571,11 +656,16 @@ function edit_clarity_project_id()
                 )
             ));
     } else {
-        update_option(
-            'clarity_project_id', /* option */
-            $new_value /* value */
-            /* autoload */
-        );
+        $project_result = brandagent_wordpress_update_project_id($new_value);
+        if (empty($project_result['success'])) {
+            die(json_encode(
+                    array(
+                        'success' => false,
+                        'message' => $project_result['error'],
+                        'error_code' => $project_result['error_code']
+                    )
+                ));
+        }
         die(json_encode(
                 array(
                     'success' => true,

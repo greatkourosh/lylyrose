@@ -101,35 +101,58 @@ class Transaction extends Model {
 	public const CLIENT_LD = 'learndash';
 	public const CLIENT_SI = 'sliced_invoices';
 	public const CLIENT_BOOKLY = 'bookly';
+	public const CLIENT_WALLET_FOR_WOO = 'wallet_for_woo';
+	public const CLIENT_JET_APPOINTMENTS = 'jet_appointments';
+	public const CLIENT_JET_BOOKING = 'jet_booking';
+	public const CLIENT_JET_ENGINE = 'jet_engine';
 
 	public static function getClients(): array {
 
 		return apply_filters( 'nabik/gateland/transaction_clients', [
-			self::CLIENT_WOOCOMMERCE => 'ووکامرس',
-			self::CLIENT_CF7         => 'فرم تماس ۷',
-			self::CLIENT_RCP         => 'اشتراک ویژه',
-			self::CLIENT_EDD         => 'فروش فایل',
-			self::CLIENT_GF          => 'گرویتی فرمز',
-			self::CLIENT_GIVE        => 'دونیت',
-			self::CLIENT_WPUF        => 'ناحیه کاربری',
-			self::CLIENT_PMP         => 'عضویت ویژه',
-			self::CLIENT_MYCRED      => 'امتیاز من',
-			self::CLIENT_WPFORMS     => 'WP Forms',
-			self::CLIENT_LP          => 'لرن‌پرس',
-			self::CLIENT_LD          => 'لرن‌دش',
-			self::CLIENT_SI          => 'Sliced Invoices',
-			self::CLIENT_BOOKLY      => 'بوکلی',
+			self::CLIENT_WOOCOMMERCE      => 'ووکامرس',
+			self::CLIENT_CF7              => 'فرم تماس ۷',
+			self::CLIENT_RCP              => 'اشتراک ویژه',
+			self::CLIENT_EDD              => 'فروش فایل',
+			self::CLIENT_GF               => 'گرویتی فرمز',
+			self::CLIENT_GIVE             => 'دونیت',
+			self::CLIENT_WPUF             => 'ناحیه کاربری',
+			self::CLIENT_PMP              => 'عضویت ویژه',
+			self::CLIENT_MYCRED           => 'امتیاز من',
+			self::CLIENT_WPFORMS          => 'WP Forms',
+			self::CLIENT_LP               => 'لرن‌پرس',
+			self::CLIENT_LD               => 'لرن‌دش',
+			self::CLIENT_SI               => 'Sliced Invoices',
+			self::CLIENT_BOOKLY           => 'بوکلی',
+			self::CLIENT_WALLET_FOR_WOO   => 'کیف پول ووکامرس',
+			self::CLIENT_JET_APPOINTMENTS => 'رزرو نوبت جت',
+			self::CLIENT_JET_BOOKING      => 'رزرواسیون جت',
+			self::CLIENT_JET_ENGINE       => 'فرم جت انجین',
 		] );
 
 	}
 
 	public function save( array $options = [] ) {
 
-		if ( isset( $this->getDirty()['status'] ) ) {
-			do_action( 'nabik/gateland/transaction_status_changed', $this->getOriginal( 'status' ), $this->getDirty()['status'], $this );
+		$dirty = $this->getDirty();
+
+		$saved = parent::save( $options );
+
+		if ( ! $saved ) {
+			return false;
 		}
 
-		return parent::save( $options );
+		if ( isset( $dirty['status'] ) ) {
+
+			do_action(
+				'nabik/gateland/transaction_status_changed',
+				$this->getOriginal( 'status' ),
+				$dirty['status'],
+				$this
+			);
+
+		}
+
+		return $saved;
 	}
 
 	// Functions
@@ -295,9 +318,7 @@ class Transaction extends Model {
 	}
 
 	public function getPrettyPayURL(): string {
-		$prefix = Gateland::get_option( 'sms.pay_link', 'pay' );
-
-		return site_url( $prefix . '/' . $this->token );
+		return site_url( Gateland::get_pay_url_prefix() . '/' . $this->token );
 	}
 
 	// Relations

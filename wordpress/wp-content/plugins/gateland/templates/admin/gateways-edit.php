@@ -61,6 +61,17 @@ wp_localize_script('global-script', 'gateland', [
                                             >
                                         </template>
 
+                                        <template x-if="input.type === 'number'">
+                                            <input
+                                                    x-model="input.model"
+                                                    :placeholder="input?.placeholder"
+                                                    type="number"
+                                                    class="w-full bg-white border border-gray-300 shadow-[0_1px_2px_0_#1018280D] rounded-lg py-2 px-3"
+                                                    class="text-left"
+                                                    dir="ltr"
+                                            >
+                                        </template>
+
                                         <template x-if="input.type === 'textarea'">
                                             <textarea
                                                     x-model="input.model"

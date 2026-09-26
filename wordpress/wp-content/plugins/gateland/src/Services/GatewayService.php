@@ -50,9 +50,10 @@ class GatewayService {
 		                   ->get()
 		                   ->map( function ( Gateway $gateway ) {
 			                   return [
-				                   'id'   => $gateway->id,
-				                   'name' => $gateway->build()->name(),
-				                   'icon' => $gateway->build()->icon(),
+				                   'id'    => $gateway->id,
+				                   'class' => $gateway->class,
+				                   'name'  => $gateway->build()->name(),
+				                   'icon'  => $gateway->build()->icon(),
 			                   ];
 		                   } )
 		                   ->keyBy( 'id' )

@@ -2,6 +2,8 @@
 
 namespace Nabik\Gateland\API\CardToCard;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Nabik\Gateland\API\RestAPI;
 use Nabik\Gateland\Enums\Transaction\CurrenciesEnum;
 use Nabik\Gateland\Helper;
@@ -9,7 +11,7 @@ use Nabik\Gateland\Helpers\SQID;
 use Nabik\Gateland\Models\Card;
 use Nabik\Gateland\Models\Receipt;
 use Nabik\Gateland\Models\Transaction;
-use Nabik\GatelandPro\Services\CardToCardService;
+use Nabik\Gateland\Services\CardToCardService;
 use WP_REST_Request;
 
 class TransactionAPI extends RestAPI {
@@ -50,34 +52,48 @@ class TransactionAPI extends RestAPI {
 		/** @var Card $card */
 		$card = Card::query()->find( $transaction->meta['card_id'] );
 
-		/** @var Receipt[] $receipts */
+		/** @var Receipt[]|Collection $receipts */
 		$receipts = Receipt::query()
 		                   ->where( 'transaction_id', $transaction->id )
 		                   ->orderByDesc( 'created_at' )
-		                   ->get()
-		                   ->map( [ $this, 'resource' ] )
-		                   ->toArray();
+		                   ->get();
+
+		$total_accepted_amount = $receipts
+			->where( 'status', 'accepted' )
+			->sum( 'accepted_amount' );
+
+		$receipts = $receipts
+			->map( [ $this, 'resource' ] )
+			->toArray();
+
+		$expires_at = $transaction->created_at->addMinutes( (int) $gateway->options['expire_time'] );
 
 		self::response( true, null, [
-			'id'                => $transaction->id,
-			'card'              => [
+			'id'                    => $transaction->id,
+			'card'                  => [
 				'name'   => $card->name,
 				'number' => $card->card_number,
+				'iban'   => $card->iban,
 			],
-			'bank'              => [
+			'bank'                  => [
 				'name' => $card->bank_name,
 				'logo' => GATELAND_URL . '/assets/images/gateways/CardToCard.png',
 			],
-			'receipts'          => $receipts,
-			'status'            => $transaction->status,
-			'amount'            => $transaction->amount,
-			'site_name'         => get_bloginfo( 'name' ),
-			'currency'          => CurrenciesEnum::tryFrom( $transaction->currency )->symbol(),
-			'order_id'          => $transaction->order_id,
-			'created_at'        => Helper::date( $transaction->created_at, 'Y/m/d H:i' ),
-			'remain_time'       => $transaction->created_at->addMinutes( $gateway->options['expire_time'] )->diffInSeconds(),
-			'max_file_size'     => $gateway->options['max_file_size'],
-			'max_receipt_count' => $gateway->options['max_receipt_count'],
+			'site'                  => [
+				'name' => get_bloginfo( 'name' ),
+				'url'  => site_url(),
+				'logo' => get_site_icon_url(),
+			],
+			'receipts'              => $receipts,
+			'total_accepted_amount' => $total_accepted_amount,
+			'status'                => $transaction->status,
+			'amount'                => $transaction->amount,
+			'currency'              => CurrenciesEnum::tryFrom( $transaction->currency )->symbol(),
+			'order_id'              => $transaction->order_id,
+			'created_at'            => Helper::date( $transaction->created_at, 'Y/m/d H:i' ),
+			'remain_time'           => max( 0, (int) Carbon::now()->diffInSeconds( $expires_at, false ) ),
+			'max_file_size'         => (int) $gateway->options['max_file_size'],
+			'max_receipt_count'     => (int) $gateway->options['max_receipt_count'],
 		] );
 	}
 
@@ -101,7 +117,7 @@ class TransactionAPI extends RestAPI {
 		], '', Helper::en_num( $card_number ) );
 
 		if ( ! Card::isValidCardNumber( $card_number ) && ! Card::isValidIBAN( $card_number ) ) {
-			self::response( false, 'شماره کارت یا شبا وارد شده معتیر نمی‌باشد.' );
+			self::response( false, 'شماره کارت یا شبا وارد شده معتبر نمی‌باشد.' );
 		}
 
 		if ( empty( $tracking_number ) ) {
@@ -209,6 +225,7 @@ class TransactionAPI extends RestAPI {
 		return [
 			'attachment_url'  => $receipt->attachment_url,
 			'id'              => $receipt->id,
+			'card_number'     => $receipt->card_number,
 			'tracking_number' => $receipt->tracking_number,
 			'amount'          => $receipt->amount,
 			'accepted_amount' => $receipt->accepted_amount,

@@ -5,9 +5,9 @@ Donate link: http://blog.futtta.be/2013/10/21/do-not-donate-to-me/
 License: GPLv3
 License URI: [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 Requires at least: 5.3
-Tested up to: 6.9
-Requires PHP: 7.1
-Stable tag: 3.1.15.1
+Tested up to: 7.1
+Requires PHP: 7.4
+Stable tag: 3.1.16
 
 Autoptimize speeds up your website by optimizing JS, CSS, images (incl. lazy-load), HTML and Google Fonts, asyncing JS, removing emoji cruft and more.
 
@@ -320,6 +320,12 @@ You can get help on the [wordpress.org support forum](http://wordpress.org/suppo
 Just [fork Autoptimize on Github](https://github.com/futtta/autoptimize) and code away!
 
 == Changelog ==
+
+= 3.1.16 =
+* Security: overall hardening of Autoptimize, e.g. replacing some regular expressions with a more modern, safer approach.
+* CSS minification: fixes for problems with alpha channel of rgb()/hsl() colors (thanks to @hinnerk-a)
+* Critical CSS: improvements to job queueing and settings page tweaks
+* confrimed OK with WordPress 7.1
 
 = 3.1.15.1 =
 * fix for "Uncaught Error: Using $this when not in object context" when preloads are set

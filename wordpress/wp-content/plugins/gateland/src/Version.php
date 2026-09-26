@@ -245,4 +245,39 @@ class Version extends \Nabik\Utils\V1\Version {
 
 	}
 
+	public function update_250() {
+		global $wpdb;
+
+		$prefix = Gateland::get_option( 'sms.pay_link', 'pay' );
+		Gateland::set_option( 'advanced.pay_url_prefix', $prefix );
+
+		$table = $wpdb->prefix . 'gateland_cards';
+		$query = sprintf( 'ALTER TABLE `%s` MODIFY COLUMN `card_number` varchar(191) NULL', $table );
+		Nabik_Net_Database::DB()->statement( $query );
+
+		/** @var Gateway[] $gateways */
+		$gateways = Gateway::query()
+		                   ->whereIn( 'class', [
+			                   'Nabik\GatelandPro\Gateways\IranDargahGateway',
+			                   'Nabik\GatelandPro\Gateways\CardToCardGateway',
+		                   ] )
+		                   ->get();
+
+		foreach ( $gateways as $gateway ) {
+			$gateway->class = str_replace( 'GatelandPro', 'Gateland', $gateway->class );
+			$gateway->save();
+		}
+
+		if ( Nabik_Net_Database::schema()->hasColumn( 'gateland_cards', 'iban' ) ) {
+			return;
+		}
+
+		Nabik_Net_Database::Schema()->table( 'gateland_cards', function ( Blueprint $table ) {
+			$table->string( 'iban' )
+			      ->unique()
+			      ->nullable()
+			      ->after( 'card_number' );
+		} );
+	}
+
 }

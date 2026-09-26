@@ -4,7 +4,7 @@ Tags: woocommerce wallet, cashback, store credit, partial payment, digital walle
 Requires PHP: 7.4
 Requires at least: 6.4
 Tested up to: 7.1
-Stable tag: 1.6.14
+Stable tag: 1.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -82,18 +82,16 @@ Beyond core wallet functionality, TeraWallet features a robust **Cashback Reward
 
 * PHP 7.4 or greater is required (PHP 8.0 or greater is recommended)
 * MySQL 5.6 or greater, OR MariaDB version 10.1 or greater, is required
-* WordPress 6.0 or greater is required
+* WordPress 6.4 or greater is required
 * WooCommerce 7.2 or greater is required
 
 = Automatic installation =
 
-Automatic installation is the easiest option as WordPress handles the file transfers itself and you don't need to leave your web browser. To do an automatic install of WooCommerce Wallet Payment, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
-
-In the search field type "Wallet for WooCommerce" and click Search Plugins. Once you've found the plugin you can view details about it such as the point release, rating and description. Most importantly of course, you can install it by simply clicking "Install Now".
+In your WordPress dashboard go to **Plugins > Add New**, search for "Wallet for WooCommerce" and click **Install Now**.
 
 = Manual installation =
 
-The manual installation method involves downloading our plugin and uploading it to your webserver via your favourite FTP application. The WordPress codex contains [instructions on how to do this here](https://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation).
+Upload the plugin folder to `/wp-content/plugins/` via FTP, then activate it from the Plugins menu.
 
 = Updating =
 
@@ -125,6 +123,14 @@ You can ask for help in the [WordPress Plugin Forum](https://wordpress.org/suppo
 = Where is the REST API documentation? =
 You can find the documentation for our [Wallet REST API here](https://github.com/malsubrata/woo-wallet/wiki/API-V3).
 
+== External services ==
+
+TeraWallet shows a dismissible admin notice inviting the administrator to join the StandaloneTech mailing list (release, security and compatibility news, tips, and occasional product news).
+
+Nothing is sent unless the administrator ticks the consent box (unticked by default) and submits the form. Only then, once, the plugin sends the entered email address, the site URL, the TeraWallet version and the time consent was given to https://standalonetech.com. No store, customer, order or wallet data is ever sent. Unsubscribe from any email.
+
+[Terms of Service](https://standalonetech.com/terms-and-conditions/) · [Privacy Policy](https://standalonetech.com/privacy-policy/#plugin-mailing-list)
+
 == Screenshots ==
 
 1. User wallet dashboard page.
@@ -140,20 +146,13 @@ You can find the documentation for our [Wallet REST API here](https://github.com
 
 == Changelog ==
 
-= v1.6.14 (September 1, 2026) =
-* New - New Statement tab replaces Transactions: pick a date range, see opening and closing balance with a running balance per row, and download or print it as CSV.
-* Fix - Statement and wallet amounts now convert correctly on multi-currency stores; the closing balance again matches the wallet balance shown elsewhere.
-* Fix - The wallet balance on Blocks checkout no longer breaks the payment method when it can't be read as a number.
-* Fix - The settings screen reopens on the tab you left, on browsers where storage is unavailable.
-* Tweak - The Transactions tab is gone; old /my-wallet/transactions/ links now open the wallet dashboard. Add-ons overriding templates/wc-endpoint-wallet.php should refresh their copy.
-* Tweak - Developers: the `woo_wallet_transactons_datatable_columns` and `woo_wallet_transactons_datatable_row_data` filters are removed; use `woo_wallet_statement_columns`, `woo_wallet_statement_row_cells` and `woo_wallet_statement_row_columns` instead.
-* Tweak - Developers: new `woo_wallet_statement_adjustments` and `woo_wallet_statement_opening_adjustment` filters let an add-on place a non-ledger balance movement on the statement as a dated line.
-* Tweak - Redesigned the Upgrade to Pro page; pricing now reads "from $79" and links to the 5-site and 25-site licences.
-* Performance - The wallet's frontend script is 445 KB smaller now that the old transaction table's charting library no longer loads on any store page.
+= v1.7.0 (September 11, 2026) =
+* New - An optional, dismissible notice on TeraWallet's admin screens invites you to join the mailing list; nothing is sent unless you tick consent and submit.
+* Tweak - Refreshed the colours and type on the Upgrade to Pro banner for better readability.
 
 [See changelog for all versions](https://raw.githubusercontent.com/malsubrata/woo-wallet/master/changelog.txt).
 
 == Upgrade Notice ==
 
-= 1.6.14 =
-New Statement tab replaces Transactions with running balances; multi-currency amounts now display correctly. If your add-on overrides templates/wc-endpoint-wallet.php or uses the old transaction table filters, update it before upgrading.
+= 1.7.0 =
+Adds an optional, opt-in mailing list notice on admin screens (nothing sent unless you consent) and refreshes the Upgrade to Pro banner.

@@ -62,6 +62,12 @@
   font-weight: 600;
   src: url("../fonts/roboto/Roboto-Medium.ttf");
 }
+@font-face {
+  font-family: Cousine;
+  font-style: normal;
+  font-weight: 500;
+  src: url("../fonts/cousine/Cousine-Regular.ttf");
+}
 body, html {
   background-color: #F9FBFE;
 }
@@ -95,6 +101,10 @@ a {
 
 .font-roboto {
   font-family: "Roboto", serif !important;
+}
+
+.font-cousine {
+  font-family: "Cousine", serif !important;
 }
 
 input, textarea {
@@ -241,6 +251,9 @@ canvas {
   padding: 6px;
   border-radius: 8px;
 }
+.tippy-box[data-theme~=tomato] .tippy-content {
+  text-align: center !important;
+}
 
 .notyf {
   z-index: 999999 !important;
@@ -259,6 +272,19 @@ canvas {
 }
 .gateway-row.active .status .status-circle {
   right: 2px !important;
+}
+
+.blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /*# sourceMappingURL=index.css.map */

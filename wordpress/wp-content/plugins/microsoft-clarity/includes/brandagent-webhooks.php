@@ -39,7 +39,7 @@ function brandagent_add_hmac_to_webhook( $http_args, $arg, $webhook_id ) {
 		return $http_args;
 	}
 
-	$store_url = home_url();
+	$store_url = brandagent_get_connected_store_url();
 	$client_id = brandagent_normalize_store_url( $store_url );
 	$timestamp = time();
 	$signature = brandagent_generate_hmac_signature( $client_id, $timestamp, $secret_key );
@@ -131,7 +131,7 @@ class BrandAgent_Webhooks {
 
 		// Build delivery URL
 		$backend_base_url = BrandAgent_Config::get_backend_base_url();
-		$store_url = home_url();
+		$store_url = brandagent_get_connected_store_url();
 		$delivery_url = $backend_base_url . $config['endpoint'] . '?store_url=' . rawurlencode( $store_url );
 
 		// Get HMAC secret for webhook signature validation

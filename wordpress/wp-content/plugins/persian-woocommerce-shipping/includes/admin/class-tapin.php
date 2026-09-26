@@ -154,7 +154,7 @@ class PWS_Settings_Tapin extends PWS_Settings {
 					'desc'    => 'در صورتی که فروشگاه کتاب است، پست کتاب و در غیر اینصورت پست تاپین را انتخاب کنید.',
 					'options' => [
 						'tapin'      => 'پست تاپین - tapin.ir',
-						'posteketab' => 'پست کتاب - posteketab.com',
+						'posteketab' => 'پست کتاب - postketab.com',
 					],
 				],
 				[

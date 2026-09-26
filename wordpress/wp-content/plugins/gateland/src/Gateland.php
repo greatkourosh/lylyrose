@@ -13,6 +13,7 @@ namespace Nabik\Gateland;
 
 use Nabik\Gateland\Admin\Menu;
 use Nabik\Gateland\Services\APIService;
+use Nabik\Gateland\Services\CardToCardService;
 use Nabik\Gateland\Services\CronService;
 use Nabik\Gateland\Services\SMSService;
 
@@ -41,33 +42,32 @@ class Gateland {
 		new SMSService();
 		new APIService();
 		new CronService();
+		new CardToCardService();
 	}
 
 	private function init_hooks() {
-		add_action( 'init', [ $this, 'addRewriteRules' ] );
-		add_filter( 'query_vars', [ $this, 'addQueryVars' ] );
-		add_action( 'wp', [ $this, 'handleCustomRule' ] );
+		add_action( 'init', [ $this, 'add_rewrite_rule' ] );
+		add_filter( 'query_vars', [ $this, 'add_query_vars' ] );
+		add_action( 'wp', [ $this, 'handle_pay_rule' ] );
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_alpine' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_alpine' ] );
 		add_action( 'login_enqueue_scripts', [ $this, 'enqueue_alpine' ] );
 	}
 
-	public static function addRewriteRules() {
-		$prefix = self::get_option( 'sms.pay_link', 'pay' );
-
-		$regex = sprintf( '^%s/([^/]+)/?', $prefix );
+	public static function add_rewrite_rule() {
+		$regex = sprintf( '^%s/([^/]+)/?', self::get_pay_url_prefix() );
 		add_rewrite_rule( $regex, 'index.php?gateland_page=pay&gateland_id=$matches[1]', 'top' );
 	}
 
-	public static function addQueryVars( $vars ) {
+	public static function add_query_vars( $vars ) {
 		$vars[] = 'gateland_page';
 		$vars[] = 'gateland_id';
 
 		return $vars;
 	}
 
-	public static function handleCustomRule() {
+	public static function handle_pay_rule() {
 		global $wp_query;
 
 		$transaction_token = get_query_var( 'gateland_id' );
@@ -81,6 +81,16 @@ class Gateland {
 			exit();
 		}
 
+	}
+
+	public static function get_pay_url_prefix(): string {
+		$prefix = self::get_option( 'advanced.pay_url_prefix', 'pay' );
+
+		if ( empty( $prefix ) ) {
+			return 'pay';
+		}
+
+		return $prefix;
 	}
 
 	public function enqueue_alpine() {

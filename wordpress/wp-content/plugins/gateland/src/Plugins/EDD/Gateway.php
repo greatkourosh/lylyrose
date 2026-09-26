@@ -2,11 +2,13 @@
 
 namespace Nabik\Gateland\Plugins\EDD;
 
+use Exception;
 use Nabik\Gateland\Enums\Transaction\CurrenciesEnum;
 use Nabik\Gateland\Enums\Transaction\StatusesEnum;
 use Nabik\Gateland\Gateland;
 use Nabik\Gateland\Models\Transaction;
 use Nabik\Gateland\Pay;
+use Nabik\Gateland\Services\GatewayService;
 
 class Gateway {
 
@@ -17,7 +19,7 @@ class Gateway {
 	/**
 	 * @var string $id
 	 */
-	public $id;
+	public string $id;
 
 	/**
 	 * Initialize gateway and hook
@@ -30,7 +32,7 @@ class Gateway {
 			$this->id = 'gateland';
 		} else {
 
-			$gateways         = \Nabik\Gateland\Services\GatewayService::activated();
+			$gateways         = GatewayService::activated();
 			$this->gateway_id = $gateway_id;
 			$this->gateway    = $gateways[ $gateway_id ] ?? [];
 
@@ -39,6 +41,9 @@ class Gateway {
 
 		add_filter( 'edd_payment_gateways', [ $this, 'register' ] );
 		add_filter( 'edd_settings_gateways', [ $this, 'settings' ] );
+
+		add_filter( 'edd_accepted_payment_icons', [ $this, 'payment_icons' ] );
+		add_filter( 'edd_accepted_payment_' . $this->id . '_image', [ $this, 'register_payment_icon' ] );
 
 		add_action( 'edd_' . $this->id . '_cc_form', '__return_false' );
 		add_action( 'edd_gateway_' . $this->id, [ $this, 'process' ] );
@@ -55,6 +60,7 @@ class Gateway {
 		$gateways[ $this->id ] = [
 			'checkout_label' => $edd_options[ $this->id . '_label' ] ?? ( $this->gateway['name'] ?? 'پرداخت آنلاین' ),
 			'admin_label'    => $this->gateway['name'] ?? 'گیت‌لند',
+			'icons'          => [ $this->id ]
 		];
 
 		return $gateways;
@@ -75,6 +81,16 @@ class Gateway {
 				'placeholder' => $this->gateway['name'] ?? 'پرداخت آنلاین',
 			],
 		] );
+	}
+
+	public function payment_icons( $payment_icons ) {
+		$payment_icons[ $this->id ] = $this->gateway['name'] ?? 'گیت لند';
+
+		return $payment_icons;
+	}
+
+	public function register_payment_icon() {
+		return $this->gateway['icon'] ?? GATELAND_URL . '/assets/images/gateland.png';
 	}
 
 	public function process( $purchase_data ) {
@@ -106,8 +122,14 @@ class Gateway {
 			return;
 		}
 
-		if ( edd_get_currency() == 'IRR' ) {
+		$edd_currency = edd_get_currency();
+
+		if ( $edd_currency == 'RIAL' ) {
 			$amount = $purchase_data['price'] / 10;
+		} elseif ( $edd_currency == 'IRHR' ) {
+			$amount = $purchase_data['price'] * 100;
+		} elseif ( $edd_currency == 'IRHT' ) {
+			$amount = $purchase_data['price'] * 1000;
 		} else {
 			$amount = $purchase_data['price'];
 		}
@@ -139,7 +161,7 @@ class Gateway {
 
 		try {
 			$response = Pay::request( $data );
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			edd_set_error( 'gateland_exception', '[E1] خطایی در زمان ارتباط با درگاه پرداخت رخ داده است.' );
 
 			Gateland::log( '[E1]', $payment, $e->getMessage() );

@@ -9,10 +9,10 @@ use Nabik\Gateland\Enums\Transaction\CurrenciesEnum;
 use Nabik\Gateland\Helper;
 use Nabik\Gateland\Models\Card;
 use Nabik\Gateland\Models\Receipt;
+use Nabik\Gateland\Services\CardToCardService;
 use Nabik\Gateland\Services\TransactionService;
 use Nabik\Gateland\Services\ZohalService;
 use Nabik\GatelandPro\Exports\ReceiptExport;
-use Nabik\GatelandPro\Services\CardToCardService;
 use Rakit\Validation\Validator;
 use WP_REST_Request;
 
@@ -65,11 +65,11 @@ class ReceiptAPI extends RestAPI {
 		                         ->get()
 		                         ->map( function ( Card $card ) {
 			                         return [
-				                         'id'                    => $card->id,
-				                         'name'                  => $card->name,
-				                         'card_number'           => $card->card_number,
-				                         'formatted_card_number' => $card->formatted_card_number,
-				                         'status'                => $card->status,
+				                         'id'          => $card->id,
+				                         'name'        => $card->name,
+				                         'card_number' => $card->card_number,
+				                         'iban'        => $card->iban,
+				                         'status'      => $card->status,
 			                         ];
 		                         } )
 		                         ->values()
@@ -244,12 +244,13 @@ class ReceiptAPI extends RestAPI {
 			],
 			'source_card'            => [
 				'name'        => $receipt->meta['card_number_owner'] ?? null,
-				'card_number' => $receipt->formatted_card_number,
+				'card_number' => $receipt->card_number,
 			],
 			'destination_card'       => [
-				'id'          => $receipt->card->id,
-				'name'        => $receipt->card->name,
-				'card_number' => $receipt->card->formatted_card_number,
+				'id'     => $receipt->card->id,
+				'name'   => $receipt->card->name,
+				'number' => $receipt->card->card_number,
+				'iban'   => $receipt->card->iban,
 			],
 			'next_receipt_id'        => $next_receipt_id,
 			'pending_receipts_count' => $pending_receipts_count,

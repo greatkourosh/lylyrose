@@ -176,6 +176,7 @@ class SamanGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 			[
 				'label' => 'شماره ترمینال (MID)',
 				'key'   => 'terminal_id',
+				'type'  => 'number',
 			],
 			[
 				'label'       => 'سرویس پرداخت سریع بلوپی',

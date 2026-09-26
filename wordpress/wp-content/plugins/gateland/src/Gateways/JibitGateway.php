@@ -34,10 +34,11 @@ class JibitGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 
 		$parameters = [
 			'amount'                => intval( $transaction->amount * 10 ),
-			"currency"              => "IRR",
+			'currency'              => 'IRR',
 			'clientReferenceNumber' => $transaction->id,
 			'description'           => $transaction->description ?? '',
 			'callbackUrl'           => $transaction->gateway_callback,
+			'additionalData'        => [ 'referralCode' => 'FPUFXP' ],
 		];
 
 		if ( $transaction->mobile ) {
@@ -204,23 +205,29 @@ class JibitGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 	 */
 	public function getToken( Transaction $transaction ): string {
 		$parameters = [
-			'username' => $this->options['apiKey'],
-			'password' => $this->options['secretKey'],
+			'apiKey'    => $this->options['apiKey'],
+			'secretKey' => $this->options['secretKey'],
+		];
+
+		$headers = [
+			'Content-Type: application/json',
 		];
 
 		try {
 
 			$url      = 'https://napi.jibit.ir/ppg/v3/tokens';
-			$response = $this->curl( $url, $parameters );
+			$response = $this->curl( $url, json_encode( $parameters ), $headers );
 
 			$this->log( $transaction, 'TokenRequest', [
 				'parameters' => $parameters,
+				'headers'    => $headers,
 			] );
 
 		} catch ( Exception $e ) {
 
 			$this->log( $transaction, 'requestFailed', [
 				'parameters' => $parameters,
+				'headers'    => $headers,
 				'error'      => $e->getMessage(),
 			] );
 

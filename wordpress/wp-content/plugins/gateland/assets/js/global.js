@@ -64,6 +64,7 @@ function gatelandLoadTippyInPage(){
         tippy('.tooltip-btn', {
             theme: 'tomato',
             content: (reference) => reference.getAttribute('tooltip-text'),
+            allowHTML: true
         });
     }catch (error){
         console.error('Error: ', error);
@@ -86,7 +87,7 @@ function gatelandCopyToClipboard(el, label = '') {
                 if (textCopyEl) {
                     textCopyEl.textContent = "کپی شد";
                     setTimeout(() => {
-                        textCopyEl.textContent = "";
+                        textCopyEl.textContent = "کپی";
                     }, 2000);
                 }
             })
@@ -117,7 +118,7 @@ function gatelandFallbackCopyToClipboard(el, text, label){
         if (successful && el) {
             el.textContent = "کپی شد";
             setTimeout(() => {
-                el.textContent = "";
+                el.textContent = "کپی";
             }, 2000);
         } else if (!successful) {
             console.error('execCommand copy failed');
@@ -343,7 +344,34 @@ function gatelandFormatCardNumber(cardNumber) {
 }
 
 function gatelandCardNumberToString(cardNumber) {
-    return cardNumber.replace(/-/g, '');
+    return cardNumber ? cardNumber.replace(/-/g, '') : null;
+}
+
+function gatelandFormatIban(iban) {
+    if (!iban) {
+        return null;
+    }
+
+    iban = iban.replace(/\D/g, '');
+    let formatted = '';
+    for (let i = 0; i < iban.length; i++) {
+        formatted += iban.charAt(i);
+
+        if (
+            i === 1 ||
+            i === 5 ||
+            i === 9 ||
+            i === 13 ||
+            i === 17 ||
+            i === 21
+        ) {
+            if (i + 1 < iban.length) {
+                formatted += '-';
+            }
+        }
+    }
+
+    return formatted;
 }
 
 function gatelandFormatDate(timestamp, format){

@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the Plugins - WP Super Cache - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2023-01-12 05:07:53+0000\n"
+"PO-Revision-Date: 2026-08-26 18:45:59+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: GlotPress/4.0.3\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.1.0\n"
 "Language: fa\n"
 "Project-Id-Version: Plugins - WP Super Cache - Stable (latest release)\n"
 
-#: wp-cache.php:433
+#: inc/boost.php:307
 msgid "Install Jetpack Boost"
 msgstr "نصب تقویت‌کننده جت‌پک"
 
@@ -35,27 +35,27 @@ msgstr "غیرفعال‌کردن کش برای بازدیدکنندگان وا�
 msgid "Cache Restrictions"
 msgstr "محدودیت‌های کش"
 
-#: ossdl-cdn.php:318
+#: ossdl-cdn.php:336
 msgid "Simple CDN"
 msgstr "CDN ساده"
 
-#: ossdl-cdn.php:282
+#: ossdl-cdn.php:300
 msgid "Jetpack CDN"
 msgstr "CDN جت‌پک"
 
-#: wp-cache.php:523
+#: inc/admin-ui.php:115
 msgid "The WordPress CRON jobs system is disabled. This means the garbage collection system will not work unless you run the CRON system manually."
 msgstr "سیستم CRON jobs وردپرس غیر فعال است. این بدان معناست که سیستم جمع آوری زباله کار نخواهد کرد مگر اینکه سیستم CRON را به صورت دستی اجرا کنید."
 
-#: wp-cache.php:522
+#: inc/admin-ui.php:114
 msgid "CRON System Disabled"
 msgstr "سیستم CRON غیرفعال است"
 
-#: wp-cache.php:3850
+#: inc/lifecycle.php:675
 msgid "WP Super Cache: could not delete files"
 msgstr "WP Super Cache: نمی تواند فایل ها را حذف کند"
 
-#: wp-cache.php:3847
+#: inc/lifecycle.php:672
 msgid ""
 "You should delete these files manually.\n"
 "You may need to change the permissions of the files or parent directory.\n"
@@ -65,7 +65,7 @@ msgid ""
 "Thank you."
 msgstr "شما باید این فایل ها را به صورت دستی حذف کنید. شما ممکن است نیاز به تغییر مجوز فایل ها و یا پوشه های اصلی داشته باشید. شما می توانید در مورد این در کدکس بیشتر بدانید %s متشکرم."
 
-#: wp-cache.php:3842
+#: inc/lifecycle.php:667
 msgid ""
 "Dear User,\n"
 "\n"
@@ -83,23 +83,23 @@ msgstr ""
 " \n"
 "\n"
 
-#: wp-cache.php:2123
+#: inc/admin-notices.php:91
 msgid "Error: Configuration file %s is missing. Please reload the page."
 msgstr "خطا: فایل پیکربندی %sگم شده است لطفا صفحه را مجددا بارگیری کنید."
 
-#: wp-cache.php:2120
+#: inc/admin-notices.php:88
 msgid "Error: Configuration file %s could not be loaded. Please reload the page."
 msgstr "خطا: فایل پیکربندی %sنمی توان بارگذاری شود لطفا صفحه را دوباره بارگیری کنید."
 
-#: wp-cache.php:2117
+#: inc/admin-notices.php:85
 msgid "Error: The directory containing the configuration file %s is read only. Please make sure it is writeable by the webserver."
 msgstr "خطا: دایرکتوری حاوی فایل پیکربندی %sفقط خواندنی است لطفا مطمئن شوید که توسط وب سرور قابل نوشتن است."
 
-#: wp-cache.php:2114
+#: inc/admin-notices.php:82
 msgid "Error: Configuration file is read only. Please make sure %s is writeable by the webserver."
 msgstr "خطا: فایل پیکربندی فقط خواندنی است. لطفا مطمئن شوید%s توسط وب سرور قابل نوشتن است."
 
-#: wp-cache.php:2111
+#: inc/admin-notices.php:79
 msgid "Error: Could not rename temporary file to configuration file. Please make sure %s is writeable by the webserver."
 msgstr "خطا: فایل مورد نظر را نمی تواند تغییر نام دهد. لطفا مطمئن شوید%s توسط وب سرور قابل نوشتن است."
 
@@ -107,32 +107,28 @@ msgstr "خطا: فایل مورد نظر را نمی تواند تغییر نا�
 msgid "Save Settings"
 msgstr "تنظیمات را ذخیره کن"
 
-#: plugins/badbehaviour.php:73
-msgid "disable"
-msgstr "غیرفعال"
-
 #. Translators: placeholder is a link to a support document.
 #: partials/advanced.php:39
 msgid "Nginx rules can be found <a href=\"%s\">here</a> but are not officially supported."
 msgstr "قوانین Nginx می تواند یافت شود در <a href=\"%s\">اینجا</a> اما بطور رسمی پشتیبانی نمی شود."
 
-#: wp-cache.php:568
+#: inc/admin-ui.php:160
 msgid "Warning! You must set WP_CACHE and WPCACHEHOME in your wp-config.php for this plugin to work correctly:"
 msgstr "اخطار! باید WP_CACHE و WPCACHEHOME در wp-config.php تنظیم کنید برای این که افزونه بطور کامل کار کند:"
 
-#: wp-cache.php:2309
+#: inc/lifecycle.php:448
 msgid "Not allowed to edit %s per configuration."
 msgstr "اجازه ویرایش %s به ازای پیکربندی را ندارد."
 
-#: wp-cache.php:1449
+#: inc/admin-ui.php:1041
 msgid "<strong>Warning</strong>! Due to the way WordPress upgrades plugins, the ones you upload to the WP Super Cache folder (wp-super-cache/plugins/) will be deleted when you upgrade WP Super Cache. To avoid this loss, load your cache plugins from a different location. When you set <strong>$wp_cache_plugins_dir</strong> to the new location in wp-config.php, WP Super Cache will look there instead. <br />You can find additional details in the <a href=\"%s\">developer documentation</a>."
 msgstr "<strong>Warning</strong>! Due to the way WordPress upgrades plugins, the ones you upload to the WP Super Cache folder (wp-super-cache/plugins/) will be deleted when you upgrade WP Super Cache. To avoid this loss, load your cache plugins from a different location. When you set <strong>$wp_cache_plugins_dir</strong> to the new location in wp-config.php, WP Super Cache will look there instead. <br />You can find additional details in the <a href=\"%s\">developer documentation</a>."
 
-#: wp-cache.php:1448
+#: inc/admin-ui.php:1040
 msgid "Keep in mind that cache plugins are for advanced users only. To create and manage them, you'll need extensive knowledge of both PHP and WordPress actions."
 msgstr "بخاطر داشته باشید که ازونه های کش فقط برای کاربران حرفه ای می باشد. برای ایجاد و مدیریت آن باید تخصص و مهارت بر کدهای PHP و وردپرس داشته باشید."
 
-#: wp-cache.php:1447
+#: inc/admin-ui.php:1039
 msgid "Cache plugins are PHP scripts you'll find in a dedicated folder inside the WP Super Cache folder (wp-super-cache/plugins/). They load at the same time as WP Super Cache, and before regular WordPress plugins."
 msgstr "Cache plugins are PHP scripts you'll find in a dedicated folder inside the WP Super Cache folder (wp-super-cache/plugins/). They load at the same time as WP Super Cache, and before regular WordPress plugins."
 
@@ -144,19 +140,15 @@ msgstr "Provides support for WPTouch mobile theme and plugin."
 msgid "Provides support for the Jetpack mobile theme and plugin. PHP caching mode and mobile support will be enabled too."
 msgstr "Provides support for the Jetpack mobile theme and plugin. PHP caching mode and mobile support will be enabled too."
 
-#: plugins/domain-mapping.php:133
+#: plugins/domain-mapping.php:143
 msgid "Provides support for Domain Mapping plugin to map multiple domains to a blog."
 msgstr "Provides support for Domain Mapping plugin to map multiple domains to a blog."
 
-#: plugins/badbehaviour.php:94
-msgid "Support for Bad Behavior. (Only WPCache caching supported, disabled compression and requires Bad Behavior in \"%s/plugins/bad-behavior/\") "
-msgstr "Support for Bad Behavior. (Only WPCache caching supported, disabled compression and requires Bad Behavior in \"%s/plugins/bad-behavior/\") "
-
-#: ossdl-cdn.php:339
+#: ossdl-cdn.php:357
 msgid "The URL of your site. No trailing <code>/</code> please."
 msgstr "آدرس سایت شما هیچ کدام <code>/</code> وجود ندارد لطفا."
 
-#: ossdl-cdn.php:336
+#: ossdl-cdn.php:354
 msgid "Site URL"
 msgstr "ادرس سایت"
 
@@ -164,23 +156,23 @@ msgstr "ادرس سایت"
 msgid "Note: if you use Cloudflare or other transparent front-end proxy service this test may fail.<ol><li> If you have Cloudflare minification enabled this plugin may detect differences in the pages and report an error.</li><li> Try using the development mode of Cloudflare to perform the test. You can disable development mode afterwards if the test succeeds.</li></ol>"
 msgstr "توجه داشته باشید: اگر از Cloudflare یا سایر سرویس های پراکسی جلویی شفاف استفاده کنید، این آزمون ممکن است خراب شود. <ol><li> اگر دارای Cloudflare minification فعال باشد، این پلاگین ممکن است تفاوت های صفحات را تشخیص دهد و خطایی را گزارش دهد</li><li> برای انجام آزمون از حالت توسعه Cloudflare استفاده کنید. بعد از آن می توانید حالت توسعه را غیرفعال کنید اگر آزمایش انجام شود. </li></ol>"
 
-#: ossdl-cdn.php:323
+#: ossdl-cdn.php:341
 msgid "<strong style=\"color: red\">WARNING:</strong> Your siteurl and homeurl are different. The plugin is using %s as the homepage URL of your site but if that is wrong please use the filter \"ossdl_off_blog_url\" to fix it."
 msgstr "<strong style=\"color: red\"> اخطار </strong> ادرس سایت شما با ادرس صفحه اصلی متفاوت است.این افزونه از %s برای ادرس صفحه اصلی استفاده میکند اما اگر اشتباه است لطفا از فیلتر \"ossdl_off_blog_url\" برای حل ان استفاده کنید"
 
-#: wp-cache.php:2723
+#: inc/cache-files.php:251
 msgid "Preload mode is enabled. Supercache files will never be expired."
 msgstr "حالت پیش بارگیری فعال است فایل های Supercache هرگز منقضی نخواهند شد."
 
-#: wp-cache.php:2693
+#: inc/cache-files.php:221
 msgid "Files"
 msgstr "فایل ها"
 
-#: wp-cache.php:2692
+#: inc/cache-files.php:220
 msgid "%s %s Files"
 msgstr "%s%s  فایل ها"
 
-#: wp-cache.php:2598
+#: inc/cache-files.php:126
 msgid "Warning! You are not allowed to delete that file"
 msgstr "هشدار! شما مجاز به حذف آن فایل نیستید"
 
@@ -224,15 +216,15 @@ msgstr "هنگامی که تحویل کارشناسی ارشد فعال شده �
 msgid "The plugin could not update %1$s.htaccess file: %2$s.<br /> The new rules go above the regular WordPress rules as shown in the code below:"
 msgstr "The plugin could not update %1$s.htaccess file: %2$s.<br /> The new rules go above the regular WordPress rules as shown in the code below:"
 
-#: wp-cache.php:1401
+#: inc/admin-ui.php:993
 msgid "Please <a href=\"%s\">rate us</a> and give feedback."
 msgstr "لطفا به ما <a href=\"%s\">امتیاز دهید</a> و بازخورد خود را بنویسید."
 
-#: wp-cache.php:1398
+#: inc/admin-ui.php:990
 msgid "Try out the <a href=\"%1$s\">development version</a> for the latest fixes (<a href=\"%2$s\">changelog</a>)."
 msgstr "Try out the <a href=\"%1$s\">development version</a> for the latest fixes (<a href=\"%2$s\">changelog</a>)."
 
-#: wp-cache.php:1368
+#: inc/admin-ui.php:960
 msgid "Speed up images and photos (free)"
 msgstr "افزایش سرعت تصاویر و عکس ها (رایگان)"
 
@@ -240,11 +232,11 @@ msgstr "افزایش سرعت تصاویر و عکس ها (رایگان)"
 msgid "<strong>Errors:</strong> %s"
 msgstr "<strong>خطا:</strong> %s"
 
-#: wp-cache.php:1375
+#: inc/admin-ui.php:967
 msgid "Use the <a href=\"%1$s\">Debug tab</a> for diagnostics."
 msgstr "Use the <a href=\"%1$s\">Debug tab</a> for diagnostics."
 
-#: wp-cache.php:1369
+#: inc/admin-ui.php:961
 msgid "Fast video hosting (paid)"
 msgstr "Fast video hosting (paid)"
 
@@ -320,31 +312,31 @@ msgstr "مکان کش"
 msgid "You must give the full path to the directory."
 msgstr "شما باید مسیر کامل به دایرکتوری را وارد کنید"
 
-#: wp-cache.php:1594
+#: inc/settings-forms.php:113
 msgid "Cannot delete directory"
 msgstr "دایرکتوری را نمیتوان حذف کرد"
 
-#: wp-cache.php:2067 wp-cache.php:2073
+#: inc/admin-notices.php:35 inc/admin-notices.php:41
 msgid "WP Super Cache Warning!"
 msgstr "اخطار افزونه WP Super Cache"
 
-#: wp-cache.php:2068
+#: inc/admin-notices.php:36
 msgid "All users of this site have been logged out to refresh their login cookies."
 msgstr "تمام کاربران این سایت برای نوسازی کوکی ها از حساب کاربری خود خارج شدند"
 
-#: wp-cache.php:2080
+#: inc/admin-notices.php:48
 msgid "Logout"
 msgstr "خروج از سیستم"
 
-#: wp-cache.php:2078
+#: inc/admin-notices.php:46
 msgid "The logout link will log out all WordPress users on this site except you. Your authentication cookie will be updated, but you will not be logged out."
 msgstr "لینک خروج تمامی کاربران سایت را به جز شما خارج می کند. کوکی احراز هویت شما بروز خواهد شد؛ اما خارج نخواهید شد."
 
-#: wp-cache.php:2076
+#: inc/admin-notices.php:44
 msgid "If you just installed WP Super Cache for the first time, you can dismiss this message. Otherwise, you should probably refresh the login cookies of all logged in WordPress users here by clicking the logout link below."
 msgstr "اگر WP Super Cache را به تازگی نصب کرده اید، که هیچ. در غیر اینصورت شما باید کوکی های احراز هویت را بروزرسانی کنید؛ توجه داشته باشید که تمامی کاربران خارج خواهند شد."
 
-#: wp-cache.php:2074
+#: inc/admin-notices.php:42
 msgid "Your server is configured to show files and directories, which may expose sensitive data such as login cookies to attackers in the cache directories. That has been fixed by adding a file named index.html to each directory. If you use simple caching, consider moving the location of the cache directory on the Advanced Settings page."
 msgstr "سرور شما به نوعی تنظیم شده است که فایل ها و پوشه های موجود در پوشه کش را نشان دهد. این موضوع با استفاده از افزودن یک فایل (index.html) موقتا حل شد. اگر شما از روش کش کردن استفاده می کنید نسبت به جا به جایی پوشه کش در تنظیمات پیشرفته اقدام فرمایید."
 
@@ -380,7 +372,7 @@ msgstr "تغییر محل پرونده‌های کش شما. پیشفرض WP_CON
 msgid "You are using expert mode to serve cache files so the plugin has added <q>Options -Indexes</q> to the .htaccess file in the cache directory to disable indexes. However, if that does not work, you should contact your system administrator or support and ask for them to be disabled, or use simple mode and move the cache outside of the web root."
 msgstr "You are using mod_rewrite to serve cache files so the plugin has added <q>Options -Indexes</q> to the .htaccess file in the cache directory to disable indexes. However, if that does not work, you should contact your system administrator or support and ask for them to be disabled, or use PHP mode and move the cache outside of the web root."
 
-#: wp-cache.php:3018
+#: inc/admin-notices.php:139
 msgid "Settings"
 msgstr "تنظیمات"
 
@@ -388,7 +380,7 @@ msgstr "تنظیمات"
 msgid "Save"
 msgstr "ذخیره"
 
-#: partials/debug.php:30 wp-cache.php:2693
+#: inc/cache-files.php:221 partials/debug.php:30
 msgid "Delete"
 msgstr "حذف"
 
@@ -404,7 +396,7 @@ msgstr "حالت بازنویسی قوانین باید بروزشود"
 msgid "View Mod_Rewrite Rules"
 msgstr "دیدن قوانین Mod_Rewrite"
 
-#: partials/advanced.php:266 wp-cache.php:3125
+#: inc/htaccess.php:83 partials/advanced.php:266
 msgid "Rules must be added to %s too:"
 msgstr "قوانین باید اضافه شود به %s همچنین:"
 
@@ -505,23 +497,23 @@ msgstr "برگه جلویی"
 msgid "Home"
 msgstr "صفحه اصلی"
 
-#: wp-cache.php:2737
+#: inc/cache-files.php:265
 msgid "Delete Expired"
 msgstr "حذف منقضی شده ها"
 
-#: wp-cache.php:2718
+#: inc/cache-files.php:246
 msgid "List all cached files"
 msgstr "فهرست تمام فایل های کش شده"
 
-#: wp-cache.php:3074
+#: inc/admin-notices.php:195
 msgid "[%s] Front page check!"
 msgstr "[%s] بررسی صفحه اول!"
 
-#: wp-cache.php:3115
+#: inc/htaccess.php:73
 msgid "Cannot update .htaccess"
 msgstr "امکان بروز رسانی فایل .htaccess نمیباشد"
 
-#: wp-cache.php:3133
+#: inc/htaccess.php:91
 msgid "Update Mod_Rewrite Rules"
 msgstr "به روز رسانی قوانین mod_rewrite"
 
@@ -542,56 +534,57 @@ msgstr "https://wordpress.org/plugins/wp-super-cache/"
 
 #. translators: 1: site url
 #. translators: Home URL of website
-#: wp-cache.php:3533 wp-cache.php:3625
+#: inc/preload.php:193 inc/preload.php:288
 msgid "[%1$s] Cache Preload Started"
 msgstr "[%1$s] از پیش بارگذاری کش آغاز شد"
 
-#: wp-cache.php:3737
+#: inc/preload.php:400
 msgid "[%s] Cache Preload Completed"
 msgstr "[%s] از پیش بارگذاری کش کامل شد"
 
-#: wp-cache.php:3737
+#: inc/preload.php:400
 msgid "Cleaning up old supercache files."
 msgstr "پاکسازی فایل های قدیمی سوپر کش"
 
-#: wp-cache.php:2693
+#: inc/cache-files.php:221
 msgid "URI"
 msgstr "آدرس"
 
-#: wp-cache.php:2716
+#: inc/cache-files.php:244
 msgid "Too many cached files, no listing possible."
 msgstr "پرونده های کش زیاد است،لیست کردنشان ممکن نیست."
 
-#: wp-cache.php:2714
+#: inc/cache-files.php:242
 msgid "Hide file list"
 msgstr "مخفی کردن لیست پرونده"
 
-#: wp-cache.php:2676
+#: inc/cache-files.php:204
 msgid "WP-Super-Cache"
 msgstr "افزونه WP Super Cache"
 
-#: wp-cache.php:2670 wp-cache.php:2683
+#: inc/cache-files.php:198 inc/cache-files.php:211
 msgid "%s Expired Pages"
 msgstr "%s برگه های منقضی شده"
 
-#: wp-cache.php:2669 wp-cache.php:2677
+#: inc/cache-files.php:197 inc/cache-files.php:205
 msgid "%s Cached Pages"
 msgstr "%s برگه های کش شده"
 
-#: wp-cache.php:2668
+#: inc/cache-files.php:196
 msgid "WP-Cache"
 msgstr "افزونه کش"
 
-#: wp-cache.php:2574
+#: inc/cache-files.php:102
 msgid "Cache Contents"
 msgstr "محتوای کش"
 
-#: wp-cache.php:2221 wp-cache.php:2226 wp-cache.php:2260 wp-cache.php:2265
-#: wp-cache.php:2271
+#: inc/lifecycle.php:360 inc/lifecycle.php:365 inc/lifecycle.php:399
+#: inc/lifecycle.php:404 inc/lifecycle.php:410
 msgid "Error"
 msgstr "خطا"
 
-#: wp-cache.php:2007 wp-cache.php:2309 wp-cache.php:2330 wp-cache.php:2422
+#: inc/lifecycle.php:236 inc/lifecycle.php:448 inc/lifecycle.php:469
+#: inc/lifecycle.php:561
 msgid "Warning"
 msgstr "هشدار"
 
@@ -647,11 +640,11 @@ msgstr "بایگانی‌ها"
 msgid "Save UA Strings"
 msgstr "ذخیره رشته‌های UA"
 
-#: wp-cache.php:3115
+#: inc/htaccess.php:73
 msgid "Refresh this page when the file permissions have been modified."
 msgstr "پس از تغییر در دسترسی‌های پرونده، صفحه را مجدداً بارگزاری نمائید."
 
-#: wp-cache.php:3858
+#: inc/lifecycle.php:683
 msgid "Supercache Uninstall Problems"
 msgstr "مشکلات حذف Supercache"
 
@@ -659,144 +652,144 @@ msgstr "مشکلات حذف Supercache"
 msgid "Delete cache of the current page"
 msgstr "حافظه کش این صفحه را پاک کنید"
 
-#: wp-cache.php:3726
+#: inc/preload.php:389
 msgid "Scheduling next preload refresh in %d minutes."
 msgstr "زمان بندی بعدی تازه سازی پیش بارگذاری در %d دقیقه."
 
 #. translators: 1: home url, 2: number of posts refreshed
-#: wp-cache.php:3715
+#: inc/preload.php:378
 msgid "[%1$s] %2$d posts refreshed"
 msgstr "[%1$s] %2$d نوشته تازه سازی شد"
 
 #. translators: Home URL of website
-#: wp-cache.php:3593 wp-cache.php:3699
+#: inc/preload.php:256 inc/preload.php:362
 msgid "[%1$s] Cache Preload Stopped"
 msgstr "[%1$s] کش پیش بارگذاری متوقف شد"
 
 #. translators: 1: home url, 2: start post id, 3: end post id
-#: wp-cache.php:3669
+#: inc/preload.php:332
 msgid "[%1$s] Refreshing posts from %2$d to %3$d"
 msgstr "[%1$s] تازه سازی نوشته ها از %2$d به %3$d"
 
 #. translators: 1: Site URL, 2: Taxonomy name, 3: Number of posts done, 4:
 #. Number of posts to preload
-#: wp-cache.php:3559
+#: inc/preload.php:219
 msgid "[%1$s] Refreshing %2$s taxonomy from %3$d to %4$d"
 msgstr "[%1$s] تازه سازی %2$s طبقه بندی از %3$d به %4$d"
 
-#: wp-cache.php:3119
+#: inc/htaccess.php:77
 msgid "To serve static html files your server must have the correct mod_rewrite rules added to a file called <code>%s.htaccess</code>"
 msgstr "برای بکاربردن پرونده های HTML ایستا سرور شما باید قوانین درست mod_rewrite اضافه شود به پرونده ای خوانده شده <code>%s.htaccess</code>"
 
-#: wp-cache.php:3115
+#: inc/htaccess.php:73
 msgid "Alternatively, you can edit your <code>%s.htaccess</code> file manually and add the following code (before any WordPress rules):"
 msgstr "به روشی دیگر می توانید ویرایش کنید پرونده <code>%s.htaccess</code> دستی اضافه کنید کد زیر را( قبل از هر قانون وردپرسی):"
 
-#: wp-cache.php:3115
+#: inc/htaccess.php:73
 msgid "The file <code>%s.htaccess</code> cannot be modified by the web server. Please correct this using the chmod command or your ftp client."
 msgstr "پرونده <code>%s.htaccess</code> نمی تواند تغییر کند توسط سرور. لطفا بکارگیری chmod command را تصحیح کنید یا ftp client."
 
-#: wp-cache.php:3074
+#: inc/admin-notices.php:195
 msgid "WP Super Cache has checked the front page of your blog. Please visit %s if you would like to disable this."
 msgstr "WP Super Cache صفحه نخست شما را بررسی کرد. لطفا مشاهده کنید %s اگر می خواهید این را غیرفعال کنید."
 
-#: wp-cache.php:3069
+#: inc/admin-notices.php:190
 msgid "The cache on your blog has been cleared because the front page of your site is missing the text \"%2$s\". Please visit %1$s to verify the cache has been cleared."
 msgstr "کش موجود در بلاگ شما پاکسازی شد چون صفحه نخست سایت شما متن گمشده \"%2$s\" دارد. مشاهده کنید  %1$s برای تائید پاکسازی کش."
 
-#: wp-cache.php:3069
+#: inc/admin-notices.php:190
 msgid "[%s] Front page is not correct! Cache Cleared!"
 msgstr "[%s] صفحه نخست صحیح نیست!کش پاکسازی شد!"
 
-#: wp-cache.php:3066
+#: inc/admin-notices.php:187
 msgid "Please visit %1$s to clear the cache as the front page of your site is not correct and missing the text, \"%2$s\"!"
 msgstr "مشاهده کنید %1$s برای پاکسازی کش از صفحه نخست سایت شما درست نیست و گمشده متن، \"%2$s\"!"
 
-#: wp-cache.php:3066
+#: inc/admin-notices.php:187
 msgid "[%s] Front page is not correct! Please clear cache!"
 msgstr "[%s] صفحه نخست صحیح نیست، کش را پاک کنید."
 
-#: wp-cache.php:3056
+#: inc/admin-notices.php:177
 msgid "The cache on your blog has been cleared because the front page of your site is now downloading. Please visit %s to verify the cache has been cleared."
 msgstr "کش در سایت ما پاکسازی شد چون صفحه نخست سایت شما درحال دانلود است. مشاهده کنید %s برای تائید پاکسازی کش."
 
-#: wp-cache.php:3056
+#: inc/admin-notices.php:177
 msgid "[%s] Front page is gzipped! Cache Cleared!"
 msgstr "[%s] صفحه نخست gzipped شده است، کش را پاکسازی کنید."
 
-#: wp-cache.php:3053
+#: inc/admin-notices.php:174
 msgid "[%s] Front page is gzipped! Please clear cache!"
 msgstr "[%s] صفحه نخست gzipped است. کش را پاک کنید"
 
-#: wp-cache.php:3028
+#: inc/admin-notices.php:149
 msgid "WP Super Cache is disabled. Please go to the <a href=\"%s\">plugin admin page</a> to enable caching."
 msgstr "WP Super Cache غیرفعال است.به <a href=\"%s\">برگه مدیریت افزونه</a> بروید و فعال کنید."
 
-#: wp-cache.php:2766
+#: inc/cache-files.php:294
 msgid "Delete Super Cache cached files (opens in new window)"
 msgstr "حذف پرونده های کش Super Cache (بازکردن در پنجره جدید)"
 
-#: wp-cache.php:2721
+#: inc/cache-files.php:249
 msgid "Expired files are files older than %s seconds. They are still used by the plugin and are deleted periodically."
 msgstr "پرونده های منقضی شده پرونده هایی قدیمی تر از %s ثانیه. آن ها هنوز بکار می برند افزونه و حذف می شوند با همان دوره معین."
 
-#: wp-cache.php:2661
+#: inc/cache-files.php:189
 msgid "Cache stats last generated: %s minutes ago."
 msgstr "آمار آخرین کش تولید شده: %s دقیقه قبل."
 
-#: wp-cache.php:2659
+#: inc/cache-files.php:187
 msgid "Regenerate cache stats"
 msgstr "تولید مجدد آمار کش"
 
-#: wp-cache.php:2658
+#: inc/cache-files.php:186
 msgid "Cache stats are not automatically generated. You must click the link below to regenerate the stats on this page."
 msgstr "آمار کش بطور خودکار تولید نشده است. شما باید لینک زیر را کلیککنید برای بازتولید آمار در این برگه."
 
-#: wp-cache.php:2619
+#: inc/cache-files.php:147
 msgid "Deleting wp-cache file: <strong>%s</strong><br />"
 msgstr "حذف پرونده wp-cache: <strong>%s</strong><br />"
 
-#: wp-cache.php:2593
+#: inc/cache-files.php:121
 msgid "Deleting supercache file: <strong>%s</strong><br />"
 msgstr "حذف پرونده supercache :<strong>%s</strong><br />"
 
-#: wp-cache.php:2474
+#: inc/lifecycle.php:613
 msgid "<strong>Error: WP_CACHE is not enabled</strong> in your <code>wp-config.php</code> file and I couldn&#8217;t modify it."
 msgstr "<strong>خطا: WP_CACHE فعال نیست</strong>در فایل<code>wp-config.php</code>و نمی توان تغییر داد."
 
-#: wp-cache.php:2431
+#: inc/lifecycle.php:570
 msgid "If that doesn&#8217;t work, make sure the file <em>%s/advanced-cache.php</em> doesn&#8217;t exist:"
 msgstr "اگر کار نکرد، مطمئن شوید پرونده<em>%s/advanced-cache.php</em>وجود ندارد:"
 
-#: wp-cache.php:2430
+#: inc/lifecycle.php:569
 msgid "Refresh this page to update <em>%s/advanced-cache.php</em>"
 msgstr "تازه سازی این برگه با بروزرسانی <em>%s/advanced-cache.php</em>"
 
-#: wp-cache.php:2330
+#: inc/lifecycle.php:469
 msgid "Could not update %s!</em> WPCACHEHOME must be set in config file."
 msgstr "نمی تواند بروزرسانی شود%s!</em> WPCACHEHOME باید در پرونده پیکربندی تنظیم شود."
 
-#: wp-cache.php:2271
+#: inc/lifecycle.php:410
 msgid "Sample WP-Cache config file (<strong>%s</strong>) does not exist. Verify your installation."
 msgstr "مثال پیکربندی پرونده WP-Cache (<strong>%s</strong>) وجود ندارد. بررسی نصب و راه اندازی."
 
-#: wp-cache.php:2265
+#: inc/lifecycle.php:404
 msgid "Configuration file missing and %1$s  directory (<strong>%2$s</strong>) is not writable by the web server. Check its permissions."
 msgstr "پرونده پیکربندی ازدست رفته دایرکتوری %1$s(<strong>%2$s</strong>) قابل بازنویسی نیست توسط سرور. دسترسی ها را بررسی کنید."
 
-#: wp-cache.php:2260
+#: inc/lifecycle.php:399
 msgid "Your WP-Cache config file (<strong>%s</strong>) is out of date and not writable by the Web server. Please delete it and refresh this page."
 msgstr "پرونده پیکربندی WP-Cache(<strong>%s</strong>)  منقضی شده است و قابل بازنویسی توسط سرور نیست. لطفا آن را حذف کنید و برگه را تازه سازی نمایید."
 
-#: wp-cache.php:2226
+#: inc/lifecycle.php:365
 msgid "Your cache directory (<strong>%1$s</strong>) or <strong>%2$s</strong> need to be writable for this plugin to work. Double-check it."
 msgstr "کش دایرکتوری شما (<strong>%1$s</strong>) یا <strong>%2$s</strong> نیاز به بازنویسی برای کارکرد این افزونه دارد. مجدد بررسی کنید."
 
-#: wp-cache.php:2221
+#: inc/lifecycle.php:360
 msgid "Your cache directory (<strong>%1$s</strong>) did not exist and couldn&#8217;t be created by the web server. Check %1$s permissions."
 msgstr "کش دایرکتوری شما (<strong>%1$s</strong>) وجود ندارد و نیم تواند توسط سرور ایجاد شود. بررسی کنید سطح دسترسی های %1$s."
 
-#: wp-cache.php:2007
+#: inc/lifecycle.php:236
 msgid "GZIP compression is enabled in WordPress, wp-cache will be bypassed until you disable gzip compression."
 msgstr "فشرده سازی GZIP فعال است در وردپرس،wp-cache درکنار قرار میگیرد تا هنگامی که شما غیرفعال کنید فشرده سازی gzip."
 
@@ -836,7 +829,7 @@ msgstr "<abbr title=\"Coordinated Universal Time\">UTC</abbr> time is <code>%s</
 msgid "Expiry Time &amp; Garbage Collection"
 msgstr "زمان ابطال &amp; کالکشن زباله"
 
-#: wp-cache.php:1511
+#: inc/admin-notices.php:15
 msgid "Comment moderation is enabled. Your comment may take some time to appear."
 msgstr "تائید دیدگاه فعال است. دیدگاه شما ممکن است کمی طول بکشد تا ظاهر شود."
 
@@ -848,7 +841,7 @@ msgstr "مشکلات را با افزونه حل کنید با اشکال زدن
 msgid "Do not cache the following page types. See the <a href=\"https://codex.wordpress.org/Conditional_Tags\">Conditional Tags</a> documentation for a complete discussion on each type."
 msgstr "انواع برگه زیر را کش نکن. ببینید <a href=\"https://codex.wordpress.org/Conditional_Tags\">برچسب های مشروط</a>مستندات برای بحث کامل در هر نوع."
 
-#: wp-cache.php:3120
+#: inc/htaccess.php:78
 msgid "You can edit the file yourself. Add the following rules."
 msgstr "شما می توانید فایل خود را ویرایش کنید قوانین زیر را وارد کنید."
 
@@ -857,7 +850,7 @@ msgstr "شما می توانید فایل خود را ویرایش کنید قو
 msgid "Automattic"
 msgstr "خودکار"
 
-#: wp-cache.php:3012
+#: inc/admin-notices.php:133
 msgid "WP Super Cache must be configured. Go to <a href=\"%s\">the admin page</a> to enable and configure the plugin."
 msgstr "افزونه WP Super Cache باید پیکربندی شود. بروید به <a href=\"%s\">برگه مدیریت</a> برای فعالسازی و پیکربندی افزونه."
 
@@ -866,20 +859,16 @@ msgstr "افزونه WP Super Cache باید پیکربندی شود. بروید
 msgid "WP Super Cache"
 msgstr "افزونه WP Super Cache"
 
-#: wp-cache.php:2475
+#: inc/lifecycle.php:614
 msgid "Edit <code>%s</code> and add the following line:<br /> <code>define('WP_CACHE', true);</code><br />Otherwise, <strong>WP-Cache will not be executed</strong> by WordPress core. "
 msgstr "ویرایش <code>%s</code> و خط زیر را اضافه کنید:<br /> <code>define('WP_CACHE', true);</code><br />به بیان دیگر:<strong>WP-Cache اجرا نمی شود</strong> توسط هسته وردپرس. "
 
 #. translators: 1: home url, 2: number of posts refreshed
-#: wp-cache.php:3715
+#: inc/preload.php:378
 msgid "Refreshed the following posts:"
 msgstr "نوشته های زیر نوسازی گردید:"
 
-#: wp-cache.php:3121
-msgid " Make sure they appear before any existing WordPress rules. "
-msgstr "مطمئن شوید که آن ها قبل از اعمال قوانین وردپرس ظاهر می شود. "
-
-#: wp-cache.php:3053
+#: inc/admin-notices.php:174
 msgid "Please visit %s to clear the cache as the front page of your site is now downloading!"
 msgstr "مشاهده کنید %s برای پاکسازی کش از صفحه نخست سایت شما که در حال دانلود است!"
 
@@ -891,11 +880,11 @@ msgstr "قفل کردن:"
 msgid "Email me when the garbage collection runs."
 msgstr "مرا از طریق ایمیل هنگامی که garbage collection اجرا می شود مطلع کن."
 
-#: wp-cache.php:2693
+#: inc/cache-files.php:221
 msgid "Age"
 msgstr "مدت"
 
-#: wp-cache.php:3858
+#: inc/lifecycle.php:683
 msgid ""
 "Dear User,\n"
 "\n"
@@ -925,11 +914,11 @@ msgstr ""
 "WP Super Cache Plugin\n"
 "https://wordpress.org/plugins/wp-super-cache/"
 
-#: wp-cache.php:3032
+#: inc/admin-notices.php:153
 msgid "Warning! WP Super Cache caching <strong>was</strong> broken but has been <strong>fixed</strong>! The script advanced-cache.php could not load wp-cache-phase1.php.<br /><br />The file %1$s/advanced-cache.php has been recreated and WPCACHEHOME fixed in your wp-config.php. Reload to hide this message."
 msgstr "Warning! WP Super Cache caching <strong>was</strong> broken but has been <strong>fixed</strong>! The script advanced-cache.php could not load wp-cache-phase1.php.<br /><br />The file %1$s/advanced-cache.php has been recreated and WPCACHEHOME fixed in your wp-config.php. Reload to hide this message."
 
-#: wp-cache.php:2426
+#: inc/lifecycle.php:565
 msgid "Make %1$s writable using the chmod command through your ftp or server software. (<em>chmod 777 %1$s</em>) and refresh this page. This is only a temporary measure and you&#8217;ll have to make it read only afterwards again. (Change 777 to 755 in the previous command)"
 msgstr "2. Make %1$s writable using the chmod command through your ftp or server software. (<em>chmod 777 %1$s</em>) and refresh this page. This is only a temporary measure and you&#8217;ll have to make it read only afterwards again. (Change 777 to 755 in the previous command)"
 
@@ -1069,40 +1058,52 @@ msgstr "%s.htaccess has been updated with the necessary mod_rewrite rules. Pleas
 msgid "Currently logging to: %s"
 msgstr "در حال‌حاضر ورود به سیستم با: %s"
 
-#: wp-cache.php:1415
+#: inc/htaccess.php:79
+msgid " Make sure they appear before any existing WordPress rules. "
+msgstr "مطمئن شوید که آن ها قبل از اعمال قوانین وردپرس ظاهر می شود. "
+
+#: inc/lifecycle.php:611
+msgid "<h4>WP_CACHE constant set to false</h4><p>The WP_CACHE constant is used by WordPress to load the code that serves cached pages. Unfortunately, it is set to false. Please edit your wp-config.php and add or edit the following line above the final require_once command:<br /><br /><code>define('WP_CACHE', true);</code></p>"
+msgstr "<h3>WP_CACHE constant set to false</h3><p>The WP_CACHE constant is used by WordPress to load the code that serves cached pages. Unfortunately, it is set to false. Please edit your wp-config.php and add or edit the following line above the final require_once command:<br /><br /><code>define('WP_CACHE', true);</code></p>"
+
+#: inc/lifecycle.php:618
+msgid "<h4>WP_CACHE constant added to wp-config.php</h4><p>If you continue to see this warning message please see point 5 of the <a href=\"https://wordpress.org/plugins/wp-super-cache/faq/\">Troubleshooting Guide</a>. The WP_CACHE line must be moved up."
+msgstr "<h3>WP_CACHE constant added to wp-config.php</h3><p>If you continue to see this warning message please see point 5 of the <a href=\"https://wordpress.org/plugins/wp-super-cache/faq/\">Troubleshooting Guide</a>. The WP_CACHE line must be moved up."
+
+#: inc/admin-ui.php:1007
 msgid "Newest Cached Pages:"
 msgstr "جدیدترین صفحات کش شده:"
 
-#: wp-cache.php:1479
+#: inc/admin-ui.php:1071
 msgid "Easy"
 msgstr "آسان"
 
-#: wp-cache.php:1462
+#: inc/admin-ui.php:1054
 msgid "Available Plugins"
 msgstr "افزونه های موجود"
 
-#: wp-cache.php:1481
+#: inc/admin-ui.php:1073
 msgid "CDN"
 msgstr "CDN"
 
 #. translators: %s is the number of seconds since the page was cached.
-#: wp-cache.php:1423
+#: inc/admin-ui.php:1015
 msgid "Cached %s seconds ago"
 msgstr "کش شده در %s ثانیه پیش"
 
-#: wp-cache.php:1482
+#: inc/admin-ui.php:1074
 msgid "Contents"
 msgstr "محتویات"
 
-#: wp-cache.php:1483
+#: inc/admin-ui.php:1075
 msgid "Preload"
 msgstr "پیش بارگزاری"
 
-#: wp-cache.php:1484
+#: inc/admin-ui.php:1076
 msgid "Plugins"
 msgstr "پلاگین ها"
 
-#: wp-cache.php:1485
+#: inc/admin-ui.php:1077
 msgid "Debug"
 msgstr "حالت اشکال زادیی"
 
@@ -1114,16 +1115,17 @@ msgstr "قوانین Mod Rewrite"
 msgid "Thank you for upgrading."
 msgstr "تشکر بابت ارتقاء پلاگین."
 
-#: wp-cache.php:1373
+#: inc/admin-ui.php:965
 msgid "Need Help?"
 msgstr "به کمک نیاز دارید؟"
 
-#: partials/easy.php:149 wp-cache.php:2749
+#: inc/cache-files.php:277 partials/easy.php:149
 msgid "Delete Cache On All Blogs"
 msgstr "حذف کش از همه بلاگ ها"
 
+#: inc/admin-notices.php:124 inc/cache-files.php:271 inc/cache-files.php:294
 #: inc/delete-cache-button.php:25 inc/delete-cache-button.php:35
-#: partials/easy.php:140 wp-cache.php:2743 wp-cache.php:2766 wp-cache.php:3003
+#: partials/easy.php:140
 msgid "Delete Cache"
 msgstr "حذف کش"
 
@@ -1175,7 +1177,7 @@ msgstr "پیشوندهای موبایل"
 msgid "Mobile Browsers"
 msgstr "مرورگر موبایل"
 
-#: partials/advanced.php:87 partials/debug.php:59 wp-cache.php:1480
+#: inc/admin-ui.php:1072 partials/advanced.php:87 partials/debug.php:59
 msgid "Advanced"
 msgstr "پیشرفته"
 
@@ -1197,15 +1199,16 @@ msgstr "کش کردن"
 msgid "all"
 msgstr "همه"
 
-#: wp-cache.php:626 wp-cache.php:653 wp-cache.php:762 wp-cache.php:2079
+#: inc/admin-notices.php:47 inc/admin-ui.php:218 inc/admin-ui.php:245
+#: inc/admin-ui.php:354
 msgid "Dismiss"
 msgstr "رد کردن"
 
-#: wp-cache.php:602
+#: inc/admin-ui.php:194
 msgid "Read-only:"
 msgstr "فقط خواندنی:"
 
-#: wp-cache.php:601
+#: inc/admin-ui.php:193
 msgid "Writeable:"
 msgstr "قابل نوشتن:"
 
@@ -1237,23 +1240,23 @@ msgstr "اکنون پیش بارگذاری کش"
 msgid "Cancel Cache Preload"
 msgstr "کنسل کردن پیش بارگذاری کش"
 
-#: wp-cache.php:646
+#: inc/admin-ui.php:238
 msgid "Warning! %s is writeable!"
 msgstr "اخطار!%s قابل بازنویسی است!"
 
-#: wp-cache.php:563
+#: inc/admin-ui.php:155
 msgid "Cannot continue... fix previous problems and retry."
 msgstr "نمی تواند ادامه یابد... مشکل قبلی را حل کرده و مجدد اقدام کنید."
 
-#: wp-cache.php:513
+#: inc/admin-ui.php:105
 msgid "Permlink Structure Error"
 msgstr "خطای ساختار پیوندیکتا"
 
-#: wp-cache.php:498
+#: inc/admin-ui.php:90
 msgid "Warning! PHP Safe Mode Enabled!"
 msgstr "اخطار! حالت امن PHP فعال است!"
 
-#: wp-cache-phase2.php:3534
+#: wp-cache-phase2.php:3879
 msgid "[%1$s] WP Super Cache GC Report"
 msgstr "[%1$s] گزارش WP Super Cache GC"
 
@@ -1261,11 +1264,11 @@ msgstr "[%1$s] گزارش WP Super Cache GC"
 msgid "WPTouch support is now %s"
 msgstr "WPTouch اکنون پشتیبانی می شود %s"
 
-#: wp-cache.php:1427
+#: inc/admin-ui.php:1019
 msgid "(may not always be accurate on busy sites)"
 msgstr "(ممکن است همیشه در سایت های شلوغ دقیق نباشد.)"
 
-#: wp-cache-phase2.php:3520
+#: wp-cache-phase2.php:3865
 msgid "Cache expiry cron job failed. Job will run again in 10 seconds."
 msgstr "ابطال کش cron job شکست خورد. دوباره این عمل اجرا می شود در 10 ثانیه دیگر."
 
@@ -1385,71 +1388,63 @@ msgstr "پیش بارگذاری برچسب ها،دسته ها و دیگر طب�
 msgid "Refresh preloaded cache files every %s minutes. (0 to disable, minimum %d minutes.)"
 msgstr "تازه سازی پیش بارگذاری پرونده کش هر%s دقیقه.(0 برای غیرفعال شدن،کمترین %d دقیقه.)"
 
-#: wp-cache.php:1135
-msgid "Configuration file changed, some values might be wrong. Load the page again from the \"Settings\" menu to reset them."
-msgstr "پیکربندی پرونده تعییر یافت ممکن است برخی مقادیر اشتباه باشد. برگه را مجدد بارگذاری کنید از فهرست\"تنظیمات\" برای تنظیم مجدد آن. "
-
-#: wp-cache.php:756
+#: inc/admin-ui.php:348
 msgid ".htaccess file may need to be moved"
 msgstr "پرونده .htaccess باید جابجا شود"
 
-#: wp-cache.php:737
+#: inc/admin-ui.php:329
 msgid "Missing Apache Modules"
 msgstr "گم شدن ماژول آپاچی"
 
-#: wp-cache.php:730
+#: inc/admin-ui.php:322
 msgid "Required to serve compressed supercache files properly."
 msgstr "نیازمند همراهی فشرده سازی پرونده های supercache بدرستی."
 
-#: wp-cache.php:698 wp-cache.php:723
+#: inc/admin-ui.php:290 inc/admin-ui.php:315
 msgid "Scroll down the Advanced Settings page and click the <strong>Update Mod_Rewrite Rules</strong> button."
 msgstr "پیمایش به پایین برگه تنظیمات پیشرفته و کلیک روی دکمه <strong> بروزرسانی قوانین Mod_Rewrite</strong>."
 
-#: wp-cache.php:697
+#: inc/admin-ui.php:289
 msgid "Set the plugin to simple mode and enable mobile support."
 msgstr "تنظیم افزونهه به حالت قدیمی و فعال سازی پشتیبانی موبایل."
 
-#: wp-cache.php:696
+#: inc/admin-ui.php:288
 msgid "Mobile support requires extra rules in your .htaccess file, or you can set the plugin to simple mode. Here are your options (in order of difficulty):"
 msgstr "پشتیبانی موبایل نیازمند قوانین زیادی در پرونده .htaccess شماست یا شما می توانید افزونه را در حالت قدیمی قرار دهید. این است تنظیمات شما ( در مرتب سازی سختی):"
 
-#: wp-cache.php:695 wp-cache.php:722
-msgid "The rewrite rules required by this plugin have changed or are missing. "
-msgstr "بازنویسی قوانین نیازاست برای این افزونه که تغییر کرده یا گم شده است."
-
-#: wp-cache.php:694 wp-cache.php:721
+#: inc/admin-ui.php:286 inc/admin-ui.php:313
 msgid "Rewrite rules must be updated"
 msgstr "بازنویسی قوانین باید بروزرسانی شود"
 
-#: wp-cache.php:675
+#: inc/admin-ui.php:267
 msgid "Mobile rewrite rules detected"
 msgstr "بازنویسی قوانین موبایل شناسایی شد"
 
-#: wp-cache.php:620
+#: inc/admin-ui.php:212
 msgid "Warning! Garbage collection is not scheduled!"
 msgstr "اخطار! کالکشن زباله زمانبندی نشده است!"
 
-#: wp-cache.php:597
+#: inc/admin-ui.php:189
 msgid "Read Only Mode. Configuration cannot be changed."
 msgstr "حالت فقط خواندنی. پیکربندی نمی تواند تغییر کند."
 
-#: wp-cache.php:590
+#: inc/admin-ui.php:182
 msgid "Mod rewrite may not be installed!"
 msgstr "حالت بازنویسی ممکن است نصب نشده باشد!"
 
-#: wp-cache.php:579
+#: inc/admin-ui.php:171
 msgid "Zlib Output Compression Enabled!"
 msgstr "خروجی فشرده سازی Zlib فعال شد!"
 
-#: wp-cache.php:532
+#: inc/admin-ui.php:124
 msgid "Warning! Your hostname \"%s\" resolves to %s"
 msgstr "اخطار! نام میزبانی شما \"%s\" برطرف شده %s"
 
-#: wp-cache.php:503
+#: inc/admin-ui.php:95
 msgid "Your server is set up to check the owner of PHP scripts before allowing them to read and write files."
 msgstr "سرور شما راه اندازی شده برای بررسی اسکریپت های php خود قبل از جازه دادن به پرونده ها برای خواندن و نوشتن."
 
-#: wp-cache.php:1400
+#: inc/admin-ui.php:992
 msgid "Rate This Plugin"
 msgstr "به این افزونه امتیاز دهید"
 
@@ -1461,7 +1456,7 @@ msgstr "واکشی %s کش اصلی: "
 msgid "The mod_rewrite rules changed since you last installed this plugin. Unfortunately, you must remove the old supercache rules before the new ones are updated. Refresh this page when you have edited your .htaccess file. If you wish to manually upgrade, change the following line: %1$s so it looks like this: %2$s The only changes are \"HTTP_COOKIE\" becomes \"HTTP:Cookie\" and \"wordpressuser\" becomes \"wordpress\". This is a WordPress 2.5 change but it&#8217;s backwards compatible with older versions if you&#8217;re brave enough to use them."
 msgstr "The mod_rewrite rules changed since you last installed this plugin. Unfortunately, you must remove the old supercache rules before the new ones are updated. Refresh this page when you have edited your .htaccess file. If you wish to manually upgrade, change the following line: %1$s so it looks like this: %2$s The only changes are \"HTTP_COOKIE\" becomes \"HTTP:Cookie\" and \"wordpressuser\" becomes \"wordpress\". This is a WordPress 2.5 change but it&#8217;s backwards compatible with older versions if you&#8217;re brave enough to use them."
 
-#: wp-cache.php:1410
+#: inc/admin-ui.php:1002
 msgid "Cached pages since %1$s : <strong>%2$s</strong>"
 msgstr "Cached pages since %1$s : <strong>%2$s</strong>"
 
@@ -1493,96 +1488,96 @@ msgstr "Preloading creates lots of files however. Caching is done from the newes
 msgid "This will cache every published post and page on your site. It will create supercache static files so unknown visitors (including bots) will hit a cached page. This will probably help your Google ranking as they are using speed as a metric when judging websites now."
 msgstr "This will cache every published post and page on your site. It will create supercache static files so unknown visitors (including bots) will hit a cached page. This will probably help your Google ranking as they are using speed as a metric when judging websites now."
 
-#: wp-cache.php:1111
+#: inc/admin-ui.php:703
 msgid "Notice: <em>Expert mode caching enabled</em>. Showing Advanced Settings Page by default."
 msgstr "Notice: <em>Mod_rewrite or Legacy caching enabled</em>. Showing Advanced Settings Page by default."
 
-#: wp-cache.php:990
+#: inc/admin-ui.php:582
 msgid "<strong>Warning!</strong> You attempted to enable compression but <code>zlib.output_compression</code> is enabled. See #21 in the Troubleshooting section of the readme file."
 msgstr "<strong>Warning!</strong> You attempted to enable compression but <code>zlib.output_compression</code> is enabled. See #21 in the Troubleshooting section of the readme file."
 
-#: wp-cache.php:757
+#: inc/admin-ui.php:349
 msgid "It appears you have WordPress installed in a sub directory as described <a href=\"https://codex.wordpress.org/Giving_WordPress_Its_Own_Directory\">here</a>. Unfortunately, WordPress writes to the .htaccess in the install directory, not where your site is served from.<br />When you update the rewrite rules in this plugin you will have to copy the file to where your site is hosted. This will be fixed in the future."
 msgstr "It appears you have WordPress installed in a sub directory as described <a href=\"https://codex.wordpress.org/Giving_WordPress_Its_Own_Directory\">here</a>. Unfortunately, WordPress writes to the .htaccess in the install directory, not where your site is served from.<br />When you update the rewrite rules in this plugin you will have to copy the file to where your site is hosted. This will be fixed in the future."
 
-#: wp-cache.php:738
+#: inc/admin-ui.php:330
 msgid "The following Apache modules are missing. The plugin will work in simple mode without them but in expert mode, your visitors may see corrupted pages or out of date content however."
 msgstr "The following Apache modules are missing. The plugin will work in legacy mode without them. In full Supercache mode, your visitors may see corrupted pages or out of date content however."
 
-#: wp-cache.php:730
+#: inc/admin-ui.php:322
 msgid "Set the expiry date on supercached pages. Visitors may not see new pages when they refresh or leave comments without this module."
 msgstr "Set the expiry date on supercached pages. Visitors may not see new pages when they refresh or leave comments without this module."
 
-#: wp-cache.php:730
+#: inc/admin-ui.php:322
 msgid "Required to set caching information on supercache pages. IE7 users will see old pages without this module."
 msgstr "Required to set caching information on supercache pages. IE7 users will see old pages without this module."
 
 #. translators: %s is the path to the .htaccess file.
-#: wp-cache.php:702
+#: inc/admin-ui.php:294
 msgid "Delete the plugin mod_rewrite rules in %s.htaccess enclosed by <code># BEGIN WPSuperCache</code> and <code># END WPSuperCache</code> and let the plugin regenerate them by reloading this page."
 msgstr "Delete the plugin mod_rewrite rules in %s.htaccess enclosed by <code># BEGIN WPSuperCache</code> and <code># END WPSuperCache</code> and let the plugin regenerate them by reloading this page."
 
-#: wp-cache.php:676
+#: inc/admin-ui.php:268
 msgid "This will have no affect on ordinary users but mobile users will see uncached pages."
 msgstr "This will have no affect on ordinary users but mobile users will see uncached pages."
 
-#: wp-cache.php:676
+#: inc/admin-ui.php:268
 msgid "For best performance you should enable \"Mobile device support\" or delete the mobile rewrite rules in your .htaccess. Look for the 2 lines with the text \"2.0\\ MMP|240x320\" and delete those."
 msgstr "For best performance you should enable \"Mobile device support\" or delete the mobile rewrite rules in your .htaccess. Look for the 2 lines with the text \"2.0\\ MMP|240x320\" and delete those."
 
-#: wp-cache.php:647
+#: inc/admin-ui.php:239
 msgid "You should change the permissions on %s and make it more restrictive. Use your ftp client, or the following command to fix things:"
 msgstr "You should change the permissions on %s and make it more restrictive. Use your ftp client, or the following command to fix things:"
 
-#: wp-cache.php:621
+#: inc/admin-ui.php:213
 msgid "Garbage collection by this plugin clears out expired and old cached pages on a regular basis. Use <a href=\"#expirytime\">this form</a> to enable it."
 msgstr "Garbage collection by this plugin clears out expired and old cached pages on a regular basis. Use <a href=\"#expirytime\">this form</a> to enable it."
 
-#: wp-cache.php:600 wp-cache.php:648
+#: inc/admin-ui.php:192 inc/admin-ui.php:240
 msgid "<a href=\"https://codex.wordpress.org/Changing_File_Permissions\">This page</a> explains how to change file permissions."
 msgstr "<a href=\"https://codex.wordpress.org/Changing_File_Permissions\">This page</a> explains how to change file permissions."
 
-#: wp-cache.php:599
+#: inc/admin-ui.php:191
 msgid "A simple way of doing that is by changing the permissions temporarily using the CHMOD command or through your ftp client. Make sure it&#8217;s globally writeable and it should be fine."
 msgstr "A simple way of doing that is by changing the permissions temporarily using the CHMOD command or through your ftp client. Make sure it&#8217;s globally writeable and it should be fine."
 
-#: wp-cache.php:598
+#: inc/admin-ui.php:190
 msgid "The WP Super Cache configuration file is <code>%s/wp-cache-config.php</code> and cannot be modified. That file must be writeable by the web server to make any changes."
 msgstr "The WP Super Cache configuration file is <code>%s/wp-cache-config.php</code> and cannot be modified. That file must be writeable by the web server to make any changes."
 
-#: wp-cache.php:591
+#: inc/admin-ui.php:183
 msgid "It appears that mod_rewrite is not installed. Sometimes this check isn&#8217;t 100% reliable, especially if you are not using Apache. Please verify that the mod_rewrite module is loaded. It is required for serving Super Cache static files in expert mode. You will still be able to simple mode."
 msgstr "It appears that mod_rewrite is not installed. Sometimes this check isn&#8217;t 100% reliable, especially if you are not using Apache. Please verify that the mod_rewrite module is loaded. It is required for serving Super Cache static files. You will still be able to use legacy or PHP modes."
 
-#: wp-cache.php:580
+#: inc/admin-ui.php:172
 msgid "PHP is compressing the data sent to the visitors of your site. Disabling this is recommended as the plugin caches the compressed output once instead of compressing the same page over and over again. Also see #21 in the Troubleshooting section. See <a href=\"http://php.net/manual/en/zlib.configuration.php\">this page</a> for instructions on modifying your php.ini."
 msgstr "PHP is compressing the data sent to the visitors of your site. Disabling this is recommended as the plugin caches the compressed output once instead of compressing the same page over and over again. Also see #21 in the Troubleshooting section. See <a href=\"http://php.net/manual/en/zlib.configuration.php\">this page</a> for instructions on modifying your php.ini."
 
-#: wp-cache.php:547
+#: inc/admin-ui.php:139
 msgid "Unfortunately, WordPress cannot find the file wp-cron.php. This script is required for the correct operation of garbage collection by this plugin, WordPress scheduled posts as well as other critical activities."
 msgstr "Unfortunately, WordPress cannot find the file wp-cron.php. This script is required for the correct operation of garbage collection by this plugin, WordPress scheduled posts as well as other critical activities."
 
-#: wp-cache.php:534 wp-cache.php:548
+#: inc/admin-ui.php:126 inc/admin-ui.php:140
 msgid "Please see entry 16 in the <a href=\"%s\">Troubleshooting section</a> of the readme.txt"
 msgstr "Please see entry 16 in the <a href=\"%s\">Troubleshooting section</a> of the readme.txt"
 
-#: wp-cache.php:533
+#: inc/admin-ui.php:125
 msgid "Your server thinks your hostname resolves to %s. Some services such as garbage collection by this plugin, and WordPress scheduled posts may not operate correctly."
 msgstr "Your server thinks your hostname resolves to %s. Some services such as garbage collection by this plugin, and WordPress scheduled posts may not operate correctly."
 
-#: wp-cache.php:514
+#: inc/admin-ui.php:106
 msgid "A custom url or permalink structure is required for this plugin to work correctly. Please go to the <a href=\"options-permalink.php\">Permalinks Options Page</a> to configure your permalinks."
 msgstr "A custom url or permalink structure is required for this plugin to work correctly. Please go to the <a href=\"options-permalink.php\">Permalinks Options Page</a> to configure your permalinks."
 
-#: wp-cache.php:507
+#: inc/admin-ui.php:99
 msgid "You or an administrator must disable this. See the <a href=\"http://php.net/features.safe-mode\">safe mode manual page</a> for further details. This cannot be disabled in a .htaccess file unfortunately. It must be done in the php.ini config file."
 msgstr "You or an administrator must disable this. See the <a href=\"http://php.net/features.safe-mode\">safe mode manual page</a> for further details. This cannot be disabled in a .htaccess file unfortunately. It must be done in the php.ini config file."
 
-#: wp-cache.php:499
+#: inc/admin-ui.php:91
 msgid "You may experience problems running this plugin because SAFE MODE is enabled."
 msgstr "You may experience problems running this plugin because SAFE MODE is enabled."
 
-#: wp-cache-phase2.php:3524
+#: wp-cache-phase2.php:3869
 msgid "Cache expiry cron job took more than 30 seconds. You should probably run the garbage collector more often."
 msgstr "Cache expiry cron job took more than 30 seconds. You should probably run the garbage collector more often."
 
@@ -1590,16 +1585,23 @@ msgstr "Cache expiry cron job took more than 30 seconds. You should probably run
 msgid "WPTouch plugin detected! Please go to the Supercache plugins page and enable the WPTouch helper plugin."
 msgstr "WPTouch plugin detected! Please go to the Supercache plugins page and enable the WPTouch helper plugin."
 
-#: wp-cache.php:220
+#: inc/lifecycle.php:26
 msgid "Please create %s/wp-cache-config.php from wp-super-cache/wp-cache-config-sample.php"
 msgstr "لطفا %s/wp-cache-config.php را از wp-super-cache/wp-cache-config-sample.php ایجاد کنید"
 
+#: inc/admin-ui.php:727
+msgid "Configuration file changed, some values might be wrong. Load the page again from the \"Settings\" menu to reset them."
+msgstr "پیکربندی پرونده تعییر یافت ممکن است برخی مقادیر اشتباه باشد. برگه را مجدد بارگذاری کنید از فهرست\"تنظیمات\" برای تنظیم مجدد آن. "
+
+#: inc/admin-ui.php:287 inc/admin-ui.php:314
+msgid "The rewrite rules required by this plugin have changed or are missing. "
+msgstr "بازنویسی قوانین نیازاست برای این افزونه که تغییر کرده یا گم شده است."
+
 #: partials/lockdown.php:35 partials/lockdown.php:40
-#: plugins/badbehaviour.php:84
 msgid "Warning!"
 msgstr "هشدار!"
 
-#: ossdl-cdn.php:375
+#: ossdl-cdn.php:393
 msgid "Save Changes"
 msgstr "ذخیره‏ی تغییرات"
 
@@ -1624,16 +1626,12 @@ msgstr "قادر ساختن"
 msgid "Cached"
 msgstr "کش شده"
 
-#: plugins/domain-mapping.php:79 plugins/domain-mapping.php:132
+#: plugins/domain-mapping.php:89 plugins/domain-mapping.php:142
 msgid "Domain Mapping"
 msgstr "نقشه دامنه"
 
-#: plugins/badbehaviour.php:63 plugins/badbehaviour.php:93
-msgid "Bad Behavior"
-msgstr "رفتار بد"
-
-#: plugins/awaitingmoderation.php:46 plugins/badbehaviour.php:77
-#: plugins/domain-mapping.php:94 plugins/jetpack.php:50 plugins/wptouch.php:34
+#: plugins/awaitingmoderation.php:46 plugins/domain-mapping.php:104
+#: plugins/jetpack.php:50 plugins/wptouch.php:34
 msgid "Update"
 msgstr "بروزرسانی"
 
@@ -1641,26 +1639,23 @@ msgstr "بروزرسانی"
 msgid "Awaiting Moderation is now %s"
 msgstr "در انتظار نظارت در حال حاضر %s"
 
-#: plugins/awaitingmoderation.php:42 plugins/domain-mapping.php:90
+#: plugins/awaitingmoderation.php:42 plugins/domain-mapping.php:100
 #: plugins/jetpack.php:46 plugins/wptouch.php:30
 msgid "disabled"
 msgstr "غیرفعال"
 
 #: partials/debug.php:52 plugins/awaitingmoderation.php:40
-#: plugins/badbehaviour.php:71 plugins/domain-mapping.php:90
-#: plugins/jetpack.php:44 plugins/wptouch.php:28
+#: plugins/domain-mapping.php:100 plugins/jetpack.php:44 plugins/wptouch.php:28
 msgid "enabled"
 msgstr "فعال"
 
 #: partials/lockdown.php:4 plugins/awaitingmoderation.php:35
-#: plugins/badbehaviour.php:66 plugins/domain-mapping.php:83
-#: plugins/jetpack.php:39 plugins/wptouch.php:23
+#: plugins/domain-mapping.php:93 plugins/jetpack.php:39 plugins/wptouch.php:23
 msgid "Disabled"
 msgstr "غیرفعال"
 
 #: partials/lockdown.php:4 plugins/awaitingmoderation.php:34
-#: plugins/badbehaviour.php:65 plugins/domain-mapping.php:82
-#: plugins/jetpack.php:38 plugins/wptouch.php:22
+#: plugins/domain-mapping.php:92 plugins/jetpack.php:38 plugins/wptouch.php:22
 msgid "Enabled"
 msgstr "فعال"
 
@@ -1668,11 +1663,11 @@ msgstr "فعال"
 msgid "Awaiting Moderation"
 msgstr "در انتظار بررسی"
 
-#: ossdl-cdn.php:364
+#: ossdl-cdn.php:382
 msgid "Additional CNAMES"
 msgstr "CNAMES اضافی"
 
-#: ossdl-cdn.php:343
+#: ossdl-cdn.php:361
 msgid "Off-site URL"
 msgstr "آدرس خارج از سایت"
 
@@ -1680,11 +1675,11 @@ msgstr "آدرس خارج از سایت"
 msgid "Jetpack Mobile Theme"
 msgstr "قالب موبایل Jetpack"
 
-#: ossdl-cdn.php:350
+#: ossdl-cdn.php:368
 msgid "Include directories"
 msgstr "شامل دایرکتوری ها"
 
-#: ossdl-cdn.php:357
+#: ossdl-cdn.php:375
 msgid "Exclude if substring"
 msgstr "حذف اگر رشته فرعی باشد"
 
@@ -1692,27 +1687,19 @@ msgstr "حذف اگر رشته فرعی باشد"
 msgid "Caching has been disabled on this blog on the Network Admin Sites page."
 msgstr "کش در این سایت در شبکه برگه مدیریت غیرفعال است."
 
-#: plugins/badbehaviour.php:75
-msgid "Bad Behavior support is now %s"
-msgstr "رفتار بد پشتیبانی می شود الان %s"
-
-#: plugins/badbehaviour.php:52
-msgid "Bad Behaviour not found. Please check your install."
-msgstr "رفتار بدی یافت نشد. نصب خود را بررسی کنید."
-
 #: plugins/awaitingmoderation.php:36 plugins/awaitingmoderation.php:60
 msgid "Enables or disables plugin to Remove the text \"Your comment is awaiting moderation.\" when someone leaves a moderated comment."
 msgstr "فعال یا غیرفعال کردن افزونه برای حذف متن \"دیدگاه شما در انتظار تائید است.\" وقتی که کسی دیدگاهی می نویسد."
 
-#: ossdl-cdn.php:371
+#: ossdl-cdn.php:389
 msgid "Skip https URLs to avoid \"mixed content\" errors"
 msgstr "ردشدن https URLs برای صرف نظر از خطای \"mixed content\""
 
-#: ossdl-cdn.php:325
+#: ossdl-cdn.php:343
 msgid "You can define different CDN URLs for each site on a multsite network."
 msgstr "می توانید آدرس های cdn متفاوتی برای هر سایت در شبکه چند سایته تعریف کنید."
 
-#: ossdl-cdn.php:333
+#: ossdl-cdn.php:351
 msgid "Enable CDN Support"
 msgstr "فعال سازی پشتیبانی CDN"
 
@@ -1732,34 +1719,30 @@ msgstr "Provides support for the <a href=\"https://wordpress.org/plugins/jetpack
 msgid "Jetpack not found in %s. Install it and enable the mobile theme and this helper plugin to cache visits by mobile visitors."
 msgstr "Jetpack not found in %s. Install it and enable the mobile theme and this helper plugin to cache visits by mobile visitors."
 
-#: plugins/domain-mapping.php:108
+#: plugins/domain-mapping.php:118
 msgid "Domain Mapping plugin detected! Please go to the Supercache plugins page and enable the domain mapping helper plugin."
 msgstr "Domain Mapping plugin detected! Please go to the Supercache plugins page and enable the domain mapping helper plugin."
 
-#: plugins/domain-mapping.php:89
+#: plugins/domain-mapping.php:99
 msgid "Domain Mapping support is now %s"
 msgstr "Domain Mapping support is now %s"
 
-#: plugins/domain-mapping.php:85
+#: plugins/domain-mapping.php:95
 msgid "Provides support for <a href=\"https://wordpress.org/plugins/wordpress-mu-domain-mapping/\">Domain Mapping</a> plugin to map multiple domains to a blog."
 msgstr "Provides support for <a href=\"https://wordpress.org/plugins/wordpress-mu-domain-mapping/\">Domain Mapping</a> plugin to map multiple domains to a blog."
 
-#: plugins/badbehaviour.php:68
-msgid "(Only WPCache caching supported, disabled compression and requires <a href=\"http://www.bad-behavior.ioerror.us/\">Bad Behavior</a> in \"%s/plugins/bad-behavior/\") "
-msgstr "(Only legacy caching supported, disabled compression and requires <a href=\"http://www.bad-behavior.ioerror.us/\">Bad Behavior</a> in \"%s/plugins/bad-behavior/\") "
-
-#: ossdl-cdn.php:360
+#: ossdl-cdn.php:378
 msgid "Excludes something from being rewritten if one of the above strings is found in the URL. Use a comma as the delimiter like this, <code>.php, .flv, .do</code>, and always include <code>.php</code> (default)."
 msgstr "Excludes something from being rewritten if one of the above strings is found in the match. Use a comma as the delimiter like this, <code>.php, .flv, .do</code>, and always include <code>.php</code> (default)."
 
-#: ossdl-cdn.php:353
+#: ossdl-cdn.php:371
 msgid "Directories to include in static file matching. Use a comma as the delimiter. Default is <code>wp-content, wp-includes</code>, which will be enforced if this field is left empty."
 msgstr "Directories to include in static file matching. Use a comma as the delimiter. Default is <code>wp-content, wp-includes</code>, which will be enforced if this field is left empty."
 
-#: ossdl-cdn.php:346
+#: ossdl-cdn.php:364
 msgid "The new URL to be used in place of %1$s for rewriting. No trailing <code>/</code> please.<br />Example: <code>%2$s</code>."
 msgstr "The new URL to be used in place of %1$s for rewriting. No trailing <code>/</code> please.<br />Example: <code>%2$s</code>."
 
-#: ossdl-cdn.php:320
+#: ossdl-cdn.php:338
 msgid "<strong style=\"color: red\">WARNING:</strong> Test some static urls e.g., %s  to ensure your CDN service is fully working before saving changes."
 msgstr "<strong style=\"color: red\">WARNING:</strong> Test some static urls e.g., %s  to ensure your CDN service is fully working before saving changes."

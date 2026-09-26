@@ -45,8 +45,7 @@ class SepalGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 
 		try {
 
-			// CURLOPT_SSL_VERIFYPEER false
-			$url      = sprintf( '%s/api/request.json', $this->get_domain() );
+			$url      = 'https://payment.sepal.ir/api/request.json';
 			$response = $this->curl( $url, json_encode( $parameters ), $headers );
 
 			$this->log( $transaction, 'paymentRequest', [
@@ -105,7 +104,7 @@ class SepalGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 
 		try {
 
-			$url      = sprintf( '%s/api/verify.json', $this->get_domain() );
+			$url      = 'https://payment.sepal.ir/api/verify.json';
 			$response = $this->curl( $url, json_encode( $parameters ), $headers );
 
 			$this->log( $transaction, 'verifyRequest', [
@@ -146,7 +145,9 @@ class SepalGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 			'transaction' => $transaction->toArray(),
 		] );
 
-		return wp_redirect( sprintf( '%s/payment/%s', $this->get_domain(), $transaction->gateway_au ) );
+		$url = 'https://payment.sepal.ir/api/v1/payment/%s';
+
+		return wp_redirect( sprintf( $url, $transaction->gateway_au ) );
 	}
 
 	public function currencies(): array {
@@ -161,16 +162,6 @@ class SepalGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Featu
 				'label' => 'کلید وب سرویس',
 				'key'   => 'api_key',
 			],
-			[
-				'label'       => 'هاست خارج از ایران',
-				'key'         => 'non-iran-host',
-				'type'        => 'checkbox',
-				'description' => 'در صورتی که هاست میزبانی شما خارج از ایران است، جهت اتصال بهتر تیک بزنید.',
-			],
 		];
-	}
-
-	private function get_domain(): string {
-		return ( $this->options['non-iran-host'] ?? false ) ? 'https://3pal.ir' : 'https://sepal.ir';
 	}
 }

@@ -27,8 +27,6 @@ class ZarinPalGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Fe
 			'transaction' => $transaction->toArray(),
 		] );
 
-		$this->checkAmount( $transaction, 1_100, 400_000_000 );
-
 		$parameters = [
 			'merchant_id'  => $this->options['merchant_id'],
 			'amount'       => intval( $transaction->amount ),

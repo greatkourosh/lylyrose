@@ -3,12 +3,12 @@ Contributors: lord_viper, man4toman, parselearn, yazdaniwp, saeedfard, iehsanir,
 Donate link: https://wp-parsi.com/support/
 Tags: Shamsi, Persian, Jalali, WooCommerce, ووکامرس
 Requires at least: 5.3
-Tested up to: 7.0
-Stable tag: 6.2.1
+Tested up to: 7.1
+Stable tag: 6.4
 Requires PHP: 7.4
 License: GPLv3
 
-Persian date support for WordPress
+Persian date support for WordPress and WooCommerce
 
 == Description ==
 
@@ -32,6 +32,11 @@ ParsiDate is a powerful plugin developed by Persian contributors to enhance the 
 = Commerce & E-commerce =
 * WooCommerce Ready - Full WooCommerce (ووکامرس) compatibility with Persian dates
 * Product Support - Persian dates for orders, products, and customer data
+* Support for Iranian payment gateways with [ParsiGate](https://wordpress.org/plugins/parsigate/) addon
+  - Bank gateways: Mellat, Parsian, Pasargad, Sadaad, Melli, Behpardakht, Asan Pardakht, Saman, Saderat, Eghtesad Novin, Iran Kish, Sepehr
+  - Installment gateways: SnappPay, Tara, Digipay, Azki
+  - Intermediary gateways: Zibal, Zarinpal, PayPing, Aghayepardakht
+  - Test gateway for simulating purchases without a bank account
 
 = Text & Character Processing =
 * Arabic to Persian - Automatic character conversion (ي/ك to ی/ک)
@@ -62,6 +67,34 @@ ParsiDate is a powerful plugin developed by Persian contributors to enhance the 
 7. WooCommerce settings
 
 == Changelog ==
+
+= 6.4 =
+* Add: Elementor addon. Jalali datepicker for Elementor form date fields and Jalali dates in "Form Submissions" screen.
+* Add: Brizy page builder addon. [#issue](https://github.com/wordpress-parsi/wp-parsidate/issues/322)
+* Add: Booked addon. [#issue](https://github.com/wordpress-parsi/wp-parsidate/issues/329)
+* Add: TapChat addon.
+* Add: English month names for Gregorian dates.
+* Add: Enhanced Solar date handling and chart localization in WooCommerce Analytics.
+* Fix: XSS issue in wp_title hook.
+* Fix: Post quick edit date.
+* Fix: Early translation loading during plugin version checks. [#PR](https://github.com/wordpress-parsi/wp-parsidate/pull/332)
+* Fix: convertNonPersianValuesInCheckout return type value. [#issue](https://github.com/wordpress-parsi/wp-parsidate/issues/331)
+* Fix: Check input_type in cx_post_meta/pre_get_meta filter.
+* Fix: FixArabic method for converting Arabic characters to Farsi.
+* Fixed some bugs
+
+= 6.3 =
+* This version of the plugin is released in memory of **Mobin Ghasempoor**. Developer of the ParsiDate plugin. Rest in peace **Mobin**.
+* Add: New Gutenberg editor Jalali datepicker.
+* Add: Archive and Calendar block widgets for Gutenberg editor.
+* Add: JetEngine date/datetime datepicker for Jalali date.
+* Add: WooCommerce analytics Jalali date converter.
+* Add: WooCommerce checkout block city selector for Iran cities. [#issue](https://github.com/wordpress-parsi/wp-parsidate/issues/285)
+* Add: WooCommerce new option for convert numbers in email content.
+* Fix: Archive and Calendar classic widgets.
+* Fix: WooCommerce order date problem when saving. [#WP topic](https://wordpress.org/support/topic/%d9%85%d8%b4%da%a9%d9%84-%d8%a8%d8%a7-%d9%88%d9%88%da%a9%d8%a7%d9%85%d8%b1%d8%b3-%d9%88-%d8%ac%d8%aa-%d8%a7%d9%86%d8%ac%db%8c%d9%86/)
+* fix: WooCommerce declare feature compatibility unconditionally [PR](https://github.com/wordpress-parsi/wp-parsidate/pull/327)
+* Fixed some bugs
 
 = 6.2.1 =
 * Fix: WooCommerce legacy report datepicker. [#WP topic](https://wordpress.org/support/topic/%d8%ae%d8%aa%d9%84%d8%a7%d9%84-%da%af%d8%b2%d8%a7%d8%b1%d8%b4%d9%87%d8%a7%db%8c-%d9%88%d9%88%da%a9%d8%a7%d9%85%d8%b1%d8%b3-%d8%a8%d8%b9%d8%af-%d8%a7%d8%b2-%d8%a2%d9%be%d8%af%db%8c%d8%aa-parsi/)

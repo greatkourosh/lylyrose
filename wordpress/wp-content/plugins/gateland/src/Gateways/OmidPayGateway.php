@@ -5,10 +5,11 @@ namespace Nabik\Gateland\Gateways;
 
 
 use Nabik\Gateland\Enums\Transaction\CurrenciesEnum;
+use Nabik\Gateland\Gateways\Features\InquiryFeature;
 use Nabik\Gateland\Gateways\Features\ShaparakFeature;
 use Nabik\Gateland\Models\Transaction;
 
-class OmidPayGateway extends BaseGateway implements ShaparakFeature {
+class OmidPayGateway extends BaseGateway implements ShaparakFeature, InquiryFeature {
 
 	protected string $name = 'امید‌پی';
 

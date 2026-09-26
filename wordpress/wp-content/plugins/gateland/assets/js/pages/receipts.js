@@ -164,7 +164,7 @@ document.addEventListener('alpine:init', () => {
                     this.filters.destination_cards = result.data.destination_cards.map((card)=>{
                         return{
                             key: card.id.toString(),
-                            value: card.formatted_card_number
+                            value: card.iban ? 'IR' + gatelandFormatIban(card.iban) : gatelandFormatCardNumber(card.card_number)
                         }
                     });
                 }else{

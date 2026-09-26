@@ -53,7 +53,7 @@ class DashboardWidget {
   public function addDashboardWidget(): void {
     add_meta_box(
       'wpp_dashboard_primary',
-      esc_html__( 'WP Parsi', 'wp-parsidate' ),
+      esc_html__( 'Parsidate', 'wp-parsidate' ),
       [ $this, 'dashboardWidgetContent' ],
       'dashboard',
       'normal',
@@ -344,7 +344,7 @@ class DashboardWidget {
     ];
 
     foreach ( $urls as $url ) {
-      $response = wp_remote_get( $url, [ 'timeout' => 3 ] );
+      $response = wp_remote_get( $url, [ 'timeout' => 6 ] );
 
       if ( ! is_wp_error( $response ) ) {
         $data = JSON::decode( wp_remote_retrieve_body( $response ), true );

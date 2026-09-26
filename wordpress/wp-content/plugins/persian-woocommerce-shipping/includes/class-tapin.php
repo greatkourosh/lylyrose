@@ -14,7 +14,7 @@ class PWS_Tapin extends PWS_Core {
 
 	protected static array $gateways = [
 		'tapin'      => 'tapin.ir',
-		'posteketab' => 'posteketab.com',
+		'posteketab' => 'postketab.com',
 	];
 
 	/**

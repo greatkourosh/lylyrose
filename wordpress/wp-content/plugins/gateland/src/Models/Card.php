@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int       $id
  * @property string    $name
  * @property string    $card_number
+ * @property string    $iban
  * @property string    $formatted_card_number
  * @property string    $status
  * @property int       $max_quantity
@@ -35,6 +36,7 @@ class Card extends Model {
 	protected $fillable = [
 		'name',
 		'card_number',
+		'iban',
 		'status',
 		'max_quantity',
 		'max_amount',

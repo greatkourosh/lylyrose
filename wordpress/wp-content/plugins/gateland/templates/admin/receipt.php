@@ -154,250 +154,89 @@ wp_localize_script( 'global-script', 'gateland', [
 
                 <div>
                     <!-- skeleton -->
-                    <template x-if-="pageLoaderIsActive">
-                        <div class="grid grid-cols-12 md:gap-4 gap-y-4 bg-white border border-gray-200 rounded-xl py-4 px-6 mb-5">
-                            <template x-for="item in [1,2]">
-                                <div class="lg:col-span-6 col-span-full">
-                                    <div class="flex items-center gap-2">
-                                        <div class="skeleton size-11 min-w-11 rounded-lg"></div>
-                                        <div>
-                                            <div class="skeleton h-4 w-10 rounded-full mb-2"></div>
-                                            <div class="skeleton h-4 w-36 rounded-full"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <template x-if="!pageLoaderIsActive && receipt">
-                        <div class="grid grid-cols-12 md:gap-4 gap-y-4 bg-white border border-gray-200 rounded-xl py-4 px-6 mb-5">
-                            <div class="lg:col-span-6 col-span-full">
-                                <div class="flex items-center gap-2">
-                                    <div class="size-11 min-w-11 sm:flex hidden items-center justify-center bg-primary-50 rounded-lg">
-                                        <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/credit-card-up.svg">
-                                    </div>
-                                    <div>
-                                        <div class="text-primary-500 text-xs mb-1">
-                                            کارت یا شبا مبدا (مشتری):
-                                        </div>
-                                        <div class="flex items-center gap-2 md:flex-nowrap flex-wrap">
-                                            <div class="font-medium text-primary-700">
-                                                <span x-text="receipt.source_card.card_number"></span>
-                                            </div>
-                                            <template x-if="!receipt.source_card.name">
-                                                <button
-                                                        @click="inquiryCardNumber(receipt.id)"
-                                                        class="h-8 flex gap-1 items-center bg-primary-50 hover:bg-primary-100 text-sm rounded py-1 px-3.5"
-                                                >
-                                                    <span class="text-primary-700 font-semibold">استعلام نام</span>
-                                                    <span
-                                                            :class="{'rotation-animation' : inquiryLoaderIsActive}"
-                                                    >
-                                                    <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh-blue.svg">
-                                                </span>
-                                                </button>
-                                            </template>
-                                            <template x-if="receipt.source_card.name">
-                                                <div class="font-medium text-primary-700">
-                                                    |
-                                                    <span x-text="receipt.source_card.name"></span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="lg:col-span-6 col-span-full">
-                                <div class="flex items-center gap-2">
-                                    <div class="size-11 min-w-11 sm:flex hidden items-center justify-center bg-primary-50 rounded-lg">
-                                        <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/credit-card-down.svg">
-                                    </div>
-                                    <div>
-                                        <div class="text-primary-500 text-xs mb-1">
-                                            کارت یا شبا مقصد (فروشنده):
-                                        </div>
-                                        <div>
-                                            <div class="font-medium text-primary-700">
-                                                <span x-text="receipt.destination_card.card_number"></span>
-                                                |
-                                                <span x-text="receipt.destination_card.name"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- levels -->
-                <div>
-                    <!-- skeleton -->
                     <template x-if="pageLoaderIsActive">
                         <div class="bg-white border border-gray-100 rounded-2xl sm:py-8 py-3 md:px-8 px-3 mb-5">
-                            <div class="sm:flex justify-center relative">
-
-                                <!--line-->
-                                <div class="sm:hidden h-full w-[2px] absolute top-0 right-4 bg-gray-200"></div>
-
-                                <div class="sm:w-[180px] sm:block flex gap-1 sm:mb-0 mb-4">
-                                    <div class="relative z-10 flex justify-center sm:mb-3">
-                                        <!-- circle -->
-                                        <div class="size-8 rounded-full">
-                                            <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                            </div>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
-                                        <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
-                                        <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:w-[180px] sm:block flex gap-1 sm:mb-0 mb-4">
-                                    <div class="relative z-10 flex justify-center sm:mb-4">
-                                        <!-- circle -->
-                                        <div class="size-8 rounded-full">
-                                            <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                            </div>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
-                                        <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
-                                        <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:w-[180px] sm:block flex gap-1 sm:mb-0">
-                                    <div class="relative z-10 flex justify-center sm:mb-4">
-                                        <!-- circle -->
-                                        <div class="size-8 rounded-full">
-                                            <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                            </div>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
-                                        <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
-                                        <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </template>
-
-                    <template x-if="!pageLoaderIsActive && receipt">
-                        <div class="bg-white border border-gray-100 rounded-2xl sm:py-8 py-3 md:px-8 px-3 mb-5">
-                            <div class="sm:flex justify-center relative">
-
-                                <!--line-->
-                                <div class="sm:hidden h-full w-[2px] absolute top-0 right-4 bg-gray-200"></div>
-
-                                <div class="sm:w-[200px] text-center sm:block flex gap-1 sm:mb-0">
-                                    <div class="relative z-10 flex justify-center sm:mb-4">
-                                        <!-- circle -->
-                                        <div class="size-8 min-w-8 rounded-full">
-                                            <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                                <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
-                                            </div>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex flex-wrap items-center px-0.5">
-                                        <div class="text-sm font-semibold text-primary-700 sm:mb-1">
-                                            تاریخ ایجاد تراکنش
-                                        </div>
-                                        <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mr-0 mr-auto">
-                                            <span x-text="receipt.transaction.created_at"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:w-[200px] text-center sm:block flex gap-1 sm:mt-0 mt-4">
-                                    <div class="relative z-10 flex justify-center sm:mb-4">
-                                        <!-- circle -->
-                                        <div class="size-8 min-w-8 rounded-full">
-                                            <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                                <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
-                                            </div>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex flex-wrap items-center px-0.5">
-                                        <div class="text-sm font-semibold text-primary-700 sm:mb-1">
-                                            تاریخ ارسال رسید
-                                        </div>
-                                        <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mr-0 mr-auto">
-                                            <span x-text="receipt.created_at"></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sm:w-[200px] text-center sm:block flex flex-wrap gap-1 sm:mt-0 mt-4">
-                                    <div class="relative z-10 flex justify-center sm:mb-4">
-                                        <!-- circle -->
-                                        <div class="size-8 rounded-full">
-                                            <template x-if="receipt.reviewed.at">
-                                                <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
-                                                    <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
-                                                </div>
-                                            </template>
-                                            <template x-if="!receipt.reviewed.at">
-                                                <div class="size-8 bg-warning-100 flex items-center justify-center rounded-full shadow-[0_1px_2px_0_#1018280F]">
-                                                    <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/current-step.svg">
-                                                </div>
-                                            </template>
-                                        </div>
-
-                                        <!--line-->
-                                        <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
-                                    </div>
-                                    <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex items-center px-0.5">
-                                        <div class="text-sm font-semibold text-primary-700 sm:mb-1">
-                                            تاریخ تعیین وضعیت
-                                        </div>
-                                        <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mb-2 sm:mr-0 mr-auto">
-                                            <template x-if="receipt.reviewed.at">
-                                                <span x-text="receipt.reviewed.at"></span>
-                                            </template>
-                                            <template x-if="!receipt.reviewed.at">
-                                                <span>نامشخص</span>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <div>
-                    <!-- skeleton -->
-                    <template x-if="pageLoaderIsActive">
-                        <div class="bg-white border border-gray-100 rounded-2xl sm:py-8 py-3 md:px-8 px-3 mb-5">
-                            <div class="grid grid-cols-12 lg:gap-x-10 gap-y-10">
+                            <div class="grid grid-cols-10 lg:gap-x-10 gap-y-10">
                                 <div class="lg:col-span-6 col-span-full">
                                     <div>
                                         <div class="flex items-center md:mb-8 mb-6">
                                             <div class="skeleton h-6 w-36 rounded-full ml-auto"></div>
                                             <div class="skeleton h-6 w-20 rounded-full"></div>
+                                        </div>
+
+                                        <div class="sm:flex justify-center relative mb-6">
+
+                                            <div class="sm:hidden h-full w-[2px] absolute top-0 right-4 bg-gray-200"></div>
+
+                                            <div class="sm:w-[150px] sm:min-w-[150px] sm:block flex gap-1 sm:mb-0 mb-4">
+                                                <div class="relative z-10 flex justify-center sm:mb-3">
+                                                    <!-- circle -->
+                                                    <div class="size-8 rounded-full">
+                                                        <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                        </div>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
+                                                    <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
+                                                    <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="sm:w-full sm:block flex gap-1 sm:mb-0 mb-4">
+                                                <div class="relative z-10 flex justify-center sm:mb-4">
+                                                    <!-- circle -->
+                                                    <div class="size-8 rounded-full">
+                                                        <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                        </div>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
+                                                    <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
+                                                    <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="sm:w-[150px] sm:min-w-[150px] sm:block flex gap-1 sm:mb-0">
+                                                <div class="relative z-10 flex justify-center sm:mb-4">
+                                                    <!-- circle -->
+                                                    <div class="size-8 rounded-full">
+                                                        <div class="skeleton size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                        </div>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] sm:block flex flex-wrap items-center px-0.5">
+                                                    <div class="skeleton sm:w-20 w-16 h-5 rounded-full sm:mb-1 sm:mx-auto"></div>
+                                                    <div class="skeleton sm:w-28 w-20 h-4 rounded-full sm:mb-2 sm:mx-auto mr-auto"></div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="border border-gray-200 rounded-xl mb-6">
+                                            <div class="flex items-center gap-2 border-b border-gray-200 p-3">
+                                                <div class="skeleton size-11 min-w-11 rounded-lg"></div>
+                                                <div>
+                                                    <div class="skeleton h-4 w-10 rounded-full mb-2"></div>
+                                                    <div class="skeleton h-4 w-36 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2 p-3">
+                                                <div class="skeleton size-11 min-w-11 rounded-lg"></div>
+                                                <div>
+                                                    <div class="skeleton h-4 w-10 rounded-full mb-2"></div>
+                                                    <div class="skeleton h-4 w-36 rounded-full"></div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <template x-for="item in [1,2,3]">
@@ -407,12 +246,11 @@ wp_localize_script( 'global-script', 'gateland', [
                                             </div>
                                         </template>
 
-                                        <!-- alert -->
                                         <div class="skeleton h-20 rounded-xl"></div>
                                     </div>
                                 </div>
-                                <div class="lg:col-span-6 col-span-full">
-                                    <div class="bg-[#F1F5F980] rounded-xl p-5">
+                                <div class="lg:col-span-4 col-span-full">
+                                    <div class="bg-[#F1F5F980] h-full flex flex-col justify-center rounded-xl p-5">
                                         <div class="h-[440px]">
                                             <div class="skeleton h-full w-72 max-w-full rounded-md mx-auto"></div>
                                         </div>
@@ -424,11 +262,11 @@ wp_localize_script( 'global-script', 'gateland', [
 
                     <template x-if="!pageLoaderIsActive && receipt">
                         <div class="bg-white border border-gray-100 rounded-2xl sm:py-8 py-3 md:px-8 px-3 mb-5">
-                            <div class="grid grid-cols-12 lg:gap-x-10 gap-y-10">
+                            <div class="grid grid-cols-10 lg:gap-x-10 gap-y-10">
                                 <div class="lg:col-span-6 col-span-full">
                                     <div>
                                         <div class="flex items-center md:mb-8 mb-6">
-                                            <div class="font-semibold text-lg ml-auto">
+                                            <div class="font-semibold md:text-lg ml-auto">
                                                 بررسی رسید
                                             </div>
                                             <template x-if="receipt.status === 'accepted'">
@@ -448,155 +286,301 @@ wp_localize_script( 'global-script', 'gateland', [
                                             </template>
                                         </div>
 
-                                        <div class="md:mb-6 mb-5">
-                                            <label class="block text-sm mb-2">شماره پیگیری</label>
-                                            <div>
-                                                <input
-                                                        disabled
-                                                        :value="receipt.tracking_number"
-                                                        class="w-full !bg-gray-50 border !border-gray-300 text-gray-500 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2.5 px-3"
-                                                        type="text"
-                                                >
+                                        <div class="sm:flex justify-between relative mb-6">
+
+                                            <!--line-->
+                                            <div class="sm:hidden h-full w-[2px] absolute top-0 right-4 bg-gray-200"></div>
+
+                                            <div class="sm:w-[150px] sm:min-w-[150px] text-center sm:block flex gap-1 sm:mb-0">
+                                                <div class="relative z-10 flex justify-center sm:mb-4">
+                                                    <!-- circle -->
+                                                    <div class="size-8 min-w-8 rounded-full">
+                                                        <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                            <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
+                                                        </div>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex flex-wrap items-center px-0.5">
+                                                    <div class="text-xs font-semibold text-gray-700 sm:mb-1">
+                                                        تاریخ ایجاد تراکنش
+                                                    </div>
+                                                    <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mr-0 mr-auto">
+                                                        <span x-text="receipt.transaction.created_at"></span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="md:mb-6 mb-5">
-                                            <label class="block text-sm mb-2">مبلغ اظهار شده</label>
-                                            <div>
-                                                <input
-                                                        disabled
-                                                        :value="`${gatelandFormatPrice(receipt.amount)} ${(receipt.amount > 0 ? receipt.currency : '')}`"
-                                                        class="w-full !bg-gray-50 border !border-gray-300 text-gray-500 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2.5 px-3"
-                                                        type="text"
-                                                >
+
+                                            <div class="sm:w-full text-center sm:block flex gap-1 sm:mt-0 mt-4">
+                                                <div class="relative z-10 flex justify-center sm:mb-4">
+                                                    <!-- circle -->
+                                                    <div class="size-8 min-w-8 rounded-full">
+                                                        <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                            <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
+                                                        </div>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] left-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex flex-wrap items-center px-0.5">
+                                                    <div class="text-xs font-semibold text-gray-700 sm:mb-1">
+                                                        تاریخ ارسال رسید
+                                                    </div>
+                                                    <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mr-0 mr-auto">
+                                                        <span x-text="receipt.created_at"></span>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <div class="sm:w-[150px] sm:min-w-[150px] text-center sm:block flex flex-wrap gap-1 sm:mt-0 mt-4">
+                                                <div class="relative z-10 flex justify-center sm:mb-4">
+                                                    <!-- circle -->
+                                                    <div class="size-8 rounded-full">
+                                                        <template x-if="receipt.reviewed.at">
+                                                            <div class="size-8 bg-primary-100 flex items-center justify-center rounded-full">
+                                                                <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/prev-step.svg">
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!receipt.reviewed.at">
+                                                            <div class="size-8 bg-warning-100 flex items-center justify-center rounded-full shadow-[0_1px_2px_0_#1018280F]">
+                                                                <img class="size-full" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/current-step.svg">
+                                                            </div>
+                                                        </template>
+                                                    </div>
+
+                                                    <!--line-->
+                                                    <div class="sm:block hidden w-1/2 absolute -z-10 top-[50%] -mt-[1px] right-0 h-[2px] bg-gray-200"></div>
+                                                </div>
+                                                <div class="sm:w-auto w-[calc(100%-36px)] text-center sm:block flex items-center px-0.5">
+                                                    <div class="text-xs font-semibold text-gray-700 sm:mb-1">
+                                                        تاریخ تعیین وضعیت
+                                                    </div>
+                                                    <div class="text-xs font-normal text-primary-600 sm:mb-2 sm:mr-0 mr-auto">
+                                                        <template x-if="receipt.reviewed.at">
+                                                            <span x-text="receipt.reviewed.at"></span>
+                                                        </template>
+                                                        <template x-if="!receipt.reviewed.at">
+                                                            <span>نامشخص</span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
-                                        <template x-if="receipt.status === 'accepted'">
+
+                                        <div class="border border-gray-200 rounded-xl mb-6">
+                                            <div class="flex items-center gap-2 border-b border-gray-200 p-3">
+                                                    <div class="size-11 min-w-11 sm:flex hidden items-center justify-center bg-primary-50 rounded-lg">
+                                                        <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/credit-card-up.svg">
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-primary-500 text-xs mb-1">
+                                                            کارت یا شبا مبدا (مشتری):
+                                                        </div>
+                                                        <div class="flex items-center gap-2 md:flex-nowrap flex-wrap">
+                                                            <div class="font-medium text-primary-700">
+                                                                <span x-text="receipt.source_card.card_number"></span>
+                                                            </div>
+                                                            <template x-if="!receipt.source_card.name">
+                                                                <button
+                                                                        @click="inquiryCardNumber(receipt.id)"
+                                                                        class="h-8 flex gap-1 items-center bg-primary-50 hover:bg-primary-100 text-sm rounded py-1 px-3.5"
+                                                                >
+                                                                    <span class="text-primary-700 font-semibold">استعلام نام</span>
+                                                                    <span
+                                                                            :class="{'rotation-animation' : inquiryLoaderIsActive}"
+                                                                    >
+                                                    <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/refresh-blue.svg">
+                                                </span>
+                                                                </button>
+                                                            </template>
+                                                            <template x-if="receipt.source_card.name">
+                                                                <div class="font-medium text-primary-700">
+                                                                    |
+                                                                    <span x-text="receipt.source_card.name"></span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <div class="flex items-center gap-2 p-3">
+                                                    <div class="size-11 min-w-11 sm:flex hidden items-center justify-center bg-primary-50 rounded-lg">
+                                                        <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/credit-card-down.svg">
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-primary-500 text-xs mb-1">
+                                                            کارت یا شبا مقصد (فروشنده):
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-medium text-primary-700">
+                                                                <template x-if="receipt.destination_card.iban">
+                                                                    <span x-text="'IR' + gatelandFormatIban(receipt.destination_card.iban)"></span>
+                                                                </template>
+                                                                <template x-if="!receipt.destination_card.iban">
+                                                                    <span x-text="gatelandFormatCardNumber(receipt.destination_card.number)"></span>
+                                                                </template>
+                                                                |
+                                                                <span x-text="receipt.destination_card.name"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </div>
+
+                                        <div>
                                             <div class="md:mb-6 mb-5">
-                                                <label class="block text-sm mb-2">مبلغ تایید شده</label>
+                                                <label class="block text-sm mb-2">شماره پیگیری</label>
                                                 <div>
                                                     <input
                                                             disabled
-                                                            :value="`${gatelandFormatPrice(receipt.accepted_amount)} ${(receipt.accepted_amount > 0 ? receipt.currency : '')}`"
+                                                            :value="receipt.tracking_number"
                                                             class="w-full !bg-gray-50 border !border-gray-300 text-gray-500 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2.5 px-3"
                                                             type="text"
                                                     >
                                                 </div>
                                             </div>
-                                        </template>
-
-                                        <!-- alert -->
-                                        <template x-if="receipt.status !== 'rejected'">
-                                            <div class="flex gap-3 items-start border border-primary-300 bg-primary-25 rounded-xl text-sm p-4">
-                                                <img class="w-4 min-w-4"
-                                                     src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/info-square.svg">
-                                                <template x-if="receipt.status === 'accepted'">
-                                                    <div>
-                                                        <div class="text-primary-700 font-semibold mb-0.5">
-                                                            رسید تایید شده — غیرقابل بازگشت
-                                                        </div>
-                                                        <div class="font-normal text-primary-700 pr">
-                                                            این رسید در تاریخ
-                                                            <span x-text="receipt.reviewed.at"></span>
-                                                            توسط
-                                                            <span x-text='`"${receipt.reviewed.by}"`'></span>
-                                                            تایید شده است و دیگر امکان تغییر وضعیت آن وجود ندارد.
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="receipt.status === 'rejected'">
-                                                    <div>
-                                                        <div class="text-primary-700 font-semibold mb-0.5">
-                                                            رسید رد شده
-                                                        </div>
-                                                        <div class="font-normal text-primary-700 pr">
-                                                            این رسید در تاریخ
-                                                            <span x-text="receipt.reviewed.at"></span>
-                                                            توسط
-                                                            <span x-text='`"${receipt.reviewed.by}"`'></span>
-                                                            رد شده است. در صورت نیاز، امکان تغییر وضعیت آن به “تعیین وضعیت مجدد” وجود دارد.
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="receipt.status === 'pending'">
-                                                    <div>
-                                                        <div class="text-primary-700 font-semibold mb-0.5">
-                                                            ثبت نتیجه بررسی رسید
-                                                        </div>
-                                                        <div class="font-normal text-primary-700 pr">
-                                                            شما در حال ثبت نتیجه بررسی این رسید هستید. پس از «تأیید»،
-                                                            امکان بازگردانی وجود ندارد و وضعیت تراکنش بر همین اساس به‌روزرسانی می‌شود
-                                                            . لطفاً با دقت تصویر رسید و اطلاعات پرداخت را با سفارش تطبیق دهید.
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </template>
-                                        <template x-if="receipt.status === 'rejected'">
-                                            <div class="flex gap-3 items-start border border-error-300 bg-error-25 rounded-xl text-sm p-4">
-                                                <img class="w-4 min-w-4"
-                                                     src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/info-square-red.svg">
+                                            <div class="md:mb-6 mb-5">
+                                                <label class="block text-sm mb-2">مبلغ اظهار شده</label>
                                                 <div>
-                                                        <div class="text-error-700 font-semibold mb-0.5">
-                                                            رسید رد شده
-                                                        </div>
-                                                        <div class="font-normal text-error-700 pr">
-                                                            این رسید در تاریخ
-                                                            <span x-text="receipt.reviewed.at"></span>
-                                                            توسط
-                                                            <span x-text='`"${receipt.reviewed.by}"`'></span>
-                                                            رد شده است. در صورت نیاز، امکان تغییر وضعیت آن به “تعیین وضعیت مجدد” وجود دارد.
-                                                        </div>
-                                                    </div>
+                                                    <input
+                                                            disabled
+                                                            :value="`${gatelandFormatPrice(receipt.amount)} ${(receipt.amount > 0 ? receipt.currency : '')}`"
+                                                            class="w-full !bg-gray-50 border !border-gray-300 text-gray-500 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2.5 px-3"
+                                                            type="text"
+                                                    >
+                                                </div>
                                             </div>
-                                        </template>
+                                            <template x-if="receipt.status === 'accepted'">
+                                                <div class="md:mb-6 mb-5">
+                                                    <label class="block text-sm mb-2">مبلغ تایید شده</label>
+                                                    <div>
+                                                        <input
+                                                                disabled
+                                                                :value="`${gatelandFormatPrice(receipt.accepted_amount)} ${(receipt.accepted_amount > 0 ? receipt.currency : '')}`"
+                                                                class="w-full !bg-gray-50 border !border-gray-300 text-gray-500 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2.5 px-3"
+                                                                type="text"
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </template>
 
-                                        <div
-                                                x-show="receipt.status === 'pending'"
-                                                class="flex sm:flex-nowrap flex-wrap gap-2.5 text-sm md:mt-6 mt-5"
-                                        >
-                                            <button
-                                                    @click="openAcceptModal(false)"
-                                                    class="sm:w-1/2 w-full bg-success-50 hover:bg-success-100 text-success-700 font-medium rounded-lg py-2 px-3.5"
+                                            <!-- alert -->
+                                            <template x-if="receipt.status !== 'rejected'">
+                                                <div class="flex gap-3 items-start border border-primary-300 bg-primary-25 rounded-xl text-sm p-4">
+                                                    <img class="w-4 min-w-4"
+                                                         src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/info-square.svg">
+                                                    <template x-if="receipt.status === 'accepted'">
+                                                        <div>
+                                                            <div class="text-primary-700 font-semibold mb-0.5">
+                                                                رسید تایید شده — غیرقابل بازگشت
+                                                            </div>
+                                                            <div class="font-normal text-primary-700 pr">
+                                                                این رسید در تاریخ
+                                                                <span x-text="receipt.reviewed.at"></span>
+                                                                توسط
+                                                                <span x-text='`"${receipt.reviewed.by}"`'></span>
+                                                                تایید شده است و دیگر امکان تغییر وضعیت آن وجود ندارد.
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="receipt.status === 'pending'">
+                                                        <div>
+                                                            <div class="text-primary-700 font-semibold mb-0.5">
+                                                                ثبت نتیجه بررسی رسید
+                                                            </div>
+                                                            <div class="font-normal text-primary-700 pr">
+                                                                شما در حال ثبت نتیجه بررسی این رسید هستید. پس از «تأیید»،
+                                                                امکان بازگردانی وجود ندارد و وضعیت تراکنش بر همین اساس به‌روزرسانی می‌شود
+                                                                . لطفاً با دقت تصویر رسید و اطلاعات پرداخت را با سفارش تطبیق دهید.
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template x-if="receipt.status === 'rejected'">
+                                                <div class="flex gap-3 items-start border border-error-300 bg-error-25 rounded-xl text-sm p-4">
+                                                    <img class="w-4 min-w-4"
+                                                         src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/info-square-red.svg">
+                                                    <div>
+                                                            <div class="text-error-700 font-semibold mb-0.5">
+                                                                رسید رد شده
+                                                            </div>
+                                                            <div class="font-normal text-error-700 pr">
+                                                                این رسید در تاریخ
+                                                                <span x-text="receipt.reviewed.at"></span>
+                                                                توسط
+                                                                <span x-text='`"${receipt.reviewed.by}"`'></span>
+                                                                رد شده است. در صورت نیاز، امکان تغییر وضعیت آن به “تعیین وضعیت مجدد” وجود دارد.
+                                                            </div>
+                                                        </div>
+                                                </div>
+                                            </template>
+
+                                            <div
+                                                    x-show="receipt.status === 'pending'"
+                                                    class="flex sm:flex-nowrap flex-wrap gap-2.5 text-sm md:mt-6 mt-5"
                                             >
-                                                تایید تراکنش
-                                            </button>
+                                                <button
+                                                        @click="openAcceptModal(false)"
+                                                        class="sm:w-1/2 w-full bg-success-50 hover:bg-success-100 text-success-700 font-medium rounded-lg py-2 px-3.5"
+                                                >
+                                                    تایید تراکنش
+                                                </button>
+                                                <button
+                                                        @click="openRejectModal()"
+                                                        class="sm:w-1/2 w-full bg-error-50 hover:bg-error-100 text-error-700 font-medium rounded-lg py-2 px-3.5"
+                                                >
+                                                    رد تراکنش
+                                                </button>
+                                            </div>
+
                                             <button
-                                                    @click="openRejectModal()"
-                                                    class="sm:w-1/2 w-full bg-error-50 hover:bg-error-100 text-error-700 font-medium rounded-lg py-2 px-3.5"
+                                                    @click="openAcceptModal(true)"
+                                                    x-show="receipt?.status === 'rejected'"
+                                                    class="flex items-center justify-center text-nowrap gap-2 w-full text-sm text-gray-700 font-semibold rounded-lg border border-gray-300 hover:bg-gray-100 py-2 px-4 mt-5"
                                             >
-                                                رد تراکنش
+                                                <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/reverse-left-gray.svg">
+                                                <span>
+                                                      تعیین وضعیت مجدد
+                                                </span>
                                             </button>
                                         </div>
-
-                                        <button
-                                                @click="openAcceptModal(true)"
-                                                x-show="receipt?.status === 'rejected'"
-                                                class="flex items-center justify-center text-nowrap gap-2 w-full text-sm text-gray-700 font-semibold rounded-lg border border-gray-300 hover:bg-gray-100 py-2 px-4 mt-5"
-                                        >
-                                            <img src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/reverse-left-gray.svg">
-                                            <span>
-                                                  تعیین وضعیت مجدد
-                                            </span>
-                                        </button>
                                     </div>
                                 </div>
-                                <div class="lg:col-span-6 col-span-full">
-                                    <div class="bg-[#F1F5F980] rounded-xl p-5">
-                                        <div class="h-[440px] overflow-hidden mb-6">
-                                            <img
-                                                    class="h-full max-w-full object-cover block rounded-md mx-auto"
-                                                    :src="receipt.attachment.url"
-                                            >
-                                        </div>
-                                        <div class="text-center">
-                                            <button
-                                                    @click="openViewModal()"
-                                                    class="inline-flex items-center gap-2 text-gray-600 hover:bg-gray-200 rounded-md py-2 px-4"
-                                            >
-                                                <img class="h-full max-w-full object-cover block rounded-md mx-auto" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/expand.svg">
-                                                مشاهده تصویر
-                                            </button>
-                                        </div>
+                                <div class="lg:col-span-4 col-span-full">
+                                    <div class="bg-[#F1F5F980] h-full flex flex-col justify-center rounded-xl p-5">
+                                       <template x-if="receipt.attachment.url">
+                                           <div>
+                                               <div class="overflow-hidden mb-6">
+                                                   <img
+                                                           class="w-full object-cover block rounded-md border border-gray-200 mx-auto"
+                                                           :src="receipt.attachment.url"
+                                                   >
+                                               </div>
+                                               <div class="text-center">
+                                                   <button
+                                                           @click="openViewModal()"
+                                                           class="inline-flex items-center gap-2 text-gray-600 hover:bg-gray-200 rounded-md py-2 px-4"
+                                                   >
+                                                       <img class="h-full max-w-full object-cover block rounded-md mx-auto" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/expand.svg">
+                                                       مشاهده تصویر
+                                                   </button>
+                                               </div>
+                                           </div>
+                                       </template>
+
+                                        <template x-if="!receipt.attachment.url">
+                                            <div class="h-[440px] bg-white rounded-2xl flex flex-col justify-center items-center border border-gray-200 p-3">
+                                                <div class="flex items-center gap-1 text-gray-500 font-semibold">
+                                                    <img class="h-4" src="<?php echo GATELAND_URL . 'assets'; ?>/images/icons/gallery-remove.svg">
+                                                    <span>این رسید تصویری ندارد</span>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>

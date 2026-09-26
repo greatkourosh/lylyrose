@@ -144,9 +144,26 @@ wp_localize_script( 'global-script', 'gateland', [
                                                 <img class="w-full h-full object-cover" src="<?php echo GATELAND_URL . 'assets'; ?>/images/avatar.jpg">
                                             </div>
                                             <div class="text-nowrap">
-                                                <div class="font-medium text-gray-900">
-                                                    <span dir="ltr" x-text="gatelandFormatCardNumber(row.card_number)"></span>
-                                                </div>
+                                                <template x-if="row.card_number && row.iban">
+                                                    <div class="flex gap-1.5 items-center">
+                                                        <div class="font-medium text-gray-900">
+                                                            <span dir="ltr" x-text="'IR' + gatelandFormatIban(row.iban)"></span>
+                                                        </div>
+                                                        <button type="button" class="tooltip-btn" :tooltip-text="'شماره کارت وارد شده:<br>' + gatelandFormatCardNumber(row.card_number)">
+                                                            <span class="inline-block size-1.5 min-w-1.5 bg-[#D98A00] rounded-full"></span>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                                <template x-if="row.card_number && !row.iban">
+                                                    <div class="font-medium text-gray-900">
+                                                        <span dir="ltr" x-text="gatelandFormatCardNumber(row.card_number)"></span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!row.card_number && row.iban">
+                                                    <div class="font-medium text-gray-900">
+                                                        <span dir="ltr" x-text="'IR' + gatelandFormatIban(row.iban)"></span>
+                                                    </div>
+                                                </template>
                                                 <div class="text-gray-600">
                                                     <span x-text="row.name"></span>
                                                 </div>
@@ -303,14 +320,39 @@ wp_localize_script( 'global-script', 'gateland', [
                                     @input="modals.add.data.cardNumber.value = gatelandFormatCardNumber(modals.add.data.cardNumber.value)"
                                     maxlength="19"
                                     minlength="19"
-                                    class="w-full bg-white border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2 px-3"
+                                    class="w-full placeholder:text-right text-left bg-white border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2 px-3"
                                     placeholder="شماره کارت را اینجا وارد کنید"
                                     type="text"
+                                    dir="ltr"
                             >
                         </div>
                         <!--error msg-->
                         <div
                                 x-text="modals.add.data.cardNumber.errorMsg"
+                                class="text-xs text-error-300 pt-1.5 empty:pt-0"
+                        >
+                        </div>
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-sm mb-2">شماره شبا</label>
+                        <div class="flex items-center bg-white border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg">
+                            <input
+                                    x-model="modals.add.data.iban.value"
+                                    @input="modals.add.data.iban.value = gatelandFormatIban(modals.add.data.iban.value)"
+                                    maxlength="30"
+                                    minlength="30"
+                                    class="w-full !border-none !shadow-none placeholder:text-right text-left py-2 pr-3"
+                                    placeholder="شماره شبا را اینجا وارد کنید"
+                                    type="text"
+                                    dir="ltr"
+                            >
+                            <div class="min-w-fit pl-3 pr-2">
+                                IR
+                            </div>
+                        </div>
+                        <!--error msg-->
+                        <div
+                                x-text="modals.add.data.iban.errorMsg"
                                 class="text-xs text-error-300 pt-1.5 empty:pt-0"
                         >
                         </div>
@@ -375,24 +417,58 @@ wp_localize_script( 'global-script', 'gateland', [
                     <div class="font-semibold text-lg mb-1">
                         ویرایش اطلاعات کارت
                     </div>
-                    <div class="text-sm text-gray-600 mb-6">
-                        شما در حال ویرایش اطلاعات کارت
-                        <span dir="ltr" x-text="gatelandFormatCardNumber(modals.edit.card?.card_number)" class="font-semibold"></span>
-                        هستید.
+                    <div class="text-sm text-gray-600 text-justify mb-6">
+	                    برای افزودن کارت یا شبا جدید، از ویرایش کارت های قبلی خودداری کرده و از گزینه
+	                    <span class="font-semibold">«افزودن کارت جدید»</span>
+	                    استفاده کنید. ویرایش کارت های قبلی باعث ایجاد اختلال در گزارشات و رسیدها می‌شود.
                     </div>
 
                     <div class="mb-5">
                         <label class="block text-sm mb-2">شماره کارت</label>
                         <div>
                             <input
-                                    :value="gatelandFormatCardNumber(modals.edit.card?.card_number)"
-                                    class="w-full border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg bg-gray-100 py-2 px-3"
+                                    x-model="modals.edit.data.cardNumber.value"
+                                    @input="modals.edit.data.cardNumber.value = gatelandFormatCardNumber(modals.edit.data.cardNumber.value)"
+                                    maxlength="19"
+                                    minlength="19"
+                                    class="w-full placeholder:text-right text-left bg-white border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg py-2 px-3"
                                     placeholder="شماره کارت را اینجا وارد کنید"
                                     type="text"
-                                    disabled
+                                    dir="ltr"
                             >
                         </div>
+                        <!--error msg-->
+                        <div
+                                x-text="modals.edit.data.cardNumber.errorMsg"
+                                class="text-xs text-error-300 pt-1.5 empty:pt-0"
+                        >
+                        </div>
                     </div>
+                    <div class="mb-5">
+                        <label class="block text-sm mb-2">شماره شبا</label>
+                        <div class="flex items-center bg-white border !border-gray-300 shadow-[0_1px_2px_0_#1018280D] !rounded-lg">
+                            <input
+                                    x-model="modals.edit.data.iban.value"
+                                    @input="modals.edit.data.iban.value = gatelandFormatIban(modals.edit.data.iban.value)"
+                                    maxlength="30"
+                                    minlength="30"
+                                    class="w-full !border-none !shadow-none placeholder:text-right text-left py-2 pr-3"
+                                    placeholder="شماره شبا را اینجا وارد کنید"
+                                    type="text"
+                                    dir="ltr"
+                            >
+                            <div class="min-w-fit pl-3 pr-2">
+                                IR
+                            </div>
+                        </div>
+                        <!--error msg-->
+                        <div
+                                x-text="modals.edit.data.iban.errorMsg"
+                                class="text-xs text-error-300 pt-1.5 empty:pt-0"
+                        >
+                        </div>
+                    </div>
+
                     <div class="mb-10">
                         <label class="block text-sm mb-2">نام و نام خانوادگی صاحب کارت</label>
                         <div>

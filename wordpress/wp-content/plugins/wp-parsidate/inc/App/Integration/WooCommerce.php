@@ -10,16 +10,23 @@ namespace WPParsidate\App\Integration;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WPParsidate\Addons\Addon;
 use WPParsidate\App\Integration\WooCommerce\{WcGateways, WooCommerceCitySelect};
-use WPParsidate\Helper\{Assets, Date, Number};
+use WPParsidate\Helper\{Assets, Date, Debug, Number, NumberConverter, Templates};
+use WPParsidate\Admin\AdminPages;
+use WPParsidate\Core\Names;
 use WPParsidate\Settings\Settings;
 
 class WooCommerce extends Addon {
   public string $addonID = 'woocommerce';
 
   public string $currentTab = 'woocommerce';
+
+  public function __construct() {
+    parent::__construct();
+
+    add_action( 'before_woocommerce_init', [ $this, 'declareCompatibility' ] );
+  }
 
   public function initM1Action(): void {
     add_filter( 'wp_parsidate_' . $this->addonID . '_settings', [ $this, 'addTabSettings' ] );
@@ -36,14 +43,14 @@ class WooCommerce extends Addon {
 
     if ( get_locale() === 'fa_IR' ) {
       if ( $this->getSetting( 'fix_prices', false ) ) {
-        add_filter( 'wc_price', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_get_price_html', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_item_price', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_item_subtotal', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_subtotal', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_totals_coupon_html', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_shipping_method_full_label', [ $this, 'fixNumbersToPersian' ] );
-        add_filter( 'woocommerce_cart_total', [ $this, 'fixNumbersToPersian' ] );
+        add_filter( 'wc_price', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_get_price_html', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_item_price', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_item_subtotal', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_subtotal', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_totals_coupon_html', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_shipping_method_full_label', [ $this, 'fixNumbersToPersian' ], 100 );
+        add_filter( 'woocommerce_cart_total', [ $this, 'fixNumbersToPersian' ], 100 );
       }
 
       if ( Settings::get( 'persian_date', false ) ) {
@@ -51,10 +58,10 @@ class WooCommerce extends Addon {
         add_filter( 'woocommerce_email_styles', [ $this, 'fixEmailTime' ], 9999, 2 );
 
         // Jalali datepicker
-        add_action( 'admin_enqueue_scripts', [ $this, 'adminEnqueueScripts' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'adminEnqueueJalaliScripts' ] );
 
         // Convert order_date using js
-        add_action( 'woocommerce_process_shop_order_meta', [ $this, 'changeOrderDateOnSave' ], 1000 );
+        add_action( 'woocommerce_process_shop_order_meta', [ $this, 'changeOrderDateOnSave' ], 0 );
         add_filter( 'woocommerce_process_product_meta', [ $this, 'validateNonVariableProductDates' ], 1000 );
         add_action( 'woocommerce_ajax_save_product_variations', [ $this, 'validateVariableProductDates' ], 1000 );
         add_action( 'woocommerce_process_shop_coupon_meta', [ $this, 'validateCouponsDate' ], 1000 );
@@ -76,6 +83,8 @@ class WooCommerce extends Addon {
       // WC_Order class, get_address_prop method, Filter: 'woocommerce_order_get_[billing|shipping]_[prop]'
       add_filter( 'woocommerce_order_get_shipping_phone', [ $this, 'fixPersianNumbersInPhone' ], 9999, 2 );
 
+      add_action( 'wp_enqueue_scripts', [ $this, 'checkoutBlockCitySelect' ], 100 );
+
       if ( $this->getSetting( 'validate_postcode', false ) ) {
         add_filter( 'woocommerce_validate_postcode', [ $this, 'validatePostcode' ], 10, 3 );
       }
@@ -84,6 +93,51 @@ class WooCommerce extends Addon {
         add_action( 'woocommerce_after_checkout_validation', [ $this, 'validatePhoneNumber' ], 10, 2 );
         add_filter( 'woocommerce_validate_phone', [ $this, 'validatePhone' ], 10, 3 );
       }
+
+      if ( $this->getSetting( 'fix_email_content_numbers', false ) ) {
+        add_filter( 'woocommerce_mail_content', [ $this, 'convertEmailContentNumbers' ] );
+      }
+
+      add_filter( 'wp_parsidate_wp_admin_notice', [ $this, 'adminNotice' ] );
+      add_action( 'admin_enqueue_scripts', [ $this, 'adminEnqueueScripts' ] );
+    }
+  }
+
+  /**
+   * Notice for the WooCommerce Analytics Jalali date.
+   *
+   * @param array $notices Notice array list
+   *
+   * @return array Notice array list
+   */
+  public function adminNotice( array $notices ): array {
+    $notices[] = array(
+      'id'          => 'wc_analytics_shamsi_date',
+      'message'     => sprintf(
+        __( 'If you want the date for this section to be Shamsi, enable it in the settings. <a href="%s">Go to configuration page</a>', 'wp-parsidate' ),
+        esc_url_raw( AdminPages::link( [ 'tab' => $this->addonID ] ) )
+      ),
+      'type'        => 'info',
+      'dismissible' => true,
+      'page'        => 'wc-admin'
+    );
+
+    return $notices;
+  }
+
+  public function convertEmailContentNumbers( $message ): string {
+    return NumberConverter::convertContent( $message );
+  }
+
+  /**
+   * Declare WooCommerce feature compatibility
+   *
+   * @return void
+   */
+  public function declareCompatibility() {
+    if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+      \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', WP_PARSI_ROOT, true );
+      \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_instance_caching', WP_PARSI_ROOT, true );
     }
   }
 
@@ -91,15 +145,78 @@ class WooCommerce extends Addon {
    * Init Before WooCommerce Loaded
    */
   public function beforeWooCommerceInit(): void {
-    // Include City Translate
-    if ( $this->getSetting( 'dropdown_cities', false ) ) {
+    // WooCommerce checkout city select in classic form
+    if ( $this->getSetting( 'dropdown_cities', false ) && ! \WPParsidate\Helper\WooCommerce::hasBlockInPage( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' ) ) {
       new WooCommerceCitySelect();
     }
+  }
 
-    if ( class_exists( FeaturesUtil::class ) ) {
-      FeaturesUtil::declare_compatibility( 'custom_order_tables', WP_PARSI_ROOT, true );
-      FeaturesUtil::declare_compatibility( 'product_instance_caching', WP_PARSI_ROOT, true );
+  public function checkoutBlockCitySelect() {
+    global $cities;
+
+    if ( is_admin() || ! function_exists( 'is_checkout' ) || ! $this->getSetting( 'dropdown_cities', false ) ) {
+      return;
     }
+
+    if ( ! is_checkout() && ! is_cart() ) {
+      return;
+    }
+
+    // Only when the page actually uses the block version.
+    if ( ! \WPParsidate\Helper\WooCommerce::hasBlockInPage( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' ) ) {
+      return;
+    }
+
+    if ( empty( $cities['IR'] ) ) {
+      $base  = plugin_dir_path( WP_PARSI_DIR );
+      $files = array(
+        'wp-parsidate/inc/App/Integration/WooCommerce/wc-cities/cities/IR.php', // wp-parsidate 6.x
+        'wc-city-select/cities/IR.php',           // older layouts, just in case
+      );
+
+      foreach ( $files as $rel ) {
+        $path = Templates::pathCorrection( $base . $rel );
+        if ( file_exists( $path ) ) {
+          require_once( $path );
+          break;
+        }
+      }
+    }
+
+    if ( empty( $cities['IR'] ) || ! is_array( $cities['IR'] ) ) {
+      return; // Iran cities not available
+    }
+
+    $all = apply_filters( 'wp_parsidate_wc_checkout_city_select_cities', $cities );
+    $ir  = ( isset( $all['IR'] ) && is_array( $all['IR'] ) ) ? $all['IR'] : array();
+
+    if ( empty( $ir ) ) {
+      return;
+    }
+
+    $pluginVersion = Assets::getVersion();
+    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
+
+    $payload = array(
+      'cities' => $ir,
+      'i18n'   => array(
+        'select' => esc_html__( 'Select your city', 'wp-parsidate' ),
+        'first'  => esc_html__( 'Select a province first', 'wp-parsidate' ),
+      ),
+    );
+
+    $css = '.wppd-wc-city-select{box-sizing: border-box;flex: 1 0 calc(50% - 12px);}
+.wppd-wc-city-select select,.wppd-wc-city-select .wc-block-components-select__select { width: 100%; }
+.wppd-wc-city-select.has-error select,.wppd-wc-city-select.has-error .wc-block-components-select__select { border-color: #cc1818; }
+.wppd-wc-city-select select:disabled { opacity: .6; }';
+
+    wp_register_script( WP_PARSI_KEY . '_wc_checkout_city_select', Assets::url( "js/woocommerce-checkout-block-city$debugName.js" ), [ 'wp-data' ], $pluginVersion, true );
+    wp_enqueue_script( WP_PARSI_KEY . '_wc_checkout_city_select' );
+    wp_localize_script( WP_PARSI_KEY . '_wc_checkout_city_select', 'WpPdWcBlockCityData', $payload );
+
+    wp_register_style( WP_PARSI_KEY . '_wc_checkout_city_select', false, [], $pluginVersion );
+    wp_enqueue_style( WP_PARSI_KEY . '_wc_checkout_city_select' );
+    wp_add_inline_style( WP_PARSI_KEY . '_wc_checkout_city_select', $css );
   }
 
   /**
@@ -184,12 +301,16 @@ class WooCommerce extends Addon {
     );
 
     /**
-     * here we pass those fields we want to convert from arabic to persian
+     * here we pass those fields we want to convert from Persian to English
      * other developers can hook into this filter and add their fields too
      *
      * @var array $persian_fields
      */
     $supported_persian_fields = apply_filters( "wpp_woocommerce_checkout_persian_fields", $persian_fields );
+
+    if ( ! is_array( $supported_persian_fields ) ) {
+      $supported_persian_fields = $persian_fields;
+    }
 
     foreach ( $supported_persian_fields as $field ) {
       if ( isset( $data[ $field ] ) ) {
@@ -197,7 +318,9 @@ class WooCommerce extends Addon {
       }
     }
 
-    return apply_filters( "wpp_woocommerce_checkout_modified_persian_fields", $data );
+    $modified_data = apply_filters( "wpp_woocommerce_checkout_modified_persian_fields", $data );
+
+    return is_array( $modified_data ) ? $modified_data : $data;
   }
 
   /**
@@ -279,7 +402,7 @@ class WooCommerce extends Addon {
   }
 
   /**
-   * Fix non-persian digits in checkout phone field
+   * Fix non-persian numbers in checkout phone field
    *
    * @param string $phone The address property value.
    * @param \WC_Order $order The order object being read.
@@ -343,7 +466,7 @@ class WooCommerce extends Addon {
         }
       }
 
-      wp_add_inline_script( 'wpp_jalali_datepicker', 'jQuery("input[name=order_date]").val("' . $jalali_date . '")' );
+      wp_add_inline_script( WP_PARSI_KEY . '_datepicker', 'jQuery("input[name=order_date]").val("' . $jalali_date . '")' );
 
     } elseif ( 'legacy_report' === $current_screen ) {
       $startDate = sanitize_text_field( wp_unslash( $_GET['start_date'] ?? '' ) );
@@ -354,7 +477,7 @@ class WooCommerce extends Addon {
       $jalali_end_date   = ! empty( $endDate ) ? parsidate( 'Y-m-d',
         date( 'Y-m-d', strtotime( $endDate ) ), 'eng' ) : '';
 
-      wp_add_inline_script( 'wpp_jalali_datepicker', 'jQuery("input[name=start_date]").val("' . $jalali_start_date . '");jQuery("input[name=end_date]").val("' . $jalali_end_date . '");' );
+      wp_add_inline_script( WP_PARSI_KEY . '_datepicker', 'jQuery("input[name=start_date]").val("' . $jalali_start_date . '");jQuery("input[name=end_date]").val("' . $jalali_end_date . '");' );
 
     } elseif ( 'product' === $current_screen ) {
       global $post;
@@ -376,7 +499,7 @@ class WooCommerce extends Addon {
         $sale_price_dates_from = $sale_price_dates_from_timestamp ? Number::toEnglish( date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) ) : '';
         $sale_price_dates_to   = $sale_price_dates_to_timestamp ? Number::toEnglish( date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) ) : '';
 
-        wp_add_inline_script( 'wpp_jalali_datepicker', 'jQuery("#_sale_price_dates_from").val("' . $sale_price_dates_from . '");jQuery("#_sale_price_dates_to").val("' . $sale_price_dates_to . '");' );
+        wp_add_inline_script( WP_PARSI_KEY . '_datepicker', 'jQuery("#_sale_price_dates_from").val("' . $sale_price_dates_from . '");jQuery("#_sale_price_dates_to").val("' . $sale_price_dates_to . '");' );
 
       } else {
         $dates                = array();
@@ -401,7 +524,7 @@ class WooCommerce extends Addon {
         }
 
         if ( ! empty( $dates ) ) {
-          wp_add_inline_script( 'wpp_jalali_datepicker',
+          wp_add_inline_script( WP_PARSI_KEY . '_datepicker',
             'const wppVariationsDates = ' . wp_json_encode( $dates ) . '
 						    jQuery("#woocommerce-product-data").on("woocommerce_variations_loaded", function(e) {
 							  wppVariationsDates.forEach((date, index) => {
@@ -607,9 +730,9 @@ class WooCommerce extends Addon {
    * @since 5.0.2
    */
   public function changeOrderDateOnSave( $order_id ): void {
-    $order_date = wc_get_post_data_by_key( 'order_date' );
+    $orderDate = Number::toEnglish( wc_get_post_data_by_key( 'order_date' ) );
 
-    if ( empty( $order_date ) ) {
+    if ( empty( $orderDate ) ) {
       return;
     }
 
@@ -619,15 +742,34 @@ class WooCommerce extends Addon {
       return;
     }
 
-    $hour       = str_pad( (int) wc_get_post_data_by_key( 'order_date_hour' ), 2, '0', STR_PAD_LEFT );
-    $minute     = str_pad( (int) wc_get_post_data_by_key( 'order_date_minute' ), 2, '0', STR_PAD_LEFT );
-    $second     = str_pad( (int) wc_get_post_data_by_key( 'order_date_second' ), 2, '0', STR_PAD_LEFT );
-    $time_stamp = "$order_date $hour:$minute:$second";
-    $fixed_date = gregdate( 'Y-m-d H:i:s', $time_stamp );
-    $date       = gmdate( 'Y-m-d H:i:s', strtotime( $fixed_date ) );
+    $orderDateHour      = (int) Number::toEnglish( wc_get_post_data_by_key( 'order_date_hour' ) );
+    $orderDateMinute    = (int) Number::toEnglish( wc_get_post_data_by_key( 'order_date_minute' ) );
+    $orderDateSecond    = (int) Number::toEnglish( wc_get_post_data_by_key( 'order_date_second' ) );
+    $hour               = str_pad( $orderDateHour, 2, '0', STR_PAD_LEFT );
+    $minute             = str_pad( $orderDateMinute, 2, '0', STR_PAD_LEFT );
+    $second             = str_pad( $orderDateSecond, 2, '0', STR_PAD_LEFT );
+    $orderDateTime      = "$orderDate $hour:$minute:$second";
+    $fixedDateTimestamp = gregdate( 'U', $orderDateTime );
+    $date               = gmdate( 'Y-m-d H:i:s', $fixedDateTimestamp );
+
+    // Fix POST data
+    $_POST['order_date']        = date( 'Y-m-d', $fixedDateTimestamp );
+    $_POST['order_date_hour']   = $orderDateHour;
+    $_POST['order_date_minute'] = $orderDateMinute;
+    $_POST['order_date_second'] = $orderDateSecond;
 
     $order->set_date_created( $date );
     $order->save();
+
+    // Fix download expire date
+    $accessExpires = $_POST['access_expires'];
+    if ( ! empty( $accessExpires ) && is_array( $accessExpires ) ) {
+      foreach ( $accessExpires as $i => $expire ) {
+        $accessExpires[ $i ] = ! empty( $expire ) ? gregdate( 'Y-m-d', $expire ) : '';
+      }
+
+      $_POST['access_expires'] = $accessExpires;
+    }
   }
 
   /**
@@ -635,13 +777,13 @@ class WooCommerce extends Addon {
    *
    * @since           4.0.0
    */
-  public function adminEnqueueScripts(): void {
-    $screen         = get_current_screen();
-    $current_screen = is_null( $screen ) ? false : $screen->id;
-    $pluginVersion  = Assets::getVersion();
-    $debugName      = WP_PARSI_DEBUG_MODE ? '' : '.min';
+  public function adminEnqueueJalaliScripts(): void {
+    $screen        = get_current_screen();
+    $currentScreen = is_null( $screen ) ? false : $screen->id;
+    $pluginVersion = Assets::getVersion();
+    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
 
-    $allowed_screens = array(
+    $allowedScreens = array(
       'product',
       'shop_order',
       'woocommerce_page_wc-orders',
@@ -649,12 +791,43 @@ class WooCommerce extends Addon {
       'shop_coupon',
     );
 
-    if ( in_array( $current_screen, $allowed_screens, true ) && Settings::get( 'persian_date' ) ) {
-      wp_enqueue_script( 'wpp_jalali_datepicker', Assets::url( 'js-admin/jalalidatepicker.min.js' ), array( 'jquery-ui-datepicker' ), $pluginVersion, [ 'in_footer' => true ] );
-      wp_enqueue_style( 'wpp_jalali_datepicker', Assets::url( "css-admin/jalalidatepicker$debugName.css" ), null, $pluginVersion );
-
-      do_action( 'wpp_jalali_datepicker_enqueued', 'wc' );
+    if ( in_array( $currentScreen, $allowedScreens, true ) && Settings::get( 'persian_date' ) ) {
+      do_action( 'wp_parsidate_jalali_datepicker_enqueue', 'wc' );
     }
+
+    if ( $currentScreen === 'woocommerce_page_wc-admin' && $this->getSetting( 'analytics_shamsi_date', false ) ) {
+      wp_enqueue_script( WP_PARSI_KEY . '_jalali_date', Assets::url( "js-admin/jalali-date$debugName.js" ), [], $pluginVersion, true );
+
+      wp_enqueue_script( WP_PARSI_KEY . '_woocommerce_analytics', Assets::url( "js-admin/woocommerce-analytics$debugName.js" ), [ WP_PARSI_KEY . '_jalali_date' ], $pluginVersion, true );
+
+      $monthNames = Names::getMonths();
+      array_shift( $monthNames ); // Remove first item (null string) from name of
+      $settings = array(
+        // Logs progress to the browser console (lines start with [WCASD]).
+        // Set false in production.
+        'debug'            => Debug::plugin(),
+        'usePersianDigits' => true,
+        // Master switch for the Jalali calendar overlay.
+        'enableOverlay'    => true,
+        // Format WooCommerce uses in its two range inputs. Your site shows
+        // 07/01/2026 -> month/day/year -> 'MDY'. Options: 'MDY','DMY','YMD'.
+        'inputDateOrder'   => 'MDY',
+        // If the start/end range comes out reversed, flip this to true.
+        'swapInputs'       => false,
+        'monthNames'       => $monthNames,
+        // Weekday headers, Saturday-first (Solar week starts on Saturday).
+        'weekdayShort'     => array( 'ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج' ),
+      );
+      wp_localize_script( WP_PARSI_KEY . '_woocommerce_analytics', 'WpPdWcAn_SETTINGS', $settings );
+    }
+  }
+
+  public function adminEnqueueScripts(): void {
+    $pluginVersion = Assets::getVersion();
+    $debugName     = WP_PARSI_DEBUG_MODE ? '' : '.min';
+
+    wp_enqueue_script( WP_PARSI_KEY_SLUG . '-woocommerce-admin', Assets::url( "js-admin/woocommerce$debugName.js" ), [], $pluginVersion, [ 'in_footer' => true ] );
+    wp_enqueue_style( WP_PARSI_KEY_SLUG . '-woocommerce-admin', Assets::url( "css-admin/woocommerce$debugName.css" ), null, $pluginVersion );
   }
 
   /**
@@ -771,21 +944,23 @@ class WooCommerce extends Addon {
       'desc'         => esc_html__( 'ParsiDate integration for WooCommerce', 'wp-parsidate' ),
       'settings_key' => $this->addonID,
       'settings'     => [
-        'woo_product_start_grid'  => array(
+        'woo_product_start_grid' => array(
           'id'    => 'woo_product_start_grid',
           'title' => esc_html__( 'Products', 'wp-parsidate' ),
           'type'  => 'startGrid',
         ),
-        'fix_prices'              => array(
+        'fix_prices'             => array(
           'id'       => 'fix_prices',
           'title'    => esc_html__( 'Fix prices', 'wp-parsidate' ),
+          'desc'     => esc_html__( 'Convert English numbers to Farsi', 'wp-parsidate' ),
           'type'     => 'toggle',
           'default'  => false,
           'sanitize' => 'bool'
         ),
-        'woo_product_end_grid'    => array(
+        'woo_product_end_grid'   => array(
           'type' => 'endGrid',
         ),
+
         'woo_checkout_start_grid' => array(
           'id'    => 'woo_checkout_start_grid',
           'title' => esc_html__( 'Checkout page', 'wp-parsidate' ),
@@ -793,14 +968,16 @@ class WooCommerce extends Addon {
         ),
         'fix_persian_postcode'    => array(
           'id'       => 'fix_persian_postcode',
-          'title'    => esc_html__( 'Fix persian postcode', 'wp-parsidate' ),
+          'title'    => esc_html__( 'Fix Persian postcode', 'wp-parsidate' ),
+          'desc'     => esc_html__( 'Convert Farsi numbers to English', 'wp-parsidate' ),
           'type'     => 'toggle',
           'default'  => false,
           'sanitize' => 'bool'
         ),
         'fix_persian_phone'       => array(
           'id'       => 'fix_persian_phone',
-          'title'    => esc_html__( 'Fix persian phone', 'wp-parsidate' ),
+          'title'    => esc_html__( 'Fix Persian phone', 'wp-parsidate' ),
+          'desc'     => esc_html__( 'Convert Farsi numbers to English', 'wp-parsidate' ),
           'type'     => 'toggle',
           'default'  => false,
           'sanitize' => 'bool'
@@ -828,7 +1005,41 @@ class WooCommerce extends Addon {
         ),
         'woo_checkout_end_grid'   => array(
           'type' => 'endGrid',
-        )
+        ),
+
+        'woo_analytics_start_grid' => array(
+          'id'    => 'woo_product_start_grid',
+          'title' => esc_html__( 'Analytics', 'wp-parsidate' ),
+          'type'  => 'startGrid',
+        ),
+        'analytics_shamsi_date'    => array(
+          'id'       => 'analytics_shamsi_date',
+          'title'    => esc_html__( 'Display Shamsi date in analytics', 'wp-parsidate' ),
+          'desc'     => esc_html__( 'Convert date to Shamsi date in WooCommerce analytics reports', 'wp-parsidate' ),
+          'type'     => 'toggle',
+          'default'  => false,
+          'sanitize' => 'bool'
+        ),
+        'woo_analytics_end_grid'   => array(
+          'type' => 'endGrid',
+        ),
+
+        'woo_email_start_grid'      => array(
+          'id'    => 'woo_product_start_grid',
+          'title' => esc_html__( 'Email', 'wp-parsidate' ),
+          'type'  => 'startGrid',
+        ),
+        'fix_email_content_numbers' => array(
+          'id'       => 'fix_email_content_numbers',
+          'title'    => esc_html__( 'Convert numbers in email content', 'wp-parsidate' ),
+          'desc'     => esc_html__( 'Convert English numbers to Farsi', 'wp-parsidate' ),
+          'type'     => 'toggle',
+          'default'  => false,
+          'sanitize' => 'bool'
+        ),
+        'woo_email_end_grid'        => array(
+          'type' => 'endGrid',
+        ),
       ]
     );
 

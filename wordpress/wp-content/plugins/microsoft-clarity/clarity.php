@@ -4,7 +4,7 @@
  * Plugin Name:       Microsoft Clarity
  * Plugin URI:        https://clarity.microsoft.com/
  * Description:       With data and session replay from Clarity, you'll see how people are using your site — where they get stuck and what they love.
- * Version:           0.10.30
+ * Version:           0.10.33
  * Author:            Microsoft
  * Author URI:        https://www.microsoft.com/en-us/
  * License:           MIT
@@ -100,8 +100,8 @@ function clarity_on_activation($network_wide)
 	flush_rewrite_rules();
 
 	// Notify the BA server that the plugin was installed and trigger upsell product ingest
-	// (fire-and-forget, non-blocking). On multisite network activation, notify once per site
-	// so backend state is consistent for each subsite's home_url().
+	// (fire-and-forget, non-blocking). On multisite network activation, notify once per site using
+	// its persisted connection identity (or canonical home_url() on first activation).
 	$clarity_server_url = BrandAgent_Config::get_clarity_server_url();
 	if ( ! empty( $clarity_server_url ) ) {
 		// WooCommerce activation is per-site on multisite, so the check has to happen inside the
@@ -114,14 +114,14 @@ function clarity_on_activation($network_wide)
 			foreach ( get_sites() as $site ) {
 				switch_to_blog( (int) $site->blog_id );
 				$store_urls[] = array(
-					'url'     => home_url(),
+					'url'     => brandagent_get_connected_store_url(),
 					'has_woo' => clarity_is_woocommerce_active_for_current_blog(),
 				);
 				restore_current_blog();
 			}
 		} else {
 			$store_urls[] = array(
-				'url'     => home_url(),
+				'url'     => brandagent_get_connected_store_url(),
 				'has_woo' => clarity_is_woocommerce_active_for_current_blog(),
 			);
 		}
@@ -646,6 +646,92 @@ function brandagent_register_query_vars( $vars ) {
 add_filter( 'query_vars', 'brandagent_register_query_vars' );
 
 /**
+ * Allow Yoast SEO to preserve query parameters on Brand Agent API requests.
+ *
+ * Yoast's advanced permalink cleanup redirects requests that contain query
+ * parameters it does not recognize. Brand Agent owns this API namespace, and
+ * its endpoint handlers retain their existing authentication and validation,
+ * so preserve the parameters only after WordPress has matched the request to
+ * that namespace.
+ *
+ * @param array $vars Query parameter names that Yoast should preserve.
+ * @return array Updated query parameter allowlist.
+ */
+function brandagent_allowlist_yoast_permalink_vars( $vars ) {
+    $brandagent_path            = get_query_var( 'brandagent_path' );
+    $is_brandagent_api_request = brandagent_is_api_request_path()
+        && intval( get_query_var( 'brandagent_api' ) ) === 1
+        && is_string( $brandagent_path )
+        && strpos( ltrim( $brandagent_path, '/' ), 'api/' ) === 0;
+
+    if ( ! $is_brandagent_api_request ) {
+        return $vars;
+    }
+
+    $allowlisted_query_vars = array();
+    foreach ( $vars as $query_var ) {
+        $allowlisted_query_vars[ (string) $query_var ] = true;
+    }
+
+    $request_query_vars = isset( $_GET ) && is_array( $_GET ) ? array_keys( $_GET ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only names are preserved; endpoint handlers retain validation.
+    foreach ( $request_query_vars as $query_var ) {
+        $query_var = (string) $query_var;
+        if ( ! isset( $allowlisted_query_vars[ $query_var ] ) ) {
+            $vars[] = $query_var;
+            $allowlisted_query_vars[ $query_var ] = true;
+        }
+    }
+
+    return $vars;
+}
+
+/**
+ * Determine whether the current URL path is in the Brand Agent API namespace.
+ *
+ * The home path and optional index.php front controller are removed before the
+ * namespace check so subdirectory and non-pretty-permalink installations work
+ * without accepting the same path when it is embedded in an unrelated URL.
+ *
+ * @return bool True for a Brand Agent API path.
+ */
+function brandagent_is_api_request_path() {
+    if ( ! isset( $_SERVER['REQUEST_URI'] ) || ! is_string( $_SERVER['REQUEST_URI'] ) ) {
+        return false;
+    }
+
+    $request_uri  = wp_unslash( $_SERVER['REQUEST_URI'] );
+    $request_path = function_exists( 'wp_parse_url' )
+        ? wp_parse_url( $request_uri, PHP_URL_PATH )
+        : parse_url( $request_uri, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Required for the declared WordPress 4.0 minimum.
+    if ( ! is_string( $request_path ) ) {
+        return false;
+    }
+
+    $site_home_url = home_url( '/' );
+    $home_path     = function_exists( 'wp_parse_url' )
+        ? wp_parse_url( $site_home_url, PHP_URL_PATH )
+        : parse_url( $site_home_url, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Required for the declared WordPress 4.0 minimum.
+    $home_path = is_string( $home_path ) ? '/' . trim( $home_path, '/' ) : '';
+    if ( '/' === $home_path ) {
+        $home_path = '';
+    }
+
+    if ( '' !== $home_path ) {
+        if ( strpos( $request_path, $home_path . '/' ) !== 0 ) {
+            return false;
+        }
+        $request_path = substr( $request_path, strlen( $home_path ) );
+    }
+
+    if ( strpos( $request_path, '/index.php/' ) === 0 ) {
+        $request_path = substr( $request_path, strlen( '/index.php' ) );
+    }
+
+    return strpos( $request_path, '/a/msba/api/' ) === 0;
+}
+add_filter( 'Yoast\WP\SEO\allowlist_permalink_vars', 'brandagent_allowlist_yoast_permalink_vars' );
+
+/**
  * Handle Brand Agent custom endpoint requests
  */
 function brandagent_handle_custom_endpoint() {
@@ -727,7 +813,7 @@ function handle_brandagent_uninstall() {
 		return;
 	}
 
-	$site_url = home_url();
+	$site_url = brandagent_get_connected_store_url();
 
 	// HMAC-signed request through Clarity proxy
 	$clarity_domain = BrandAgent_Config::get_clarity_server_url();

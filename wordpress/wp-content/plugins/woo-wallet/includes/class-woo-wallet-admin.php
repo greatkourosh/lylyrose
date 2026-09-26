@@ -5,6 +5,7 @@
  * @package StandaleneTech
  */
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -284,7 +285,7 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 		 * Admin init
 		 */
 		public function admin_init() {
-			if ( version_compare( WC_VERSION, '3.4', '<' ) ) {
+			if ( version_compare( Constants::get_constant( 'WC_VERSION' ), '3.4', '<' ) ) {
 				add_filter( 'woocommerce_account_settings', array( $this, 'add_woocommerce_account_endpoint_settings' ) );
 			}
 			$this->download_export_file();
@@ -746,7 +747,7 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 			?>
 			<div class="wrap">
 				<?php settings_errors(); ?>
-				<h2><?php /* translators: user display name and email */ printf( __( 'Adjust Balance: %1$s (%2$s)', 'woo-wallet' ), $user->display_name, $user->user_email ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <a style="text-decoration: none;" href="<?php echo add_query_arg( array( 'page' => 'woo-wallet-users' ), admin_url( 'admin.php' ) ); ?>"><span class="dashicons dashicons-editor-break" style="vertical-align: middle;"></span></a></h2>
+				<h2><?php /* translators: user display name and email */ printf( esc_html__( 'Adjust Balance: %1$s (%2$s)', 'woo-wallet' ), esc_html( $user->display_name ), esc_html( $user->user_email ) ); ?> <a style="text-decoration: none;" href="<?php echo esc_url( add_query_arg( array( 'page' => 'woo-wallet-users' ), admin_url( 'admin.php' ) ) ); ?>"><span class="dashicons dashicons-editor-break" style="vertical-align: middle;"></span></a></h2>
 				<p>
 					<?php
 					esc_html_e( 'Current wallet balance: ', 'woo-wallet' );
@@ -757,7 +758,7 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 					<table class="form-table">
 						<tbody>
 							<tr>
-								<th scope="row"><label for="balance_amount"><?php esc_html_e( 'Amount', 'woo-wallet' ) . ' ( ' . get_woocommerce_currency_symbol( $currency ) . ' )'; ?></label></th>
+								<th scope="row"><label for="balance_amount"><?php echo esc_html__( 'Amount', 'woo-wallet' ) . ' ( ' . wp_kses_post( get_woocommerce_currency_symbol( $currency ) ) . ' )'; ?></label></th>
 								<td>
 									<input type="number" step="any" name="balance_amount" class="regular-text" />
 									<p class="description"><?php esc_html_e( 'Enter Amount', 'woo-wallet' ); ?></p>
@@ -1099,7 +1100,10 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 		 * @param type $order_id order_id.
 		 */
 		public function add_wallet_payment_amount( $order_id ) {
-			$order                 = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
+			if ( ! $order ) {
+				return;
+			}
 			$total_cashback_amount = get_total_order_cashback_amount( $order_id );
 			if ( $total_cashback_amount ) {
 				?>
@@ -1337,6 +1341,9 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 			}
 			$order_id = wc_get_order_id_by_order_item_id( $item_id );
 			$order    = wc_get_order( $order_id );
+			if ( ! $order ) {
+				return;
+			}
 			if ( $order->get_meta( '_woo_wallet_partial_payment_refunded' ) ) {
 				echo '<small class="refunded">' . esc_html__( 'Refunded', 'woo-wallet' ) . '</small>';
 			} else {
@@ -1611,22 +1618,22 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 			</aside>
 			<style>
 				.tw-promo {
-					--tw-promo-ink: #16191d;
-					--tw-promo-inset: #1e2329;
-					--tw-promo-line: rgba(255, 255, 255, 0.10);
-					--tw-promo-text: #f0f0f1;
-					--tw-promo-muted: #a7aaad;
-					--tw-promo-accent: #b183e0;
-					--tw-promo-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+					--tw-promo-ink: #1c2230;
+					--tw-promo-inset: #171d29;
+					--tw-promo-line: #2e3648;
+					--tw-promo-text: #e9eaf0;
+					--tw-promo-muted: #98a0b3;
+					--tw-promo-accent: #a78bfa;
 
 					display: grid;
 					grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.1fr) minmax(0, 0.5fr);
 					gap: 0;
 					margin: 16px 0 24px;
 					border: 1px solid var(--tw-promo-line);
-					border-radius: 6px;
+					border-radius: 8px;
 					background: var(--tw-promo-ink);
 					color: var(--tw-promo-text);
+					box-shadow: 0 1px 2px rgba(16, 20, 32, 0.12);
 					box-sizing: border-box;
 					overflow: hidden;
 				}
@@ -1644,10 +1651,9 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 
 				.tw-promo__eyebrow {
 					margin: 0 0 18px;
-					font-family: var(--tw-promo-mono);
 					font-size: 11px;
-					font-weight: 600;
-					letter-spacing: 0.14em;
+					font-weight: 700;
+					letter-spacing: 0.10em;
 					text-transform: uppercase;
 					color: var(--tw-promo-accent);
 				}
@@ -1664,7 +1670,6 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 				}
 				.tw-promo__figure {
 					display: block;
-					font-family: var(--tw-promo-mono);
 					font-size: 34px;
 					font-weight: 600;
 					line-height: 1.1;
@@ -1676,7 +1681,6 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 				.tw-promo__caption {
 					display: block;
 					margin-top: 7px;
-					font-family: var(--tw-promo-mono);
 					font-size: 11px;
 					letter-spacing: 0.05em;
 					text-transform: uppercase;
@@ -1756,11 +1760,11 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 					flex-wrap: wrap;
 				}
 				.tw-promo__amount {
-					font-family: var(--tw-promo-mono);
 					font-size: 26px;
 					font-weight: 600;
 					letter-spacing: -0.02em;
 					font-variant-numeric: tabular-nums;
+					font-feature-settings: "tnum" 1;
 					color: var(--tw-promo-text);
 				}
 				.tw-promo__term {
@@ -1771,16 +1775,16 @@ if ( ! class_exists( 'Woo_Wallet_Admin' ) ) {
 					display: inline-block;
 					padding: 9px 18px;
 					border-radius: 3px;
-					background: #7f54b3;
+					background: #6d47e8;
 					color: #fff !important;
 					font-size: 13px;
 					font-weight: 600;
 					text-decoration: none;
 					transition: background 0.15s ease;
 				}
-				.tw-promo__btn:hover { background: #6b449b; color: #fff !important; }
+				.tw-promo__btn:hover { background: #5c37d6; color: #fff !important; }
 				.tw-promo__btn:focus {
-					background: #6b449b;
+					background: #5c37d6;
 					color: #fff !important;
 					outline: 2px solid var(--tw-promo-accent);
 					outline-offset: 2px;

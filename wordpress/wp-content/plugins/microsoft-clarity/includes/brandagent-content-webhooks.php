@@ -174,7 +174,7 @@ function brandagent_dispatch_content_webhook( $event, $body ) {
  * @return array [ 0 => absolute URL string, 1 => headers array ].
  */
 function brandagent_build_content_webhook_request( $event, $body, $backend ) {
-	$store_url      = home_url();
+	$store_url      = brandagent_get_connected_store_url();
 	$path_and_query = BRANDAGENT_CONTENT_WEBHOOK_BASE_URL . 'content/' . rawurlencode( $event )
 		. '?store_url=' . rawurlencode( $store_url );
 

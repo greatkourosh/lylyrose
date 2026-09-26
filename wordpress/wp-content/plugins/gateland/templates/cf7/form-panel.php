@@ -89,29 +89,3 @@ defined( 'ABSPATH' ) || exit;
 	</p>
 
 </fieldset>
-
-<script>
-    jQuery(document).ready(function ($) {
-
-        $('#gateland_price_tag').on('change', function (e) {
-            if (this.value === '___') {
-                $('#gateland_price').parents('p').show();
-            } else {
-                $('#gateland_price').parents('p').hide();
-            }
-        });
-
-    });
-</script>
-
-<style>
-
-
-    #gateland_form, #gateland_form h2, #contact-form-editor-tabs a {
-        font-family: IRANYekanX, Vazirmatn, Sahel, serif !important;
-    }
-
-    #gateland_form input[type=number], #gateland_form select {
-        min-width: 50%;
-    }
-</style>

@@ -25,8 +25,6 @@ class PayPingGateway extends BaseGateway implements \Nabik\Gateland\Gateways\Fea
 			'transaction' => $transaction->toArray(),
 		] );
 
-		$this->checkAmount( $transaction, 1000, 200000000 );
-
 		$parameters = [
 			'amount'      => intval( $transaction->amount ),
 			'description' => $transaction->description,

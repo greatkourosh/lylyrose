@@ -100,8 +100,6 @@ class Pay {
 			return self::response( false, 'تراکنش ایجاد نشد، مجددا تلاش کنید.' );
 		}
 
-		do_action( 'nabik/gateland/transaction_created', $transaction );
-
 		return self::response( true, null, [
 			'authority'    => $transaction->id,
 			'payment_link' => $transaction->getPrettyPayURL(),

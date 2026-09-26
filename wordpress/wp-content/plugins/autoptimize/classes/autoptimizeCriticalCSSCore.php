@@ -100,7 +100,7 @@ class autoptimizeCriticalCSSCore {
                     // explicit match OR partial match if MANUAL rule.
                     if ( ( $this->criticalcss->is_api_active() || $this->criticalcss->is_rule_manual( $rule ) ) && ( $req_path == $path || urldecode( $req_path ) == $path || ( apply_filters( 'autoptimize_filter_ccss_core_path_partial_match', true ) && false == $rule['hash'] && false != $rule['file'] && strpos( $req_path, str_replace( site_url(), '', $path ) ) !== false ) ) ) {
                         if ( file_exists( AO_CCSS_DIR . $rule['file'] ) ) {
-                            $_ccss_contents = file_get_contents( AO_CCSS_DIR . $rule['file'] );
+                            $_ccss_contents = $this->ao_ccss_file_get_contents( AO_CCSS_DIR . $rule['file'] );
                             if ( 'none' != $_ccss_contents ) {
                                 if ( $debug ) {
                                     $_ccss_contents = '/* PATH: ' . $path . ' hash: ' . $rule['hash'] . ' file: ' . $rule['file'] . ' */ ' . $_ccss_contents;
@@ -125,7 +125,7 @@ class autoptimizeCriticalCSSCore {
 
                 foreach ( $rules['types'] as $type => $rule ) {
                     if ( ( $this->criticalcss->is_api_active() || $this->criticalcss->is_rule_manual( $rule ) ) && in_array( $type, $this->_types ) && file_exists( AO_CCSS_DIR . $rule['file'] ) ) {
-                        $_ccss_contents = file_get_contents( AO_CCSS_DIR . $rule['file'] );
+                        $_ccss_contents = $this->ao_ccss_file_get_contents( AO_CCSS_DIR . $rule['file'] );
                         if ( $is_front_page && 'is_front_page' == $type ) {
                             if ( 'none' != $_ccss_contents ) {
                                 if ( $debug ) {
@@ -595,9 +595,10 @@ class autoptimizeCriticalCSSCore {
 
     public function ao_ccss_check_contents( $ccss ) {
         // Perform basic exploit avoidance and CSS validation.
+        // todo; use autoptimizeStyles::check_css which is way stricter? or could that break things??
         if ( ! empty( $ccss ) ) {
             // Try to avoid code injection.
-            $blocklist = array( '#!/', 'function(', '<script', '<?php', '</style', ' onload=', ' onerror=', ' onmouse', ' onscroll=', ' onclick=' );
+            $blocklist = array( '#!/', 'function(', '<script', '<?php', '<?=', '</style', 'onload=', 'onerror=', ' onmouse', 'onscroll=', 'onclick=' );
             foreach ( $blocklist as $blocklisted ) {
                 if ( stripos( $ccss, $blocklisted ) !== false ) {
                     $this->ao_ccss_log( 'Critical CSS received contained blocklisted content.', 2 );
@@ -660,5 +661,22 @@ class autoptimizeCriticalCSSCore {
     public function ao_ccss_clear_page_tpl_cache() {
         // Clears transient cache for page templates.
         delete_transient( 'autoptimize_ccss_page_templates' );
+    }
+    
+    public function ao_ccss_file_get_contents( $critcssfile ) {
+        // Resolve the path to collapse any traversal attempts like '../'
+        $requested_path = realpath( $critcssfile );
+
+        // Validate: path must exist, must be a .css file, and must remain inside AO_CCSS_DIR
+        if ( $requested_path && str_starts_with( $requested_path, AO_CCSS_DIR ) && pathinfo( $requested_path, PATHINFO_EXTENSION ) === 'css' ) {
+            $_ccss_contents = file_get_contents( $requested_path );
+
+            // Sanitize: if contents looks fishy, strip all tags.
+            if ( false === $this->criticalcss->check_contents( $_ccss_contents ) ) {
+                $_ccss_contents = autoptimizeStyles::sanitize_css( $_ccss_contents );
+            }
+
+            return $_ccss_contents;
+        }
     }
 }

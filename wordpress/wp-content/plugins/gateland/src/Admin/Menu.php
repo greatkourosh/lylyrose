@@ -2,8 +2,6 @@
 
 namespace Nabik\Gateland\Admin;
 
-use Nabik\GatelandPro\Services\CardToCardService;
-
 defined( 'ABSPATH' ) || exit;
 
 class Menu {

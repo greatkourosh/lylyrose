@@ -75,6 +75,14 @@
   src: url("../fonts/roboto/Roboto-Medium.ttf");
 }
 
+// Cousine
+@font-face {
+  font-family:  Cousine;
+  font-style: normal;
+  font-weight: 500;
+  src: url("../fonts/cousine/Cousine-Regular.ttf");
+}
+
 body, html {
     background-color: #F9FBFE;
 }
@@ -106,6 +114,10 @@ a {
 
 .font-roboto{
   font-family: 'Roboto', serif !important;
+}
+
+.font-cousine{
+  font-family: 'Cousine', serif !important;
 }
 
 input, textarea {
@@ -280,6 +292,11 @@ canvas{
     text-align: center;
     padding: 6px;
     border-radius: 8px;
+
+    .tippy-content {
+        text-align: center !important;
+    }
+
 }
 
 .notyf{
@@ -311,4 +328,18 @@ canvas{
 
     }
 
+}
+
+.blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }

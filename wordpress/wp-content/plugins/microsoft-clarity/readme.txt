@@ -3,7 +3,7 @@ Contributors: sammartin,zoe7633,q3ahmed
 Tags: Microsoft, Clarity, behavioral analytics
 Requires at least: 4.0
 Tested up to: 7.0
-Stable tag: 0.10.30
+Stable tag: 0.10.33
 License: MIT
 License URI: https://docs.opensource.microsoft.com/content/releasing/license.html
 
@@ -94,6 +94,16 @@ Visit [Clarity homepage](https://clarity.microsoft.com?utm_medium=wordpressInsta
 Check out more [frequently asked questions](https://docs.microsoft.com/en-us/clarity/faq) and our [documentation](https://docs.microsoft.com/en-us/clarity/faq).
 
 == Changelog ==
+= 0.10.33 =
+* Allow Brand Agents onboarding to transition between WooCommerce and WordPress after WooCommerce is enabled or disabled.
+* Keep Brand Agents connections stable when WordPress language or request context changes the site URL.
+
+= 0.10.32 =
+* Bugfix.
+
+= 0.10.31 =
+* Bugfix.
+
 = 0.10.30 =
 * Add opt-in UCP discovery endpoint support for Brand Agents-enabled WooCommerce stores.
 
