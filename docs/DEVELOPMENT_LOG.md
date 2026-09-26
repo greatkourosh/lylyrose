@@ -1278,3 +1278,37 @@ breaking updates; don't disable anything to "fix" it.
   The other 6 shipping plugins (Wordfence, Rank Math, WP Super Cache, Gateland,
   Persian shipping, Limit Login Attempts) are **inactive locally**. Production
   plugin state is not necessarily identical to local.
+
+---
+
+## Post-update verification + doc reconciliation (2026-09-26 17:08)
+
+Third consecutive clean run of the full suite after the update pass:
+**217 passed, 0 failed**, exit 0
+(`.test-logs/full-tests-20260926-170836-post-update-confirm.log`).
+
+State re-confirmed at the same moment:
+
+```
+core: 7.1.2 | WC: 11.1.2
+plugins pending: 0 | themes pending: 0 | active plugins: 19
+```
+
+Zero pending updates is the point worth stating plainly — it means the "update all"
+pass is complete, not merely started. `active_plugins` is still 19, so nothing was
+accidentally activated or deactivated by the update.
+
+### Doc corrections made this pass
+
+Three claims were stale and are now corrected. All three were *live* claims about
+current state, not historical narrative, which is why they mattered:
+
+| File | Was | Now |
+|---|---|---|
+| `docs/DEPLOY_PREP.md` | "The Docker image initializes 6.5.5 … the local volume was upgraded to 7.1" | The local stack no longer has this problem at all: `docker/Dockerfile` overlays 7.1 core, so a fresh volume gets it automatically. Production still must ship 7.1 — `stage-deploy.sh` downloads the fa_IR core itself rather than taking it from the image. |
+| `docs/CONTINUATION.md` (open items) | "local is on 5.1.1" | local is on 5.1.3 (the live-imported DB is still on 5.0.16) |
+| `DEPLOYMENT_SUMMARY.md` (still-to-do) | "local is 5.1.1" | local is 5.1.3 |
+
+The dated `## Dokan 5.1.1 upgrade` section in `CONTINUATION.md` is deliberately **left
+alone** — it is an accurate record of what happened on 2026-09-12. Rewriting history to
+match the present is how a changelog stops being a changelog.

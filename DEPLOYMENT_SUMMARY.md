@@ -39,7 +39,7 @@ local source templates** — fix before re-deploying:
 - [ ] WP Mail SMTP credentials, UpdraftPlus remote storage
 - [ ] Deactivate Redis Object Cache + drop `WP_REDIS_*` defines (no Redis on this host)
 - [ ] WP Super Cache re-configure, Wordfence scan + firewall mode
-- [ ] Live Dokan update (imported DB is on 5.0.16; local is 5.1.1)
+- [ ] Live Dokan update (imported DB is on 5.0.16; local is 5.1.3)
 - [ ] Optional: bump the domain to PHP 8.2 (host currently runs 8.1.34)
 
 ---

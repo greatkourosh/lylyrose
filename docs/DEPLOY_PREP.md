@@ -89,9 +89,12 @@ directory.
 
 ### Why WordPress 7.1 (not the Docker image's 6.5.5)
 
-WooCommerce 11.1.0 requires WordPress 7.0+. The Docker image initializes 6.5.5, which
-fatals with a missing `WP_Block_Templates_Registry` class. The local volume was upgraded
-to 7.1; production must ship 7.1 core too.
+WooCommerce 11.1.0 requires WordPress 7.0+. The shared `aroma_store-wordpress` image ships
+6.5.5 core, which fatals with a missing `WP_Block_Templates_Registry` class. **That is no
+longer true of this project's local stack**: `docker/Dockerfile` now overlays 7.1 core
+(and 7.1.2 as of the 2026-09-26 update pass), so a fresh volume gets it automatically.
+Production must still ship 7.1 core — `stage-deploy.sh` downloads the fa_IR core itself
+and does not take it from the image.
 
 ---
 
