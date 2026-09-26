@@ -1,6 +1,6 @@
 <?php
 define('ABSPATH', '/var/www/html/');
-$_SERVER['HTTP_HOST'] = 'localhost:8080';
+$_SERVER['HTTP_HOST'] = 'localhost:8020';
 require '/var/www/html/wp-load.php';
 $emails = WC()->mailer()->get_emails();
 $e = $emails['WC_Email_Customer_Completed_Order'];

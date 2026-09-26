@@ -2,6 +2,37 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 
+## 🔍 Production audit — 2026-09-26 (supersedes several claims below)
+
+Read this before trusting any "still to do" item in this file. The older sections
+were written from the **local** stack's perspective, where the suite is green and
+zero updates are pending — that local health was being reported as if it described
+production. It does not. Verified directly on `lylyrose.ir` by logging into
+`/secure-login/` and reading state via the REST API (read-only except where noted):
+
+| Doc said | Production actually is |
+|---|---|
+| Dokan 5.0.16, "live Dokan update pending" | **5.1.1** already, with **5.1.3** available |
+| Suite green at 217/0, port 8080 | Green at **217/0 re-verified on the new port 8020** (2026-09-26 21:33) |
+| (implied current) | **23 updates pending** — 20 plugins, 3 themes, core 7.1 → 7.1.2 |
+| — | A **failed auto-update is recorded** on the dashboard (automatic WP update did not complete) |
+| Redis Object Cache "deactivate + drop `WP_REDIS_*` defines" | Plugin was active but Redis **unreachable** (`Connection refused 127.0.0.1:6379`), drop-in **never installed**, object cache **Not enabled** — so it was never doing anything. **Deactivated 2026-09-26** (19 → 18 active); home/shop/cart/checkout/my-account all still 200. |
+| Passwords maybe still `admin/admin123` | `admin/admin123` correctly **rejected** ✅ |
+| — | **4 administrator accounts**: `admin`, `claude`, `kouroshvega`, `superadmintest` (confirmed intentional 2026-09-26 — keep) |
+
+**Still open after the audit** (unchanged, needs a decision — do not assume): the
+23 pending updates, and the merchant/gateway credentials below. The update pass was
+deliberately *not* run: it was offered as a one-click job, and running 23 updates on
+a live store with no verified backup is a different risk class from the config
+cleanup that was requested. UpdraftPlus is active but no remote backup target is
+configured, so there is currently no restorable backup of production.
+
+This is the third time in this project that a locally-green / docs-current state
+turned out to hide a live-site problem. The other two: the `$table_prefix` and
+`.htaccess` omissions that looked like a DB import failure, and a `git push` that
+reported "Everything up-to-date" on a failed push. **Read state off the live site;
+do not infer it from this file.**
+
 ## ⚠️ Read first — this project is DOWNSTREAM of `aroma_store`
 
 **`aroma_store` is the source of truth. This project (`lylyrose`) is downstream of it.**
@@ -36,13 +67,13 @@ projects shared a codebase. Upstream is the parent, not the ancestor-of-record.
   Gate the next deploy on: home 200 **and** `/shop/ /cart/ /checkout/` 200 — not the home page alone.
 - **Hosting credentials**: the cPanel account details are in `.env` (git-ignored) — `PHP_HOST`, `PHP_HOST_USERNAME`, `PHP_HOST_PASSWORD`, `PHP_HOST_IP=89.39.208.244`, `PHP_HOST_SERVER_NAME=ircpanel181`, `LYLYROSE_DOMAIN=lylyrose.ir`, `LYLYROSE_FOLDER=lylyroseir`. The existing site on that account is **vegacodex.ir**; Lyly Rose is an addon, so do not disturb the primary domain's document root.
 - **Repository**: local Git initialized and the full tree committed (`1eea959`, 20,302 files) and **pushed** to https://github.com/greatkourosh/lylyrose (`master` tracks `origin/master`). The push needed the PAT from `project_manager/secrets/github.env`; the repo URL now embeds that token, so `git push` works without re-auth. `.env` is git-ignored and was not committed.
-- **Local**: `http://localhost:8080`, phpMyAdmin on port 8081; active theme `lylyrose`, plugin `lylyrose-core`. Legacy themes remain unchanged. Database branding still needs verification independently of source-code branding.
+- **Local**: `http://localhost:8020`, phpMyAdmin on port 8021; active theme `lylyrose`, plugin `lylyrose-core`. Legacy themes remain unchanged. Database branding still needs verification independently of source-code branding.
 - **Core compatibility — RESOLVED 2026-09-26.** WooCommerce 11.1.0 requires WordPress 7.0 or later and calls `WP_Block_Templates_Registry`, a class absent from the 6.5.5 core the shared `aroma_store-wordpress` image ships. The local volume had been hand-upgraded to 7.1 by copying core files out of the upstream container, so the defect only surfaced on a fresh volume — which also could not start at all, for a second reason: the shared image's `aroma-entrypoint.sh` execs the command directly, so the official WordPress entrypoint never ran and never copied core out of `/usr/src/wordpress`. A fresh volume held nothing but `wp-content`. Fixed in `docker/Dockerfile` + `docker/entrypoint.sh`: the image now builds **on** the shared image (keeping its redis extension and wp-content ownership fix) and overlays 7.1 core, asserting at build time that the class exists and the version clears the WooCommerce minimum; the entrypoint keeps the chown and then hands off to the official entrypoint. `docker-compose.yml` builds it as `lylyrose-wordpress:local`. The overlay preserves `wp-config-docker.php` (an image file, not in the WordPress zip) or fresh volumes generate no `wp-config.php`. Verified: fresh volume → 7.1.2, config generated, WooCommerce 11.1.0 activates, `/` `/shop/` `/cart/` 200, `/checkout/` 302, zero fatals; existing stack unaffected (volume still 7.1, all pages 200); suite **217 passed / 0 failed**, twice.
 - **Verified fixes**: gift-wrap rendering uses `wp_kses_post(wc_price(...))` instead of the removed theme helper. A real cookie-based add-to-cart request renders the coupon form and nonce. Shop returns 200. Generated JPEG and PNG uploads and their six sizes are WebP.
 - **DB rebranded off "Aromaland" (2026-09-26, RESOLVED).** The source project was branded "Aromaland" / "آرومالند" with a misspelled mail domain `admin@aromalnd.test` ("aromalnd"). None of that was visitor-facing in code, but it lived in the DB, so a fresh dump shipped it to production on 2026-09-24 — meaning the earlier claim that "the production site at `lylyrose.ir` is correctly branded" was **wrong**: every page `<title>` read `Aromaland` and `/wp-json/` returned `{"name":"Aromaland"}`. Now fixed on both local and production: `blogname`=`Lyly Rose`, `woocommerce_email_from_name`=`لیلی رز`, all mail addresses -> `info@lylyrose.ir` (also `wp_users` for `admin`/`demo_customer`, one `billing_email`, one comment). Serialized options (`wp_mail_smtp`, `cartflows_ca_email_admin_settings`, `woocommerce_paypal_settings`, `auto_core_update_notified`) were re-serialized rather than SQL-`REPLACE`d, since a blind replace leaves `s:<length>:` prefixes stale and corrupts the blob. The 55-row WP Mail SMTP debug log was purged. **Remaining `aroma` hits are intentional**: 3 `wp_wfconfig` rows that inventory the source project's plugin/theme *slugs* — rewriting them would misreport what is installed and they are never rendered. Local suite re-verified **217 passed / 0 failed** after the change. Any future dump now carries the correct brand, so the "must fix before re-deploy" concern is closed.
 - **Versions (updated 2026-09-26):** core **7.1.2**; WooCommerce **11.1.2**; woo-wallet **1.7.0** (was 1.6.14 — the roadmap's "2.4.x" claim was wrong); redis-cache **3.0.0** (was 2.8.0); Dokan 5.1.3; wp-parsidate 6.4; persian-woocommerce 10.0.5. All 19 updates applied one at a time with a smoke check after each; 19 `active_plugins` unchanged, six shipped-but-inactive plugins updated in place. Updating required two fixes that blocked *all* updates, now in the image and `docker/update-core.php`: `unzip` was missing from the container (WP's upgrader shells out to it) and core updates need `abort_if_destination_exists => false`. Utilities: `docker/update-core.php`, `docker/update-plugin.php` (one at a time, `--inactive` for shipped-but-off plugins), `docker/smoke.sh`. Rollback backup in `.test-logs/pre-update-backup-20260926-132143/`.
-- **Testing**: `bash docker/run-tests.sh` is **fully green — 217 passed, 0 failed** (re-verified 2026-09-26 17:08, exit 0, **three** consecutive clean runs including one after the update pass completed), logs in `.test-logs/full-tests-*.log` (project-local, survives reboots; the old `/tmp/lylyrose-full-tests.log` was cleared on reboot). Actual SMS gateway resolves to `PW\PWSMS\Gateways\Logger`; ZarinPal is enabled in sandbox mode.
-- **Updates are LOCAL ONLY.** The versions above are what the local Docker stack runs. **Production at `lylyrose.ir` is still on the pre-update versions** (core 7.1, WooCommerce 11.1.0, woo-wallet 1.6.14, redis-cache 2.8.0, Dokan 5.0.16). Nothing has been pushed to the host. Shipping the new versions means a re-deploy via `docker/stage-deploy.sh`, which is a separate, higher-risk step: it rewrites the live database and replaces production plugin code. Do not treat the local green suite as evidence that a production re-deploy is safe — it only says the local stack is correct.
+- **Testing**: `bash docker/run-tests.sh` is **fully green — 217 passed, 0 failed** (re-verified 2026-09-26 21:33, exit 0, **after the local port moved 8080 → 8020**, with the containers recreated on the new port first so the run is a real post-migration result; four consecutive clean runs overall, including one after the update pass completed), logs in `.test-logs/full-tests-*.log` (project-local, survives reboots; the old `/tmp/lylyrose-full-tests.log` was cleared on reboot). Actual SMS gateway resolves to `PW\PWSMS\Gateways\Logger`; ZarinPal is enabled in sandbox mode.
+- **Updates are LOCAL ONLY.** The versions above are what the local Docker stack runs. **Production at `lylyrose.ir` is still on the pre-update versions** (core 7.1, WooCommerce 11.1.0, woo-wallet 1.6.14, redis-cache 2.8.0, Dokan **5.1.1** — *not* 5.0.16, see the audit at the top). Nothing has been pushed to the host. Shipping the new versions means a re-deploy via `docker/stage-deploy.sh`, which is a separate, higher-risk step: it rewrites the live database and replaces production plugin code. Do not treat the local green suite as evidence that a production re-deploy is safe — it only says the local stack is correct.
 - **Two flaky assertions hardened (2026-09-26)** — both were test defects, not product defects, and both are now fixed in `run-tests.sh`:
   1. **Action Scheduler backlog.** The assertion counted any `pending` action past its `scheduled_date_gmt`. The suite schedules its own async work (`wc_run_batch_process` every minute), so a few actions can sit seconds past due between the sidecar's ticks. Worse, the queue is persisted in the **DB volume**: after a 2-day gap the first run found 14 actions from the previous run still pending, because the cron sidecar had not been running. The check now uses a **5-minute grace period** — a real backlog means cron is broken; a few seconds does not. Start the sidecar (`docker compose up -d`) before the suite or the first run will report a spurious backlog.
   2. **ZarinPal sandbox 500s.** `sandbox.zarinpal.com` intermittently serves an HTML **"Server Error"** page instead of the StartPay payment page — measured at **~1 in 5 requests** under rapid runs against the shared dummy merchant `00000000-0000-0000-0000-000000000000`. The existing retry only covered the *redirect* into StartPay, not the *token fetch*, so one upstream 500 cascaded into three failures (token, callback, order state). The token fetch now retries up to 6× with a 5s backoff, and the callback/order-state checks are skipped rather than failed when no token was obtained. The gateway itself is healthy — `pg/v4/payment/request.json` returns `code: 100` and a valid authority every time.
@@ -187,7 +218,7 @@ copy rather than branching from it.
 - **Cron**: `DISABLE_WP_CRON` is `false` in the deployed config (WP self-triggers). If you
   want a cPanel cron job instead, set it to `true` and add
   `* * * * * /usr/local/bin/php /home3/bqwyvowk/lylyroseir/wp-cron.php >/dev/null 2>&1`.
-- **Live Dokan update pending**: the imported DB still has Dokan 5.0.16 (local is on 5.1.3 as of 2026-09-26; was 5.1.1).
+- **Live Dokan update pending**: the imported DB still has Dokan 5.0.16 (local is on 5.1.3 as of 2026-09-26; was 5.1.1). **Superseded by the 2026-09-26 audit above — production is on 5.1.1, not 5.0.16, and 5.1.3 is available.**
   Upgrade via WP admin or an FTP chunk+assembler deploy of the new `dokan-lite/` folder,
   then re-verify home 200 + shop 200.
 - **PHP version**: host runs 8.1.34; runbook prefers 8.2. Optional.
@@ -246,7 +277,7 @@ this host is `/home3/bqwyvowk/lylyroseir` (note `home3`, not `home`).
    **Required and easy to miss: `$table_prefix = 'wp_';`** (normally added by the WP
    installer). Without it WordPress ignores every imported table and redirects to
    `install.php`. Keep the dump's prefix and this line in sync.
-9. **URL rewrite** — replace `http://localhost:8080` with `https://lylyrose.ir` across
+9. **URL rewrite** — replace `http://localhost:8020` with `https://lylyrose.ir` across
    all tables (WP-CLI `wp search-replace … --all-tables --precise`, or Better Search
    Replace). Verify `wp_options.siteurl` and `home` afterwards.
 10. **TLS** — AutoSSL in cPanel → SSL/TLS Status; force HTTPS once issued.

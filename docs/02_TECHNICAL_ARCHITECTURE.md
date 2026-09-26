@@ -331,7 +331,7 @@ Choose a sensible local URL.
 
 For example:
 
-`http://localhost:8080`
+`http://localhost:8020`
 
 or another appropriate port.
 

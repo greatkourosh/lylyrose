@@ -24,7 +24,7 @@ cat /tmp/smoke-plugins.txt | head -3
 
 # A fatal during plugin load shows up as a PHP error on any page.
 for p in "/" "/shop/" "/cart/"; do
-  code=$(curl -s -o /dev/null -w '%{http_code}' -m 90 "http://localhost:8080$p" 2>/dev/null)
+  code=$(curl -s -o /dev/null -w '%{http_code}' -m 90 "http://localhost:8020$p" 2>/dev/null)
   if [ "$code" != "200" ]; then
     echo "SMOKE FAIL: $p returned $code"
     fail=1

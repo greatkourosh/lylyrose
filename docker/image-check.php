@@ -5,7 +5,7 @@
  * then removes both attachments.
  */
 define( 'ABSPATH', '/var/www/html/' );
-$_SERVER['HTTP_HOST'] = 'localhost:8080';
+$_SERVER['HTTP_HOST'] = 'localhost:8020';
 require '/var/www/html/wp-load.php';
 require_once ABSPATH . 'wp-admin/includes/file.php';
 require_once ABSPATH . 'wp-admin/includes/media.php';

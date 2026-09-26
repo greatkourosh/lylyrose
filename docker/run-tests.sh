@@ -22,7 +22,7 @@ section() { echo ""; echo "== $1 =="; }
 
 WP_CONTAINER="lylyrose-wp"
 DB_CONTAINER="lylyrose-db"
-SITE_URL="${SITE_URL:-http://localhost:8080}"
+SITE_URL="${SITE_URL:-http://localhost:8020}"
 THEMES_DIR="/var/www/html/wp-content/themes"
 PLUGINS_DIR="/var/www/html/wp-content/plugins"
 ACTIVE_THEME="${ACTIVE_THEME:-lylyrose}"
@@ -330,7 +330,7 @@ printf '%s' "$IMG_OUT" | grep -q "BIG_THRESHOLD: 2560" && pass "large-image thre
 # 14. Coupon surfaces: Digikala-style coupon field in cart summary + campaign
 # banner strip (P1 #10). Uses a real browser session (cookies) + real POST.
 section "14. Coupon surfaces"
-CU_CPN=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "http://localhost:8080/cart/")
+CU_CPN=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "http://localhost:8020/cart/")
 [ "$CU_CPN" = "200" ] && pass "cart reachable" || fail "cart not reachable ($CU_CPN)"
 # Coupon must exist (seeded by lylyrose-core or manually)
 CU_COUPON=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $ids = wc_get_coupon_id_by_code("welcome10") ? : wc_get_coupon_id_by_code("WELCOME10"); echo $ids ? "yes" : "no";' 2>/dev/null)
@@ -405,8 +405,8 @@ section "16. Instagram strip"
 INSTA_BACKUP=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo wp_json_encode(get_option("asc_instagram", array()));' 2>/dev/null)
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 update_option("asc_instagram", array("handle" => "@lylyrose.ir", "items" => array(
-  array("image_url" => "http://localhost:8080/wp-content/uploads/insta-1.jpg", "post_url" => ""),
-  array("image_url" => "http://localhost:8080/wp-content/uploads/insta-2.jpg", "post_url" => "https://instagram.com/p/abc"),
+  array("image_url" => "http://localhost:8020/wp-content/uploads/insta-1.jpg", "post_url" => ""),
+  array("image_url" => "http://localhost:8020/wp-content/uploads/insta-2.jpg", "post_url" => "https://instagram.com/p/abc"),
 )));' >/dev/null 2>&1
 docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
 INSTA_HTML=$(curl -sL --max-time 90 "$SITE_URL/")

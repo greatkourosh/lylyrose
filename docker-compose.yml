@@ -12,7 +12,7 @@ services:
     container_name: lylyrose-wp
     restart: unless-stopped
     ports:
-      - "${WORDPRESS_PORT:-8080}:80"
+      - "${WORDPRESS_PORT:-8020}:80"
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
@@ -21,8 +21,8 @@ services:
       WORDPRESS_TABLE_PREFIX: wp_
       WORDPRESS_DEBUG: "${WORDPRESS_DEBUG:-0}"
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_HOME', 'http://localhost:${WORDPRESS_PORT:-8080}');
-        define('WP_SITEURL', 'http://localhost:${WORDPRESS_PORT:-8080}');
+        define('WP_HOME', 'http://localhost:${WORDPRESS_PORT:-8020}');
+        define('WP_SITEURL', 'http://localhost:${WORDPRESS_PORT:-8020}');
         define('FS_METHOD', 'direct');
         define('DISABLE_WP_CRON', true);
         define('WP_REDIS_HOST', 'redis');
@@ -95,7 +95,7 @@ services:
     container_name: lylyrose-pma
     restart: unless-stopped
     ports:
-      - "${PMA_PORT:-8081}:80"
+      - "${PMA_PORT:-8021}:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306

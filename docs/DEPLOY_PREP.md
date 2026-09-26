@@ -114,10 +114,10 @@ exits non-zero if either of the two post-deploy bugs below is missing, or if the
 generated `wp-config.php` does not parse. DB credentials ship as placeholders —
 fill them on the host, since cPanel may prefix the db name and user.
 
-It does **not** rewrite `localhost:8080` in the dump: every occurrence is in a
+It does **not** rewrite `localhost:8020` in the dump: every occurrence is in a
 plain column, so the post-import `search-replace` (step 9) stays valid and
 `--precise` needs no serialized length recompute. The script warns when the dump
-still carries `localhost:8080` and prints the exact command.
+still carries `localhost:8020` and prints the exact command.
 
 <details>
 <summary>Manual recipe used for the 2026-09-24 deploy (superseded by the script)</summary>
@@ -175,8 +175,8 @@ which is how both post-deploy bugs got shipped.
 8. **wp-config.php** — edit `lylyroseir/wp-config.php`: fill `DB_NAME` / `DB_USER` /
    `DB_PASSWORD` with the step-4 values. `WP_HOME` / `WP_SITEURL` already point at
    `https://lylyrose.ir`; salts are fresh.
-9. **URL rewrite** — if any `http://localhost:8080` URLs survive in the data:
-   `wp search-replace 'http://localhost:8080' 'https://lylyrose.ir' --all-tables --precise`,
+9. **URL rewrite** — if any `http://localhost:8020` URLs survive in the data:
+   `wp search-replace 'http://localhost:8020' 'https://lylyrose.ir' --all-tables --precise`,
    then confirm `wp_options.siteurl` and `home`.
 10. **TLS** — cPanel → SSL/TLS Status → AutoSSL for `lylyrose.ir`; force HTTPS.
 11. **Permalinks & cron** — Settings → Permalinks → Save; cPanel Cron Jobs:

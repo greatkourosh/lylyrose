@@ -5,7 +5,7 @@
 > See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
 
 
-**آدرس**: `http://localhost:8080`
+**آدرس**: `http://localhost:8020`
 **پیش‌نیاز**: `docker compose up -d` (کانتینرها فعال باشند)
 **مدت تقریبی**: ۱۵–۲۰ دقیقه
 
@@ -40,7 +40,7 @@
 
 ## مرحله ۱ — صفحه اصلی
 
-**آدرس**: `http://localhost:8080`
+**آدرس**: `http://localhost:8020`
 
 **توضیح بدهید**:
 - بنر اسلایدر اصلی (Hero) — تصاویر محصولات با طراحی دیجی‌کالایی

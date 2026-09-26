@@ -62,6 +62,7 @@ if [ -f "$REPO/.env" ]; then
   set -a; . "$REPO/.env"; set +a
   DB_NAME="${MYSQL_DATABASE:-$DB_NAME}"
 fi
+LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8020}"
 DB_PASSWORD="${MYSQL_ROOT_PASSWORD:-}"
 [ -n "$DB_PASSWORD" ] || { echo "ERR: no DB password (set MYSQL_ROOT_PASSWORD in .env)" >&2; exit 1; }
 
@@ -262,9 +263,9 @@ grep -q "BEGIN WordPress" "$STAGE_DIR/.htaccess"; check ".htaccess has WordPress
 [ ! -e "$STAGE_DIR/uploads/wc-logs" ]; check "wc-logs stripped from uploads" $?
 [ ! -e "$STAGE_DIR/wp-content/themes/digikala" ]; check "dev theme digikala not shipped" $?
 [ -s "$SQL_DUMP" ]; check "database dump non-empty" $?
-# Every localhost:8080 URL must already have been rewritten; see DEPLOY_PREP.
-if grep -q "localhost:8080" "$SQL_DUMP" 2>/dev/null; then
-  echo "  WARN  dump still contains localhost:8080 — run search-replace before import"
+# Every local-site URL must already have been rewritten; see DEPLOY_PREP.
+if grep -q "$LOCAL_SITE_URL" "$SQL_DUMP" 2>/dev/null; then
+  echo "  WARN  dump still contains $LOCAL_SITE_URL — run search-replace before import"
 fi
 
 echo
@@ -277,8 +278,8 @@ echo "  1. Upload the CONTENTS of $STAGE_DIR into the docroot."
 echo "  2. Upload $STAGE_DIR/uploads into <docroot>/wp-content/uploads (644 files, 755 dirs)."
 echo "  3. Fill DB_NAME/DB_USER/DB_PASSWORD in wp-config.php (cPanel may prefix them)."
 echo "  4. Import $SQL_DUMP, then delete the dump from any shared location."
-echo "  5. URL rewrite (dump still carries localhost:8080):"
-echo "       wp search-replace 'http://localhost:8080' '$SITE_URL_PLACEHOLDER' --all-tables --precise"
+echo "  5. URL rewrite (dump still carries $LOCAL_SITE_URL):"
+echo "       wp search-replace '$LOCAL_SITE_URL' '$SITE_URL_PLACEHOLDER' --all-tables --precise"
 echo "     All occurrences are in PLAIN columns, so no serialized length recompute"
 echo "     is needed; confirm wp_options.siteurl and wp_options.home afterwards."
 echo "  6. GATE: home 200 AND /shop/ /cart/ /checkout/ 200 — not home alone."

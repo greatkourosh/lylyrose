@@ -127,9 +127,9 @@ wordpress/wp-content/plugins/lylyrose-core/
 docker-compose up -d
 
 # Access
-http://localhost:8080          # Storefront
-http://localhost:8080/wp-admin # Admin (admin / admin123)
-http://localhost:8081          # phpMyAdmin
+http://localhost:8020          # Storefront
+http://localhost:8020/wp-admin # Admin (admin / admin123)
+http://localhost:8021          # phpMyAdmin
 
 # Admin credentials
 Username: admin
@@ -1312,3 +1312,45 @@ current state, not historical narrative, which is why they mattered:
 The dated `## Dokan 5.1.1 upgrade` section in `CONTINUATION.md` is deliberately **left
 alone** — it is an accurate record of what happened on 2026-09-12. Rewriting history to
 match the present is how a changelog stops being a changelog.
+
+---
+
+## Local port migration 8080 → 8020 + full suite re-verified (2026-09-26 21:33)
+
+**Why the move:** `8080` turned out to be a **trap** on this host — a stale second
+Aromaland instance answers there, so a local health check could silently hit the
+wrong store and report green for a system under test. Silent wrong-target is worse
+than a hard failure, so the port moved to `8020` (pma `8021`), which is not known
+to collide. See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md), which already
+recorded this trap.
+
+`aroma_store` (upstream) runs on `8010/8011`; `lylyrose` now on `8020/8021`.
+
+### Suite re-verified on the new port
+
+```
+RESULTS: 217 passed, 0 failed
+ALL TESTS PASSED                                    (exit 0)
+```
+
+Log: `.test-logs/full-tests-20260926-213332-post-port-change.log` (27 sections).
+Same 217/0 as the pre-move baseline — the port change moved the target, not the
+behaviour. The containers were recreated on the new port before the run, so this
+is a real post-migration result and not a stale-process artifact.
+
+### What the port change touched
+
+`.env`, `.env.example`, `docker-compose.yml`, and every hardcoded
+`localhost:8080`/`8081` in the test suite, deploy and probe scripts
+(`run-tests.sh`, `smoke.sh`, `stage-deploy.sh`, `install-plugin.sh`, the
+`*-probe.php` / `*-check.php` helpers) and the docs that reference it.
+
+`docker/migrate-from-remote.sh` kept `${WORDPRESS_PORT:-8080}` in two places and
+was corrected here — it is the script that *rewrites* URLs into the local DB, so a
+stale default would have written `localhost:8080` back into a 8020 stack. That is
+the same silent-wrong-target class as the trap itself.
+
+**Deliberately not rewritten:** the `localhost:8080` occurrences in
+`DEPLOYMENT_SUMMARY.md` (the 2026-09-24 deploy record) and
+`DEVELOPMENT_LOG.md` line 241. Those describe what was true on the day they were
+written; changing them would make the changelog lie about its own history.

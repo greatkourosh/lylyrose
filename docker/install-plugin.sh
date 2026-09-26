@@ -45,12 +45,12 @@ var_dump(in_array($plugin, get_option("active_plugins", []), true));
 # Smoke test: homepage must return 200 and not fatal
 sleep 2
 TESTHTML="$(mktemp)"
-CODE=$(curl -s -o "$TESTHTML" -w "%{http_code}" --max-time 20 http://localhost:8080/)
+CODE=$(curl -s -o "$TESTHTML" -w "%{http_code}" --max-time 20 http://localhost:8020/)
 FATAL=$(grep -c "Fatal error\|Parse error" "$TESTHTML" 2>/dev/null)
 [ -z "$FATAL" ] && FATAL=0
 case "$FATAL" in ''|*[!0-9]*) FATAL=0;; esac
 rm -f "$TESTHTML"
-SHOP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 http://localhost:8080/shop/)
+SHOP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 http://localhost:8020/shop/)
 echo "--- home=$CODE shop=$SHOP fatals=$FATAL"
 
 if [ "$CODE" = "200" ] && [ "$FATAL" = "0" ] && [ "$SHOP" = "200" ]; then

@@ -34,8 +34,8 @@ Work travels downstream only.
 | Storefront theme | `digikala` | `lylyrose` |
 | WP / WooCommerce | 7.1 / 11.1.0 | 7.1 / 11.1.0 |
 | Test suite | `bash docker/run-tests.sh` | `bash docker/run-tests.sh` |
-| Local address | http://localhost:8010 | http://localhost:8080 |
-| phpMyAdmin | :8011 | :8081 |
+| Local address | http://localhost:8010 | http://localhost:8020 |
+| phpMyAdmin | :8011 | :8021 |
 | Admin login | `/secure-login` | `/secure-login` |
 | Branded name | آرومالند (Aromaland) | لیلی رز (Lyly Rose) |
 | Repo | `github.com/greatkourosh/aroma_store` | `github.com/greatkourosh/lylyrose` |
@@ -55,7 +55,7 @@ these substitutions are the **only** intended difference:
 | `aroma-store` (legacy theme dir) | `aroma-store` *(kept as-is, inactive)* |
 | `آرومالند` / `Aromaland` in user-visible strings | `لیلی رز` / `Lyly Rose` |
 | `aroma-store.vegacodex.ir` | `lylyrose.ir` |
-| `localhost:8010` | `localhost:8080` |
+| `localhost:8010` | `localhost:8020` |
 
 The `ASC_` prefix is deliberately **not** renamed — it keeps the mirrored code diffable.
 
@@ -96,9 +96,12 @@ Also present upstream only: `docker/preview-proxy.py`, `docker/import-product-ga
 - `lylyrose`'s docs may record `lylyrose` facts, but the shared architecture, the
   feature set, and the gotchas have one home: `aroma_store`'s docs. When they disagree,
   upstream wins and the downstream doc gets corrected.
-- Local ports differ (8010 vs 8080) and `8080` is a **trap** in this host's port map —
-  a stale second Aromaland instance answers there. Verify which store answers before
-  trusting any local check.
+- Local ports differ: `aroma_store` runs on 8010/8011, `lylyrose` on 8020/8021. They
+  were 8080/8081 here until 2026-09-26, when `8080` proved to be a **trap** in this
+  host's port map — a stale second Aromaland instance answered there, so a local check
+  could silently hit the wrong store. `8020` is not known to collide, but the failure
+  mode is silent, so check which store answers (`<title>`) before trusting any local
+  check.
 
 ## Cross-links
 

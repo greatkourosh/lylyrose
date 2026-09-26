@@ -175,12 +175,12 @@ define( 'FS_METHOD', 'direct' );          // direct updates if permissions allow
 
 ## Step 7 — Rewrite URLs inside the data
 
-The dump was exported from `http://localhost:8080`. Replace every occurrence:
+The dump was exported from `http://localhost:8020`. Replace every occurrence:
 
 With WP-CLI (recommended):
 
 ```bash
-wp search-replace 'http://localhost:8080' 'https://yourdomain.com' --all-tables --precise
+wp search-replace 'http://localhost:8020' 'https://yourdomain.com' --all-tables --precise
 wp search-replace 'http://yourdomain.com' 'https://yourdomain.com' --all-tables
 wp cache flush
 ```
@@ -272,7 +272,8 @@ wp db check
 - [ ] Cart → Checkout works end-to-end (place one real test order)
 - [ ] ZarinPal/Gateland sandbox→live keys active; test payment round-trips
 - [ ] `/secure-login` opens admin; `wp-login.php` redirects away
-- [ ] Passwords changed from dev values (`admin/admin123` must NOT work)
+- [x] Passwords changed from dev values — **verified 2026-09-26** against production:
+      `admin/admin123` is rejected.
 - [ ] Wordfence scan clean; Limit Login Attempts active
 - [ ] Emails send (new order notification)
 - [ ] UpdraftPlus backup runs once successfully

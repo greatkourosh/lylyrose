@@ -52,7 +52,7 @@ back.
 
 4. **Mirror into `lylyrose`.** Apply the rename map
    ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)): `aroma-store-core` →
-   `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز, ports 8010 → 8080.
+   `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز, ports 8010 → 8020.
    The `ASC_` prefix is unchanged.
 
 5. **Test here too.** `bash docker/run-tests.sh` in this repo must stay green.

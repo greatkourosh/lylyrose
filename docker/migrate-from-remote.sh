@@ -35,7 +35,7 @@ run_phase pages
 run_phase links
 
 echo "==> Rewriting remote URLs to local"
-LOCAL_URL="http://localhost:${WORDPRESS_PORT:-8080}"
+LOCAL_URL="http://localhost:${WORDPRESS_PORT:-8020}"
 docker exec "$WP_CONTAINER" php /tmp/wp-cli.phar search-replace 'https://lylyrose.vegacodex.ir' "$LOCAL_URL" --all-tables --precise --recurse-objects --skip-columns=guid --allow-root >/dev/null 2>&1 || true
 docker exec "$WP_CONTAINER" php /tmp/wp-cli.phar search-replace 'http://lylyrose.vegacodex.ir' "$LOCAL_URL" --all-tables --precise --recurse-objects --skip-columns=guid --allow-root >/dev/null 2>&1 || true
 
@@ -55,4 +55,4 @@ echo "categories:" . n("SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxono
 echo "brands:    " . n("SELECT COUNT(*) FROM {$wpdb->term_taxonomy} WHERE taxonomy=\"pa_brand\"") . "\n";
 ' 2>/dev/null
 
-echo "==> Done. Browse http://localhost:${WORDPRESS_PORT:-8080}"
+echo "==> Done. Browse http://localhost:${WORDPRESS_PORT:-8020}"

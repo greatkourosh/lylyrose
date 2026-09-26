@@ -247,9 +247,9 @@ the store-specific exceptions, is in
 4. Mirror the change here with the rename map
    ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)):
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
-   ports 8010 → 8080. The `ASC_` prefix is unchanged.
-5. `bash docker/run-tests.sh` in this repo (localhost:8080) must stay green — currently
-   **217 checks across 26 sections**.
+   ports 8010 → 8020. The `ASC_` prefix is unchanged.
+5. `bash docker/run-tests.sh` in this repo (localhost:8020) must stay green — currently
+   **217 checks across 27 sections**.
 6. Update `docs/DEVELOPMENT_LOG.md` and commit on `master`.
 
 Store-specific changes (branding, a campaign page, host config) skip steps 1–3 and are

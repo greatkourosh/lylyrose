@@ -79,9 +79,9 @@ docker-compose up -d
 ```
 
 3. Access the site:
-- Website: http://localhost:8080
-- Admin: http://localhost:8080/wp-admin
-- phpMyAdmin: http://localhost:8081
+- Website: http://localhost:8020
+- Admin: http://localhost:8020/wp-admin
+- phpMyAdmin: http://localhost:8021
 
 4. Admin credentials:
 - Username: `admin`
@@ -127,7 +127,7 @@ mysql -u root -p production_db < lylyrose.sql
 
 5. Update URLs:
 ```bash
-wp search-replace 'http://localhost:8080' 'https://yourdomain.com' --allow-root
+wp search-replace 'http://localhost:8020' 'https://yourdomain.com' --allow-root
 ```
 
 6. Update siteurl and homeurl in wp_options table

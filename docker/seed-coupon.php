@@ -1,6 +1,6 @@
 <?php
 define('ABSPATH', '/var/www/html/');
-$_SERVER['HTTP_HOST'] = 'localhost:8080';
+$_SERVER['HTTP_HOST'] = 'localhost:8020';
 require '/var/www/html/wp-load.php';
 $existing = get_posts(array('post_type'=>'shop_coupon','post_status'=>'any','numberposts'=>1,'s'=>'WELCOME10','fields'=>'ids'));
 if ($existing) { echo "EXISTS: " . $existing[0] . "\n"; exit; }

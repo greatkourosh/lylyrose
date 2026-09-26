@@ -37,9 +37,17 @@ local source templates** — fix before re-deploying:
 - [ ] ZarinPal real merchant code + `sandbox: no`
 - [ ] PWSMS real gateway credentials (currently the `Logger` sink — production SMS is a no-op)
 - [ ] WP Mail SMTP credentials, UpdraftPlus remote storage
-- [ ] Deactivate Redis Object Cache + drop `WP_REDIS_*` defines (no Redis on this host)
+- [x] Deactivate Redis Object Cache — **done 2026-09-26.** It was never doing
+      anything: drop-in not installed, object cache "Not enabled", Redis unreachable.
+      Deactivated via REST; 19 → 18 active plugins, all key pages still 200.
+      (`WP_REDIS_*` defines still in `wp-config.php` — inert without the plugin,
+      but worth dropping for tidiness when convenient.)
 - [ ] WP Super Cache re-configure, Wordfence scan + firewall mode
-- [ ] Live Dokan update (imported DB is on 5.0.16; local is 5.1.3)
+- [ ] Live Dokan update — **doc was stale.** Production is on **5.1.1**, not
+      5.0.16; 5.1.3 is available. Fold into the 23-item update pass below.
+- [ ] **23 pending updates** (20 plugins, 3 themes, core 7.1 → 7.1.2), plus a
+      **failed auto-update recorded on the dashboard**. Not run — needs a verified
+      restorable backup first, and UpdraftPlus currently has no remote target.
 - [ ] Optional: bump the domain to PHP 8.2 (host currently runs 8.1.34)
 
 ---
