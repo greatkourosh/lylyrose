@@ -58,6 +58,27 @@ still holds only the 3 guard files and `updraft_backup_history` is `NULL`, as
 expected before the first fire. **The first actual backup is still unconfirmed** —
 that is the one item left, and it is time-based, not blocked.
 
+**Re-verified 2026-09-27 ~17:10 UTC, and the schedule is intact.** The events are
+still registered for the same fire time, `2026-09-27 20:46:33 UTC`, each
+`schedule: daily` / `interval: 86400`, both under args-hash
+`40cd750bba9870f18aada2478b24840a`; `updraft_interval` and
+`updraft_interval_database` are both `daily`; `DISABLE_WP_CRON` is still `false`;
+no archive and no history yet — correct, since at that moment the fire was still
+~3h24m away. A check is scheduled for **00:16 Tehran time, 2026-09-28**, just
+after the fire.
+
+Worth recording from that probe: **WP's cron option is keyed by timestamp, not
+hook name.** `$cron['updraft_backup']` is empty, so a by-name read reports both
+events `MISSING` and looks exactly like a schedule that was silently deleted —
+it had not. The real shape is `$cron[<unix ts>][<hook>][<args-hash>]`, and each
+event's `schedule`/`interval` sit one level deeper again. Reading it wrong cost
+two probe rounds and briefly looked like a production regression. Same lesson as
+the three probes in the settings audit below: **a probe that reports a problem
+is usually the probe that is wrong**, and here it was the *safe* direction to be
+wrong in — nothing on the site changed.
+
+
+
 ## 🔍 Production audit — 2026-09-26 (superseded by the above, kept for history)
 
 Read this before trusting any "still to do" item in this file. The older sections

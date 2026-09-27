@@ -345,6 +345,32 @@ so the loopback works.
 exercised is the same state you are trying to leave behind — the mechanism being
 sound is not the same as it having produced a backup.
 
+**Re-checked 2026-09-27 ~17:10 UTC: schedule intact, fire still pending.** Both
+events remain at the same fire time with `schedule: daily` / `interval: 86400`,
+and no archive or history exists yet — correct, since the fire was ~3h24m away
+at that point. A verification is scheduled for 00:16 Tehran time, 2026-09-28.
+
+**If that check finds no archive, do not re-run the schedule writer.** First
+establish whether the site has had *any* front-end request since 20:46 UTC:
+WP-Cron only spawns on a page view, so with no traffic the events sit past-due
+without being broken. `DISABLE_WP_CRON=false` and a working loopback are
+necessary but not sufficient — neither produces a request on its own.
+
+**Reading the cron option (cost two probe rounds — get this right).** WP stores
+`cron` keyed by **timestamp, not hook name**:
+
+```php
+$cron = _get_cron_array();
+$e = $cron[1790541993]['updraft_backup']['40cd750bba9870f18aada2478b24840a'];
+$e['schedule'];  // 'daily'   -- 86400 in $e['interval']
+```
+
+`$cron['updraft_backup']` returns nothing, and an event's `schedule` key sits one
+level *below* the hook, under `md5(serialize($args))`. Reading either wrongly
+reports a perfectly healthy schedule as deleted. Also `gmdate('…', $ts)` throws a
+`TypeError` on the strings PHP hands back from the serialized array — cast to
+`(int)` first.
+
 Two probes were burned getting here, both my error and both worth recording:
 `gmdate()` on `$event['schedule']` (which is the recurrence *name*, `'daily'`, not
 a timestamp — WP's cron array stores the interval separately), and a guessed
