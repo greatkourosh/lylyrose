@@ -77,6 +77,30 @@ the three probes in the settings audit below: **a probe that reports a problem
 is usually the probe that is wrong**, and here it was the *safe* direction to be
 wrong in — nothing on the site changed.
 
+**WP-Cron is running normally — confirmed, and the reason the first fire will
+work.** A check at ~17:51 UTC found four events overdue, the worst
+`action_scheduler_run_queue` (a 60-second event) by 26 minutes, which looks like
+a stalled cron. It is not: a single page view — the probe fetch itself —
+immediately rescheduled all four (`action_scheduler_run_queue` went from 26 min
+overdue to 36 s out). The site is simply **low-traffic**, so between visits the
+short-interval events sit past-due until someone arrives. A recurring event that
+has been overdue *and rescheduled* is healthy; only one that stays overdue across
+page views is broken.
+
+Two consequences worth keeping:
+
+- The fire at 20:46:33 UTC will happen **on the next front-end request after that
+  moment**, not at that moment. The scheduled 00:16 check fetches the site, which
+  is itself the trigger, so the archive should exist by then.
+- Do not read "overdue events" on this site as a fault. Before concluding cron
+  is broken, fetch a page and re-read: WP-Cron runs on the *span request* that
+  arrives after `doing_cron` is set, so the state right after a page view is the
+  honest one.
+
+**Local suite re-verified green 2026-09-27 17:50: `229 passed, 0 failed`**
+across 28 sections, on the canonical host `https://lylyrose.local`. The roadmap
+in `FEATURES_ROADMAP.md` has no open P0/P1/P2 work — P3 is deliberately optional
+— so with 1c deferred to the clock there is no feature work in flight here.
 
 
 ## 🔍 Production audit — 2026-09-26 (superseded by the above, kept for history)

@@ -356,6 +356,13 @@ WP-Cron only spawns on a page view, so with no traffic the events sit past-due
 without being broken. `DISABLE_WP_CRON=false` and a working loopback are
 necessary but not sufficient — neither produces a request on its own.
 
+**Do not mistake past-due events for a broken cron (verified 2026-09-27).** At
+~17:51 UTC, four events read overdue — `action_scheduler_run_queue` by 26
+minutes. One page view rescheduled all four instantly, putting that 60-second
+event 36 s out. This store is low-traffic, so between visits every short-interval
+event is *expected* to read past-due. The test is therefore: **fetch a page,
+then re-read.** Rescheduled ⇒ healthy. Still overdue after a page view ⇒ broken.
+
 **Reading the cron option (cost two probe rounds — get this right).** WP stores
 `cron` keyed by **timestamp, not hook name**:
 
