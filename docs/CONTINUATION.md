@@ -102,6 +102,49 @@ across 28 sections, on the canonical host `https://lylyrose.local`. The roadmap
 in `FEATURES_ROADMAP.md` has no open P0/P1/P2 work — P3 is deliberately optional
 — so with 1c deferred to the clock there is no feature work in flight here.
 
+### ⚠️ `lylyrose-core` v2.4.0 is NOT deployed — production runs v2.3.0
+
+Found 2026-09-27 18:45 UTC, and it is the largest gap between this repo and the
+live site. **`/incredible-offers/` returns 404 on `lylyrose.ir`** even though
+section 28 of the local suite covers it (12 checks, green) and the port commit
+`d3233c16` is in `master`.
+
+The cause is not a bug or a failed deploy — **the code was never uploaded**.
+Confirmed three ways:
+
+| Evidence | Result |
+| --- | --- |
+| `lylyrose-core.php` on the host | header `Version: 2.3.0`, mtime **2026-09-24 08:45** (the deploy date) |
+| `wp-content/plugins/lylyrose-core/includes/` over FTP | **16** files, no `class-flash-sales.php` |
+| Repo working tree | **17** files incl. `class-flash-sales.php`; header bumped to `2.4.0` |
+
+**Neither site has it.** `https://aroma-store.vegacodex.ir/incredible-offers/`
+is also **404** — so upstream has not been deployed either, and this is *not* a
+lylyrose-only regression. Per `FEATURE_REQUEST_POLICY.md` the fix therefore
+belongs upstream, then mirrored: deploy v2.4.0 to `aroma_store` first, then here.
+
+This is the same shape as the 2026-09-27 partial update noted above: WordPress's
+updater refreshed the *updatable* plugins, and everything not in the WordPress
+plugin directory — this custom plugin and the theme — stayed at the 2026-09-24
+deploy. `CONTINUATION.md` claimed feature parity with upstream, and parity with
+the **repo** does hold; parity with the **live site** does not.
+
+**Also note a version-string inconsistency in the repo, inherited from upstream:**
+the header says `2.4.0` but `const VERSION` in the same file still says `2.3.0`
+(`lylyrose-core.php:7` vs `:19`). That constant is not cosmetic — it defines
+`LYLYROSE_CORE_VERSION`, which gates the product-code rewrite flush
+(`class-product-code.php:154`) and the store-pages version check
+(`class-store-pages.php:45`), so a stale value means those do not re-run.
+`aroma_store` has the identical split, so fix it there first.
+
+**Do not deploy v2.4.0 while another session is mid-mirror.** At the time of
+writing there are uncommitted changes to `lylyrose-core.php`, `flash-sales.css`
+and `page-about.php`, plus a new untracked `includes/class-gift-cards.php`
+(`ASC_Gift_Cards`, authored upstream per its `@package aroma-store-core`
+header) — an `aroma_store` session is actively mirroring the gift-card feature
+into this repo. Deploying now would ship a half-written feature. Wait for that
+work to land, run the suite, then deploy.
+
 
 ## 🔍 Production audit — 2026-09-26 (superseded by the above, kept for history)
 

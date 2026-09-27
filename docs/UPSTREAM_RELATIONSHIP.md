@@ -61,6 +61,14 @@ The `ASC_` prefix is deliberately **not** renamed — it keeps the mirrored code
 
 ## Current divergence
 
+**The feature set is at parity in the REPOS — 2026-09-27. Neither live site has
+v2.4.0 deployed.** `lylyrose.ir/incredible-offers/` and
+`aroma-store.vegacodex.ir/incredible-offers/` both return **404**; both hosts run
+`*-core` **v2.3.0** with 16 `includes/` files, while both repos have 17 including
+`class-flash-sales.php`. So the parity below is repo-to-repo, and it must not be
+read as "the Offers page is live". Deploy v2.4.0 upstream first, then here.
+See the v2.4.0 section of `CONTINUATION.md`.
+
 **The feature set is at parity — 2026-09-27.** The `ASC_Flash_Sales` gap that
 stood here since 2026-09-17 is closed: all four files are ported (`lylyrose-core`
 now has **17** classes, matching upstream) and covered by test section 28
