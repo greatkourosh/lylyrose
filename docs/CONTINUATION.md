@@ -44,8 +44,19 @@ unconfirmed-but-consistent rather than as something this project did.
 
 So runbook steps 2–4 are **complete**; step 5 (this doc reconciliation) is what
 this audit did. Step 1c (UpdraftPlus daily schedule) was set the same day, later,
-by host-side PHP probe — see the 1c section of the runbook. It is registered but
-has not yet fired; confirming the first backup is still open.
+by host-side PHP probe — see the 1c section of the runbook.
+
+**1c's mechanism was verified 2026-09-27 13:40 UTC** (read-only docroot probe,
+uploaded/fetched/deleted). Both `updraft_backup` and `updraft_backup_database`
+exist as **recurring** events (daily, 86400s, next 2026-09-27 20:46:33 UTC), and
+the site's cron loopback to `wp-cron.php` returns **200 with an empty body** in
+0.03 s. That second check is the load-bearing one on a host with no cPanel
+scheduler: `DISABLE_WP_CRON=false` only says WP is *permitted* to self-spawn, so
+without it a registered schedule could sit there forever and be
+indistinguishable from one that simply has not fired yet. `wp-content/updraft/`
+still holds only the 3 guard files and `updraft_backup_history` is `NULL`, as
+expected before the first fire. **The first actual backup is still unconfirmed** —
+that is the one item left, and it is time-based, not blocked.
 
 ## 🔍 Production audit — 2026-09-26 (superseded by the above, kept for history)
 
@@ -153,8 +164,9 @@ Both a files-only and a db-only archive pass a size check and are still useless
 here, because steps 3–4 change the schema — so asserting the *database* entry
 alongside a *site file* is the check that matters.
 
-Still outstanding: confirming the first 1c backup fires, and 1a-ii (UpdraftPlus
-host-local, optional).
+Still outstanding: confirming the first 1c backup fires (its mechanism is
+verified — see the top of this file; first fire 2026-09-27 20:46 UTC), and 1a-ii
+(UpdraftPlus host-local, optional).
 
 ## ⚠️ Read first — this project is DOWNSTREAM of `aroma_store`
 

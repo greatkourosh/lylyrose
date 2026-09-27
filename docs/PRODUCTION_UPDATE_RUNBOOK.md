@@ -27,9 +27,11 @@ third-party account.
   `homedir/lylyroseir/wp-config.php` and 1,794 upload files.
   sha256 `a8c2a1173aaa185ea4913d39fd9cf90b442d00c178926bb0ef8f720b1f726e3f`.
 
-The update pass is no longer blocked on backup. **1c is done** (UpdraftPlus daily
-schedule set 2026-09-27, both backup cron events registered). Only 1a-ii
-(UpdraftPlus host-local, optional) remains.
+The update pass is no longer blocked on backup. **1c is done and its mechanism is
+verified** (UpdraftPlus daily schedule set 2026-09-27, both backup cron events
+registered and recurring, and the site's cron loopback confirmed working — see
+1c below). Only 1a-ii (UpdraftPlus host-local, optional) and the first real fire
+at 2026-09-27 20:46 UTC remain.
 
 **1c's original cPanel route does not exist on this host** — no Backup schedule
 control, no Backup Wizard, and the `Cron` UAPI module is not installed at all.
@@ -311,10 +313,49 @@ broken site is most likely. Mitigation while it stays open: run **1a manually
 before each risky change** (it takes a few minutes and is one UAPI call), and
 keep the off-host pull from 1b current.
 
-**Verify — still outstanding:** the schedule is registered but has not yet fired.
-After 2026-09-27 20:46 UTC, check that a *new dated* archive appeared under
-`wp-content/updraft/`. A schedule that was never exercised is the same as the
-state you are trying to leave behind.
+**Verify — 1c mechanism DONE 2026-09-27; first actual fire still outstanding.**
+
+Checked at 13:40 UTC on 2026-09-27, via a read-only docroot probe (uploaded
+random name, fetched, deleted — the mechanism above). Everything needed for the
+schedule to *run* is confirmed on the host, not just written down:
+
+| Check | Result |
+| --- | --- |
+| `updraft_interval` / `updraft_interval_database` | `'daily'` / `'daily'` — both read back |
+| `updraft_backup` cron event | **exists, recurring**, `daily` / 86400s, next 2026-09-27 20:46:33 UTC |
+| `updraft_backup_database` cron event | **exists, recurring**, `daily` / 86400s, next 2026-09-27 20:46:33 UTC |
+| `DISABLE_WP_CRON` | `false` |
+| **Loopback to `wp-cron.php`** | **200, empty body, 0.03 s** |
+| `wp-content/updraft/` | only the 3 guard files (`.htaccess`, `index.html`, `web.config`) — no archive yet |
+| Updraft backup history | `NULL` — no backup has ever been recorded |
+| Site after the probe | `/` `/shop/` `/checkout/` all 200; probe 404 |
+
+The loopback row is the one that matters, and it is not the same fact as
+`DISABLE_WP_CRON=false`. That constant only says WP is *permitted* to self-spawn;
+the self-request is what actually has to succeed. This host has no cPanel
+scheduler, so nothing else will ever fire these events — if the loopback were
+blocked, both events would sit registered and never run, looking exactly like
+"hasn't fired yet" and staying that way forever. A 200 with an empty body is
+WP-Cron's normal success response (it has nothing to return once it has spawned),
+so the loopback works.
+
+**Still outstanding:** the first *real* fire at 20:46 UTC. After that, confirm a
+**new dated** archive appeared under `wp-content/updraft/`, and that
+`updraft_backup_history` is no longer `NULL`. A schedule that was never
+exercised is the same state you are trying to leave behind — the mechanism being
+sound is not the same as it having produced a backup.
+
+Two probes were burned getting here, both my error and both worth recording:
+`gmdate()` on `$event['schedule']` (which is the recurrence *name*, `'daily'`, not
+a timestamp — WP's cron array stores the interval separately), and a guessed
+`UpdraftPlus::get_updraft_backup_history()` that does not exist (the real reader
+is `UpdraftPlus_Options::get_updraft_option('updraft_backup_history')`, and it
+must go through that accessor because the history option is filtered). Both
+threw fatally on the live store before being fixed. It is the same lesson as the
+`updraft_interval_type` write in 1c: **a guessed API name fails loudly here, but
+in a write path it would have failed silently** — the write that matters is the
+one to double-check.
+
 
 ### Optional — only if you want a true off-site safety net
 
@@ -414,10 +455,12 @@ docs claiming 23 pending updates when the live site had **0** and had for hours.
 
 **The update pass is no longer on this list — it is done.** What remains:
 
-- **1c verification** — the UpdraftPlus daily schedule is set and registered, but
-  it has not yet fired. After 2026-09-27 20:46 UTC, confirm a new dated archive
-  exists under `wp-content/updraft/`. This host has no scheduler of its own, so
-  until that is confirmed keep running 1a manually before any risky change.
+- **1c's first real fire** — the schedule's *mechanism* is verified (both events
+  recurring, loopback to `wp-cron.php` confirmed 200), but it has not yet produced
+  a backup. After 2026-09-27 20:46 UTC, confirm a new dated archive exists under
+  `wp-content/updraft/` and that `updraft_backup_history` is no longer `NULL`.
+  This host has no scheduler of its own, so until that is confirmed keep running
+  1a manually before any risky change.
 - **ZarinPal live merchant code** and **`sandbox: no`** — not yet acquired. Until
   then production runs the gateway in sandbox and takes no real payments.
 - **PWSMS real credentials** — the `Logger` sink makes production SMS a **silent

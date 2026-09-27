@@ -1736,3 +1736,58 @@ and the suite is **229 passed / 0 failed** both before and after the DB fix.
 **The lesson, which is the fifth instance of one pattern:** a repo-wide text replace
 is not a migration. Scope it to the files that own the string, and diff the result
 token-wise — a passing suite does not mean the diff is clean.
+
+---
+
+## 1c mechanism verified on the live site (2026-09-27 13:40 UTC)
+
+Picked up the next open item from the runbook: 1c's daily schedule was *set* but
+never *exercised*. The first fire is not until 20:46 UTC, so what could be checked
+now was whether it **can** fire at all — and on this host that was a real question,
+not a formality.
+
+**Why it was a real question.** The host has no cPanel scheduler (no `Cron` UAPI
+module, no Backup schedule control). The only thing that will ever run these
+events is WordPress self-spawning `wp-cron.php` on a front-end request. So the
+entire backup schedule rests on one loopback HTTP request working. If it were
+blocked, both events would sit registered and never run — and the evidence would
+be indistinguishable from "hasn't fired yet", which is exactly the state that
+started all of this. The 2026-09-26 and 2026-09-27 audits both turned on a signal
+that looked fine and was not, so the loopback got measured rather than assumed.
+
+Verified by read-only docroot probe (random name, uploaded over passive FTP,
+fetched over HTTPS, deleted; confirmed gone by both HTTP 404 and FTP listing):
+
+| Check | Result |
+| --- | --- |
+| `updraft_interval` / `updraft_interval_database` | `'daily'` / `'daily'` |
+| `updraft_backup` | **recurring**, `daily` / 86400s, next 2026-09-27 20:46:33 UTC |
+| `updraft_backup_database` | **recurring**, `daily` / 86400s, next 2026-09-27 20:46:33 UTC |
+| `DISABLE_WP_CRON` | `false` |
+| **loopback → `wp-cron.php`** | **200, empty body, 0.03 s** |
+| loopback → site root | 200, 0.75 s |
+| `wp-content/updraft/` | 3 guard files only — no archive |
+| `updraft_backup_history` | `NULL` |
+| after cleanup | `/` `/shop/` `/checkout/` 200, probe 404 |
+
+The empty body is not a failure signal — `wp-cron.php` returns 200 with no content
+once it has spawned, and a 200 with a body would be the thing to worry about.
+
+**Two probes burned, both my error.** Worth recording because this is now the
+second time in one day a guessed API name bit:
+
+1. `gmdate( ..., $e['schedule'] )` fataled — in WP's cron array `schedule` is the
+   recurrence *name* (`'daily'`), not a timestamp; the seconds are in `interval`.
+2. `UpdraftPlus::get_updraft_backup_history()` fataled — it does not exist. The
+   real reader is `UpdraftPlus_Options::get_updraft_option('updraft_backup_history')`,
+   and it has to go through that accessor because the history option is filtered.
+
+Both threw on the **live store**, which is the argument for checking API names
+against the local copy before uploading: the 2026-09-27 `updraft_interval_type`
+write failed *silently* and created two junk options, and this is the same
+mistake in the read path where it at least failed loudly. Guessed names are only
+self-announcing on the read path; on a write path they look like success.
+
+**Still open:** the first real fire at 20:46 UTC. After that, confirm a new dated
+archive under `wp-content/updraft/` and `updraft_backup_history` no longer `NULL`.
+Time-based, not blocked.
