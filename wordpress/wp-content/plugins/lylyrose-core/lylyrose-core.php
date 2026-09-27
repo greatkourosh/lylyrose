@@ -4,7 +4,7 @@
  * Plugin URI: http://localhost:8080
  * Description: Core functionality for Lyly Rose - Custom product attributes, taxonomies, and WooCommerce extensions
  * Author: Lyly Rose Team
- * Version: 2.3.0
+ * Version: 2.4.0
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: lylyrose-core
@@ -102,6 +102,9 @@ class Lylyrose_Core {
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-stock-notifier.php';
         ASC_Stock_Notifier::init();
+
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-flash-sales.php';
+        ASC_Flash_Sales::init();
     }
 
     /**

@@ -9,7 +9,6 @@
 > here is referred to `aroma_store`, built and tested there, and mirrored back only
 > once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
 
-
 ## 1. Architecture
 
 Use a standard WordPress + WooCommerce architecture.
@@ -37,18 +36,18 @@ lylyrose-core/
 ├── .gitignore
 ├── README.md
 ├── docs/
-│   ├── DEVELOPMENT_LOG.md
-│   ├── LOCAL_SETUP.md
-│   ├── DEPLOYMENT.md
-│   ├── BACKUP_RESTORE.md
-│   └── ARCHITECTURE.md
+│ ├── DEVELOPMENT_LOG.md
+│ ├── LOCAL_SETUP.md
+│ ├── DEPLOYMENT.md
+│ ├── BACKUP_RESTORE.md
+│ └── ARCHITECTURE.md
 │
 ├── wordpress/
-│   └── wp-content/
-│       ├── themes/
-│       │   └── aroma-store/
-│       └── plugins/
-│           └── lylyrose-core/
+│ └── wp-content/
+│ ├── themes/
+│ │ └── aroma-store/
+│ └── plugins/
+│ └── lylyrose-core/
 │
 └── docker/
 
@@ -68,17 +67,17 @@ The theme must be custom-designed for this store.
 
 It should include appropriate separation for:
 
-* header
-* footer
-* navigation
-* product cards
-* product archive
-* single product
-* cart
-* checkout
-* account
-* homepage sections
-* reusable components
+- header
+- footer
+- navigation
+- product cards
+- product archive
+- single product
+- cart
+- checkout
+- account
+- homepage sections
+- reusable components
 
 Use WooCommerce template overrides only when necessary.
 
@@ -98,13 +97,13 @@ Store LYLY ROSE-specific business functionality that should survive theme change
 
 Examples:
 
-* custom product taxonomies
-* custom product metadata
-* fragrance note structures
-* custom shortcodes/components where necessary
-* custom WooCommerce hooks
-* brand functionality
-* custom product badges
+- custom product taxonomies
+- custom product metadata
+- fragrance note structures
+- custom shortcodes/components where necessary
+- custom WooCommerce hooks
+- brand functionality
+- custom product badges
 
 Do not put business logic into WordPress core.
 
@@ -120,12 +119,12 @@ Use taxonomies for values useful for filtering/grouping.
 
 Potential taxonomies/attributes:
 
-* brand
-* gender
-* concentration
-* fragrance_family
-* season
-* occasion
+- brand
+- gender
+- concentration
+- fragrance_family
+- season
+- occasion
 
 Use structured metadata where a value is genuinely product-specific.
 
@@ -179,11 +178,11 @@ Configuration must be environment-based.
 
 Examples:
 
-* database name
-* database user
-* database password
-* database host
-* WordPress URL
+- database name
+- database user
+- database password
+- database host
+- WordPress URL
 
 Never hard-code:
 
@@ -223,11 +222,11 @@ Avoid huge frontend frameworks for simple UI components unless there is a strong
 
 Optimize:
 
-* CSS
-* JS
-* images
-* database queries
-* WooCommerce queries
+- CSS
+- JS
+- images
+- database queries
+- WooCommerce queries
 
 Do not install caching plugins during initial development unless required.
 
@@ -241,13 +240,13 @@ Implement standard WordPress security practices.
 
 Use:
 
-* nonces
-* capability checks
-* sanitization
-* escaping
-* prepared database queries
-* secure AJAX handling
-* validation
+- nonces
+- capability checks
+- sanitization
+- escaping
+- prepared database queries
+- secure AJAX handling
+- validation
 
 Never trust frontend input.
 
@@ -279,14 +278,14 @@ Target good practical accessibility.
 
 Use:
 
-* semantic HTML
-* keyboard navigation
-* visible focus states
-* alt text
-* accessible forms
-* appropriate labels
-* sufficient contrast
-* ARIA only where necessary
+- semantic HTML
+- keyboard navigation
+- visible focus states
+- alt text
+- accessible forms
+- appropriate labels
+- sufficient contrast
+- ARIA only where necessary
 
 ---
 
@@ -302,9 +301,9 @@ Shared WordPress hosting.
 
 VPS with:
 
-* Nginx/Apache
-* PHP
-* MySQL/MariaDB
+- Nginx/Apache
+- PHP
+- MySQL/MariaDB
 
 Document both at a high level.
 
@@ -331,7 +330,7 @@ Choose a sensible local URL.
 
 For example:
 
-`http://localhost:8020`
+`http://localhost:8030`
 
 or another appropriate port.
 
@@ -349,9 +348,9 @@ Use a maintainable Docker Compose file.
 
 Do not use:
 
-* privileged containers unnecessarily
-* host networking unnecessarily
-* hard-coded machine-specific paths inside containers
+- privileged containers unnecessarily
+- host networking unnecessarily
+- hard-coded machine-specific paths inside containers
 
 Use named volumes or project-relative paths appropriately.
 
@@ -363,12 +362,12 @@ Prepare the project for Git.
 
 `.gitignore` must exclude:
 
-* secrets
-* `.env`
-* database dumps containing credentials
-* unnecessary generated files
-* caches
-* logs where appropriate
+- secrets
+- `.env`
+- database dumps containing credentials
+- unnecessary generated files
+- caches
+- logs where appropriate
 
 Provide:
 
@@ -382,55 +381,55 @@ Before declaring the project complete, test:
 
 ### WordPress
 
-* installation
-* login
-* admin
+- installation
+- login
+- admin
 
 ### WooCommerce
 
-* product creation
-* category
-* attributes
-* inventory
-* price
-* variation
+- product creation
+- category
+- attributes
+- inventory
+- price
+- variation
 
 ### Frontend
 
-* homepage
-* category
-* search
-* filters
-* product page
-* cart
-* checkout
-* account
+- homepage
+- category
+- search
+- filters
+- product page
+- cart
+- checkout
+- account
 
 ### Responsive
 
-* mobile
-* tablet
-* desktop
+- mobile
+- tablet
+- desktop
 
 ### Persian
 
-* RTL
-* Persian text
-* Persian product names
-* forms
-* checkout
+- RTL
+- Persian text
+- Persian product names
+- forms
+- checkout
 
 ### Security
 
-* unauthorized requests
-* form validation
-* nonce handling
+- unauthorized requests
+- form validation
+- nonce handling
 
 ### Deployment
 
-* backup
-* restore
-* fresh installation procedure
+- backup
+- restore
+- fresh installation procedure
 
 ---
 
@@ -460,25 +459,25 @@ Update documentation when architecture changes.
 
 The technical implementation is complete only when:
 
-* local environment starts successfully
-* WordPress loads
-* WooCommerce is configured
-* custom LYLY ROSE theme is active
-* custom core plugin works
-* sample products work
-* product variations work
-* catalog works
-* filters work
-* search works
-* cart works
-* checkout works
-* account works
-* RTL works
-* responsive UI works
-* no obvious PHP errors
-* no obvious JavaScript console errors
-* project can be backed up
-* project can theoretically be migrated to hosting
-* deployment documentation exists
-* `.env.example` exists
-* no secrets are committed
+- local environment starts successfully
+- WordPress loads
+- WooCommerce is configured
+- custom LYLY ROSE theme is active
+- custom core plugin works
+- sample products work
+- product variations work
+- catalog works
+- filters work
+- search works
+- cart works
+- checkout works
+- account works
+- RTL works
+- responsive UI works
+- no obvious PHP errors
+- no obvious JavaScript console errors
+- project can be backed up
+- project can theoretically be migrated to hosting
+- deployment documentation exists
+- `.env.example` exists
+- no secrets are committed

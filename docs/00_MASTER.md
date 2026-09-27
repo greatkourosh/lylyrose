@@ -9,6 +9,10 @@
 > here is referred to `aroma_store`, built and tested there, and mirrored back only
 > once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
 
+> **This repo is production; `aroma_store` is the test suite.** Apply and test every
+> feature in `aroma_store` first, then port it here to use. A feature that lands here
+> without existing upstream first is a bug in process, not an exception.
+
 
 ## 1. Project
 

@@ -4,8 +4,8 @@
 > truth. Develop and test features upstream first; mirror here only when needed.
 > See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
 
-
 ## Project: LYLY ROSE - Persian RTL E-commerce Perfume Store
+
 **Date:** 2026-08-20
 **Status:** Phase 1 Complete - Core Store Operational (Digikala-style UI)
 
@@ -14,6 +14,7 @@
 ## ✅ Completed Implementation
 
 ### Phase 0: Foundation
+
 - [x] Docker Compose environment (WordPress + MariaDB + phpMyAdmin)
 - [x] WordPress core installed
 - [x] WooCommerce plugin activated
@@ -22,6 +23,7 @@
 - [x] Iranian Toman (IRR) currency configured
 
 ### Phase 1: Core Store (Digikala-style Design)
+
 - [x] **Theme Architecture**: Complete RTL Persian theme with Digikala-inspired visual identity
   - Header: Top bar (location, links), Main row (logo, prominent search, cart/wishlist/account), Category nav (red)
   - Mobile: Hamburger menu drawer, collapsible search, responsive breakpoints (1024/768/480px)
@@ -127,9 +129,9 @@ wordpress/wp-content/plugins/lylyrose-core/
 docker-compose up -d
 
 # Access
-http://localhost:8020          # Storefront
-http://localhost:8020/wp-admin # Admin (admin / admin123)
-http://localhost:8021          # phpMyAdmin
+http://localhost:8030          # Storefront
+http://localhost:8030/wp-admin # Admin (admin / admin123)
+http://localhost:8031          # phpMyAdmin
 
 # Admin credentials
 Username: admin
@@ -147,12 +149,12 @@ Password: admin123
 
 ---
 
-**Phase 1 Status: ✅ COMPLETE - Production-ready Persian perfume e-commerce store operational**
----
+## **Phase 1 Status: ✅ COMPLETE - Production-ready Persian perfume e-commerce store operational**
 
 ## Update — 2026-08-23: Digikala Theme + Test Suite
 
 ### New Active Theme: `digikala`
+
 - Built from live Playwright captures of digikala.com (homepage, category, product pages)
 - Design tokens from real site: red `#ef394e`, badge red `#d32f2f`, page bg `#f0f0f1`, headings `#23254e`, IRANYekan font stack (Vazirmatn fallback via CDN)
 - Templates: header (announcement bar, topbar, search header, category nav, mobile drawer), front-page (hero slider, service row, story circles, شگفت‌انگیز offers carousel with progress bars, banner grid, product rails, category circles, brand strip, magazine), footer, archive with filter sidebar, product card with discount chips, single product with sticky buy box, cart, checkout
@@ -160,6 +162,7 @@ Password: admin123
 - Activated as default theme (template + stylesheet = digikala)
 
 ### Test Suite: `docker/run-tests.sh`
+
 - Section 1: `php -l` on all custom PHP files (34 files) inside the wp container
 - Section 2: active theme check (DB query on wp_options)
 - Section 3: required plugins active (woocommerce, lylyrose-core)
@@ -168,6 +171,7 @@ Password: admin123
 - Known MSYS/Git Bash quirk documented in-script: `grep -q` exits 141 (SIGPIPE) on large inputs; use `grep -c` wrapper instead
 
 ### Current Status (2026-08-23)
+
 - Tests: 17 passed / 1 failed (currency still USD — Toman conversion is the next work item)
 
 ---
@@ -175,14 +179,17 @@ Password: admin123
 ## Update — 2026-08-23 (part 2): Persian Plugins + Toman Currency
 
 ### Plugins Installed
+
 - **persian-woocommerce** (ووکامرس فارسی) — Persian WooCommerce localization, IRT/تومان currency symbol, Iran states/cities
 - **wp-parsidate** — Jalali dates + Persian digit conversion
 - **wp-jalali REMOVED** — incompatible with PHP 8.2 (curly-brace string offsets caused a fatal error that broke the entire site)
 
 ### Key incident: serialized option corruption
+
 A manual SQL update to `active_plugins` wrote wrong string lengths in the PHP-serialized value (`s:47` instead of `s:43`), causing `unserialize()` to fail and WordPress to silently load zero plugins. Fixed by writing the correct serialization. Lesson: never hand-edit serialized WP options — use `update_option()` or compute lengths precisely.
 
 ### Toman Currency Configuration
+
 - `woocommerce_currency` = `IRT` (Toman via persian-woocommerce)
 - `woocommerce_currency_pos` = `right_space` (23,000,000 تومان)
 - `woocommerce_price_num_decimals` = `0`
@@ -191,6 +198,7 @@ A manual SQL update to `active_plugins` wrote wrong string lengths in the PHP-se
 - Note: OPcache cached the old functions.php — required `opcache_reset()` + container restart for changes to take effect
 
 ### Test Suite Status
+
 18 passed / 0 failed — all green.
 
 ---
@@ -199,20 +207,21 @@ A manual SQL update to `active_plugins` wrote wrong string lengths in the PHP-se
 
 Installed one-by-one with lint → activate → smoke test → commit workflow (`docker/install-plugin.sh`):
 
-| Plugin | Slug | Purpose |
-|---|---|---|
-| Limit Login Attempts Reloaded | limit-login-attempts-reloaded | Brute-force protection |
-| WPS Hide Login | wps-hide-login | Login page moved to /secure-login (wp-login.php 301s away) |
-| Wordfence | wordfence | Firewall + malware scanner |
-| UpdraftPlus | updraftplus | Backups |
-| WP Super Cache | wp-super-cache | Page cache (Apache-compatible; LiteSpeed skipped) |
-| Rank Math | seo-by-rank-math | SEO + product schema (PW has IRT schema fixes for it) |
-| TI WooCommerce Wishlist | ti-woocommerce-wishlist | Heart icon on product cards |
-| ZarinPal Gateway | zarinpal-woocommerce-payment-gateway | Iranian payment gateway |
-| Persian WooCommerce Shipping | persian-woocommerce-shipping | پست پیشتاز / تیپاکس rates |
-| Dokan Lite | dokan-lite | Multi-vendor marketplace (Digikala's core model) |
+| Plugin                        | Slug                                 | Purpose                                                    |
+| ----------------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| Limit Login Attempts Reloaded | limit-login-attempts-reloaded        | Brute-force protection                                     |
+| WPS Hide Login                | wps-hide-login                       | Login page moved to /secure-login (wp-login.php 301s away) |
+| Wordfence                     | wordfence                            | Firewall + malware scanner                                 |
+| UpdraftPlus                   | updraftplus                          | Backups                                                    |
+| WP Super Cache                | wp-super-cache                       | Page cache (Apache-compatible; LiteSpeed skipped)          |
+| Rank Math                     | seo-by-rank-math                     | SEO + product schema (PW has IRT schema fixes for it)      |
+| TI WooCommerce Wishlist       | ti-woocommerce-wishlist              | Heart icon on product cards                                |
+| ZarinPal Gateway              | zarinpal-woocommerce-payment-gateway | Iranian payment gateway                                    |
+| Persian WooCommerce Shipping  | persian-woocommerce-shipping         | پست پیشتاز / تیپاکس rates                                  |
+| Dokan Lite                    | dokan-lite                           | Multi-vendor marketplace (Digikala's core model)           |
 
 Notes:
+
 - install-plugin.sh lints every PHP file against PHP 8.2 BEFORE activating; incompatible plugins are auto-removed (would have caught wp-jalali).
 - If activation breaks the site (non-200/fatal), the script auto-deactivates.
 - whl_page option set to "secure-login"; run-tests.sh reads it dynamically.
@@ -223,6 +232,7 @@ Notes:
 ## Update — 2026-08-24: Setup Completion (Wordfence, TI Wishlist, Action Scheduler)
 
 ### 1. Wordfence installation completed
+
 The plugin was active but activation had never finished (no API key, no onboarding flags, WAF not enabled). Completed:
 
 - **WAF auto-prepend installed**: generated `wordfence-waf.php` in web root (`/var/www/html/`, NOT wp-content — the file resolves `__DIR__ . '/wp-content/plugins/...'`), added the `# Wordfence WAF` block to `.htaccess` including a `<IfModule mod_php.c>` section for PHP 8 (Wordfence only writes mod_php5/mod_php7 blocks; this container runs php_module with PHP 8.2)
@@ -230,26 +240,32 @@ The plugin was active but activation had never finished (no API key, no onboardi
 - Onboarding banners cleared (`onboardingAttempt1=license`, `onboardingAttempt3=skipped`), alert email set to admin@example.com, scheduled scans enabled
 
 **Known limitation — no API key on localhost**: Wordfence's NOC refuses to issue free keys to sites reporting `localhost` URLs (`get_anon_api_key` returns "A premium license must be provided for license downgrade requests" [400]). Consequences:
+
 - WAF rules file (`wflogs/rules.php`) stays empty — request-blocking rules are NOT downloaded
 - Scanner still works (core file scan), login security works, hit logging works
 - To get full WAF rules: run the site under a real domain, or register at wordfence.com and paste the key manually (admin → Wordfence → Install)
 
 ### 2. TI WooCommerce Wishlist setup completed
+
 - Wizard notice ("You're almost ready to start") was shown because option `ti-woocommerce-wishlist_wizard` was never set
 - Wishlist page already existed (id 242, slug `/wishlist/`, `[tinvwl_wishlist]` shortcode) but was unlinked in general settings — linked it (`tinvwl-general.page_wishlist = 242`)
 - Set `ti-woocommerce-wishlist_wizard = 1`, enabled `woocommerce_product_wishlist_enabled`
 - Page verified rendering at http://localhost:8080/wishlist/
 
 ### 3. "4 overdue scheduled actions" fixed (زمان‌بندی اقدام)
+
 The Persian warning came from WP Crontrol / Action Scheduler health check: 4 pending actions had missed their schedule dates (site was off / cron didn't run):
+
 - `action_scheduler/migration_hook`, `wc-admin_process_pending_orders_batch`, `woocommerce_update_marketplace_suggestions`, `action_scheduler_run_recurring_actions_schedule_hook`
 - Processed all 4 via `ActionScheduler_QueueRunner::instance()->process_action()` — all complete
 - Ran WP-Cron `--due-now`; queue now has 0 overdue pending actions (12 pending, all future-dated — normal)
 
 ### Tooling note
+
 WP-CLI is not baked into the container; installed ad-hoc to `/tmp/wp-cli.phar` (ephemeral — lost on container rebuild).
 
 ### Test Suite Status
+
 19 passed / 0 failed.
 
 ---
@@ -259,47 +275,58 @@ WP-CLI is not baked into the container; installed ad-hoc to `/tmp/wp-cli.phar` (
 Prioritized install pass, one-by-one with lint → activate → smoke test:
 
 ### 1. Reliable system cron (no plugin)
+
 - `DISABLE_WP_CRON=true` added to wp env in docker-compose.yml
 - New sidecar service `cron` (curlimages/curl) hits `http://wordpress/wp-cron.php?doing_wp_cron` every 60s
 - Root-cause fix for the Action Scheduler backlog from earlier today
 
 ### 2. WP Mail SMTP — installed & active
+
 - Defaults set (mailer=smtp, from "Lyly Rose" <admin@example.com>)
 - **User action needed**: enter real SMTP host/credentials at WP admin → WP Mail SMTP → Settings
 
 ### 3. Persian WooCommerce SMS (افزونه پیامک ووکامرس) — installed & active
+
 - Supports Kavenegar, SMS.ir, Melipayamak and other Iranian gateways
 - **User action needed**: pick gateway + API key under پیکربندی → پیامک
 
 ### 4. National ID (کد ملی) checkout field — implemented natively
+
 - Added to lylyrose-core: `includes/class-national-id.php`
 - Required billing field on checkout, saved to order meta `_billing_national_id`, shown in admin + emails
 - Full mod-11 checksum validation (`ASC_National_ID::is_valid()`); invalid codes blocked with Persian error
 - No third-party plugin needed
 
 ### 5. Redis object cache — live
+
 - New `redis` service (redis:7-alpine, 128MB LRU) in docker-compose.yml
 - PHP redis extension now baked into a custom image via new `docker/Dockerfile` (pecl install; ad-hoc pecl installs are lost on container rebuild)
 - `WP_REDIS_HOST=redis` constant added; Redis Object Cache plugin installed, drop-in enabled (~1.8k keys after two page loads)
 
 ### 6. Autoptimize — installed & active
+
 - CSS/JS/HTML minify+aggregate master switches enabled programmatically
 - Assets now served from `wp-content/cache/autoptimize/`
 
 ### 7. Image optimization — not needed
+
 All existing uploads are already WebP; WebP Express plugin was installed then removed.
 
 ### 8. Torob product feed (افزونه رسمی ترب) — installed & active
+
 - products-extractor-for-woocommerce; configure feed URL inside the plugin when ready to list on torob.com
 
 ### 9. Goftino live chat (گفتینو) — installed & active
+
 - **User action needed**: paste Goftino site code in its settings
 
 ### 10. Analytics — installed & active
+
 - Microsoft Clarity (needs Clarity project ID)
 - Google Site Kit (needs Google account sign-in flow for GA4)
 
 ### Incidents fixed during this pass
+
 1. **Permalinks wiped** (all pages 404): `permalink_structure` option and the `.htaccess` WordPress block were emptied (likely during a container recreate). Restored structure `/%postname%/` + rewrote the rewrite block manually.
 2. **WooCommerce Coming Soon mode was ON**: shop page rendered "چیزهای بزرگ در افق هستند" placeholder instead of products. Disabled via `woocommerce_coming_soon=no`.
 3. **Checkout 302 to /cart/**: WC redirects checkout when cart is empty. Fixed by hooking `woocommerce_checkout_redirect_empty_cart → __return_false` late (plugins_loaded@99) in lylyrose-core. Note: the same filter added earlier (plugins_loaded@20 inside class constructor) did NOT take effect on web requests until a full container restart cleared stale state.
@@ -307,6 +334,7 @@ All existing uploads are already WebP; WebP Express plugin was installed then re
 5. **my-account page id unassigned**: fixed `woocommerce_myaccount_page_id = 9`.
 
 ### Test Suite Status
+
 19 passed / 0 failed.
 
 ---
@@ -315,20 +343,22 @@ All existing uploads are already WebP; WebP Express plugin was installed then re
 
 `docker/run-tests.sh` grew from 19 to 46 tests across 10 sections. New coverage:
 
-| Section | What it verifies |
-|---|---|
-| 3 (expanded) | All 10 stack plugins active (Redis cache, SMTP, SMS, Autoptimize, Torob, Goftino, Clarity, Site Kit) |
-| 6 Cron | lylyrose-cron sidecar up, DISABLE_WP_CRON defined, sidecar reaches wp-cron.php internally, zero overdue Action Scheduler actions |
-| 7 Redis | PONG response, object-cache.php drop-in, PHP redis ext, wp_cache round-trip |
+| Section                | What it verifies                                                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3 (expanded)           | All 10 stack plugins active (Redis cache, SMTP, SMS, Autoptimize, Torob, Goftino, Clarity, Site Kit)                                                 |
+| 6 Cron                 | lylyrose-cron sidecar up, DISABLE_WP_CRON defined, sidecar reaches wp-cron.php internally, zero overdue Action Scheduler actions                     |
+| 7 Redis                | PONG response, object-cache.php drop-in, PHP redis ext, wp_cache round-trip                                                                          |
 | 8 Checkout/National ID | checkout renders real checkout UI, field registered for block + classic checkout, label کد ملی, 4 checksum unit cases, empty-cart checkout reachable |
-| 9 Autoptimize | assets served from cache/autoptimize, cache files exist |
-| 10 Site integrity | permalink /%postname%/, coming-soon off, wishlist page + wizard flag |
+| 9 Autoptimize          | assets served from cache/autoptimize, cache files exist                                                                                              |
+| 10 Site integrity      | permalink /%postname%/, coming-soon off, wishlist page + wizard flag                                                                                 |
 
 ### Bugs the new tests caught and fixed
+
 1. **Missing page.php in digikala theme**: checkout/cart/my-account fell through to index.php's blog-card layout — WooCommerce pages rendered as editorial article listings with no functional UI. Added `wordpress/wp-content/themes/digikala/page.php` rendering `the_content()` full-width.
 2. **Block checkout ignores classic fields**: WooCommerce now renders checkout as a React block; `woocommerce_checkout_fields` filters don't apply. Registered the کد ملی field via `woocommerce_register_additional_checkout_field()` (id `lylyrose-core/national-id`, required, address location). Classic shortcode path keeps its own registration.
 
 ### Test Suite Status
+
 46 passed / 0 failed.
 
 ---
@@ -336,7 +366,9 @@ All existing uploads are already WebP; WebP Express plugin was installed then re
 ## Update — 2026-08-25: Product Page v1.1 + Performance Incident
 
 ### Digikala-style product page (theme v1.0.2, lylyrose-core v1.1.0)
+
 `single-product.php` rebuilt out to a fuller Digikala clone:
+
 - Latin subtitle extracted from product excerpt, rendered LTR under the title
 - Discount badge (٪ off) in info column and mobile bar when a sale price is active
 - Product code via new `ASC_Product_Code` class (`includes/class-product-code.php`) — falls back to SKU
@@ -345,10 +377,11 @@ All existing uploads are already WebP; WebP Express plugin was installed then re
 - ~140 lines of matching CSS in `style.css`
 
 ### Performance incident — pages timing out at 15s (root cause: opcache config flip)
+
 HTTP smoke tests intermittently returned `000` because uncached pages took 15s+ (curl's
 15s timeout). Diagnosis path:
 
-1. All pages actually returned 200 server-side; only *uncached* pages were slow.
+1. All pages actually returned 200 server-side; only _uncached_ pages were slow.
 2. Homepage fast (WP Super Cache full-page hit), every WP bootstrap slow (~15-20s).
 3. Per-plugin timing mu-plugin: plugin includes only ~2.3s; bulk of time spread across
    core load + init hooks — consistent with per-file filesystem stat overhead, not any
@@ -369,6 +402,7 @@ saw zero plugins active. Restored programmatically via `update_option()` with th
 22-plugin array. Never hand-write serialized PHP values.
 
 ### Test Suite Status
+
 46 passed / 0 failed.
 
 ## 2026-08-31 — Rebrand: visible Digikala labels -> Aromaland (لیلی رز)
@@ -463,8 +497,8 @@ Extended the shop/category filter rail (which already had brand/price/
 availability/discount) with the three remaining product-attribute facets,
 closing FEATURES_ROADMAP P0 #3:
 
-- lylyrose_filter_facets() maps GET params dk_brands / dk_gender /
-  dk_concentration / dk_volume to the pa_* taxonomies + Persian labels;
+- lylyrose*filter_facets() maps GET params dk_brands / dk_gender /
+  dk_concentration / dk_volume to the pa*\* taxonomies + Persian labels;
   lylyrose_facet_selection() reads a facet from the query string.
 - lylyrose_shop_filters() now applies all four facets as tax_query terms
   (previously brand-only).
@@ -551,7 +585,7 @@ several of them) plus .htaccess rewrite rules on a BitNinja-guarded host — rea
 zero gain.
 
 - **Plugin** (`lylyrose-core` v1.6.0): new `includes/class-images.php` — `ASC_Images`:
-  - `image_editor_output_format` → JPEG *and* PNG uploads are converted to WebP by WP
+  - `image_editor_output_format` → JPEG _and_ PNG uploads are converted to WebP by WP
     core's image editor (original kept). Closes the real gap: future manual/vendor uploads
     would otherwise have reintroduced heavy raster formats.
   - `big_image_size_threshold` → 2560px cap on the longest side.
@@ -627,7 +661,7 @@ no plugin, ~140 lines total.
   shared hosts), leaving stale empty caches. Inline `delete_transient()` in the
   status hook is trivially cheap for ≤ item-count keys — replaced.
 - **Gotcha — same-status transitions**: `wc_create_order(array('status' =>
-  'completed'))` then `update_status('completed')` is a same-status no-op — the
+'completed'))` then `update_status('completed')` is a same-status no-op — the
   `woocommerce_order_status_completed` hook never fires. Real checkout always
   transitions pending→completed, but test seeds must create pending first.
 
@@ -792,7 +826,7 @@ In-house build (no third-party OTP plugin): lylyrose-core gains `ASC_OTP`
   wrong code, resend cooldown, invalid mobile, bad nonce, rate limit 6th
   request blocked, Persian digits, cleanup). 124 total.
 - Live deploy: plugin dir FTP'd (woo-wallet ~3.5MB, chunked), fa_IR pack
-  + options via a token-guarded script, deleted after.
+  - options via a token-guarded script, deleted after.
 
 ## 2026-09-03 — Cart abandonment recovery (P0 #4)
 
@@ -830,6 +864,7 @@ in lylyrose-core (`ASC_Cart_Abandonment`, class-cart-abandonment.php).
 - Live note: real SMS gateway credentials still required (same as OTP).
 
 ## 2026-09-03 — ZarinPal sandbox e2e payment (P0 #5)
+
 - **Goal**: prove the full purchase → gateway → callback → order-completed flow
   headlessly, then encode it as a permanent test section. Payment is the one
   flow that must not fail silently.
@@ -903,12 +938,12 @@ plugin bumped to v2.1.0 concept — code already at 2.0.0 constant):
   non-purchaser no-coupon, cleanup). 152 total across 22 sections, all green.
 - **WC 11 API gotchas found**:
   - `WC_Coupon::set_expiry_date()` does not exist — `set_date_expires(int
-    timestamp)` is the correct setter (fatal otherwise).
+timestamp)` is the correct setter (fatal otherwise).
   - woo-wallet hooks `comment_post` with 3 args; test-fired hooks must pass
     `do_action("comment_post", $id, 1, get_comment($id, ARRAY_A))` or WP
     fatals with ArgumentCountError (production WP always passes all 3, so
     this is test-only).
-  - The coupon lookup requires the order to be *actually* completed
+  - The coupon lookup requires the order to be _actually_ completed
     (`update_status("completed")`), not just the hook fired on a pending
     order.
 - **Live note**: `class-reviews.php` must be shipped to production for the
@@ -970,6 +1005,7 @@ caveat in the previous entry.
 - **Result**: all green — 163 tests across 23 sections, 0 failed (was 152/22).
 
 ## 2026-09-05 — Multi-step checkout (P3)
+
 - **Goal**: split classic one-page WooCommerce checkout into two explicit
   steps — 1) اطلاعات ارسال (billing/shipping + کد ملی), 2) پرداخت (payment
   info) — for the Digikala convention of reducing address-stage drop-off.
@@ -1011,6 +1047,7 @@ caveat in the previous entry.
   is intact.
 
 ## 2026-09-05 — Notifications center (P3 #17)
+
 - Custom post type `asc_notification` for scalable notifications with author scoping.
 - Bell icon in header (logged-in only) with unread-badge and dropdown of 5 most recent.
 - Account endpoint `/my-account/notifications/` lists all notifications newest-first with mark-all-read.
@@ -1025,6 +1062,7 @@ Plugin: lylyrose-core v2.1.0; Theme: digikala v1.8.0
 ## 2026-09-06 — Gift wrap + gift card (P3 #17)
 
 ### Gift wrap (custom, lylyrose-core v2.2.0)
+
 - New `ASC_Gift_Wrap` class (`includes/class-gift-wrap.php`).
 - `woocommerce_cart_calculate_fees` adds a 50,000 تومان fee when enabled.
   State via `WC()->session` (`asc_gift_wrap`) or cookie fallback.
@@ -1041,6 +1079,7 @@ Plugin: lylyrose-core v2.1.0; Theme: digikala v1.8.0
   cart/checkout. Theme version 1.8.0 → 1.9.0.
 
 ### Gift card (plugin — deferred)
+
 - `pw-woocommerce-gift-cards` downloaded + PHP 8.2 lint OK via
   `install-plugin.sh`. Activation smoke-test falsely failed (`shop=000`)
   due to site-wide latency (requests now ~19-37s), and auto-deactivated;
@@ -1051,6 +1090,7 @@ Plugin: lylyrose-core v2.1.0; Theme: digikala v1.8.0
   amounts, 12-month expiry.
 
 ### Tests
+
 - New section 26 «Gift wrap + gift card (P3 #17)» — cart checkbox, Persian
   label/digits, AJAX toggle, fee row in totals, checkout status + order
   review, order fee line item (50000), soft gift-card plugin check.
@@ -1073,16 +1113,16 @@ all residue was data.
 
 ### What changed
 
-| Table | Rows | Before | After |
-|---|---|---|---|
-| `wp_options` | `blogname` | `Aromaland` | `Lyly Rose` |
-| `wp_options` | `woocommerce_email_from_name` | `آرومالند` | `لیلی رز` |
-| `wp_options` | 5 mail-address options | `admin@aromalnd.test` | `info@lylyrose.ir` |
-| `wp_options` | `wp_mail_smtp`, `cartflows_ca_email_admin_settings`, `woocommerce_paypal_settings`, `auto_core_update_notified` | embedded old brand | re-serialized |
-| `wp_users` | `admin`, `demo_customer` | `*@aromalnd.test` | `info@lylyrose.ir` |
-| `wp_usermeta` | 1 (`billing_email`) | `admin@aromalnd.test` | `info@lylyrose.ir` |
-| `wp_comments` | 1 | `riya-test@aromalnd.test` | `riya-test@lylyrose.ir` |
-| `wp_wpmailsmtp_debug_events` | 55 | old outbound headers | purged (log) |
+| Table                        | Rows                                                                                                            | Before                    | After                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------------------- |
+| `wp_options`                 | `blogname`                                                                                                      | `Aromaland`               | `Lyly Rose`             |
+| `wp_options`                 | `woocommerce_email_from_name`                                                                                   | `آرومالند`                | `لیلی رز`               |
+| `wp_options`                 | 5 mail-address options                                                                                          | `admin@aromalnd.test`     | `info@lylyrose.ir`      |
+| `wp_options`                 | `wp_mail_smtp`, `cartflows_ca_email_admin_settings`, `woocommerce_paypal_settings`, `auto_core_update_notified` | embedded old brand        | re-serialized           |
+| `wp_users`                   | `admin`, `demo_customer`                                                                                        | `*@aromalnd.test`         | `info@lylyrose.ir`      |
+| `wp_usermeta`                | 1 (`billing_email`)                                                                                             | `admin@aromalnd.test`     | `info@lylyrose.ir`      |
+| `wp_comments`                | 1                                                                                                               | `riya-test@aromalnd.test` | `riya-test@lylyrose.ir` |
+| `wp_wpmailsmtp_debug_events` | 55                                                                                                              | old outbound headers      | purged (log)            |
 
 The `aromalnd.test` domain also appeared in the **WC session cache**, which re-persisted
 the old address on the next request after a naive fix. Fixed by flushing the object cache
@@ -1092,7 +1132,7 @@ and rewriting the session row.
 
 - **`wp_wfconfig`** (`wordpressPluginVersions`, `wordpressThemeVersions`,
   `vulnerabilities_plugin`) still contain the strings `aroma-store*`. These are
-  Wordfence inventories of plugin/theme *slugs* that existed on the source project.
+  Wordfence inventories of plugin/theme _slugs_ that existed on the source project.
   Rewriting them would misreport what is actually installed, and they are never rendered
   to a visitor. A full text-column sweep of every varchar/text/blob/JSON column in the
   schema returns these 3 rows as the only remaining `aroma` hits.
@@ -1131,7 +1171,7 @@ Full pre-change dump at `/tmp/lylyrose-rebrand-backup.sql` (97 tables).
 
 Same helper uploaded to `lylyroseir/` over passive FTP, fetched once over HTTPS, then
 deleted — all four files (`rebrand_aromaland.php`, `rebrand-backup.json`, `.rebrand_done`,
-`verify_prod.php`) confirmed gone afterwards by HTTP 404 *and* an FTP directory listing
+`verify_prod.php`) confirmed gone afterwards by HTTP 404 _and_ an FTP directory listing
 that no longer contains them. The pre-change values were pulled back to
 `/tmp/lylyrose-prod-rebrand-backup.json` before deletion, so the change is reversible.
 
@@ -1185,6 +1225,7 @@ volumes then generate no `wp-config.php` — a failure that looks like a credent
 problem, not a missing file.
 
 **Verification**
+
 - Fresh volume: core 7.1.2, `wp-config.php` generated, installer reachable, WooCommerce
   11.1.0 activates, `class_exists(WP_Block_Templates_Registry)` YES.
 - Fresh volume pages: `/` 200, `/shop/` 200, `/cart/` 200, `/checkout/` 302, `/wp-admin/` 302,
@@ -1207,23 +1248,23 @@ Full update pass, core first then plugins one at a time with a smoke check after
 each. Backup first: DB dump + `wp-content` tarball + the three `woo_wallet_*`
 tables, in `.test-logs/pre-update-backup-20260926-132143/` (git-ignored).
 
-| Component | From | To |
-|---|---|---|
-| WordPress core | 7.1 | 7.1.2 |
-| WooCommerce | 11.1.0 | 11.1.2 |
-| woo-wallet | 1.6.14 | **1.7.0** (major) |
-| redis-cache | 2.8.0 | **3.0.0** (major) |
-| Dokan | 5.1.1 | 5.1.3 |
-| wp-parsidate | 6.2.1 | 6.4 |
-| persian-woocommerce | 10.0.4 | 10.0.5 |
-| gateland | 2.4.5 | 2.5.0 *(inactive)* |
-| wordfence | 9.0.0 | 9.0.1 *(inactive)* |
-| seo-by-rank-math | 1.0.276 | 1.0.279 *(inactive)* |
-| limit-login-attempts-reloaded | 3.3.5 | 3.3.10 *(inactive)* |
-| wp-super-cache | 3.1.1 | 3.1.3 *(inactive)* |
-| persian-woocommerce-shipping | 4.4.6 | 4.4.8 *(inactive)* |
-| autoptimize / clarity / site-kit / updraftplus / wcpe / ti-wishlist / persian-wc-sms | — | patch bumps |
-| twentytwentytwo | 1.7 | 2.2 *(unused default)* |
+| Component                                                                            | From    | To                     |
+| ------------------------------------------------------------------------------------ | ------- | ---------------------- |
+| WordPress core                                                                       | 7.1     | 7.1.2                  |
+| WooCommerce                                                                          | 11.1.0  | 11.1.2                 |
+| woo-wallet                                                                           | 1.6.14  | **1.7.0** (major)      |
+| redis-cache                                                                          | 2.8.0   | **3.0.0** (major)      |
+| Dokan                                                                                | 5.1.1   | 5.1.3                  |
+| wp-parsidate                                                                         | 6.2.1   | 6.4                    |
+| persian-woocommerce                                                                  | 10.0.4  | 10.0.5                 |
+| gateland                                                                             | 2.4.5   | 2.5.0 _(inactive)_     |
+| wordfence                                                                            | 9.0.0   | 9.0.1 _(inactive)_     |
+| seo-by-rank-math                                                                     | 1.0.276 | 1.0.279 _(inactive)_   |
+| limit-login-attempts-reloaded                                                        | 3.3.5   | 3.3.10 _(inactive)_    |
+| wp-super-cache                                                                       | 3.1.1   | 3.1.3 _(inactive)_     |
+| persian-woocommerce-shipping                                                         | 4.4.6   | 4.4.8 _(inactive)_     |
+| autoptimize / clarity / site-kit / updraftplus / wcpe / ti-wishlist / persian-wc-sms | —       | patch bumps            |
+| twentytwentytwo                                                                      | 1.7     | 2.2 _(unused default)_ |
 
 Suite **217 passed / 0 failed**, two consecutive runs. `active_plugins` unchanged
 at 19 — the six inactive plugins ship in the deploy artifact and were updated
@@ -1238,7 +1279,7 @@ which produced a useful error message:
 1. **`unzip` missing from the image.** WordPress's own upgrader shells out to it
    (`WP_Filesystem::unzip_file`), so every core/plugin/theme update died at
    `installing_package` with a bare `process_failed`. Added to the Dockerfile —
-   this blocks *all* future updates, not just this pass.
+   this blocks _all_ future updates, not just this pass.
 
 2. **`abort_if_destination_exists` defaults to true.** `WP_Upgrader::run()` sets it
    that way, which is right for a fresh plugin install and wrong for a core update
@@ -1246,7 +1287,7 @@ which produced a useful error message:
    `/var/www/html` is never empty. Core updates must pass `false`.
 
 3. **My own harness bug, worth recording because the error was useless.** Passing
-   the plugin *file* as the upgrader's `package` (rather than the URL from the
+   the plugin _file_ as the upgrader's `package` (rather than the URL from the
    update transient) makes it try to HTTP-GET that literal string, surfacing as an
    empty `download_failed` with the message buried in `get_error_data()`. The
    plugin file must never be used as the package.
@@ -1300,14 +1341,14 @@ accidentally activated or deactivated by the update.
 
 ### Doc corrections made this pass
 
-Three claims were stale and are now corrected. All three were *live* claims about
+Three claims were stale and are now corrected. All three were _live_ claims about
 current state, not historical narrative, which is why they mattered:
 
-| File | Was | Now |
-|---|---|---|
-| `docs/DEPLOY_PREP.md` | "The Docker image initializes 6.5.5 … the local volume was upgraded to 7.1" | The local stack no longer has this problem at all: `docker/Dockerfile` overlays 7.1 core, so a fresh volume gets it automatically. Production still must ship 7.1 — `stage-deploy.sh` downloads the fa_IR core itself rather than taking it from the image. |
-| `docs/CONTINUATION.md` (open items) | "local is on 5.1.1" | local is on 5.1.3 (the live-imported DB is still on 5.0.16) |
-| `DEPLOYMENT_SUMMARY.md` (still-to-do) | "local is 5.1.1" | local is 5.1.3 |
+| File                                  | Was                                                                         | Now                                                                                                                                                                                                                                                         |
+| ------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/DEPLOY_PREP.md`                 | "The Docker image initializes 6.5.5 … the local volume was upgraded to 7.1" | The local stack no longer has this problem at all: `docker/Dockerfile` overlays 7.1 core, so a fresh volume gets it automatically. Production still must ship 7.1 — `stage-deploy.sh` downloads the fa_IR core itself rather than taking it from the image. |
+| `docs/CONTINUATION.md` (open items)   | "local is on 5.1.1"                                                         | local is on 5.1.3 (the live-imported DB is still on 5.0.16)                                                                                                                                                                                                 |
+| `DEPLOYMENT_SUMMARY.md` (still-to-do) | "local is 5.1.1"                                                            | local is 5.1.3                                                                                                                                                                                                                                              |
 
 The dated `## Dokan 5.1.1 upgrade` section in `CONTINUATION.md` is deliberately **left
 alone** — it is an accurate record of what happened on 2026-09-12. Rewriting history to
@@ -1315,16 +1356,16 @@ match the present is how a changelog stops being a changelog.
 
 ---
 
-## Local port migration 8080 → 8020 + full suite re-verified (2026-09-26 21:33)
+## Local port migration 8080 → 8030 + full suite re-verified (2026-09-26 21:33)
 
 **Why the move:** `8080` turned out to be a **trap** on this host — a stale second
 Aromaland instance answers there, so a local health check could silently hit the
 wrong store and report green for a system under test. Silent wrong-target is worse
-than a hard failure, so the port moved to `8020` (pma `8021`), which is not known
+than a hard failure, so the port moved to `8030` (pma `8031`), which is not known
 to collide. See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md), which already
 recorded this trap.
 
-`aroma_store` (upstream) runs on `8010/8011`; `lylyrose` now on `8020/8021`.
+`aroma_store` (upstream) runs on `8010/8011`; `lylyrose` now on `8030/8031`.
 
 ### Suite re-verified on the new port
 
@@ -1346,17 +1387,17 @@ is a real post-migration result and not a stale-process artifact.
 `*-probe.php` / `*-check.php` helpers) and the docs that reference it.
 
 `docker/migrate-from-remote.sh` kept `${WORDPRESS_PORT:-8080}` in two places and
-was corrected here — it is the script that *rewrites* URLs into the local DB, so a
-stale default would have written `localhost:8080` back into a 8020 stack. That is
+was corrected here — it is the script that _rewrites_ URLs into the local DB, so a
+stale default would have written `localhost:8080` back into a 8030 stack. That is
 the same silent-wrong-target class as the trap itself.
 
 `docker/stage-deploy.sh` was **not** hardcoded to a new port. Its "dump still carries
 the local URL" guard was written against a literal `localhost:8080`; find-and-replace
 would have left the guard matching a string no dump can contain, so it would have gone
 silent on the exact failure it exists to catch. It now derives
-`LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8020}"` from the `.env` it already
+`LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8030}"` from the `.env` it already
 sources, so a future port move cannot break it again. Verified both ways: fires on a
-dump carrying 8020, silent on one already rewritten.
+dump carrying 8030, silent on one already rewritten.
 
 **Deliberately not rewritten:** the `localhost:8080` occurrences in
 `DEPLOYMENT_SUMMARY.md` (the 2026-09-24 deploy record) and
@@ -1371,10 +1412,10 @@ The update pass is blocked on a backup, so the backup was the next thing to veri
 UpdraftPlus is **active** on production, which is what made this look covered. It is
 not, on any of the three counts:
 
-| Check | Found |
-|---|---|
-| `updraft_interval` | **manual** — no scheduled backup has ever run |
-| Backup history endpoint | returns **nothing** (empty, 0 bytes) |
+| Check                    | Found                                                               |
+| ------------------------ | ------------------------------------------------------------------- |
+| `updraft_interval`       | **manual** — no scheduled backup has ever run                       |
+| Backup history endpoint  | returns **nothing** (empty, 0 bytes)                                |
 | UpdraftVault destination | configured, but `email: ""` and unknown quota — **never connected** |
 
 So production has **no backup, local or remote**. The plugin was doing the work of an
@@ -1386,6 +1427,312 @@ account (UpdraftVault, or credentials for Google Drive / Dropbox / S3). Procedur
 written up in [PRODUCTION_UPDATE_RUNBOOK.md](PRODUCTION_UPDATE_RUNBOOK.md), blocked on
 step 1; nothing past that has been run.
 
-**How to apply:** when auditing whether a store is protected, check the *schedule* and
-the *history* and the *destination connection* separately. A plugin being active answers
+**How to apply:** when auditing whether a store is protected, check the _schedule_ and
+the _history_ and the _destination connection_ separately. A plugin being active answers
 none of those three.
+
+## Production backup taken and pulled off-host (2026-09-27)
+
+The blocker above was not a missing subscription. UpdraftPlus is a GPL plugin and
+scheduling + local retention are free features; only *UpdraftVault storage* is paid,
+and leaving **Backup destinations** empty bypasses it entirely (writes to
+`wp-content/updraft/`). So there was never a reason to replace the plugin. What was
+missing was that nothing was scheduled and nothing had ever been taken.
+
+The better free route was already on the host: **cPanel Backup**, which captures all
+account databases plus the full site tree.
+
+| | UpdraftPlus (free) | cPanel Backup (free) |
+| --- | --- | --- |
+| Database | yes | yes, all account DBs |
+| Files | uploads set | whole site tree |
+| Restore | admin UI | manual |
+| Off-host | FTP pull | FTP pull |
+
+- **1a (host):** `~/backup-9.27.2026_09-37-51_bqwyvowk.tar.gz` — 389.6 MB, size
+  stable across a 30s re-check, so the job finished rather than still writing.
+- **1b (off-host):** pulled to `backups/production-2026-09-27/`, local size equal to
+  the host's FTP `SIZE` exactly (408,520,120), `gzip -t` passes, contains
+  `mysql/bqwyvowk_lylyrose.sql` + `homedir/lylyroseir/wp-config.php` + 1,794 uploads.
+  sha256 `a8c2a1173aaa185ea4913d39fd9cf90b442d00c178926bb0ef8f720b1f726e3f`.
+
+### The verification trap, and how it was nearly missed twice
+
+Site files are under **`homedir/lylyroseir/`**, not `httpfiles/`. The archive does
+contain an `httpfiles/` entry, but it is **empty** — one tar line, no children. So
+a check that greps for `httpfiles/` passes on an archive with no site files at all,
+which is exactly the "right size, wrong content" failure the verify step exists to
+catch. An earlier draft of the runbook said the archive contained `httpfiles/`,
+because only the first ~400 tar entries had been read over FTP and that is where
+they stopped. Assert on a file that can only exist if the site was really captured.
+
+The second near-miss: both a files-only *and* a database-only archive pass a size
+check, and either is useless here, because the update pass in steps 3–4 changes the
+schema. Both assertions are required.
+
+**How to apply:** a backup is verified by content, never by size alone — assert a
+real site file *and* the `.sql`, and confirm size stability over a re-check so a
+still-being-written archive is not mistaken for a finished one.
+
+## Theme "fork risk" claim withdrawn (2026-09-27)
+
+`docs/CONTINUATION.md` had listed the inactive `aroma-store` / `aroma-store-old`
+themes as a **fork risk to resolve downstream** — i.e. as things to delete or
+reconcile upstream. Raised by the `aroma_store` session, verified here, and
+**withdrawn: it was a false alarm. Do not delete these themes.**
+
+They are deliberate rollback/archive copies, and that intent is recorded in three
+places in this repo: `README.md:54-56`, `docs/04_DEPLOYMENT.md:21`, and the
+2026-09-01 entry above. `digikala-v1.0.0` is the same kind of thing and the
+"fork risk" item never mentioned it.
+
+**On the evidence.** An earlier form of this correction described the two themes
+as "byte-identical". They are not — `diff -r` reports `style.css` and
+`functions.php` as differing. The differences are only four header strings whose
+entire purpose is to mark the copy: `Theme Name: Aroma Store Old`, an
+`(archive copy)` description, `Version: 2.0.0-old`, and an "archive copy — do
+not develop here" comment. Both trees hold the same 24 files with identical names
+and no template or logic difference. So the conclusion holds — nothing to
+reconcile upstream — but on different grounds than first stated.
+
+`Theme URI: http://localhost:8080` in both copies is cosmetic: harmless while
+inactive, and 8080 is not listening in this repo at all. Fix the string only if
+already editing those files. The **active** `lylyrose` theme has no port
+references.
+
+
+
+Surfaced by the `aroma_store` upstream session during the downstream sweep:
+`docs/FEATURES_ROADMAP.md` listed back-in-stock notifier twice under **P3 — later /
+optional** while the feature was in fact done. Verified independently before
+adopting: `ASC_Stock_Notifier` is registered at
+`lylyrose-core/lylyrose-core.php:104`, and `docker/run-tests.sh` section 27 covers
+subscribe/dedupe/invalid-phone/restock-notify. The peer's claims about internals
+also matched the source — `TABLE_SUBS = asc_stock_subs`, 24h resubscribe cooldown,
+PWSMS SMS plus a bell notification for logged-in subscribers, one row per
+phone+product.
+
+Fixed the duplicate P3 lines and added a **DONE** entry, plus a DEVELOPMENT_LOG
+reference. Also renumbered the new entry **20 → 19** (the sequence jumped 18 → 20;
+there was no 19), and dropped the stale `(P3)` label from the test section heading.
+
+**Still open:** `1c` (daily schedule, prune ≥ 2) — the schedule is what stops this
+recurring — and 1a-ii (UpdraftPlus host-local, optional).
+
+## Production update pass: already done, and the test harness was broken (2026-09-27)
+
+Two separate findings, both from the "continue the next item" run.
+
+### 1. The 23 pending updates do not exist — production was already updated
+
+`CONTINUATION.md` and the update runbook both claimed 23 pending updates
+(20 plugins, 3 themes, core 7.1 → 7.1.2) plus a failed auto-update. **None of it
+was true.** Verified by uploading a read-only PHP probe into the production
+docroot under a random name, fetching it over HTTPS, then deleting it (the
+mechanism the rebrand used), and **cross-checking against the plugins' own
+`Version:` headers pulled over FTP** so the finding rests on two independent reads:
+
+| | Docs claimed | Actually live |
+| --- | --- | --- |
+| core | 7.1 | **7.1.2** |
+| WooCommerce | 11.1.0 | **11.1.2** |
+| Dokan | 5.1.1 | **5.1.3** |
+| woo-wallet | 1.6.14 | **1.7.0** |
+| Redis Object Cache | 2.8.0 | **3.0.0** (inactive) |
+| pending | **23** | **0 plugins, 0 core** |
+| failed auto-update | recorded | **gone** (empty `update_core_failed`) |
+
+The only 3 pending items are Twenty Twenty-Four/Twenty-Three/Twenty-Two, none in
+use — the live theme is `lylyrose` 1.10.0. Deliberately left alone.
+
+Host mtimes explain it: updatable plugin files carry **2026-09-27 06:24** while
+`index.php`, `wp-config.php`, `themes/lylyrose/` and `plugins/lylyrose-core/` are
+still **2026-09-24** — a plugin-only update, which is exactly what WordPress's own
+updater does. It happened outside this repo's history, so the mechanism is
+consistent-but-unconfirmed rather than something this project did.
+
+Storefront re-verified logged-out after the fact: all six key URLs 200, brand
+`Lyly Rose` intact, and a real cart → checkout round trip works (7,950,000 تومان
+in cart, place-order button present). So runbook steps 2–5 are **complete**; step
+5 (this doc reconciliation) is all that was left.
+
+### 2. The suite was at 105/109 — a harness bug, not a product regression
+
+`docker/run-tests.sh` went from a documented 217/0 to **105 passed / 109 failed**
+after commit `770aaf77` set `siteurl`/`home` to `https://lylyrose.local`. Every
+non-root page request to `localhost:8030` was 301-redirecting to the canonical
+host, dropping the port, and the follow-up assertions were measuring the wrong
+thing. Homepage passed only because it tolerates the redirect — which is why the
+failure looked scattered rather than systematic.
+
+- **Fix 1:** `SITE_URL` now defaults to `https://lylyrose.local` (plus the 3
+  hardcoded refs). 105/109 → **212 passed / 5 failed**.
+
+The 5 remaining were the ASC sales-report CSV export, and the cause was subtler:
+`WPS Hide Login` is active locally, and its line 546 redirects
+`is_admin() && ! is_user_logged_in()` to `/404/`. The harness built its auth
+cookie with `AUTH_COOKIE`/`"auth"`, but WordPress only honours
+`SECURE_AUTH_COOKIE`/`"secure_auth"` here — so the cookie was well-formed, valid
+in isolation, and still never authenticated, and the 404 looked like a routing
+bug. Confirmed by diffing the two cookie pairs against `/my-account/`: the `auth`
+pair rendered no logout marker, the `secure_auth` pair rendered **خروج /
+پیشخوان**.
+
+- **Fix 2:** all four `wp_generate_auth_cookie` call sites now use
+  `SECURE_AUTH_COOKIE` + `"secure_auth"`.
+
+Note the argument order `($user_id, $expiration, $scheme, $token)` is *not* what
+the cookie layout suggests — the value is `user_login|expiration|token|hash`. I
+"fixed" the order first, it broke the cookie further, and reading the actual
+`pluggable.php` signature is what corrected it. Reverted, then applied Fix 2.
+
+**Result: 217 passed / 0 failed, twice consecutively.** The 5 transient failures
+between the two fixes were leftover state from repeated runs against the same
+stack, not a defect — they cleared on a clean run.
+
+Worth recording that the suite had been reporting 217/0 while the auth cookies
+were not actually authenticating: those 5 CSV assertions were the only ones
+exercising a real admin page, so they were the only ones that could catch it.
+
+**Still open:** confirming the first `1c` backup actually fires. Until then run
+1a manually before any risky change.
+
+---
+
+## 1c is done — the UpdraftPlus schedule, set from a docroot probe (2026-09-27)
+
+The runbook said 1c "needs WordPress admin access the automation does not have."
+That was wrong, and it was the same mistake the earlier pages made: a host-side
+PHP probe in the docroot is admin-equivalent, because it runs *inside* WordPress
+with plugins loaded. The 2026-09-26 rebrand had already used exactly that route.
+Doing it took one upload and one fetch.
+
+The interesting part was not the access, it was the option names. UpdraftPlus
+1.26.8 has **no `updraft_interval_type` and no `updraft_retention`**. The real
+options are `updraft_interval` (files), `updraft_interval_database` (DB) and
+`updraft_retain` / `updraft_retain_db` for retention. My first pass wrote the
+invented names, which created two junk options and scheduled nothing at all —
+the option values were never consulted by anything, so it looked like it had
+worked.
+
+The second trap: `UpdraftPlus::schedule_backup()` and `schedule_backup_database()`
+(`class-updraftplus.php` ~line 4779) are `register_setting()` **sanitize
+callbacks**. They call `wp_schedule_event()` and then *return* the interval; the
+caller's `update_option()` is what writes it. Calling them directly does the
+scheduling and leaves the option as `false`, so the next read shows a scheduled
+backup whose interval is "manual". The correct entry point is plain
+`update_option()` — it fires the sanitize callback and both halves land.
+
+Verified end state, read back from the cron array:
+
+```
+updraft_interval          'daily'  -> updraft_backup          2026-09-27 20:46:33 UTC
+updraft_interval_database 'daily'  -> updraft_backup_database 2026-09-27 20:46:33 UTC
+updraft_retain            '2'
+updraft_retain_db         '2'
+```
+
+Also confirmed `DISABLE_WP_CRON` is `false`, which is the only reason this can
+work at all on a host with no cPanel scheduler. The first fire is 00:16 local on
+2026-09-28.
+
+**Still open:** the schedule is registered but unexercised. Check
+`wp-content/updraft/` for a new dated archive after 20:46 UTC. Until then, 1a
+manually before any risky change.
+
+---
+
+## The 8020→8030 port replace corrupted 50 vendor files (2026-09-27)
+
+Found while picking up the flash-sales port. The working tree carried ~465k
+changed lines across 52 files, and only **2 of them were real**: the
+`lylyrose-core.php` version bump + `ASC_Flash_Sales::init()`, and the
+`functions.php` asset enqueue. The other 50 were collateral damage from the
+port migration — a blanket string replace of `8020` → `8030` that was never
+scoped to the files where those digits are ports.
+
+**The damage, which is the point.** Every `8020` anywhere in a vendored file was
+rewritten, including places where `8020` is a version number, not a port:
+
+- `symfony/polyfill-mbstring` ×3 plugins: `\PHP_VERSION_ID >= 80200` → `>= 80300`.
+  The container runs **PHP 8.2.21**, so the true condition is satisfied and the
+  mangled one is not — `mb_html_entity_decode()` would take the `(?!&)` branch
+  reserved for PHP < 8.3 and mis-decode HTML entities.
+- `nesbot/carbon` composer metadata ×2: git SHA
+  `…023ed802075` → `…023ed803075`. A SHA differing by one character is not a
+  new version; it is a corrupted reference.
+- SVG coordinates: `cx="65.8021"` → `cx="65.8031"` in `dokan-lite`'s rank-math icon.
+- ~450k lines of minified JS/CSS "reformatted" (single-line → pretty-printed) —
+  the tell that a tool walked `wp-content` rather than a human editing.
+
+The suite still reported **229/0** with all of this in place, which is exactly why
+it needed the token-level diff rather than a test run to find.
+
+**Also live, and the more dangerous one:** the database still held
+`siteurl`/`home` = `http://localhost:8020` while `.env` and compose were on 8030.
+Nothing listens on 8020. Inert *today* only because `docker-compose.yml` pins
+`WP_HOME`/`WP_SITEURL` as static `define()`s, so the constants win. The dead-port
+URLs turned out to span three ports and ten tables, not one table — see fix 2.
+
+`stage-deploy.sh` would have shipped them: its check was
+`grep -q "$LOCAL_SITE_URL"` — matching only the *current* port. A dump carrying
+the superseded 8020 passes that grep and reaches production. Upstream had reached
+the same conclusion and explicitly declined to run its proposed `UPDATE`, on the
+grounds that the harness was the real problem; both were partly right, and the
+DB rows were still wrong.
+
+**Fixed:**
+
+1. All 50 files restored from HEAD. The bind-mounted `wp-content` is not writable
+   by this user and there is no passwordless sudo, so the restore ran through the
+   container (which mounts the same paths) — `cp` into place, then `chown 33:33`.
+   Verified by re-reading every one of the 50 and diffing against `git show HEAD:`.
+2. Every `localhost` URL in the database rewritten to `https://lylyrose.local`
+   across **10 tables and 12 columns**, after confirming **0 serialized rows**
+   among them (all plain columns, so no length recompute — the known deploy
+   trap). Pre-fix dumps at `.test-logs/pre-siteurl-fix-20260927.sql.gz` and
+   `.test-logs/pre-url-normalize-20260927.sql.gz`. Now **0** occurrences across
+   all 300 text/blob columns, and the options agree with the constant instead of
+   being overridden by it.
+3. The deploy check hardened from a port-specific `WARN` to a hard
+   `check "no localhost URLs in dump"` over `https?://localhost(:[0-9]+)?`, so any
+   port fails staging and the offending URLs are named. Tested against fixtures:
+   clean dump passes, a dump carrying 8020 *and* 8030 fails listing both.
+
+**The first pass at fix 2 was wrong, and the way it was wrong is the useful part.**
+I updated the three tables I had checked by hand — `wp_options`, `wp_posts` — and
+declared the database clean. Then I ran the hardened gate against a real
+`mariadb-dump` instead of trusting the hand-check, and it failed: **8080 was
+still in the dump**, on a port nobody had looked for, in a table nobody had
+scanned.
+
+Two separate mistakes, both mine:
+
+- **Three ports, not one.** I searched for 8020, because 8020 was the port the
+  commit was about. The database had also been through 8080, and still carried
+  it. Searching for the port you are fixing is not the same as searching for the
+  defect.
+- **A hand-checked table list is not a table list.** My scan filtered
+  `information_schema` on `text`/`varchar`/`char`, which silently excluded
+  `longblob`. `wp_wfconfig.val` is a `longblob`, and it held two rows — Wordfence's
+  cached `wp_home_url` / `wp_site_url`, both `http://localhost:8080`. Those are
+  the values Wordfence scans and blocks against, so a stale one is worse than a
+  stale post URL.
+
+The corrected scan covers `tinytext`/`text`/`mediumtext`/`longtext`/`char`/
+`varchar`/`blob`/`mediumblob`/`longblob` — 300 columns, not 295. It found the
+two `longblob` rows the first scan had missed, and only then was the dump
+actually clean.
+
+**So the gate earned its keep on the first real run.** The old check could not
+have caught any of this: it matched one port, on one dump, with a `WARN` that
+never failed the build. The replacement is a `check`, so a dump with any
+localhost URL cannot be staged at all.
+
+The two edits that were real are kept and the feature gap is closed: `ASC_Flash_Sales`
+is ported (17 classes, parity with upstream), covered by test section 28 (12 checks),
+and the suite is **229 passed / 0 failed** both before and after the DB fix.
+
+**The lesson, which is the fifth instance of one pattern:** a repo-wide text replace
+is not a migration. Scope it to the files that own the string, and diff the result
+token-wise — a passing suite does not mean the diff is clean.

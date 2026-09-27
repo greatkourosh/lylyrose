@@ -22,7 +22,10 @@ section() { echo ""; echo "== $1 =="; }
 
 WP_CONTAINER="lylyrose-wp"
 DB_CONTAINER="lylyrose-db"
-SITE_URL="${SITE_URL:-http://localhost:8020}"
+# siteurl/home are https://lylyrose.local, so any request to localhost:8030 gets
+# 301-redirected to the canonical host and the port is lost. Test the canonical
+# host directly, or every non-root page 301s and the suite fails for no real reason.
+SITE_URL="${SITE_URL:-https://lylyrose.local}"
 THEMES_DIR="/var/www/html/wp-content/themes"
 PLUGINS_DIR="/var/www/html/wp-content/plugins"
 ACTIVE_THEME="${ACTIVE_THEME:-lylyrose}"
@@ -330,7 +333,7 @@ printf '%s' "$IMG_OUT" | grep -q "BIG_THRESHOLD: 2560" && pass "large-image thre
 # 14. Coupon surfaces: Digikala-style coupon field in cart summary + campaign
 # banner strip (P1 #10). Uses a real browser session (cookies) + real POST.
 section "14. Coupon surfaces"
-CU_CPN=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "http://localhost:8020/cart/")
+CU_CPN=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "${SITE_URL}/cart/")
 [ "$CU_CPN" = "200" ] && pass "cart reachable" || fail "cart not reachable ($CU_CPN)"
 # Coupon must exist (seeded by lylyrose-core or manually)
 CU_COUPON=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $ids = wc_get_coupon_id_by_code("welcome10") ? : wc_get_coupon_id_by_code("WELCOME10"); echo $ids ? "yes" : "no";' 2>/dev/null)
@@ -405,10 +408,10 @@ section "16. Instagram strip"
 INSTA_BACKUP=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo wp_json_encode(get_option("asc_instagram", array()));' 2>/dev/null)
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 update_option("asc_instagram", array("handle" => "@lylyrose.ir", "items" => array(
-  array("image_url" => "http://localhost:8020/wp-content/uploads/insta-1.jpg", "post_url" => ""),
-  array("image_url" => "http://localhost:8020/wp-content/uploads/insta-2.jpg", "post_url" => "https://instagram.com/p/abc"),
+  array("image_url" => "https://lylyrose.local/wp-content/uploads/insta-1.jpg", "post_url" => ""),
+  array("image_url" => "https://lylyrose.local/wp-content/uploads/insta-2.jpg", "post_url" => "https://instagram.com/p/abc"),
 )));' >/dev/null 2>&1
-docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
 INSTA_HTML=$(curl -sL --max-time 90 "$SITE_URL/")
 html_has "$INSTA_HTML" "dk-insta-grid" && pass "Instagram strip renders on homepage" || fail "Instagram strip missing"
 html_has "$INSTA_HTML" "اینستاگرام ما" && pass "Instagram Persian heading present" || fail "Instagram heading wrong"
@@ -422,7 +425,7 @@ $o = ASC_Instagram::sanitize(array("handle" => "<script>x</script>@h", "items" =
 echo $o["handle"] . "|" . count($o["items"]) . "|" . $o["items"][0]["post_url"];' 2>/dev/null)
 [ "$INSTA_SAN" = "@h|1|" ] && pass "Instagram sanitizer strips scripts and javascript: URLs" || fail "Instagram sanitizer weak: $INSTA_SAN"
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); delete_option("asc_instagram");' >/dev/null 2>&1
-docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
 INSTA_NEG=$(curl -sL --max-time 90 "$SITE_URL/" | grep -c "dk-insta" || true)
 [ "$INSTA_NEG" = "0" ] && pass "unconfigured Instagram option renders nothing" || fail "Instagram strip rendered while unconfigured"
 if [ -n "$INSTA_BACKUP" ] && [ "$INSTA_BACKUP" != "[]" ] && [ "$INSTA_BACKUP" != "{}" ]; then
@@ -450,7 +453,7 @@ REP_PAIR=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.ph
 $m = WP_Session_Tokens::get_instance(1);
 $e = time() + 600;
 $t = $m->create($e);
-echo AUTH_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "logged_in", $t);' 2>/dev/null)
+echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "logged_in", $t);' 2>/dev/null)
 REP_TOKEN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 echo ASC_Reports::export_token(1, "2026-01-01", "2026-12-31");' 2>/dev/null)
 REP_CSV=$(curl -s --max-time 90 -b "$REP_PAIR" "$SITE_URL/wp-admin/admin.php?page=asc-reports&asc_export=$REP_TOKEN&from=2026-01-01&to=2026-12-31")
@@ -542,7 +545,7 @@ $m = WP_Session_Tokens::get_instance($uid);
 $m->destroy_all();
 $e = time() + 1200;
 $t = $m->create($e);
-echo AUTH_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "logged_in", $t);' 2>/dev/null)
+echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "logged_in", $t);' 2>/dev/null)
     curl -sL --max-time 90 -b "$PAIR" "$1"
 }
 WALLET_NAV=$(fetch_auth "$SITE_URL/my-account/")
@@ -1011,7 +1014,7 @@ update_post_meta((int) $argv[1], "_asc_notes_top", "برگاموت\nیاس");
 update_post_meta((int) $argv[1], "_asc_notes_heart", "گل محمدی\nعود");
 update_post_meta((int) $argv[1], "_asc_notes_base", "مشک سفید\nوانیل");
 echo "seeded";' "$FP_MAIN" >/dev/null 2>&1
-docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
 
 FN_HTML=$(curl -sL --max-time 120 --retry 2 "$SITE_URL/?p=$FP_MAIN")
 html_has "$FN_HTML" "dk-notes" && pass "note pyramid card renders on product page" || fail "dk-notes card missing"
@@ -1033,7 +1036,7 @@ FN_NEG=$(curl -sL --max-time 120 --retry 2 "$SITE_URL/?p=$FP_NEG" | grep -c "dk-
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 foreach (array("_asc_notes_top", "_asc_notes_heart", "_asc_notes_base") as $k) { delete_post_meta((int) $argv[1], $k); }
 echo "cleaned";' "$FP_MAIN" >/dev/null 2>&1
-docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
 FN_LEFT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 $out = array();
 foreach (array("top", "heart", "base") as $k) { $out[] = get_post_meta((int) $argv[1], "_asc_notes_" . $k, true) === "" ? "empty" : "left"; }
@@ -1088,7 +1091,7 @@ AUTH_COOKIE_NAME=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp
 LOGGED_IN_COOKIE_NAME=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo LOGGED_IN_COOKIE;' 2>/dev/null)
 EXPIRY=$(date -d '+10 min' +%s 2>/dev/null || echo $(( $(date +%s) + 600 )))
 SESSION_INST=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo WP_Session_Tokens::get_instance(1)->create('"$EXPIRY"');' 2>/dev/null)
-AUTH_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo AUTH_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'auth','$SESSION_INST');" 2>/dev/null)
+AUTH_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo SECURE_AUTH_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'secure_auth','$SESSION_INST');" 2>/dev/null)
 LOGGED_IN_COOKIE=$(docker exec "$WP_CONTAINER" php -r "require('/var/www/html/wp-load.php'); echo LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie(1,$EXPIRY,'logged_in','$SESSION_INST');" 2>/dev/null)
 NOTIF_PAIR="$AUTH_COOKIE; $LOGGED_IN_COOKIE"
 NOTIF_HTML=$(curl -s --max-time 30 -b "$NOTIF_PAIR" "$SITE_URL/")
@@ -1185,11 +1188,11 @@ GC_ACTIVE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.p
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $o=wc_get_order((int)$argv[1]); if($o){ $o->delete(true); echo "cleaned"; }' "$GW_OID" >/dev/null 2>&1
 pass "gift-wrap test data cleaned"
 
-# 27. Back-in-stock notifier (P3): out-of-stock products show the
+# 27. Back-in-stock notifier: out-of-stock products show the
 # "موجود شد به من خبر بده" form, guest phones are saved to asc_stock_subs,
 # duplicates/invalid phones rejected, and restocking sends a Persian SMS
 # (and a bell notification for logged-in subscribers) once per subscription.
-section "27. Back-in-stock notifier (P3)"
+section "27. Back-in-stock notifier"
 
 # 27.1 class + table registered
 SN_CLASS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo class_exists("ASC_Stock_Notifier") ? "yes" : "no";' 2>/dev/null)
@@ -1199,7 +1202,7 @@ SN_TAB=$(docker exec "$DB_CONTAINER" sh -c 'mariadb -u root -p"$MYSQL_ROOT_PASSW
 
 # 27.2 fixture: make the FP_OOS product out of stock & fetch page
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $p=wc_get_product((int) $argv[1]); if($p){ $p->set_stock_status("outofstock"); $p->save(); }' "$FP_OOS" >/dev/null 2>&1
-docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/localhost >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
 SN_HTML=$(curl -sL --max-time 120 --retry 2 "$SITE_URL/?p=$FP_OOS")
 html_has "$SN_HTML" "dk-stock-notify" && pass "notifier form renders on out-of-stock product" || fail "notifier form missing on OOS product"
 html_has "$SN_HTML" "موجود شد به من خبر بده" && pass "notifier Persian heading present" || fail "notifier heading missing"
@@ -1274,6 +1277,54 @@ $u=get_user_by("login","sn_tester"); if($u){ foreach(get_posts(array("post_type"
 echo "cleaned";' "$FP_OOS" >/dev/null 2>&1
 SN_LEFT=$(docker exec "$DB_CONTAINER" sh -c "mariadb -u root -p\"\$MYSQL_ROOT_PASSWORD\" \"\$MYSQL_DATABASE\" -N -e \"SELECT COUNT(*) FROM ${SN_TAB};\"" 2>/dev/null)
 [ "$SN_LEFT" = "0" ] && pass "stock notifier test data cleaned" || fail "cleanup incomplete: $SN_LEFT rows remaining"
+
+section "28. Incredible Offers page (پیشنهادهای شگفت‌انگیز)"
+
+# Server-side coverage for the flash-sales page. The DOM/JS layer was verified
+# manually (2026-09-27); what is asserted here is everything that must not silently
+# regress: the page exists, is driven by real WooCommerce sale state, and its
+# sort/filter/pagination params behave.
+OFFERS_URL="$SITE_URL/incredible-offers/"
+
+# 28.1 class registered + page auto-created
+OF_CLASS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo class_exists("ASC_Flash_Sales") ? "yes" : "no";' 2>/dev/null)
+[ "$OF_CLASS" = "yes" ] && pass "ASC_Flash_Sales class loaded" || fail "ASC_Flash_Sales missing"
+
+check_http "$OFFERS_URL" "incredible offers page loads"
+
+OF_HTML=$(curl -s --max-time 60 "$OFFERS_URL")
+html_has "$OF_HTML" "dk-flash-card"        && pass "offer cards render"              || fail "no offer cards rendered"
+html_has "$OF_HTML" "dk-flash-tabs"        && pass "category tabs render"            || fail "category tabs missing"
+html_has "$OF_HTML" 'dk-offer-label'       && pass "شگفت‌انگیز label present"        || fail "offer label missing"
+html_has "$OF_HTML" 'dk-flash-grid'        && pass "product grid present"            || fail "product grid missing"
+
+# 28.2 page is driven by real sale state, not a hardcoded list
+OF_SALE_IDS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo (int) count(wc_get_product_ids_on_sale());' 2>/dev/null)
+[ "${OF_SALE_IDS:-0}" -gt 0 ] && pass "sale products exist to drive the page ($OF_SALE_IDS)" || fail "no sale products — page cannot be verified"
+
+# 28.3 one page holds at most PER_PAGE (24) cards regardless of total on sale
+# grep -o | wc -l, not grep -c: the grid is a single line, so -c counts lines (1).
+OF_CARDS=$(printf '%s' "$OF_HTML" | grep -o "dk-flash-card" | wc -l | tr -d ' ')
+[ "$OF_CARDS" -gt 0 ] && [ "$OF_CARDS" -le 24 ] && pass "page shows at most 24 cards (got $OF_CARDS)" || fail "card count out of range: $OF_CARDS"
+
+# 28.4 a non-existent category must render the empty state, not a fatal or all products
+OF_EMPTY=$(curl -s --max-time 60 "$OFFERS_URL?offer_cat=999999")
+[ "$(printf '%s' "$OF_EMPTY" | grep -o "dk-flash-card" | wc -l | tr -d ' ')" -eq 0 ] && pass "invalid category renders empty state" || fail "invalid category still showed products"
+
+# 28.5 both sort orders render AND order differently. Presence alone is not enough:
+# a sort param silently ignored still returns 24 cards and would pass a presence check.
+OF_CHEAP=$(curl -s --max-time 60 "$OFFERS_URL?sort=cheapest")
+OF_EXP=$(curl -s --max-time 60 "$OFFERS_URL?sort=expensive")
+OF_FIRST_CHEAP=$(printf '%s' "$OF_CHEAP" | grep -o 'dk-offer-product" href="[^"]*"' | head -1)
+OF_FIRST_EXP=$(printf '%s' "$OF_EXP"  | grep -o 'dk-offer-product" href="[^"]*"' | head -1)
+[ -n "$OF_FIRST_CHEAP" ] && [ -n "$OF_FIRST_EXP" ] \
+  && [ "$OF_FIRST_CHEAP" != "$OF_FIRST_EXP" ] \
+  && pass "sort=cheapest and sort=expensive render different products" \
+  || fail "sort orders did not differ (both first: '$OF_FIRST_CHEAP')"
+
+# 28.6 stock filter and pagination are accepted
+check_http "$OFFERS_URL?in_stock=1"    "in_stock filter accepted"
+check_http "$OFFERS_URL?offers_page=2" "pagination accepted"
 
 section ""
 echo "==========================================="

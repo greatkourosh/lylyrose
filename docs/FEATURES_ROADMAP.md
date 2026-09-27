@@ -276,8 +276,9 @@ the store-specific exceptions, is in
    ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)):
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
    ports 8010 → 8030. The `ASC_` prefix is unchanged.
-5. `bash docker/run-tests.sh` in this repo (localhost:8030) must stay green — currently
-   **217 checks across 27 sections**.
+5. `bash docker/run-tests.sh` in this repo (canonical host `https://lylyrose.local`) must
+   stay green — currently **229 checks across 28 sections**. Test the canonical host, not
+   the mapped port: a `localhost:8030` request 301-redirects and reports mass failures.
 6. Update `docs/DEVELOPMENT_LOG.md` and commit on `master`.
 
 Store-specific changes (branding, a campaign page, host config) skip steps 1–3 and are

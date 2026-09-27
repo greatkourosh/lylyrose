@@ -62,7 +62,7 @@ if [ -f "$REPO/.env" ]; then
   set -a; . "$REPO/.env"; set +a
   DB_NAME="${MYSQL_DATABASE:-$DB_NAME}"
 fi
-LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8020}"
+LOCAL_SITE_URL="http://localhost:${WORDPRESS_PORT:-8030}"
 DB_PASSWORD="${MYSQL_ROOT_PASSWORD:-}"
 [ -n "$DB_PASSWORD" ] || { echo "ERR: no DB password (set MYSQL_ROOT_PASSWORD in .env)" >&2; exit 1; }
 
@@ -263,10 +263,11 @@ grep -q "BEGIN WordPress" "$STAGE_DIR/.htaccess"; check ".htaccess has WordPress
 [ ! -e "$STAGE_DIR/uploads/wc-logs" ]; check "wc-logs stripped from uploads" $?
 [ ! -e "$STAGE_DIR/wp-content/themes/digikala" ]; check "dev theme digikala not shipped" $?
 [ -s "$SQL_DUMP" ]; check "database dump non-empty" $?
-# Every local-site URL must already have been rewritten; see DEPLOY_PREP.
-if grep -q "$LOCAL_SITE_URL" "$SQL_DUMP" 2>/dev/null; then
-  echo "  WARN  dump still contains $LOCAL_SITE_URL — run search-replace before import"
-fi
+# No localhost URL may reach production, whatever port it names. Matching only
+# $LOCAL_SITE_URL misses superseded ports: a dump carrying the previous port
+# (8020, from before the 8030 move) passes that grep and ships dead links.
+STALE_URLS=$(grep -Eoh 'https?://localhost(:[0-9]+)?' "$SQL_DUMP" 2>/dev/null | sort -u | tr '\n' ' ')
+check "no localhost URLs in dump${STALE_URLS:+ (found: $STALE_URLS)}" "$([ -z "$STALE_URLS" ] && echo 0 || echo 1)"
 
 echo
 echo "  tree:     $STAGE_DIR  ($(du -sh "$STAGE_DIR" 2>/dev/null | cut -f1))"

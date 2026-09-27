@@ -4,9 +4,8 @@
 > truth. Develop and test features upstream first; mirror here only when needed.
 > See [UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md).
 
-
 > **Status: deployed 2026-09-24.** `https://lylyrose.ir` is live on cPanel host
-> `bqwyvowk` and verified. This file stays the *generic* runbook for any PHP+MySQL
+> `bqwyvowk` and verified. This file stays the _generic_ runbook for any PHP+MySQL
 > host; the host-specific runbook and the two bugs that bit during the live deploy
 > live in [DEPLOY_PREP.md](DEPLOY_PREP.md) and [CONTINUATION.md](CONTINUATION.md).
 
@@ -35,7 +34,7 @@ is ignored on purpose; migrate it separately from the current site (Step 3).
 ## Prerequisites on the host
 
 | Requirement  | Minimum                    |
-|--------------|----------------------------|
+| ------------ | -------------------------- |
 | PHP          | 8.1+ (8.2 recommended)     |
 | MySQL        | 5.7+ / MariaDB 10.4+       |
 | HTTPS        | required (SSL certificate) |
@@ -175,12 +174,12 @@ define( 'FS_METHOD', 'direct' );          // direct updates if permissions allow
 
 ## Step 7 — Rewrite URLs inside the data
 
-The dump was exported from `http://localhost:8020`. Replace every occurrence:
+The dump was exported from `http://localhost:8030`. Replace every occurrence:
 
 With WP-CLI (recommended):
 
 ```bash
-wp search-replace 'http://localhost:8020' 'https://yourdomain.com' --all-tables --precise
+wp search-replace 'http://localhost:8030' 'https://yourdomain.com' --all-tables --precise
 wp search-replace 'http://yourdomain.com' 'https://yourdomain.com' --all-tables
 wp cache flush
 ```
@@ -193,23 +192,23 @@ Also verify in `wp_options`: `siteurl` and `home`.
 
 ## Step 8 — Fix plugin settings for the new host
 
-| Plugin            | Change needed                                                        |
-|-------------------|----------------------------------------------------------------------|
-| Redis Object Cache| Deactivate on shared hosting (no Redis). On VPS: install redis-server, activate, verify "Connected". |
-| WP Super Cache    | Revisit Settings → WP Super Cache; caching writes into `wp-config.php`/`.htaccess`. |
-| UpdraftPlus       | Re-point remote storage (Google Drive/S3 credentials are per-site). |
-| WP Mail SMTP      | Re-enter SMTP credentials; test with "Send a Test Email".           |
-| ZarinPal / Gateland | Re-enter payment API keys (they were never in git — good).        |
-| Persian SMS       | Update gateway API key + sender number.                             |
-| Wordfence         | Run a scan after first load; check Firewall mode = learning → enabled. |
-| WPS Hide Login    | Login stays at `/secure-login`; confirm it loads before announcing. |
+| Plugin              | Change needed                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| Redis Object Cache  | Deactivate on shared hosting (no Redis). On VPS: install redis-server, activate, verify "Connected". |
+| WP Super Cache      | Revisit Settings → WP Super Cache; caching writes into `wp-config.php`/`.htaccess`.                  |
+| UpdraftPlus         | Re-point remote storage (Google Drive/S3 credentials are per-site).                                  |
+| WP Mail SMTP        | Re-enter SMTP credentials; test with "Send a Test Email".                                            |
+| ZarinPal / Gateland | Re-enter payment API keys (they were never in git — good).                                           |
+| Persian SMS         | Update gateway API key + sender number.                                                              |
+| Wordfence           | Run a scan after first load; check Firewall mode = learning → enabled.                               |
+| WPS Hide Login      | Login stays at `/secure-login`; confirm it loads before announcing.                                  |
 
 ## Step 9 — Cron
 
 Docker used a sidecar container hitting `wp-cron.php`. On real hosting:
 
-* **Shared hosting**: cron is usually fine as-is (WP triggers it itself).
-* **Reliable scheduling**: disable WP's own trigger and add a real cron job.
+- **Shared hosting**: cron is usually fine as-is (WP triggers it itself).
+- **Reliable scheduling**: disable WP's own trigger and add a real cron job.
 
 In `wp-config.php`:
 

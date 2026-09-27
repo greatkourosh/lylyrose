@@ -67,6 +67,10 @@ wordpress/wp-content/themes/twentytwentyfive/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+.codacy/
 
 # --- Test logs (durable across reboots) ---
 .test-logs/
+
+# --- Production backups pulled off the host (real customer/order data) ---
+backups/

@@ -68,22 +68,26 @@ lylyrose/
 ### Setup
 
 1. Copy environment file:
+
 ```bash
 cp .env.example .env
 # Edit .env with your settings
 ```
 
 2. Start the development environment:
+
 ```bash
 docker-compose up -d
 ```
 
 3. Access the site:
-- Website: http://localhost:8020
-- Admin: http://localhost:8020/wp-admin
-- phpMyAdmin: http://localhost:8021
+
+- Website: http://localhost:8030
+- Admin: http://localhost:8030/wp-admin
+- phpMyAdmin: http://localhost:8031
 
 4. Admin credentials:
+
 - Username: `admin`
 - Password: `admin123` (change after first login)
 
@@ -109,11 +113,13 @@ docker exec -it lylyrose-wp bash
 ## Deployment to Production
 
 1. Export database:
+
 ```bash
 docker exec lylyrose-db mysqldump -u root -p lylyrose > lylyrose.sql
 ```
 
 2. Backup wp-content:
+
 ```bash
 tar -czf wp-content.tar.gz wordpress/wp-content
 ```
@@ -121,13 +127,15 @@ tar -czf wp-content.tar.gz wordpress/wp-content
 3. Upload files to production server
 
 4. Import database:
+
 ```bash
 mysql -u root -p production_db < lylyrose.sql
 ```
 
 5. Update URLs:
+
 ```bash
-wp search-replace 'http://localhost:8020' 'https://yourdomain.com' --allow-root
+wp search-replace 'http://localhost:8030' 'https://yourdomain.com' --allow-root
 ```
 
 6. Update siteurl and homeurl in wp_options table

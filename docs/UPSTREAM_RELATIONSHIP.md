@@ -14,8 +14,8 @@ mirrored into `lylyrose` if `lylyrose` needs it.
       (source / upstream)                (downstream / dependent)
    aroma-store.vegacodex.ir               lylyrose.ir
      digikala theme                         lylyrose theme
-   aroma-store-core 2.3.0                 lylyrose-core 2.3.0
-        17 ASC_ classes                     16 ASC_ classes
+   aroma-store-core 2.4.0                 lylyrose-core 2.4.0
+        17 ASC_ classes                     17 ASC_ classes
               │                                   ▲
               │  1. implement + test here          │  2. mirror only if
               └───────────────────────────────────┘     lylyrose needs it
@@ -27,48 +27,51 @@ Work travels downstream only.
 
 ## What the two share
 
-| Concern | `aroma_store` | `lylyrose` |
-|---|---|---|
-| Live site | `https://aroma-store.vegacodex.ir` | `https://lylyrose.ir` |
-| Core plugin | `aroma-store-core` | `lylyrose-core` |
-| Storefront theme | `digikala` | `lylyrose` |
-| WP / WooCommerce | 7.1 / 11.1.0 | 7.1 / 11.1.0 |
-| Test suite | `bash docker/run-tests.sh` | `bash docker/run-tests.sh` |
-| Local address | http://localhost:8010 | http://localhost:8020 |
-| phpMyAdmin | :8011 | :8021 |
-| Admin login | `/secure-login` | `/secure-login` |
-| Branded name | آرومالند (Aromaland) | لیلی رز (Lyly Rose) |
-| Repo | `github.com/greatkourosh/aroma_store` | `github.com/greatkourosh/lylyrose` |
-| Deploy branch | `hosting-ready` (merge master → it) | single `master` branch |
+| Concern          | `aroma_store`                         | `lylyrose`                         |
+| ---------------- | ------------------------------------- | ---------------------------------- |
+| Live site        | `https://aroma-store.vegacodex.ir`    | `https://lylyrose.ir`              |
+| Core plugin      | `aroma-store-core`                    | `lylyrose-core`                    |
+| Storefront theme | `digikala`                            | `lylyrose`                         |
+| WP / WooCommerce | 7.1 / 11.1.0                          | 7.1 / 11.1.0                       |
+| Test suite       | `bash docker/run-tests.sh`            | `bash docker/run-tests.sh`         |
+| Local address    | http://localhost:8010                 | http://localhost:8030              |
+| phpMyAdmin       | :8011                                 | :8031                              |
+| Admin login      | `/secure-login`                       | `/secure-login`                    |
+| Branded name     | آرومالند (Aromaland)                  | لیلی رز (Lyly Rose)                |
+| Repo             | `github.com/greatkourosh/aroma_store` | `github.com/greatkourosh/lylyrose` |
+| Deploy branch    | `hosting-ready` (merge master → it)   | single `master` branch             |
 
 ## The rename map
 
 `lylyrose` is mechanically renamed from `aroma_store` throughout. When mirroring a file,
 these substitutions are the **only** intended difference:
 
-| In `aroma_store` | In `lylyrose` |
-|---|---|
-| `aroma-store-core` (plugin slug, text domain, `@package`) | `lylyrose-core` |
-| `aroma-store-core.php` (main file) | `lylyrose-core.php` |
-| `ASC_` class prefix *(unchanged)* | `ASC_` class prefix *(unchanged)* |
-| `digikala` (theme dir, style.css slug) | `lylyrose` |
-| `aroma-store` (legacy theme dir) | `aroma-store` *(kept as-is, inactive)* |
-| `آرومالند` / `Aromaland` in user-visible strings | `لیلی رز` / `Lyly Rose` |
-| `aroma-store.vegacodex.ir` | `lylyrose.ir` |
-| `localhost:8010` | `localhost:8020` |
+| In `aroma_store`                                          | In `lylyrose`                          |
+| --------------------------------------------------------- | -------------------------------------- |
+| `aroma-store-core` (plugin slug, text domain, `@package`) | `lylyrose-core`                        |
+| `aroma-store-core.php` (main file)                        | `lylyrose-core.php`                    |
+| `ASC_` class prefix _(unchanged)_                         | `ASC_` class prefix _(unchanged)_      |
+| `digikala` (theme dir, style.css slug)                    | `lylyrose`                             |
+| `aroma-store` (legacy theme dir)                          | `aroma-store` _(kept as-is, inactive)_ |
+| `آرومالند` / `Aromaland` in user-visible strings          | `لیلی رز` / `Lyly Rose`                |
+| `aroma-store.vegacodex.ir`                                | `lylyrose.ir`                          |
+| `localhost:8010`                                          | `localhost:8030`                       |
 
 The `ASC_` prefix is deliberately **not** renamed — it keeps the mirrored code diffable.
 
 ## Current divergence
 
-`aroma_store` is **ahead**. As of 2026-09-26, one feature exists upstream only:
+**The feature set is at parity — 2026-09-27.** The `ASC_Flash_Sales` gap that
+stood here since 2026-09-17 is closed: all four files are ported (`lylyrose-core`
+now has **17** classes, matching upstream) and covered by test section 28
+(12 checks, suite **229/0**). The port is a clean rename-map application — the
+only differences from upstream are the four intended `digikala_*` →
+`lylyrose_*` helper calls in `page-incredible-offers.php`; `flash-sales.js` and
+`flash-sales.css` are byte-identical, as is `class-flash-sales.php`.
 
-- **`class-flash-sales.php`** + `page-incredible-offers.php` — the «پیشنهادهای شگفت‌انگیز»
-  (Incredible Offers) page, `ASC_Flash_Sales`, built 2026-09-17, still open on browser
-  verification. Absent from `lylyrose-core` (16 classes vs upstream's 17).
-
-Also present upstream only: `docker/preview-proxy.py`, `docker/import-product-galleries.php`,
-`docker/verify-galleries.php`, and a `hosting-ready` deploy branch.
+Still upstream only, and not store features: `docker/preview-proxy.py`,
+`docker/import-product-galleries.php`, `docker/verify-galleries.php`, and a
+`hosting-ready` deploy branch.
 
 `lylyrose` has nothing upstream lacks, except the production deploy history itself
 (the 2026-09-24 `lylyrose.ir` deploy and its two config fixes).
@@ -96,10 +99,10 @@ Also present upstream only: `docker/preview-proxy.py`, `docker/import-product-ga
 - `lylyrose`'s docs may record `lylyrose` facts, but the shared architecture, the
   feature set, and the gotchas have one home: `aroma_store`'s docs. When they disagree,
   upstream wins and the downstream doc gets corrected.
-- Local ports differ: `aroma_store` runs on 8010/8011, `lylyrose` on 8020/8021. They
+- Local ports differ: `aroma_store` runs on 8010/8011, `lylyrose` on 8030/8031. They
   were 8080/8081 here until 2026-09-26, when `8080` proved to be a **trap** in this
   host's port map — a stale second Aromaland instance answered there, so a local check
-  could silently hit the wrong store. `8020` is not known to collide, but the failure
+  could silently hit the wrong store. `8030` is not known to collide, but the failure
   mode is silent, so check which store answers (`<title>`) before trusting any local
   check.
 

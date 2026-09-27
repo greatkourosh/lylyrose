@@ -4,8 +4,8 @@
 change to shared code in this repository.
 
 This is the operational form of the relationship defined in
-[UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md). That doc says *who is upstream*.
-This one says *what you do when a feature is requested here*.
+[UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md). That doc says _who is upstream_.
+This one says _what you do when a feature is requested here_.
 
 ## The rule
 
@@ -52,7 +52,7 @@ back.
 
 4. **Mirror into `lylyrose`.** Apply the rename map
    ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)): `aroma-store-core` →
-   `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز, ports 8010 → 8020.
+   `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز, ports 8010 → 8030.
    The `ASC_` prefix is unchanged.
 
 5. **Test here too.** `bash docker/run-tests.sh` in this repo must stay green.
@@ -64,13 +64,13 @@ back.
 
 ## What "shared code" means
 
-| Routes upstream | Stays here |
-|---|---|
-| Anything in `aroma-store-core` / `lylyrose-core` | Branding / theme visual tweaks |
-| Anything in the storefront theme's shared templates | A store-specific page or campaign |
-| Test suite behaviour | Host, gateway, or plugin configuration |
-| A bug in code both repos share | Deploy settings, secrets, `.env` |
-| Any new `ASC_` class | Local dev-environment differences |
+| Routes upstream                                     | Stays here                             |
+| --------------------------------------------------- | -------------------------------------- |
+| Anything in `aroma-store-core` / `lylyrose-core`    | Branding / theme visual tweaks         |
+| Anything in the storefront theme's shared templates | A store-specific page or campaign      |
+| Test suite behaviour                                | Host, gateway, or plugin configuration |
+| A bug in code both repos share                      | Deploy settings, secrets, `.env`       |
+| Any new `ASC_` class                                | Local dev-environment differences      |
 
 Rule of thumb: **if the other store would want it too, it is shared.** If only this
 store would want it, it can stay here — but say so explicitly rather than silently
@@ -91,14 +91,14 @@ building shared code here.
 
 ## Current standing gap
 
-`aroma_store` leads by one feature, absent here:
+**None — feature parity as of 2026-09-27.** The `ASC_Flash_Sales`
+(«پیشنهادهای شگفت‌انگیز» / Incredible Offers) gap that stood here since
+2026-09-17 is closed: all four files are ported, `lylyrose-core` is at 17 classes
+matching upstream, and test section 28 covers the page (suite **229/0**).
 
-- **`ASC_Flash_Sales`** (`class-flash-sales.php`) + `page-incredible-offers.php` —
-  the «پیشنهادهای شگفت‌انگیز» (Incredible Offers) page, built upstream 2026-09-17.
-
-To close the gap: build/verify it upstream, then mirror per step 4–5. It is a shared
-storefront capability (a sale-product page driven by WooCommerce sale state), not a
-brand-specific campaign, so it belongs in both stores.
+This is a shared storefront capability (a sale-product page driven by WooCommerce
+sale state), not a brand-specific campaign, so it belonged in both stores — which
+is why the correct direction was upstream-first, as recorded above.
 
 ## Related
 

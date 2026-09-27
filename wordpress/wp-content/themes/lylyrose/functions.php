@@ -672,3 +672,31 @@ add_filter( 'body_class', function( $classes ) {
 } );
 
 add_filter( 'excerpt_length', function() { return 25; }, 999 );
+
+/**
+ * Flash sales (incredible offers) assets — only on the offers page.
+ * Served from the theme so they version-bump with theme updates.
+ */
+function lylyrose_flash_sales_assets() {
+    if ( ! function_exists( 'is_incredible_offers' ) || ! is_incredible_offers() ) {
+        return;
+    }
+    wp_enqueue_script(
+        'lylyrose-flash-sales',
+        get_theme_file_uri( 'assets/js/flash-sales.js' ),
+        array(),
+        lylyrose_version(),
+        true
+    );
+    wp_localize_script( 'lylyrose-flash-sales', 'dk_flash_i18n', array(
+        'noStock'   => __( 'اتمام موجودی', 'lylyrose' ),
+        'addedToCart' => __( 'افزوده شد', 'lylyrose' ),
+    ) );
+    wp_enqueue_style(
+        'lylyrose-flash-sales',
+        get_theme_file_uri( 'assets/css/flash-sales.css' ),
+        array(),
+        lylyrose_version()
+    );
+}
+add_action( 'wp_enqueue_scripts', 'lylyrose_flash_sales_assets', 20 );
