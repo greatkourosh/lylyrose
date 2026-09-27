@@ -9,7 +9,6 @@
 > here is referred to `aroma_store`, built and tested there, and mirrored back only
 > once that suite is green. See [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
 
-
 Date: 2026-08-29 · Branch: master · Plugin count: 19 active locally (25 shipped
 including 6 shipped-but-inactive: Wordfence, Rank Math, WP Super Cache, Gateland,
 Persian shipping, Limit Login Attempts — corrected 2026-09-26)
@@ -20,6 +19,7 @@ Autoptimize, UpdraftPlus, Goftino, Clarity, Site Kit) with concrete next feature
 ordered by revenue/UX impact vs effort.
 
 Current-state facts this list is built on:
+
 - Guest checkout ON, but **account registration OFF** (`woocommerce_enable_myaccount_registration = no`)
 - No image optimization (no WebP/AVIF conversion) — perfume store is image-heavy
 - Shop/archive pages have **no faceted filters** (no brand/gender/price/attribute sidebar)
@@ -33,6 +33,7 @@ Current-state facts this list is built on:
 ## P0 — Do first (direct revenue / checkout UX)
 
 ### 1. ✅ DONE 2026-09-02 — Mobile OTP login & registration (ورود با شماره موبایل)
+
 - Built in-house instead of a third-party plugin: lylyrose-core `ASC_OTP` — two AJAX
   endpoints (`asc_otp_request` / `asc_otp_verify`), 6-digit code hashed with
   `wp_hash_password` and stored as a 120s transient, resend cooldown 60s, max 5 attempts,
@@ -48,6 +49,7 @@ Current-state facts this list is built on:
   پیامک settings before OTP works in production; until then codes land in the logger.
 
 ### 2. ✅ DONE 2026-09-01 — Image optimization: WebP delivery (see DEVELOPMENT_LOG)
+
 - Investigation changed the plan: the media library is already 100% WebP from the
   Digikala import (no image over 40 KB), so Converter for Media was **not** installed —
   no conversion gain, and it would have added ~100 FTP files + .htaccess rewrites on the
@@ -58,6 +60,7 @@ Current-state facts this list is built on:
   `fetchpriority="high"` + srcset.
 
 ### 3. ✅ DONE 2026-09-01 — Shop faceted filters (see DEVELOPMENT_LOG, entries "Faceted shop filters" + "Gender/concentration/volume facets")
+
 - Shipped in-theme (not widgets): `archive-product.php` renders the Digikala
   filter rail — availability/discount toggles, برند checkboxes, جنسیت/غلظت/حجم
   attribute facets, price range form, sort dropdown, result count, auto-submit
@@ -68,6 +71,7 @@ Current-state facts this list is built on:
   `in_stock=1` → ۱۲۹, `discount=1` → ۸۶.
 
 ### 4. ✅ DONE 2026-09-03 — Cart abandonment recovery (بازیابی سبد خرید رهاشده)
+
 - woo-cart-abandonment-recovery v2.1.3 (CartFlows) installed: tracks checkout form
   (email + phone captured via JS before order completes), stores carts in
   `wp_cartflows_ca_cart_abandonment`, cron (`every_fifteen_minutes`, 30-min cut-off)
@@ -85,6 +89,7 @@ Current-state facts this list is built on:
   gets no SMS, cleanup). Same live caveat as OTP: real SMS gateway credentials needed.
 
 ### 5. ✅ DONE 2026-09-03 — ZarinPal sandbox e2e payment test (تست پرداخت واقعی) (see DEVELOPMENT_LOG)
+
 - **Why**: Gateway is installed but a full sandbox purchase→IPN→order-completed flow
   has not been proven. Payment is the one flow that must not fail silently.
 - **How**: ZarinPal sandbox merchant code, test purchase, verify order status transitions,
@@ -102,6 +107,7 @@ Current-state facts this list is built on:
 ## P1 — High value, next sprint
 
 ### 6. ✅ DONE 2026-09-01 — Store pages: تماس با ما / درباره ما / پیگیری سفارش / FAQ (see DEVELOPMENT_LOG)
+
 - **Why**: Trust pages measurably lift checkout conversion for Iranian shoppers;
   order-tracking page reduces support load (Goftino handles chat, not async status).
 - **How**: 4 pages + Digikala-style templates; پیگیری سفارش uses order-lookup form
@@ -109,6 +115,7 @@ Current-state facts this list is built on:
 - **Effort**: Low-medium. **Acceptance**: Pages live, linked in footer, RTL-clean.
 
 ### 7. ✅ DONE 2026-09-01 — Search upgrade: search by product code / SKU (see DEVELOPMENT_LOG)
+
 - `ASC_Product_Code::search_redirect()` on `pre_get_posts`: a site search of
   `sku-<digits>`, `sku <digits>` or bare digits resolving to a product 301s to
   its canonical URL; non-numeric and unmatched searches fall through to normal
@@ -116,6 +123,7 @@ Current-state facts this list is built on:
   `?s=17` → ID-code product, miss → 200 results page.
 
 ### 8. ✅ DONE 2026-09-04 — Reviews incentive (تشویق به ثبت نظر) (see DEVELOPMENT_LOG)
+
 - lylyrose-core v2.1.0 `ASC_Reviews`: on `woocommerce_order_status_completed` schedules
   a Persian review-request email + SMS 3–7 days out via Action Scheduler
   (`asc_send_review_request`, once per order via `_asc_review_requested` meta). When the
@@ -129,6 +137,7 @@ Current-state facts this list is built on:
   second review, non-purchaser no-coupon, cleanup).
 
 ### 9. ✅ DONE 2026-09-01 — Order-status email templates in Persian (ایمیل‌های فارسی)
+
 - **Why**: SMS exists, but emails still ship with English WP defaults; wp-mail-smtp is
   active and unused to its potential.
 - **How**: WooCommerce email settings → translate subject/body templates, Digikala-style
@@ -136,6 +145,7 @@ Current-state facts this list is built on:
 - **Effort**: Medium. **Acceptance**: New-order/processing/completed emails render RTL Persian.
 
 ### 10. ✅ DONE 2026-09-01 — Discount/coupon strategy surfaces (see DEVELOPMENT_LOG)
+
 - Coupon field now always visible in the cart payment summary (Digikala-style, teal
   اعمال button; posts to WC core with the woocommerce-cart nonce) — hidden once a
   discount applies. Campaign banner strip (`dk-campaign`) driven by the
@@ -149,6 +159,7 @@ Current-state facts this list is built on:
 ## P2 — Scale & retention
 
 ### 11. ✅ DONE 2026-09-02 — Loyalty points / wallet (see DEVELOPMENT_LOG)
+
 - Shipped as woo-wallet («کیف پول برای ووکامرس» / TeraWallet, **v1.6.14 at the
   time, updated to v1.7.0 on 2026-09-26** — the "v2.4.x" previously written here was
   wrong; fa_IR translation from translate.wordpress.org, installed and loading):
@@ -159,6 +170,7 @@ Current-state facts this list is built on:
   off; clawback on refund on. Theme account nav links «کیف پول». Tests section 18.
 
 ### 12. ✅ DONE 2026-09-02 — Related-products "Frequently bought together" (see DEVELOPMENT_LOG)
+
 - Shipped as lylyrose-core v1.8.0 `ASC_Frequently_Bought`: co-purchase query over
   the last 500 completed orders (`wc_get_orders`, HPOS-safe), scored by co-occurrence,
   top 8 partners, 1-day transient cache invalidated inline when an order completes.
@@ -167,6 +179,7 @@ Current-state facts this list is built on:
   until real order data exists. Tests section 15.
 
 ### 13. ✅ DONE 2026-09-04 — Fragrance note pyramid (see DEVELOPMENT_LOG)
+
 - Shipped as in-house postmeta, NOT ACF (pivot: same structured data, zero plugin
   dependency). lylyrose-core `ASC_Fragrance_Notes`: product-edit meta box with
   three layers — top (نوت آغازین), heart (نوت میانی), base (نوت پایه) — one note
@@ -178,6 +191,7 @@ Current-state facts this list is built on:
   text on the front end, negative test on a noteless product, cleanup verified.
 
 ### 14. ✅ DONE 2026-09-02 — Instagram feed / social proof strip (see DEVELOPMENT_LOG)
+
 - lylyrose-core v1.9.0 `ASC_Instagram`: `asc_instagram` option (handle + up to 6
   image/post URL rows) with a Persian Settings page; theme v1.5.0 renders a lazy-loaded
   6-up grid («اینستاگرام ما») on the homepage between brands and magazine.
@@ -185,18 +199,21 @@ Current-state facts this list is built on:
   plain image URLs from any host. Silent until configured. Tests section 16.
 
 ### 15. ✅ DONE 2026-09-02 — Advanced reporting (see DEVELOPMENT_LOG)
+
 - lylyrose-core v2.0.0 `ASC_Reports`: «گزارش فروش» admin page — date-range stats
   (orders, revenue, items, avg order), top-10 products, and CSV export with Persian
   headers + UTF-8 BOM for Excel. Export link uses a day-scoped signed token (session
   tokens rotate per request under the security stack, breaking nonces). Tests section 17.
 
 ### 16. ✅ DONE 2026-09-05 — Multi-step checkout (تسویه‌حال چندمرحله‌ای) (see DEVELOPMENT_LOG)
+
 - digikala theme v1.7.0 splits the classic checkout into two presentational steps
   (اطلاعات ارسال → پرداخت) inside the single WooCommerce form — pure client-side,
   no server change. Order summary + place-order stay in the persistent sidebar.
   No-JS fallback stacks both cards. Tests section 24.
 
 ### 17. ✅ DONE 2026-09-05 — Notifications center (اعلان‌ها) (see DEVELOPMENT_LOG)
+
 - lylyrose-core v2.1.0 `ASC_Notifications`: custom post type `asc_notification`
   (author-scoped), bell icon + unread-badge + dropdown in header (logged-in only),
   `/my-account/notifications/` account endpoint via `add_rewrite_endpoint` +
@@ -206,6 +223,7 @@ Current-state facts this list is built on:
   digikala theme v1.8.0 bell + account nav + CSS. Tests section 25.
 
 ### 18. ✅ DONE 2026-09-06 — Gift wrap / gift card (کارتابل هدیه) (see DEVELOPMENT_LOG)
+
 - Gift wrap: lylyrose-core v2.2.0 `ASC_Gift_Wrap` — cart fee (50,000 تومان) via
   `woocommerce_cart_calculate_fees`, persisted as order fee line item (HPOS-safe),
   checkbox on cart + status in checkout, AJAX `asc_gift_wrap_toggle` + no-JS fallback.
@@ -214,14 +232,24 @@ Current-state facts this list is built on:
   (lint OK) and integrates with `ti-woocommerce-wishlist`, but the shop's
   ~27-39s page latency made the installer's smoke-test false-negative (auto-
   deactivate). Reinstall + activate once the shop latency is fixed; then
-  Persian email template + `GC-XXXX` codes.
+  Persian email template + `GC-XXXX` codes. Tracked upstream as demand **D2** in
+  `aroma_store/docs/FEATURES_ROADMAP.md` — build it there first, per
+  [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
+
+### 19. ✅ DONE — Back-in-stock notifier (موجود شد به من خبر بده) (see DEVELOPMENT_LOG)
+
+- `ASC_Stock_Notifier` (`class-stock-notifier.php`): customers subscribe to an out-of-stock
+  product by phone; on restock every pending subscriber gets a Persian SMS via PWSMS plus a
+  bell notification if they are a logged-in customer. Subscriptions in a dedicated
+  `asc_stock_subs` table, one row per phone+product, 24h resubscribe cooldown.
+- Registered in the core plugin and covered by **test suite section 27**.
+- Was listed here as P3 "later/optional" while already being built and tested — corrected
+  2026-09-27 during the upstream downstream sweep.
 
 ---
 
 ## P3 — Later / optional
 
-- **Back-in-stock notifier** (موجود شد به من خبر بده): SMS on restock per product.
-- **Back-in-stock notifier** (موجود شد به من خبر بده): SMS on restock per product.
 - **Vendors onboarding docs**: if Dokan vendors become real, seller FAQ + commission policy.
 - **AMP / PWA**: low priority; cache stack already fast, PWA only if mobile-app feel needed.
 
@@ -247,8 +275,8 @@ the store-specific exceptions, is in
 4. Mirror the change here with the rename map
    ([UPSTREAM_RELATIONSHIP.md](UPSTREAM_RELATIONSHIP.md)):
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
-   ports 8010 → 8020. The `ASC_` prefix is unchanged.
-5. `bash docker/run-tests.sh` in this repo (localhost:8020) must stay green — currently
+   ports 8010 → 8030. The `ASC_` prefix is unchanged.
+5. `bash docker/run-tests.sh` in this repo (localhost:8030) must stay green — currently
    **217 checks across 27 sections**.
 6. Update `docs/DEVELOPMENT_LOG.md` and commit on `master`.
 
