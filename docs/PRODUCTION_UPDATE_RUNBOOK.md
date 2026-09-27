@@ -461,12 +461,28 @@ docs claiming 23 pending updates when the live site had **0** and had for hours.
   `wp-content/updraft/` and that `updraft_backup_history` is no longer `NULL`.
   This host has no scheduler of its own, so until that is confirmed keep running
   1a manually before any risky change.
-- **ZarinPal live merchant code** and **`sandbox: no`** — not yet acquired. Until
-  then production runs the gateway in sandbox and takes no real payments.
+- **ZarinPal live merchant code** and **`sandbox: no`** — not yet acquired, but
+  **corrected 2026-09-27**: the gateway is **enabled and live at checkout**, not
+  disabled. A real checkout POST created order 1809 and redirected to
+  `sandbox.zarinpal.com` with a real authority, using the all-zero dummy
+  merchant. So production creates real orders and sends customers to a payment
+  page it cannot collect money from. The store is in **demo mode** (hardcoded
+  banner in `header.php`), so this is pre-launch state rather than a live-money
+  bug — but the banner is a statement to visitors, not a control. **Before
+  launch: a real merchant code with `sandbox: no`, or disable the gateway.**
+  Details in `CONTINUATION.md`.
 - **PWSMS real credentials** — the `Logger` sink makes production SMS a **silent
   no-op**, which also means the P0 mobile OTP login feature does not work on the live
   site. It is worth treating this as higher priority than it looks.
-- **WP Mail SMTP credentials** — mail is configured but unverified on real delivery.
-- **WP Super Cache** re-configure and **Wordfence** scan + firewall mode.
-- **`WP_REDIS_*` defines** still in production `wp-config.php`. Inert now that the
-  plugin is deactivated; drop them when convenient.
+- **WP Mail SMTP credentials** — the `wp_mail_smtp` option is **empty** on the
+  live site: no provider, no from-address, no SMTP host or key. Unconfigured,
+  not merely unverified.
+- **WP Super Cache** — `WP_CACHE` is `false`, there is no `advanced-cache.php`
+  and no `supercache` directory, so caching is **off**, not misconfigured.
+  Needs enabling.
+- **Wordfence** — the plugin is **inactive** and its `wordfence` option is
+  empty. It needs activating and configuring, not just a scan.
+- ~~**`WP_REDIS_*` defines**~~ — **already resolved.** Verified 2026-09-27:
+  there are no `WP_REDIS_*` defines, no `object-cache.php` drop-in, and the
+  plugin is deactivated, so `WP_Object_Cache` is the live backend. Nothing to
+  drop; this item can be closed.

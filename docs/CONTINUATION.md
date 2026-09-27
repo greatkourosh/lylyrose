@@ -281,9 +281,13 @@ copy rather than branching from it.
   host). Rate limits: 5/hour per mobile, 60s resend, 5 verify attempts, 120s code TTL.
 - **ZarinPal payment (P0 #5)**: gateway `WC_ZPal` configured locally (sandbox yes,
   dummy UUID merchant — sandbox accepts any), section 21 proves the full chain
-  checkout → order-pay → receipt → StartPay → callback → processing/paid. On live the
-  plugin is present but **disabled** — production requires a real merchant code +
-  `sandbox: no` in WP admin (درگاه‌ها → زرین‌پال) before launch.
+  checkout → order-pay → receipt → StartPay → callback → processing/paid. ~~On live the
+  plugin is present but **disabled**~~ — **corrected 2026-09-27: that was wrong.**
+  Production has the gateway **enabled and offering checkout**; a real checkout POST
+  created order 1809 and redirected to `sandbox.zarinpal.com` with a real authority,
+  on the all-zero dummy merchant. Production still requires a real merchant code +
+  `sandbox: no` in WP admin (درگاه‌ها → زرین‌پال) before launch — but the risk is
+  "takes orders and cannot collect", not "inert". See the per-host settings table above.
 - **Cart abandonment (P0 #4)**: woo-cart-abandonment-recovery v2.1.3 captures email +
   phone at checkout into `wp_cartflows_ca_cart_abandonment`; cron flips stale carts
   (30-min cut-off) to `abandoned`; lylyrose-core `ASC_Cart_Abandonment` sends the
@@ -356,11 +360,64 @@ breaks the site in the same misleading way (redirect to `install.php`). Verified
   end: 25,845 files / 452 MB, 16/16 checks pass. The tree is assembled from the script
   now, so a re-deploy cannot silently regress. DB credentials ship as placeholders
   (cPanel may prefix the db name/user); fill them on the host.
+- **Per-host settings pass — audited on the live site 2026-09-27 14:16–14:43 UTC.**
+  Read off production with read-only docroot probes (random name, uploaded, fetched,
+  deleted; plus one guarded write to clean up the test order, see below). **Three
+  items on the old list are already done, and one is not what the docs said:**
+
+  | Item | Reality on the live site |
+  | --- | --- |
+  | Redis | **Done already.** Plugin already deactivated, and **no `WP_REDIS_*` defines exist** and **no `object-cache.php` drop-in**. `WP_Object_Cache` is the live backend. The "drop the defines" line is moot — there is nothing to drop. |
+  | UpdraftPlus remote storage | **Superseded.** Still no remote destination, deliberately (free route, see the runbook). 1a/1b/1c cover it. |
+  | Wordfence | **Wordfence is INACTIVE** (not active-and-unconfigured as listed). `wordfence` option empty. It is installed, shipped-but-off. |
+  | WP Super Cache | **Genuinely off**: `WP_CACHE` is `false` and there is no `advanced-cache.php` and no `supercache` dir. Needs enabling, not "re-configuring". |
+  | PWSMS | **Confirmed `Logger`** (`PW\PWSMS\Gateways\Logger` in `pwsms_settings`), so SMS is a silent no-op and the P0 OTP login does not work live. Unchanged and still the highest-value gap. |
+  | WP Mail SMTP | **Empty** — no provider, no from-address, no SMTP host or key. Unconfigured. |
+  | ZarinPal | **Enabled and live at checkout — contradicting two docs.** See below. |
+
+  **ZarinPal is not "disabled and inert", and it is not "sandbox, so it does not
+  matter".** The gateway's settings say `enabled: yes`, the plugin loads
+  (`WC_ZPal` class exists even though it is not in `active_plugins` — it is
+  loaded some other way), and a real checkout POST created order **1809** and
+  redirected to `https://sandbox.zarinpal.com/pg/StartPay/…` with a real
+  authority ID. The merchant code is the **all-zero dummy UUID** and `sandbox`
+  is `yes`, so no money can ever be collected — but orders *are* created and
+  customers *are* sent to a payment page. That is a materially different risk
+  from "the gateway is off": it looks like a working checkout to a visitor.
+
+  **What keeps this from being an emergency: the store is in demo mode.** The
+  hardcoded banner in `header.php` states «سفارش‌ها واقعی نیستند و پرداختی انجام
+  نمی‌شود» (orders are not real and no payment is made), and the badge says
+  «خرید نهایی ثبت نمی‌شود». So the site is deliberately pre-launch, which is
+  consistent with taking sandbox payments. **Before launch, ZarinPal must get a
+  real merchant code and `sandbox: no`, or checkout must be disabled** — the
+  demo banner is a visitor-facing statement, not a safety control, and anyone
+  reaching the site without reading it would see a live-looking checkout.
+
+  **Cleanup note:** the audit created order 1809 (7,800,000 تومان, product 1301,
+  `audit-probe@example.invalid`). It was **cancelled with an audit note and
+  trashed** — not force-deleted, so it is recoverable in wp-admin — and stock
+  was restored. Confirmed `post_status = trash` in the DB. One side effect to
+  be aware of: WooCommerce sent the store's real «سفارش لغو شده» cancellation
+  email to the admin address, so the owner will see one cancellation email for
+  order 1809. `/checkout/order-received/1809/` still renders "thank you" from
+  the page cache even though the order is trashed — cosmetic, not a data leak.
+
+  Three probes were burned on this audit, all mine and all the same mistake as
+  `updraft_interval_type`: reading a value from the wrong place instead of
+  checking. `sms_main_settings` is a 0-length placeholder — the real gateway
+  option is `pwsms_settings`; `function_exists('UpdraftPlus_Options')` is always
+  false for a class; and `WC()->payment_gateways` is empty from a bare
+  `wp-load.php` because WooCommerce only populates it on `woocommerce_init`.
+  In all three cases the *site* was fine and my probe was wrong, which is the
+  safer direction — but it is also why the gateway list had to be read from the
+  rendered checkout HTML rather than from the registry.
+
 - **Per-host settings still to do from `/secure-login/`** (no SSH needed, just admin access):
-  ZarinPal real merchant code + `sandbox: no`; PWSMS real gateway credentials (currently
-  the `Logger` sink, so production SMS is a no-op); WP Mail SMTP credentials; UpdraftPlus
-  remote storage; deactivate Redis Object Cache (no Redis on this host) and drop the
-  `WP_REDIS_*` defines; WP Super Cache re-configure; Wordfence scan + firewall mode.
+  ZarinPal real merchant code + `sandbox: no` **before launch**; PWSMS real gateway
+  credentials (still the `Logger` sink, so production SMS is a no-op); WP Mail SMTP
+  credentials; WP Super Cache **enable** (`WP_CACHE` is false today); Wordfence
+  **activate + configure** (it is inactive). Redis needs nothing — see the table above.
 - **Cron**: `DISABLE_WP_CRON` is `false` in the deployed config (WP self-triggers). If you
   want a cPanel cron job instead, set it to `true` and add
   `* * * * * /usr/local/bin/php /home3/bqwyvowk/lylyroseir/wp-cron.php >/dev/null 2>&1`.

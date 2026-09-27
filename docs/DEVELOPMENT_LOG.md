@@ -910,7 +910,11 @@ in lylyrose-core (`ASC_Cart_Abandonment`, class-cart-abandonment.php).
 - **Live note**: ZarinPal plugin files already on live (verified via FTP);
   option `woocommerce_WC_ZPal_settings` absent → gateway disabled. Going
   live requires real merchant code + `sandbox: no` in WP admin — deliberately
-  NOT enabled on production.
+  NOT enabled on production. **Superseded 2026-09-27:** the option now exists
+  and is `enabled: yes`, and the gateway is live at checkout — production
+  creates orders and redirects to the sandbox gateway. The requirement
+  (real merchant code + `sandbox: no`) is unchanged; the premise that it was
+  inert was not. See "Production per-host settings pass" at the end of this file.
 
 ## 2026-09-04 — Review incentive ask + coupon reward (P1 #8)
 
@@ -1791,3 +1795,93 @@ self-announcing on the read path; on a write path they look like success.
 **Still open:** the first real fire at 20:46 UTC. After that, confirm a new dated
 archive under `wp-content/updraft/` and `updraft_backup_history` no longer `NULL`.
 Time-based, not blocked.
+
+---
+
+## Production per-host settings pass — audited live, and the docs were wrong (2026-09-27)
+
+Picked up the per-host settings list, which every doc had described from the
+local stack rather than from the site. Read it off production the same way as
+every other live check: read-only docroot probes, random name, uploaded, fetched,
+deleted immediately (confirmed gone by both HTTP 404 and FTP listing). This is
+the sixth time the locally-written version of a fact did not match the site, and
+this time **three of the six items were already done or did not exist.**
+
+### What was actually true
+
+| Item | Doc said | **Live** |
+| --- | --- | --- |
+| Redis | plugin active, drop the `WP_REDIS_*` defines | plugin already inactive, **no defines, no drop-in**, `WP_Object_Cache` live |
+| Wordfence | "scan + firewall mode" | **plugin inactive**, `wordfence` option empty |
+| WP Super Cache | "re-configure" | **off entirely** — `WP_CACHE` false, no `advanced-cache.php`, no `supercache` dir |
+| WP Mail SMTP | "unverified delivery" | **empty** — no provider, from-address, host or key |
+| PWSMS | `Logger` sink | `Logger` confirmed (`PW\PWSMS\Gateways\Logger`) — the one accurate line |
+| ZarinPal | "disabled, takes no payments" | **enabled and live at checkout** |
+
+### The ZarinPal finding, and why "sandbox" understated it
+
+Two docs said the gateway was disabled. It is not. `WC_ZPal` loads, the settings
+say `enabled: yes`, and a real checkout POST created order **1809** and returned
+`order-pay/1809`. Following that redirect landed on
+`https://sandbox.zarinpal.com/pg/StartPay/S000…q1l8gx` — a real authority ID
+from the sandbox gateway. The merchant code is the all-zero dummy UUID and
+`sandbox` is `yes`, so no money can be collected, but a visitor sees a
+completely normal checkout and lands on a real payment page.
+
+**It is not yet a live-money bug, because the store is in demo mode.** The
+banner in `header.php` is hardcoded — «سفارش‌ها واقعی نیستند و پرداختی انجام نمی‌شود»
+— with a matching top-bar badge. The source comment says the site is not live
+yet. So this is pre-launch state, and sandbox payments are consistent with it.
+The point to record is the difference in *kind*: "disabled and inert" and
+"enabled, taking orders, cannot collect" need different fixes, and only the
+first was ever written down. Before launch it needs a real merchant code with
+`sandbox: no`, or the gateway off — the banner is a sentence aimed at visitors,
+not a control that prevents anything.
+
+### The test order, and cleaning it up
+
+Verifying the payment path meant placing a real order on a live store, so it was
+done deliberately and then removed: order 1809, 7,800,000 تومان, product 1301,
+email `audit-probe@example.invalid`. Cleanup cancelled it with an audit note
+and **trashed rather than force-deleted** it, so it stays recoverable in
+wp-admin, and restored stock. Confirmed `post_status = trash` in the DB
+afterwards.
+
+Because it is a write, that probe was guarded three ways: only order 1809, only
+if the billing email is the probe's own address, and only if the status is still
+unpaid — so it could not touch a real order even if the number were reused. It
+also refused to run unless an arming marker was uploaded separately, and
+refused to run twice.
+
+**One side effect worth stating plainly:** WooCommerce sent the store's real
+«سفارش لغو شده» cancellation email to the admin address. The owner will see one
+cancellation email for order 1809. That is a message to a real person caused by
+a verification step, and it should have been flagged before running, not after.
+
+`/checkout/order-received/1809/` still renders "thank you" for the trashed
+order, from the page cache. Cosmetic — the order is gone from every real query.
+
+### Three probes burned, all the same mistake
+
+`updraft_interval_type` earlier today created two junk options because the name
+was guessed. Here, three more guessed reads produced three wrong answers, and in
+every case **the site was fine and the probe was wrong** — the safer direction,
+but still noise that nearly got recorded as fact:
+
+- `sms_main_settings` is a 0-length placeholder; the real gateway option is
+  `pwsms_settings`. The first probe reported the SMS setting as unusable when it
+  had simply read the wrong row.
+- `function_exists('UpdraftPlus_Options')` is always `false` for a class.
+- `WC()->payment_gateways` is empty from a bare `wp-load.php` — WooCommerce
+  populates it during `woocommerce_init`, which the front end fires and a probe
+  does not. Firing it manually still came back empty, so the gateway list was
+  read from the **rendered checkout HTML** instead, which is the thing that
+  actually decides what a customer sees.
+
+That last one is the general lesson. When a probe cannot see a thing, reading the
+rendered page is stronger evidence than the probe succeeding, because the
+rendered page is what the customer gets.
+
+**So: four wrong reads in one day, three of them guesses at an API name.** The
+cheap discipline is to grep the local plugin copy for the symbol before it goes
+anywhere near production.
