@@ -33,11 +33,39 @@
    v2.4.0 was incomplete. It omitted two theme files, so the Offers page shipped
    serving 200 with no CSS and no JS. **Derive deploy file lists per commit with
    `--name-status`, not from a single file's diff** — see the v2.4.0 section.
-6. **Note the checkout fix is in the tree but not deployed.** `47034b98` removed
-   a duplicate order-review render (3 review tables, 2 payment blocks, 2
-   `#place_order` — a duplicate DOM id, live on `/checkout/` since 2026-09-05) and
-   re-scoped the stepper's `is-hidden` rule so step 1 actually hides. Local only;
-   those two theme files have not been pushed.
+6. **The checkout duplicate-render fix is deployed** (2026-09-28, after the
+   WebP push). `47034b98` removed a duplicate order-review render (3 review
+   tables, 2 payment blocks, 2 `#place_order` — a duplicate DOM id, live on
+   `/checkout/` since 2026-09-05) and re-scoped the stepper's `is-hidden` rule so
+   step 1 actually hides. Verified live with a real cart: 1 / 1 / 1.
+   **Deployed from a committed-only copy, not the working tree** — see below.
+
+## ⚠️ Other sessions edit this tree concurrently — deploy from a commit, not the worktree
+
+On 2026-09-28, at the moment I was about to deploy the checkout fix,
+`themes/lylyrose/style.css` was **modified but uncommitted** (mtime 18:13, my last
+commit 17:54) and I was not the one who changed it. The extra hunks were
+`minmax(0, 1fr)` grid fixes for the site-wide 90px mobile overflow — the item
+"Fix 90px mobile overflow from the announcement bar" in a **running session**, plus
+another session working the checkout page directly. Three sessions share this
+working directory. `git status` showing a file I did not touch is normal here, and
+**deploying the worktree would have shipped another session's in-flight work to
+production unreviewed.**
+
+Two consequences, both cheap to get right:
+
+1. **`git status` before every deploy, and diff the working tree against the host.**
+   A file differing from the host is *not* automatically mine to overwrite. This is
+   the same discipline as the v2.4.0 two-missing-files miss, for the opposite
+   reason: there the set was too small, here it would have been too large.
+2. **Deploy a committed copy, not the tree.** `git show HEAD:<path>` into a staging
+   dir, then `deploy-targeted.py --src <staging>`. Verified afterwards over FTP:
+   host == committed (**True**), host == worktree including the other session's
+   edits (**False**) — their work stayed local and was neither stolen nor shipped.
+
+Do not "clean up" an unexplained dirty file here, and do not assume a dirty file is
+a peer session's mistake: one such change is already in CONTINUATION.md as
+committed work, with an explicit note saying it is not a peer's in-flight edit.
 
 ## ✅ `lylyrose-core` v2.4.0 is deployed and verified live (2026-09-28)
 
