@@ -2,6 +2,51 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 
+## Open as of 2026-09-28
+
+1. **`aroma_store` (upstream) has not been deployed.** `aroma-store.vegacodex.ir`
+   is still v2.3.0 and `/incredible-offers/` 404s there. Its local tree is the
+   source of truth and needs the same targeted push Lyly Rose just got. Note the
+   order: Lyly Rose was deployed **first** here on purpose — `hosting-ready` is
+   vestigial and 1439 files behind, so the *local* aroma tree is what ships.
+2. **Per-host settings still open** (needs a human in `/secure-login/`, all
+   described in "Known open items" below): ZarinPal real merchant + `sandbox: no`,
+   PWSMS real gateway (still the `Logger` sink, so **production SMS is a no-op**
+   and the P0 OTP login does not work live), WP Mail SMTP, enable WP Super Cache
+   (`WP_CACHE` is false today), activate Wordfence.
+3. **1a-ii, a remote UpdraftPlus target** — optional; the daily schedule writes
+   host-local only. Keep 1b (off-host pull) current.
+4. **P1, WebP attachments keep the wrong mime type in the DB.** The one failing
+   local test. `ASC_Images` converts uploads to WebP by extending WP's
+   `image_editor_output_format` — which changes the extension WP *writes* — but
+   `wp_insert_attachment()` has already stored the **original** type by then.
+   So the file on disk is `.webp` while the attachment row still says
+   `image/jpeg`/`image/png`. Verified three ways: a fresh sideload in the local
+   container gave `db_mime=image/jpeg` with `mime_content_type()` = `image/webp`;
+   the 4 gift-card rows (2849–2852) read `image/png` against magic bytes
+   `WEBP`; and **production shows the same, 4 `image/png` rows out of the first
+   100 media items.** It is cosmetic — every file really is WebP and serves as
+   WebP — but the media library filter, the admin type column, REST
+   `/wp/v2/media` and attachment search all read that column. Fix is one
+   `wp_update_post()` in `ASC_Images::log_conversion()` (it already runs on
+   `wp_generate_attachment_metadata` with the attachment id). It is identical
+   upstream, so fix `aroma_store` first — but that tree is `www-data`-owned and
+   needs `sudo`. Backfill the 4 existing rows at the same time.
+5. **The backup gotcha to keep in mind:** the recorded 5-file deploy set for
+   v2.4.0 was incomplete. It omitted two theme files, so the Offers page shipped
+   serving 200 with no CSS and no JS. **Derive deploy file lists per commit with
+   `--name-status`, not from a single file's diff** — see the v2.4.0 section.
+
+## ✅ `lylyrose-core` v2.4.0 is deployed and verified live (2026-09-28)
+
+Production runs 2.4.0, all 18 classes on the host, `/incredible-offers/` 200
+with working assets, gift cards 1811–1814 seeded, rewrite flush fired. Full
+verification table and the two-missing-files post-mortem in
+["`lylyrose-core` v2.4.0 IS deployed"](#-lylyrose-core-v240-is-deployed--verified-live-2026-09-28)
+below. Local suite is **250 passed / 1 failed** — the single failure is the
+WebP mime-type defect described in the open items, and it is **pre-existing and
+also present on production**, not caused by this deploy.
+
 ## 🔍 Production audit — 2026-09-27 (supersedes the 2026-09-26 audit below)
 
 **The update pass is DONE. There is nothing left to update.** Verified
@@ -156,7 +201,85 @@ stopped. `updraft_backup_history` still holds one set; `updraft_retain` and
 stopping this from filling the disk, so don't raise it casually. `/` `/shop/`
 `/checkout/` `/my-account/` all 200.
 
-### ⚠️ `lylyrose-core` v2.4.0 is NOT deployed — production runs v2.3.0
+### ✅ `lylyrose-core` v2.4.0 IS deployed — verified live 2026-09-28
+
+**Supersedes the 2026-09-27 "NOT deployed" finding below (kept for history).**
+Production now runs **2.4.0** on both the header and `const VERSION`, all 18
+`ASC_` classes are on the host, and `/incredible-offers/` serves **200** with
+real product cards. Read the "not deployed" section for the original evidence
+and the deploy-order investigation — both still valid — but its conclusion is
+now stale.
+
+#### The recorded 5-file set was incomplete — 2 files were missing
+
+This is the part worth keeping. The set below was derived from the two v2.4.0
+commits, but it was **wrong by two files**, and the mistake was invisible from
+the repo side:
+
+| File | In the recorded 5-file set | Why it mattered |
+| --- | --- | --- |
+| `themes/lylyrose/functions.php` | **no** | held the whole 28-line `lylyrose_flash_sales_assets()` enqueue hook |
+| `themes/lylyrose/assets/js/flash-sales.js` | **no** | the count-down timer script itself |
+
+Both are **modifications/additions the commits made to the theme**, and both were
+omitted. The four plugin-side files plus two theme files had gone up (mtimes
+2026-09-28 11:59 / 12:03), so the deploy *had* run — just incompletely. Result:
+the offers page returned **200 while shipping no CSS and no JS at all**. The page
+existed and rendered cards, so a status-code check passed. The tell was
+`assets/js/flash-sales.js` → **404**.
+
+**Both now uploaded and verified:**
+
+```bash
+python3 docker/deploy-targeted.py \
+  wp-content/themes/lylyrose/functions.php \
+  wp-content/themes/lylyrose/assets/js/flash-sales.js
+```
+
+`functions.php` is a PHP syntax boundary — a fatal there takes the whole site
+down. The site-wide 200 sweep after upload is what rules that out, since every
+front-end request loads it.
+
+**Lesson: derive the file list per commit with `--name-status`, not from the
+diff of one file against the other.** Both `d3233c16` and `3ce37382` touch the
+theme as well as the plugin, and the theme side is the easy half to miss because
+the headline was "the plugin is not deployed".
+
+#### Live verification, 2026-09-28 (read-only, off the site itself)
+
+| Check | Result |
+| --- | --- |
+| `lylyrose-core.php` on host | header `Version: 2.4.0`, `const VERSION` `2.4.0` — agree |
+| `includes/` over FTP | **18** files; `class-flash-sales.php` + `class-gift-cards.php` present, all 18 referenced by the bootstrap |
+| 5 original files + the 2 new ones | **byte-identical** to the working tree (sha1) |
+| `/incredible-offers/` | **200**, 24 product cards |
+| `flash-sales.css` | **200**, 4,204 B, enqueued as `lylyrose-flash-sales-css` |
+| `flash-sales.js` | **200**, 1,024 B, enqueued as `lylyrose-flash-sales-js` |
+| CSS bundle contents | `.dk-flash-card` `.dk-flash-grid` `.dk-flash-hero` `.dk-flash-tab` `.dk-flash-timer` all present |
+| i18n payload | `dk_flash_i18n` present, base64-inline, decodes to `noStock`/`addedToCart` in Persian |
+| Auto-created artifacts | page `incredible-offers` id **1810**; gift cards **1811–1814** = `GC-500K`/`GC-1000K`/`GC-2000K`/`GC-5000K`, virtual, correct prices |
+| Version-gated rewrite flush | fired — shop links resolve as `/product/sku-13503503/…` and fetch **200** |
+| Whole site | `/` `/shop/` `/cart/` `/checkout/` `/my-account/` `/incredible-offers/` `/about/` `/contact/` `/faq/` `/track-order/` all **200** |
+| Branding | `<title>Lyly Rose`, `/wp-json/` name `Lyly Rose`, **0** "Aromaland" hits |
+| `vegacodex.ir` (primary site) | **200**, untouched |
+
+**Two probes here were wrong, not the site** — the recurring lesson. (1) Grepping
+the page for `flash-sales\.(css|js)` found nothing and looked like a dead
+enqueue hook; Autoptimize rewrites the tag and the script is footer-loaded, so
+the pattern never matched. The real tags are `id='lylyrose-flash-sales-css'` and
+`id="lylyrose-flash-sales-js"`. (2) `curl` of `functions.php` over HTTPS returned
+**0 bytes** (LiteSpeed/Autoptimize serve that path statically), which looked like
+missing code on the host; it was not — FTP showed the file identical with the
+hook present twice. **Confirm file identity over FTP, never by fetching PHP over
+HTTP.** And `?s=کارت هدیه` on the Store API returns `0` products, which looks
+like gift cards failed to seed; they exist (1811–1814), the Store API just does
+not match on Persian name. Query by `?sku=GC-500K` instead.
+
+**Still not deployed: `aroma_store` upstream.** `https://aroma-store.vegacodex.ir/`
+was 404 for `/incredible-offers/` and was not part of this pass. Its local tree is
+the source of truth for the next release and carries both features.
+
+#### The earlier finding, for history
 
 Found 2026-09-27 18:45 UTC, and it is the largest gap between this repo and the
 live site. **`/incredible-offers/` returns 404 on `lylyrose.ir`** even though

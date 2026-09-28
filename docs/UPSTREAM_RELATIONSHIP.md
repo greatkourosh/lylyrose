@@ -61,13 +61,18 @@ The `ASC_` prefix is deliberately **not** renamed — it keeps the mirrored code
 
 ## Current divergence
 
-**The feature set is at parity in the REPOS — 2026-09-27. Neither live site has
-v2.4.0 deployed.** `lylyrose.ir/incredible-offers/` and
-`aroma-store.vegacodex.ir/incredible-offers/` both return **404**; both hosts run
-`*-core` **v2.3.0** with 16 `includes/` files, while both repos have 17 including
-`class-flash-sales.php`. So the parity below is repo-to-repo, and it must not be
-read as "the Offers page is live". Deploy v2.4.0 upstream first, then here.
-See the v2.4.0 section of `CONTINUATION.md`.
+**Lyly Rose is live on v2.4.0; `aroma_store` is not — 2026-09-28.** The gap that
+stood here since 2026-09-27 is now **half closed**. `lylyrose.ir` runs
+`lylyrose-core` **2.4.0** (header and `const VERSION` agree), all **18**
+`includes/` classes are on the host, and `/incredible-offers/` returns **200**
+with 24 cards, its CSS and JS both served. `aroma-store.vegacodex.ir` is still on
+**v2.3.0** with `/incredible-offers/` **404** — upstream's local tree is the
+source of truth for the next release, and it was not part of that pass. So repo
+parity now also holds *downstream* to production; it still does not hold
+*upstream* to production. See the v2.4.0 section of `CONTINUATION.md`, which
+also records that the first production deploy of the Offers feature shipped
+**without its two theme files** (`functions.php`, `assets/js/flash-sales.js`) —
+the page served 200 while sending no CSS or JS.
 
 **The feature set is at parity — 2026-09-27.** The `ASC_Flash_Sales` gap that
 stood here since 2026-09-17 is closed: all four files are ported (`lylyrose-core`
