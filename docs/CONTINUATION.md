@@ -108,8 +108,8 @@ here.
 
 The last open item from the 2026-09-27 audit is **closed with evidence, not
 inference**. Six archives appeared in `wp-content/updraft/` sharing run id
-`ddea859eb974`, dated `2026-09-28-0415`, totalling **120,899,203 bytes
-(115.3 MB)**: `plugins.zip` 85.3 MB, `themes.zip` 18.8 MB, `others.zip` 4.7 MB,
+`ddea859eb974`, dated `2026-09-28-0415`, totalling **120,790,945 bytes
+(115.2 MB)**: `plugins.zip` 85.3 MB, `themes.zip` 18.8 MB, `others.zip` 4.7 MB,
 `uploads.zip` 6.1 MB, `db.gz` 407 KB, `mu-plugins.zip` 120 B — plus
 `log.ddea859eb974.txt` (108 KB), which did not exist before the fire.
 
@@ -143,6 +143,18 @@ the log records `No remote despatch: user chose no remote backup service`. So th
 only automated copy sits on the same host as the site, and 1a-ii (a remote
 target) is now the sole remaining gap, still optional. Keep 1b (off-host pull)
 current, and keep 1a manual before any risky change.
+
+**Re-checked 2026-09-28 06:55 UTC — the daily cycle actually turned over.** Both
+events are still registered as `daily` / `86400` and have moved off the stamp
+they fired on: next run `1790628393` = `2026-09-29 04:33:13 UTC`, ~24h after the
+04:15 run. That reschedule is the check the archive could not provide — a cron
+event looks *identical* before a fire, after a fire, and if it never fires, so
+"still registered" alone would have passed even for a schedule that had silently
+stopped. `updraft_backup_history` still holds one set; `updraft_retain` and
+`updraft_retain_db` are both `2`, so retention caps the directory at **2 sets ≈
+231 MB steady-state** on a host of unknown quota — retention is the only thing
+stopping this from filling the disk, so don't raise it casually. `/` `/shop/`
+`/checkout/` `/my-account/` all 200.
 
 ### ⚠️ `lylyrose-core` v2.4.0 is NOT deployed — production runs v2.3.0
 

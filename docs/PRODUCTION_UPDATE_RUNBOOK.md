@@ -32,7 +32,7 @@ The update pass is no longer blocked on backup. **1c is done and its mechanism i
 verified** (UpdraftPlus daily schedule set 2026-09-27, both backup cron events
 registered and recurring, and the site's cron loopback confirmed working — see
 1c below). **The first real fire also happened: on 2026-09-28 04:15 UTC it
-produced a complete 115.3 MB set**, verified in the log, by checksum, and against
+produced a complete 115.2 MB set**, verified in the log, by checksum, and against
 the live directories. Only 1a-ii (UpdraftPlus host-local, optional) remains,
 and it is optional.
 
@@ -370,7 +370,7 @@ Six archives appeared in `wp-content/updraft/`, all sharing the run id
 | `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-uploads.zip` | 6,353,289 (6.1 MB) |
 | `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-db.gz` | 416,686 (407 KB) |
 | `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-mu-plugins.zip` | 120 |
-| **Total** | **120,899,203 (115.3 MB)** |
+| **Total** | **120,790,945 (115.2 MB)** |
 
 Plus `log.ddea859eb974.txt` (108,009 bytes) — UpdraftPlus's own run log, which
 was absent before the fire and is itself proof the process ran end to end.
@@ -385,6 +385,27 @@ was absent before the fire and is itself proof the process ran end to end.
 | Retention ran | log shows the retain pass executing with `retain_files=2, retain_db=2` and retaining the new set |
 | Remote destinations | none configured — log line `No remote despatch: user chose no remote backup service`. The set is **host-local only**, which is exactly what 1a-ii (optional) exists to add. |
 | Site after | `/` `/shop/` `/checkout/` all 200; both probes 404 after deletion |
+
+**Re-verified 2026-09-28 06:55 UTC, after the fire.** Both events are still
+registered and still `schedule: daily` / `interval: 86400`, and both have
+**moved off the stamp they fired on**: next run `1790628393` =
+`2026-09-29 04:33:13 UTC` (00:33:33 Tehran), i.e. ~24h after the 04:15 run
+rather than the original `2026-09-27 20:46:33 UTC`. This is the one part of the
+schedule that a "still registered" check *cannot* prove — an event looks
+identical before a fire, after a fire, and if it never fires — so the reschedule
+is the piece that shows the daily cycle actually turned over.
+`updraft_backup_history` still holds exactly one set, `updraft_retain` and
+`updraft_retain_db` are both `2`, and no remote target is configured
+(`updraft_rmode` empty). Site healthy: `/` `/shop/` `/checkout/` `/my-account/`
+all 200.
+
+**Disk ceiling this creates.** `retain_files=2` / `retain_db=2` means Updraft
+keeps **2 file sets and 2 DB sets** on the host. At the current 115.2 MB per set
+that is a **steady-state ~231 MB** in `wp-content/updraft/`, not unbounded
+growth — but it is on the same host as the site it protects, and the host's
+quota is unknown (see the `fullbackup_to_homedir` note above, which left 1.23 GB
+on disk). Retention is the only thing standing between this and a full disk, so
+do not raise it without raising the awareness of what that costs.
 
 **How it was read:** FTP `nlst` + `SIZE` + `MDTM` on `wp-content/updraft`
 (passive mode), plus two read-only docroot probes uploaded with a random leading
@@ -544,7 +565,7 @@ docs claiming 23 pending updates when the live site had **0** and had for hours.
   above for the record: *"the schedule's mechanism is verified (both events
   recurring, loopback to `wp-cron.php` confirmed 200), but it has not yet produced
   a backup…"* The fire happened at 04:15 UTC on 2026-09-28 and produced a
-  complete 115.3 MB set, `updraft_backup_history` is no longer `NULL`, and the DB
+  complete 115.2 MB set, `updraft_backup_history` is no longer `NULL`, and the DB
   archive matches its recorded sha1. **1c is closed.** What remains of 1c is only
   1a-ii (a remote copy), which is optional and now the sole backup gap — the
   daily schedule now writes host-local, so keep 1b (the off-host pull) current

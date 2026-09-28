@@ -1903,7 +1903,7 @@ the evidence**. Six archives landed in `wp-content/updraft/` sharing run id
 | `-uploads.zip` | 6,353,289 |
 | `-db.gz` | 416,686 |
 | `-mu-plugins.zip` | 120 |
-| **total** | **120,899,203 (115.3 MB)** |
+| **total** | **120,790,945 (115.2 MB)** |
 
 plus `log.ddea859eb974.txt` (108,009 B) — absent before the fire, so its existence
 is part of the proof.
