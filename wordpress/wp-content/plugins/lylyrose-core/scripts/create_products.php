@@ -330,7 +330,13 @@ $products = array(
 
 // ---- 7. Create products ----
 foreach ( $products as $p ) {
+    // Match on SKU so re-running updates the existing product. Inserting
+    // unconditionally seeded a second and third copy of every product
+    // (ids 1306-1325), which then reached both live storefronts.
+    $existing = wc_get_product_id_by_sku( $p['sku'] );
+
     $product_id = wp_insert_post( array(
+        'ID'           => $existing ?: 0,
         'post_title'   => $p['name'],
         'post_content' => $p['desc'],
         'post_excerpt' => $p['short'],
@@ -407,7 +413,7 @@ foreach ( $products as $p ) {
         update_post_meta( $product_id, '_sale_price_dates_to', '' );
     }
 
-    echo "Created: {$p['name']} (ID: {$product_id})\n";
+    echo ( $existing ? "Updated" : "Created" ) . ": {$p['name']} (ID: {$product_id})\n";
 }
 
-echo "\nDone! " . count( $products ) . " products created.\n";
+echo "\nDone! " . count( $products ) . " products processed.\n";

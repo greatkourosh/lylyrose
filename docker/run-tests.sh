@@ -1507,6 +1507,32 @@ echo get_option("asc_rewrite_version","") . "|" . get_option("asc_store_pages_ve
   && pass "version-gated options track the constant" \
   || fail "gated options '$CORE_OPTS' have not advanced to '$CORE_LIVE'"
 
+section "31. Seed catalog integrity"
+
+# 31.1 no two published products may share a title. create_products.php once
+# called wp_insert_post with no SKU lookup, so every re-run seeded a second and
+# third copy of all 10 products (ids 1306-1325). Those copies carry no SKU and
+# no image, and they shipped to both live storefronts. The seeder now matches on
+# SKU; this is the check that would catch a regression there.
+DUP_TITLES=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$titles = wp_list_pluck( get_posts( array( "post_type" => "product", "post_status" => "publish",
+  "posts_per_page" => -1, "no_found_rows" => true ) ), "post_title" );
+echo count( $titles ) . "|" . count( array_unique( $titles ) );' 2>/dev/null)
+DUP_TOTAL="${DUP_TITLES%%|*}"; DUP_DISTINCT="${DUP_TITLES##*|}"
+[ "${DUP_TOTAL:-0}" = "${DUP_DISTINCT:-x}" ] \
+  && pass "every published product title is unique ($DUP_TOTAL products)" \
+  || fail "$((DUP_TOTAL - DUP_DISTINCT)) duplicate product title(s) — the seeder created copies again"
+
+# 31.2 the seeder must resolve by SKU before inserting, so re-running it updates
+# in place. Grep the guard rather than re-run it: running the seeder for real
+# would rewrite catalog content as a side effect of a read-only check.
+SEEDER=$(docker exec "$WP_CONTAINER" sh -c \
+  "grep -c 'wc_get_product_id_by_sku' /var/www/html/wp-content/plugins/lylyrose-core/scripts/create_products.php" 2>/dev/null | tr -dc '0-9')
+[ "${SEEDER:-0}" -ge 1 ] \
+  && pass "create_products.php resolves existing products by SKU before inserting" \
+  || fail "create_products.php has no SKU lookup — re-running it will duplicate the catalog"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"
