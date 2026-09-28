@@ -55,8 +55,9 @@ scheduler: `DISABLE_WP_CRON=false` only says WP is *permitted* to self-spawn, so
 without it a registered schedule could sit there forever and be
 indistinguishable from one that simply has not fired yet. `wp-content/updraft/`
 still holds only the 3 guard files and `updraft_backup_history` is `NULL`, as
-expected before the first fire. **The first actual backup is still unconfirmed** —
-that is the one item left, and it is time-based, not blocked.
+expected before the first fire. **The first actual backup was unconfirmed at that
+point — that was the one item left, and it was time-based, not blocked. It has
+since fired; see the 2026-09-28 entry at the end of this section.**
 
 **Re-verified 2026-09-27 ~17:10 UTC, and the schedule is intact.** The events are
 still registered for the same fire time, `2026-09-27 20:46:33 UTC`, each
@@ -100,7 +101,48 @@ Two consequences worth keeping:
 **Local suite re-verified green 2026-09-27 17:50: `229 passed, 0 failed`**
 across 28 sections, on the canonical host `https://lylyrose.local`. The roadmap
 in `FEATURES_ROADMAP.md` has no open P0/P1/P2 work — P3 is deliberately optional
-— so with 1c deferred to the clock there is no feature work in flight here.
+— and with 1c now closed (see the next entry) there is no feature work in flight
+here.
+
+### ✅ 2026-09-28 04:15 UTC — the first UpdraftPlus backup fired. 1c is closed.
+
+The last open item from the 2026-09-27 audit is **closed with evidence, not
+inference**. Six archives appeared in `wp-content/updraft/` sharing run id
+`ddea859eb974`, dated `2026-09-28-0415`, totalling **120,899,203 bytes
+(115.3 MB)**: `plugins.zip` 85.3 MB, `themes.zip` 18.8 MB, `others.zip` 4.7 MB,
+`uploads.zip` 6.1 MB, `db.gz` 407 KB, `mu-plugins.zip` 120 B — plus
+`log.ddea859eb974.txt` (108 KB), which did not exist before the fire.
+
+| Check | Result |
+| --- | --- |
+| `updraft_backup_history` | **no longer `NULL`** — one set, `nonce: ddea859eb974`, `created_by_version: 1.26.8` |
+| Run log | 909 lines, **no error/warning/fatal**; ends `The backup succeeded and is now complete` |
+| DB archive | gzip decompresses fully (416,686 → 2,673,317 B), **36 tables**, header names `https://lylyrose.ir` and WP 7.1.2 |
+| DB checksum | sha1 of downloaded bytes == Updraft's recorded `4879d6a657a69b595a2ee318518db29847da2703` |
+| Not stubs | `uploads` 6.35 MB zip vs **1,792 live files / 5.7 MB**; `plugins` 85.3 MB zip vs **20,089 files / 240.9 MB** (ratio 0.35) |
+| Site after | `/` `/shop/` `/checkout/` all 200; both probes 404 after deletion |
+
+**Read via FTP** (`nlst` + `SIZE` + `MDTM`, passive) **plus two read-only docroot
+probes** — random leading-underscore name, uploaded, fetched over HTTPS,
+deleted, each confirmed gone by *both* a 404 and an FTP listing. **Nothing was
+triggered by hand**: no "Back up now", no `UpdraftPlus::schedule_backup`, no
+`doing_wp_cron` param, no `Backup/fullbackup_to_homedir`.
+
+**Why the note above was right, and how it played out.** The event was stamped
+`2026-09-27 20:46:33 UTC`; the archives are stamped `04:15` — **7h29m late**. At
+04:15 UTC the cron array still showed `updraft_backup` at its *original* stamp
+and still 26,951 s overdue, and `wp-content/updraft/` held only guard files, so
+at that instant there was no archive and no evidence of a backup. The docroot
+probe that read that state was itself a PHP request, and it is the request that
+released the run: by 04:17 the archives were complete. This is precisely the
+"a registered schedule is not a backup, but neither is a late one a fault"
+case — on a low-traffic store WP-Cron fires on a visitor, not on a clock.
+
+**What is now the backup posture.** The daily schedule writes **host-local only** —
+the log records `No remote despatch: user chose no remote backup service`. So the
+only automated copy sits on the same host as the site, and 1a-ii (a remote
+target) is now the sole remaining gap, still optional. Keep 1b (off-host pull)
+current, and keep 1a manual before any risky change.
 
 ### ⚠️ `lylyrose-core` v2.4.0 is NOT deployed — production runs v2.3.0
 
@@ -252,9 +294,11 @@ Both a files-only and a db-only archive pass a size check and are still useless
 here, because steps 3–4 change the schema — so asserting the *database* entry
 alongside a *site file* is the check that matters.
 
-Still outstanding: confirming the first 1c backup fires (its mechanism is
-verified — see the top of this file; first fire 2026-09-27 20:46 UTC), and 1a-ii
-(UpdraftPlus host-local, optional).
+Still outstanding: 1a-ii (UpdraftPlus host-local, optional). **The first 1c backup
+is no longer outstanding — it fired 2026-09-28 04:15 UTC and was verified (see
+the 2026-09-28 entry at the top of this file).** Its mechanism was verified
+2026-09-27; the first fire was stamped 2026-09-27 20:46 UTC and ran 7h29m later,
+deferred to the first request on a low-traffic site.
 
 ## ⚠️ Read first — this project is DOWNSTREAM of `aroma_store`
 

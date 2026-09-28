@@ -1,8 +1,9 @@
 # Production update runbook — `lylyrose.ir`
 
-**Status: ALL DONE as of 2026-09-27.** Steps 2–5 were completed outside this repo;
-step 1a/1b backup is done and verified; **1c (UpdraftPlus daily schedule) is now
-set and the cron events are registered** — see 1c below.
+**Status: ALL DONE as of 2026-09-28.** Steps 2–5 were completed outside this repo;
+step 1a/1b backup is done and verified; **1c (UpdraftPlus daily schedule) is set,
+its cron events are registered, and the first real fire has produced a verified
+backup** — see 1c below.
 
 **Do not re-run steps 2–5.** They are already complete — see the audit at the top
 of `CONTINUATION.md`. The 23 pending updates this page was written about **no
@@ -30,8 +31,10 @@ third-party account.
 The update pass is no longer blocked on backup. **1c is done and its mechanism is
 verified** (UpdraftPlus daily schedule set 2026-09-27, both backup cron events
 registered and recurring, and the site's cron loopback confirmed working — see
-1c below). Only 1a-ii (UpdraftPlus host-local, optional) and the first real fire
-at 2026-09-27 20:46 UTC remain.
+1c below). **The first real fire also happened: on 2026-09-28 04:15 UTC it
+produced a complete 115.3 MB set**, verified in the log, by checksum, and against
+the live directories. Only 1a-ii (UpdraftPlus host-local, optional) remains,
+and it is optional.
 
 **1c's original cPanel route does not exist on this host** — no Backup schedule
 control, no Backup Wizard, and the `Cron` UAPI module is not installed at all.
@@ -313,7 +316,7 @@ broken site is most likely. Mitigation while it stays open: run **1a manually
 before each risky change** (it takes a few minutes and is one UAPI call), and
 keep the off-host pull from 1b current.
 
-**Verify — 1c mechanism DONE 2026-09-27; first actual fire still outstanding.**
+**Verify — 1c mechanism DONE 2026-09-27; first actual fire CONFIRMED 2026-09-28** (see "Confirmed 2026-09-28" below). The table that follows is the 2026-09-27 mechanism check, kept as-is.
 
 Checked at 13:40 UTC on 2026-09-27, via a read-only docroot probe (uploaded
 random name, fetched, deleted — the mechanism above). Everything needed for the
@@ -339,9 +342,9 @@ blocked, both events would sit registered and never run, looking exactly like
 WP-Cron's normal success response (it has nothing to return once it has spawned),
 so the loopback works.
 
-**Still outstanding:** the first *real* fire at 20:46 UTC. After that, confirm a
-**new dated** archive appeared under `wp-content/updraft/`, and that
-`updraft_backup_history` is no longer `NULL`. A schedule that was never
+**Still outstanding (as written 2026-09-27):** the first *real* fire at 20:46 UTC.
+After that, confirm a **new dated** archive appeared under `wp-content/updraft/`,
+and that `updraft_backup_history` is no longer `NULL`. A schedule that was never
 exercised is the same state you are trying to leave behind — the mechanism being
 sound is not the same as it having produced a backup.
 
@@ -349,6 +352,55 @@ sound is not the same as it having produced a backup.
 events remain at the same fire time with `schedule: daily` / `interval: 86400`,
 and no archive or history exists yet — correct, since the fire was ~3h24m away
 at that point. A verification is scheduled for 00:16 Tehran time, 2026-09-28.
+
+> **CLOSED 2026-09-28 04:15 UTC — the fire happened and the backup is real.**
+> The two paragraphs above are kept as the record of what was being waited for.
+> What follows is the confirmation.
+
+### Confirmed 2026-09-28 — first fire produced a verified backup
+
+Six archives appeared in `wp-content/updraft/`, all sharing the run id
+`ddea859eb974` and the datestamp `2026-09-28-0415`:
+
+| Archive | Size |
+| --- | --- |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-plugins.zip` | 89,447,010 (85.3 MB) |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-themes.zip` | 19,692,191 (18.8 MB) |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-others.zip` | 4,881,649 (4.7 MB) |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-uploads.zip` | 6,353,289 (6.1 MB) |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-db.gz` | 416,686 (407 KB) |
+| `backup_2026-09-28-0415_Lyly_Rose_ddea859eb974-mu-plugins.zip` | 120 |
+| **Total** | **120,899,203 (115.3 MB)** |
+
+Plus `log.ddea859eb974.txt` (108,009 bytes) — UpdraftPlus's own run log, which
+was absent before the fire and is itself proof the process ran end to end.
+
+| Check | Result |
+| --- | --- |
+| `updraft_backup_history` | **no longer `NULL`** — one set, `nonce: ddea859eb974`, `datestamp: 1790568944`, `created_by_version: 1.26.8` |
+| Updraft run log | **909 lines, zero error/warning/fatal matches**; ends `The backup succeeded and is now complete` |
+| DB archive integrity | gzip decompresses fully (416,686 → 2,673,317 bytes), **36 tables** with `INSERT`, header names `https://lylyrose.ir` and `WordPress Version: 7.1.2` |
+| DB archive checksum | sha1 of the downloaded bytes == `4879d6a657a69b595a2ee318518db29847da2703`, matching the sha1 Updraft recorded in history |
+| Files are not stubs | `uploads` is **6.35 MB** against a live `uploads/` of **1,792 files / 5.7 MB**; `plugins` is **85.3 MB** against **20,089 files / 240.9 MB** (ratio 0.35, expected for already-compressed assets) |
+| Retention ran | log shows the retain pass executing with `retain_files=2, retain_db=2` and retaining the new set |
+| Remote destinations | none configured — log line `No remote despatch: user chose no remote backup service`. The set is **host-local only**, which is exactly what 1a-ii (optional) exists to add. |
+| Site after | `/` `/shop/` `/checkout/` all 200; both probes 404 after deletion |
+
+**How it was read:** FTP `nlst` + `SIZE` + `MDTM` on `wp-content/updraft`
+(passive mode), plus two read-only docroot probes uploaded with a random leading
+underscore, fetched over HTTPS, and deleted — each confirmed gone by *both* a
+404 and an FTP listing. No backup was triggered by hand at any point.
+
+**The fire was late by design, not by fault.** The event was stamped
+`2026-09-27 20:46:33 UTC` and the archives are stamped `04:15` — 7h29m later.
+That is the behaviour documented above this section: WP-Cron spawns on a
+front-end request, and this store is low-traffic, so the run waited for a
+visitor. The docroot probe that read the cron state at 04:15 was itself a PHP
+request, and it is the request that released it. **A missing archive on a
+low-traffic site is not evidence of a broken schedule** — this is the case the
+2026-09-27 "past-due is not broken" note was written for, and it is the reason
+the check had to be a *file that appeared on its own* rather than a re-read of
+the schedule.
 
 **If that check finds no archive, do not re-run the schedule writer.** First
 establish whether the site has had *any* front-end request since 20:46 UTC:
@@ -488,12 +540,15 @@ docs claiming 23 pending updates when the live site had **0** and had for hours.
 
 **The update pass is no longer on this list — it is done.** What remains:
 
-- **1c's first real fire** — the schedule's *mechanism* is verified (both events
+- ~~**1c's first real fire**~~ — **CLOSED 2026-09-28.** Superseded text kept
+  above for the record: *"the schedule's mechanism is verified (both events
   recurring, loopback to `wp-cron.php` confirmed 200), but it has not yet produced
-  a backup. After 2026-09-27 20:46 UTC, confirm a new dated archive exists under
-  `wp-content/updraft/` and that `updraft_backup_history` is no longer `NULL`.
-  This host has no scheduler of its own, so until that is confirmed keep running
-  1a manually before any risky change.
+  a backup…"* The fire happened at 04:15 UTC on 2026-09-28 and produced a
+  complete 115.3 MB set, `updraft_backup_history` is no longer `NULL`, and the DB
+  archive matches its recorded sha1. **1c is closed.** What remains of 1c is only
+  1a-ii (a remote copy), which is optional and now the sole backup gap — the
+  daily schedule now writes host-local, so keep 1b (the off-host pull) current
+  and keep 1a manual before risky changes.
 - **ZarinPal live merchant code** and **`sandbox: no`** — not yet acquired, but
   **corrected 2026-09-27**: the gateway is **enabled and live at checkout**, not
   disabled. A real checkout POST created order 1809 and redirected to

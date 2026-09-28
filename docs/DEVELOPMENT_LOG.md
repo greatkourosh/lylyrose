@@ -1792,9 +1792,10 @@ write failed *silently* and created two junk options, and this is the same
 mistake in the read path where it at least failed loudly. Guessed names are only
 self-announcing on the read path; on a write path they look like success.
 
-**Still open:** the first real fire at 20:46 UTC. After that, confirm a new dated
-archive under `wp-content/updraft/` and `updraft_backup_history` no longer `NULL`.
-Time-based, not blocked.
+**Still open at the time of writing:** the first real fire at 20:46 UTC. After that,
+confirm a new dated archive under `wp-content/updraft/` and
+`updraft_backup_history` no longer `NULL`. Time-based, not blocked. **Closed
+2026-09-28** — see "First UpdraftPlus backup confirmed" at the end of this log.
 
 ---
 
@@ -1885,3 +1886,78 @@ rendered page is what the customer gets.
 **So: four wrong reads in one day, three of them guesses at an API name.** The
 cheap discipline is to grep the local plugin copy for the symbol before it goes
 anywhere near production.
+
+---
+
+## First UpdraftPlus backup confirmed — 1c closed (2026-09-28 04:15 UTC)
+
+The last open item from yesterday's 1c work is **closed, with the backup itself as
+the evidence**. Six archives landed in `wp-content/updraft/` sharing run id
+`ddea859eb974`, dated `2026-09-28-0415`:
+
+| Archive | Bytes |
+| --- | --- |
+| `-plugins.zip` | 89,447,010 |
+| `-themes.zip` | 19,692,191 |
+| `-others.zip` | 4,881,649 |
+| `-uploads.zip` | 6,353,289 |
+| `-db.gz` | 416,686 |
+| `-mu-plugins.zip` | 120 |
+| **total** | **120,899,203 (115.3 MB)** |
+
+plus `log.ddea859eb974.txt` (108,009 B) — absent before the fire, so its existence
+is part of the proof.
+
+`updraft_backup_history` is **no longer `NULL`** (one set, `created_by_version:
+1.26.8`). The log is 909 lines with **zero** error/warning/fatal matches and ends
+`The backup succeeded and is now complete`. The DB archive decompresses fully
+(416,686 → 2,673,317 B) with 36 tables, a header naming `https://lylyrose.ir` and
+WP 7.1.2, and a sha1 matching the one Updraft recorded. Neither files archive is a
+stub: `uploads` 6.35 MB against **1,792 live files / 5.7 MB**, and `plugins`
+85.3 MB against **20,089 files / 240.9 MB** (ratio 0.35 — normal for
+already-compressed assets).
+
+**How it was read.** FTP `nlst` + `SIZE` + `MDTM` on `wp-content/updraft`
+(passive; Pure-FTPd rejects active mode), plus two read-only docroot probes —
+random leading-underscore name, uploaded, fetched over HTTPS, deleted, each
+confirmed gone by *both* an HTTP 404 and an FTP listing. **No backup was
+triggered by hand**: no "Back up now", no `UpdraftPlus::schedule_backup`, no
+`doing_wp_cron` param, and no `Backup/fullbackup_to_homedir` (the write that cost
+410 MB of host disk twice yesterday).
+
+### The lesson worth keeping: a registered schedule is not a backup, and a late one is not a fault
+
+Yesterday's item was written as "confirm the schedule fires". That framing is what
+made it feel unfinished for days: the mechanism could be verified on paper (both
+events recurring, loopback 200) and still no backup would exist, because those
+facts are about the *arrangement*, not the *result*. The only thing that settles
+it is **a file that appeared on its own**.
+
+Getting there needed one correction to my own framing. At 04:15 UTC the cron
+array still showed `updraft_backup` at its original `2026-09-27 20:46:33` stamp,
+26,951 s overdue, and `wp-content/updraft/` held only the three guard files. By
+every check I had, that reads as "still nothing" — but the probe that produced
+that reading was itself a PHP request, and it is the request that released the
+run. By 04:17 the set was complete: **7h29m late.**
+
+That gap is how WP-Cron is built, not a defect: cron spawns on a visitor, not on a
+clock, and this store is low-traffic. So three states that look identical from
+outside — *never fired*, *fired and errored*, *fired but waiting for traffic* —
+separate only on evidence I did not have yesterday: the presence of
+`log.*.txt`, and the history option moving off `NULL`. Hence the rule: **check
+for a new dated archive and a log file, not for the schedule looking right.**
+Re-reading the schedule was never going to distinguish them.
+
+Second-order: had I read that state and stopped, I would have reported "no backup,
+site got no traffic" and been *right about the state and wrong about the outcome* —
+the archives were two minutes from complete. Same trap that produced the four
+wrong reads above: **a probe reports a problem far more often than the problem is
+there**, and the cheap discipline is to name in advance what result counts as
+done, then read the thing that produces it. Here that was a file listing, and it
+was already half-written.
+
+One real gap this closed: the log records `No remote despatch: user chose no
+remote backup service`, so the daily set is **host-local only**. That makes 1a-ii
+(a remote target) the sole remaining backup gap, still optional — but the
+automated copies now live on the same host as the store they protect, so keep 1b
+(off-host pull) current and 1a manual before risky changes.
