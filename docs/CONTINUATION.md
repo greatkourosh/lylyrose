@@ -16,26 +16,28 @@
    (`WP_CACHE` is false today), activate Wordfence.
 3. **1a-ii, a remote UpdraftPlus target** — optional; the daily schedule writes
    host-local only. Keep 1b (off-host pull) current.
-4. **P1, WebP attachments keep the wrong mime type in the DB.** The one failing
-   local test. `ASC_Images` converts uploads to WebP by extending WP's
+4. **The WebP mime fix is downstream-only; it still needs mirroring upstream.**
+   `ASC_Images` converted uploads to WebP by extending WP's
    `image_editor_output_format` — which changes the extension WP *writes* — but
-   `wp_insert_attachment()` has already stored the **original** type by then.
-   So the file on disk is `.webp` while the attachment row still says
-   `image/jpeg`/`image/png`. Verified three ways: a fresh sideload in the local
-   container gave `db_mime=image/jpeg` with `mime_content_type()` = `image/webp`;
-   the 4 gift-card rows (2849–2852) read `image/png` against magic bytes
-   `WEBP`; and **production shows the same, 4 `image/png` rows out of the first
-   100 media items.** It is cosmetic — every file really is WebP and serves as
-   WebP — but the media library filter, the admin type column, REST
-   `/wp/v2/media` and attachment search all read that column. Fix is one
-   `wp_update_post()` in `ASC_Images::log_conversion()` (it already runs on
-   `wp_generate_attachment_metadata` with the attachment id). It is identical
-   upstream, so fix `aroma_store` first — but that tree is `www-data`-owned and
-   needs `sudo`. Backfill the 4 existing rows at the same time.
+   `wp_insert_attachment()` had already stored the **original** type by then, so
+   every converted upload kept a row saying `image/jpeg`/`image/png` while the
+   file on disk was WebP. Fixed and **deployed to `lylyrose.ir`** (2026-09-28):
+   `log_conversion()` now relabels, guarded on `mime_content_type()` of the real
+   file rather than the path (WP keeps the original, so the path is not evidence),
+   plus a version-keyed `maybe_backfill()` on `init:99` for rows written earlier.
+   Production rows 1826–1829 relabelled; all 100 sampled media rows now read
+   `image/webp`. **The identical bug is still live in `aroma_store`, and that repo
+   is `www-data`-owned — mirroring it upstream needs `sudo`.** Fix there next, or
+   the next upstream release reintroduces it.
 5. **The backup gotcha to keep in mind:** the recorded 5-file deploy set for
    v2.4.0 was incomplete. It omitted two theme files, so the Offers page shipped
    serving 200 with no CSS and no JS. **Derive deploy file lists per commit with
    `--name-status`, not from a single file's diff** — see the v2.4.0 section.
+6. **Note the checkout fix is in the tree but not deployed.** `47034b98` removed
+   a duplicate order-review render (3 review tables, 2 payment blocks, 2
+   `#place_order` — a duplicate DOM id, live on `/checkout/` since 2026-09-05) and
+   re-scoped the stepper's `is-hidden` rule so step 1 actually hides. Local only;
+   those two theme files have not been pushed.
 
 ## ✅ `lylyrose-core` v2.4.0 is deployed and verified live (2026-09-28)
 
