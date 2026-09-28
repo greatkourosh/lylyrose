@@ -853,3 +853,39 @@ this host is `/home3/bqwyvowk/lylyroseir` (note `home3`, not `home`).
   `get_queried_object()`. stock-notifier.js enqueues on OOS pages again.
 - **Theme/plugin version**: lylyrose-core header synced to 2.3.0 (const) — WP now
   reports the real version.
+
+**Uncommitted in `lylyrose`'s working tree as of 2026-09-28 (later) — checkout
+duplicate-render fix. Do not mistake these for a peer session's in-flight work.**
+Requested against `https://lylyrose.ir/checkout/` («بخش خلاصه سفارش هم مرتب بشه»).
+The order summary was not untidy, it was **duplicated — and live since
+2026-09-05**, when multi-step checkout landed:
+
+| | before | after |
+| --- | --- | --- |
+| `.woocommerce-checkout-review-order-table` | **3** | 1 |
+| `.woocommerce-checkout-payment` | **2** | 1 |
+| `#place_order` | **2** (duplicate DOM id) | 1 |
+
+`woocommerce_checkout_order_review` is a two-callback action
+(`woocommerce_order_review` @10, `woocommerce_checkout_payment` @20), but the
+theme called it *as well as* `woocommerce_order_review()` in the same aside and
+fired it again in step 2 — so customers saw the payment panel twice and the green
+«ثبت سفارش» button twice. The sidebar now renders the table only; step 2 calls
+`woocommerce_checkout_payment()` directly. Files: `themes/lylyrose/woocommerce/
+checkout/form-checkout.php` (2 lines) and `docker/run-tests.sh` (section 24, +5
+checks proven to fail against `HEAD`'s files first).
+
+**Second, pre-existing bug found while verifying it:** the stepper's `is-hidden`
+rule was scoped `.dk-checkout-step--2`, but the JS adds that class to whichever
+step is *not* current — so «ادامه به پرداخت» never actually hid step 1 and both
+cards stayed stacked. Re-scoped to `.dk-checkout-step` in `themes/lylyrose/
+style.css`. Verified by measurement: step 1 `display: none`, step 2 visible.
+
+Suite: **255 passed, 1 failed** — the failure is `media library contains non-WebP
+images`, which is the 4 gift-card PNGs seeded 2026-09-28 12:01 by the D2
+gift-card feature (ids 2849–2852) and is unrelated to checkout. Do not attribute
+it to this change.
+
+Not addressed, deliberately: the checkout page has a 90px horizontal overflow at
+390px from `.dk-announce`, but home and `/shop/` show the identical 90px — it is a
+site-wide announcement-bar problem, not a checkout one.

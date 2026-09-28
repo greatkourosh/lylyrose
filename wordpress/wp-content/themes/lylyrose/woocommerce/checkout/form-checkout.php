@@ -54,7 +54,7 @@ $shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id(
                                 <div class="dk-checkout-card">
                                     <p class="dk-step-back"><a href="#" class="dk-step-back-link"><?php esc_html_e( 'ویرایش اطلاعات ارسال', 'lylyrose' ); ?></a></p>
                                     <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
-                                    <?php do_action( 'woocommerce_checkout_order_review' ); ?>
+                                    <?php woocommerce_checkout_payment(); ?>
                                 </div>
                             </div>
                         </div>
@@ -64,8 +64,7 @@ $shop_url = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_id(
                 <aside class="dk-checkout-summary">
                     <div class="dk-cart-summary-card dk-checkout-sticky">
                         <h2 class="dk-cart-summary-title"><?php esc_html_e( 'خلاصه سفارش', 'lylyrose' ); ?></h2>
-                        <?php woocommerce_order_review(); ?>
-                        <?php do_action( 'woocommerce_checkout_order_review' ); ?>
+                        <?php woocommerce_order_review(); // Renders the table only. The 'woocommerce_checkout_order_review' action would also fire woocommerce_checkout_payment, which step 2 already renders. ?>
                     </div>
                 </aside>
             </div>

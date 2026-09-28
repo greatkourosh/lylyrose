@@ -1059,11 +1059,41 @@ printf '%s' "$CS2_HTML" | grep -q "dk-checkout-step--2 is-hidden" \
 # Summary sidebar + place-order still present (unchanged anatomy)
 html_has "$CS2_HTML" "order_review\|place-order" && pass "order summary sidebar preserved" || fail "order summary missing"
 html_has "$CS2_HTML" "billing_national_id" && pass "national-ID field still in step 1" || fail "national-ID missing"
+# 24.1 The order review must render EXACTLY ONCE. The theme used to call both
+# woocommerce_order_review() and do_action('woocommerce_checkout_order_review')
+# in the sidebar, and fired that action again in step 2 -- and the action already
+# runs woocommerce_order_review at priority 10. That produced 3 review tables,
+# 2 payment blocks and 2 #place_order submit buttons on a live checkout.
+# Counts the opening class attribute, so it cannot be satisfied by a CSS mention.
+cs2_count() { printf '%s' "$CS2_HTML" | grep -o -- "$1" | wc -l | tr -d ' '; }
+CS2_TBL=$(cs2_count 'class="shop_table woocommerce-checkout-review-order-table"')
+[ "$CS2_TBL" = 1 ] && pass "order review table renders exactly once" \
+  || fail "order review table renders $CS2_TBL times, expected 1"
+CS2_PAY=$(cs2_count 'class="woocommerce-checkout-payment"')
+[ "$CS2_PAY" = 1 ] && pass "payment block renders exactly once" \
+  || fail "payment block renders $CS2_PAY times, expected 1"
+CS2_SUBMIT=$(cs2_count 'id="place_order"')
+[ "$CS2_SUBMIT" = 1 ] && pass "place-order submit button is unique" \
+  || fail "duplicate #place_order ids: $CS2_SUBMIT, expected 1"
+# The sidebar holds the table, step 2 holds the payment block. Guard the split so
+# a future "simplification" that moves either one breaks loudly. Newlines are
+# collapsed first: the aside spans lines and sed is line-oriented.
+CS2_ASIDE=$(printf '%s' "$CS2_HTML" | tr '\n' ' ' | sed -n 's/.*<aside class="dk-checkout-summary">\(.*\)<\/aside>.*/\1/p')
+printf '%s' "$CS2_ASIDE" | grep -q 'class="woocommerce-checkout-payment"' \
+  && fail "payment block still inside the summary sidebar (duplicated by step 2)" \
+  || pass "summary sidebar holds the table only; step 2 owns the payment block"
 # JS enqueued + contains required markers
 html_has "$CS2_HTML" "checkout-stepper.js" && pass "checkout-stepper.js enqueued" || fail "stepper JS not enqueued"
 CS2_JS=$(docker exec "$WP_CONTAINER" cat /var/www/html/wp-content/themes/lylyrose/assets/js/checkout-stepper.js)
 printf '%s' "$CS2_JS" | grep -q "is-hidden"    && pass "JS toggles is-hidden"   || fail "JS missing is-hidden"
 printf '%s' "$CS2_JS" | grep -q "step2-ready"  && pass "JS sets step2-ready"    || fail "JS missing step2-ready"
+# 24.2 The stepper adds is-hidden to BOTH step cards (it hides whichever step is
+# not current), so the rule must not be scoped to step 2 only. Scoped to step 2,
+# step 1 never hid and both cards stayed stacked after "ادامه به پرداخت".
+CS2_CSS=$(docker exec "$WP_CONTAINER" cat /var/www/html/wp-content/themes/lylyrose/style.css)
+printf '%s' "$CS2_CSS" | grep -q '\.dk-checkout-step\.is-hidden[[:space:]]*{' \
+  && pass "is-hidden rule covers both step cards" \
+  || fail "is-hidden rule not scoped to .dk-checkout-step (step 1 would never hide)"
 
 section "25. Notifications center (P3 #17)"
 # Seed: create 2 notifications (1 read, 1 unread) and trigger order status change + review reply
