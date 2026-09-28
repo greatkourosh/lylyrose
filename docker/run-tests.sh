@@ -1326,6 +1326,187 @@ OF_FIRST_EXP=$(printf '%s' "$OF_EXP"  | grep -o 'dk-offer-product" href="[^"]*"'
 check_http "$OFFERS_URL?in_stock=1"    "in_stock filter accepted"
 check_http "$OFFERS_URL?offers_page=2" "pagination accepted"
 
+
+section "29. Gift cards (کارت هدیه)"
+
+# 29.1 class registered
+GC_CLASS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo class_exists("ASC_Gift_Cards") ? "yes" : "no";' 2>/dev/null)
+[ "$GC_CLASS" = "yes" ] && pass "ASC_Gift_Cards class loaded" || fail "ASC_Gift_Cards missing"
+
+# 29.2 one product per fixed denomination, all flagged as gift cards
+GC_PIDS=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+ASC_Gift_Cards::ensure_products();
+$ok = 0;
+foreach ( ASC_Gift_Cards::DENOMINATIONS as $a ) {
+  $p = wc_get_product( wc_get_product_id_by_sku( "GC-" . intdiv( $a, 1000 ) . "K" ) );
+  if ( $p && ASC_Gift_Cards::is_gift_card( $p ) && (int) $p->get_price() === $a && $p->is_virtual() ) { $ok++; }
+}
+echo $ok, " ", count( ASC_Gift_Cards::DENOMINATIONS );' 2>/dev/null)
+GC_OK=$(printf '%s' "$GC_PIDS" | cut -d' ' -f1); GC_TOT=$(printf '%s' "$GC_PIDS" | cut -d' ' -f2)
+[ "$GC_OK" = "$GC_TOT" ] && [ "${GC_TOT:-0}" -gt 0 ] \
+  && pass "gift card products seeded ($GC_OK/$GC_TOT denominations)" \
+  || fail "gift card products wrong ($GC_OK/$GC_TOT)"
+
+# 29.2b re-running ensure_products() must not create duplicates. It hooks init:30
+# of every request, so an option flag alone is a race: two concurrent requests
+# both read it missing and both seeded. lylyrose really did end up with 8.
+GC_DUPES=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+global $wpdb;
+$rows = $wpdb->get_results( "SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+  JOIN {$wpdb->postmeta} m ON m.post_id = p.ID
+  WHERE p.post_type = \"product\" AND m.meta_key = \"_asc_is_gift_card\" AND m.meta_value = \"yes\"",
+  ARRAY_A );
+$seen = array();
+foreach ( $rows as $r ) { $seen[ wc_get_product( $r["ID"] )->get_sku() ] = ( $seen[ wc_get_product( $r["ID"] )->get_sku() ] ?? 0 ) + 1; }
+$dupes = 0;
+foreach ( $seen as $n ) { if ( $n > 1 ) { $dupes += $n - 1; } }
+echo $dupes;' 2>/dev/null | tr -dc '0-9')
+[ "${GC_DUPES:-x}" = "0" ] && pass "no duplicate gift card products" || fail "$GC_DUPES duplicate gift card products"
+
+# 29.3 checkout asks for a recipient only when a gift card is in the cart
+GC_JAR="$(mktemp -u)"
+curl -sL --max-time 60 -c "$GC_JAR" -b "$GC_JAR" "$SITE_URL/" -o /dev/null
+GC_CO_HTML=$(curl -sL --max-time 120 -b "$GC_JAR" -c "$GC_JAR" "$SITE_URL/checkout/")
+html_has "$GC_CO_HTML" "id=\"asc_gift_recipient\"" \
+  && fail "recipient field shown with no gift card in cart" \
+  || pass "recipient field hidden with empty cart"
+
+GC_SKU_ID=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo wc_get_product_id_by_sku("GC-500K");' 2>/dev/null)
+curl -sL --max-time 60 -b "$GC_JAR" -c "$GC_JAR" -X POST "$SITE_URL/?add-to-cart=$GC_SKU_ID" -o /dev/null
+GC_CO_GC=$(curl -sL --max-time 120 -b "$GC_JAR" -c "$GC_JAR" "$SITE_URL/checkout/")
+html_has "$GC_CO_GC" "id=\"asc_gift_recipient\"" && pass "recipient field appears with a gift card in cart" || fail "recipient field missing with gift card in cart"
+html_has "$GC_CO_GC" "id=\"asc_gift_message\"" && pass "gift message field renders" || fail "gift message field missing"
+
+# 29.4 a paid order mints a GC- code worth the card value, valid 90 days
+GC_CODE=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$pid = wc_get_product_id_by_sku("GC-1000K");
+$order = wc_create_order();
+$item = new WC_Order_Item_Product();
+$item->set_product( wc_get_product($pid) );
+$item->set_quantity(1); $item->set_subtotal(1000000); $item->set_total(1000000);
+$order->add_item($item); $order->calculate_totals();
+$order->set_billing_email( "gc_buyer@aromalnd.test" );
+$order->update_meta_data( "_asc_gift_recipient", "gc_friend@aromalnd.test" );
+$order->save();
+$oid = $order->get_id();
+do_action( "woocommerce_order_status_processing", $oid );
+file_put_contents( "/tmp/gc_test_order", $oid );
+$o = wc_get_order( $oid );
+foreach ( $o->get_items() as $it ) {
+  $c = $it->get_meta( "_asc_gift_card_code" );
+  if ( $c ) { echo $c; break; }
+}' 2>/dev/null)
+GC_ORDER_ID=$(docker exec "$WP_CONTAINER" cat /tmp/gc_test_order 2>/dev/null | tr -dc '0-9')
+case "$GC_CODE" in
+  GC-*) pass "paid gift-card order issues a code ($GC_CODE)" ;;
+  *)    fail "no gift card code issued (got: '$GC_CODE')" ;;
+esac
+
+GC_VAL=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$c = new WC_Coupon($argv[1]);
+$d = $c->get_date_expires();
+echo (int) $c->get_amount(), " ", (int) $c->get_usage_limit(),
+     " ", $d ? round( ($d->getTimestamp() - time()) / DAY_IN_SECONDS ) : 0,
+     " ", $c->is_valid() ? "valid" : "invalid";' "$GC_CODE" 2>/dev/null)
+GC_AMT=$(printf '%s' "$GC_VAL" | cut -d' ' -f1)
+GC_USE=$(printf '%s' "$GC_VAL" | cut -d' ' -f2)
+GC_DAYS=$(printf '%s' "$GC_VAL" | cut -d' ' -f3)
+GC_V=$(printf '%s' "$GC_VAL" | cut -d' ' -f4)
+[ "$GC_AMT" = "1000000" ] && pass "code is worth the card value (1000000)" || fail "code amount wrong: '$GC_AMT'"
+[ "$GC_USE" = "1" ] && pass "code is single-use" || fail "code usage limit wrong: '$GC_USE'"
+[ "$GC_DAYS" -ge 89 ] 2>/dev/null && [ "$GC_DAYS" -le 90 ] \
+  && pass "code expires in 90 days" \
+  || fail "expiry wrong: '$GC_DAYS' days"
+[ "$GC_V" = "valid" ] && pass "code is valid now" || fail "code not valid: '$GC_V'"
+
+# 29.5 the code redeems through the ordinary coupon surface
+GC_APPLY=$(curl -sL --max-time 60 -b "$GC_JAR" -c "$GC_JAR" -X POST "$SITE_URL/?wc-ajax=apply_coupon" \
+  --data-urlencode "coupon_code=$GC_CODE" \
+  --data-urlencode "security=$(curl -sL --max-time 60 -b "$GC_JAR" -c "$GC_JAR" "$SITE_URL/cart/" | grep -o 'apply_coupon_nonce":"[^"]*' | cut -d'"' -f3)" \
+  -H "X-Requested-With: XMLHttpRequest")
+html_has "$GC_APPLY" "woocommerce-message" && pass "gift card code applies at the cart" || fail "gift card code rejected: $GC_APPLY"
+
+# 29.6 an expired code is refused
+GC_EXP=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$c = new WC_Coupon($argv[1]);
+$c->set_date_expires( time() - DAY_IN_SECONDS ); $c->save();
+$fresh = new WC_Coupon($argv[1]);
+echo $fresh->is_valid() ? "valid" : "expired";' "$GC_CODE" 2>/dev/null)
+[ "$GC_EXP" = "expired" ] && pass "expired code is refused" || fail "expired code still valid: '$GC_EXP'"
+
+# 29.7 the code renders on the order-received page
+GC_RCPT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$o = wc_get_order( (int) $argv[1] );
+ob_start(); ASC_Gift_Cards::render_on_receipt( $o ); echo ob_get_clean();' "$GC_ORDER_ID" 2>/dev/null)
+html_has "$GC_RCPT" "$GC_CODE" && pass "code shown on the receipt page" || fail "code missing from receipt"
+
+# 29.8 cleanup. force_delete is required: the CPT data store trashes rather than
+# removes by default, and a trashed coupon is still resolvable by code.
+docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$c = new WC_Coupon($argv[1]); if ( $c->get_id() ) { $c->delete( true ); }
+$o = wc_get_order( (int) $argv[2] ); if ( $o ) { $o->delete( true ); }' "$GC_CODE" "$GC_ORDER_ID" >/dev/null 2>&1
+GC_LEFT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+echo ( new WC_Coupon($argv[1]) )->get_id() ? "left" : "gone";' "$GC_CODE" 2>/dev/null)
+[ "$GC_LEFT" = "gone" ] && pass "gift card test data cleaned" || fail "cleanup failed: $GC_LEFT"
+rm -f "$GC_JAR"
+
+# 29.9 parity: the grid density and percent order corrected upstream 2026-09-27
+LR_COLS=$(docker exec "$WP_CONTAINER" php -r '
+$c = file_get_contents("/var/www/html/wp-content/themes/lylyrose/assets/css/flash-sales.css");
+if ( preg_match("/\.dk-flash-grid \{[^}]*grid-template-columns:\s*repeat\((\d+)/", $c, $m) ) { echo $m[1]; }' 2>/dev/null)
+[ "$LR_COLS" = "7" ] && pass "offers grid is 7 columns at desktop" || fail "offers grid density is $LR_COLS, expected 7 (Digikala parity)"
+
+LR_BADPCT=$(docker exec "$WP_CONTAINER" sh -c \
+  "grep -rno '٪[۰-۹]' /var/www/html/wp-content/themes/lylyrose/ 2>/dev/null | wc -l" | tr -dc '0-9')
+[ "${LR_BADPCT:-0}" -eq 0 ] && pass "percent sign is digits-first everywhere" || fail "$LR_BADPCT percent signs are written percent-first"
+
+section "30. Core plugin version wiring"
+
+# Mirrors aroma_store section 30. The plugin header Version: and `const VERSION`
+# drift apart easily, because the header is what you bump when releasing and the
+# const is what WordPress never reads. That is not cosmetic: the const is
+# LYLYROSE_CORE_VERSION, which gates the rewrite flush
+# (class-product-code.php maybe_flush) and the store-pages version check
+# (class-store-pages.php ensure_pages). A stale const means those never re-run on
+# a version bump, which also defeats the documented "self-heals after a DB reset"
+# behaviour. Pin the two together here.
+CORE_READ=$(docker exec "$WP_CONTAINER" php -r '
+$f = "/var/www/html/wp-content/plugins/lylyrose-core/lylyrose-core.php";
+$src = file_get_contents($f);
+preg_match("/^ \* Version: *(\S+)/m", $src, $h);
+preg_match("/const VERSION *= *\x27([^\x27]+)\x27/", $src, $c);
+echo ($h[1] ?? "none") . "|" . ($c[1] ?? "none");' 2>/dev/null)
+CORE_HDR=${CORE_READ%%|*}
+CORE_CONST=${CORE_READ##*|}
+[ -n "$CORE_HDR" ] && [ "$CORE_HDR" = "$CORE_CONST" ] \
+  && pass "core header Version ($CORE_HDR) matches const VERSION" \
+  || fail "core version drift: header '$CORE_HDR' vs const '$CORE_CONST'"
+
+# Prove the const is the one the running site gates on, not just a string on
+# disk — a stale opcache would let the file read as correct.
+CORE_LIVE=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+echo defined("LYLYROSE_CORE_VERSION") ? LYLYROSE_CORE_VERSION : "undefined";' 2>/dev/null)
+[ "$CORE_LIVE" = "$CORE_CONST" ] \
+  && pass "running site reports LYLYROSE_CORE_VERSION=$CORE_LIVE" \
+  || fail "live constant '$CORE_LIVE' != file constant '$CORE_CONST' (restart the container)"
+
+# The gated options must have caught up, or the flush/pages logic did not re-run.
+CORE_OPTS=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+echo get_option("asc_rewrite_version","") . "|" . get_option("asc_store_pages_version","");' 2>/dev/null)
+[ "$CORE_OPTS" = "$CORE_LIVE|$CORE_LIVE" ] \
+  && pass "version-gated options track the constant" \
+  || fail "gated options '$CORE_OPTS' have not advanced to '$CORE_LIVE'"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

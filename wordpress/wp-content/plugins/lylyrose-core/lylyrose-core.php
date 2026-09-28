@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Lylyrose_Core {
 
-    const VERSION = '2.3.0';
+    const VERSION = '2.4.0';
     const SLUG    = 'lylyrose-core';
 
     private static $instance = null;
@@ -105,6 +105,9 @@ class Lylyrose_Core {
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-flash-sales.php';
         ASC_Flash_Sales::init();
+
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-gift-cards.php';
+        ASC_Gift_Cards::init();
     }
 
     /**

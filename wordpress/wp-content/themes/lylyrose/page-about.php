@@ -20,7 +20,7 @@ get_header();
 					<span class="lbl"><?php esc_html_e( 'تنوع عطر و ادکلن', 'lylyrose' ); ?></span>
 				</div>
 				<div class="dk-about-stat">
-					<span class="num">٪۱۰۰</span>
+					<span class="num">۱۰۰٪</span>
 					<span class="lbl"><?php esc_html_e( 'ضمانت اصالت کالا', 'lylyrose' ); ?></span>
 				</div>
 				<div class="dk-about-stat">
