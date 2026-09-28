@@ -149,11 +149,19 @@ def main() -> int:
     print(f"\nlogged in to {host}, docroot {docroot}")
 
     def ensure_dir(remote_dir: str) -> None:
-        """Walk down creating directories; pure-ftpd makes each level explicit."""
-        parts = [x for x in remote_dir.split("/") if x]
+        """Walk down from the login root, creating each level.
+
+        Absolute paths only. An earlier version built a relative path and
+        re-walked it per segment, which re-descended the directory it had just
+        created and nested docroot-relative junk four levels deep inside the
+        docroot. Same for `ftp.cwd`: it is relative to the current directory, so
+        a loop that cds into a dir and then cds the full path again descends
+        twice.
+        """
+        ftp.cwd("/")
         walked = ""
-        for part in parts:
-            walked = f"{walked}/{part}" if walked else part
+        for part in [x for x in remote_dir.split("/") if x]:
+            walked = f"{walked}/{part}"
             try:
                 ftp.cwd(walked)
             except Exception:
@@ -162,22 +170,31 @@ def main() -> int:
 
     failures = []
     for local, rel in files:
-        remote = f"{docroot}/{rel}"
+        remote = f"/{docroot}/{rel}"
         remote_dir = os.path.dirname(remote)
         try:
             ensure_dir(remote_dir)
         except Exception as exc:
             failures.append(f"{rel}: mkdir {remote_dir}: {exc}")
             continue
+        # ensure_dir() leaves the session inside the target directory, so the
+        # write is a bare basename. A partial transfer would leave the remote in
+        # a state the next run cannot detect, so the size is read before and
+        # after every write.
+        name = os.path.basename(rel)
+        try:
+            before = ftp.size(name)
+        except Exception:
+            before = None
         try:
             with open(local, "rb") as fh:
-                ftp.storbinary("STOR " + remote, fh)
+                ftp.storbinary("STOR " + name, fh)
             want = local.stat().st_size
-            got = ftp.size(remote)
+            got = ftp.size(name)
             if got != want:
-                failures.append(f"{rel}: size {got} != local {want}")
+                failures.append(f"{rel}: size {got} != local {want} (was {before})")
             else:
-                print(f"  ok  {rel} ({got:,} B)")
+                print(f"  ok  {rel} ({got:,} B, was {before})")
         except Exception as exc:
             failures.append(f"{rel}: {exc}")
 
