@@ -191,13 +191,68 @@ the header says `2.4.0` but `const VERSION` in the same file still says `2.3.0`
 (`class-store-pages.php:45`), so a stale value means those do not re-run.
 `aroma_store` has the identical split, so fix it there first.
 
-**Do not deploy v2.4.0 while another session is mid-mirror.** At the time of
-writing there are uncommitted changes to `lylyrose-core.php`, `flash-sales.css`
-and `page-about.php`, plus a new untracked `includes/class-gift-cards.php`
-(`ASC_Gift_Cards`, authored upstream per its `@package aroma-store-core`
-header) — an `aroma_store` session is actively mirroring the gift-card feature
-into this repo. Deploying now would ship a half-written feature. Wait for that
-work to land, run the suite, then deploy.
+#### ✅ The mid-mirror blocker is gone (2026-09-28). Suite is 249/0; deploy is unblocked.
+
+The "do not deploy while another session is mid-mirror" warning above is
+**resolved**. The gift-card work landed upstream and was mirrored byte-identical
+(`diff` clean against `aroma_store`'s `class-gift-cards.php`), upstream is
+committed and its own tree is clean, and this repo's suite is **249 passed, 0
+failed** (up from 229 — sections 29 and 30 are new). The version split is fixed
+on both sides: header and `const VERSION` both read `2.4.0`, and section 30
+pins them together so it cannot silently reopen. Mirrored in `3ce37382`.
+
+**Deploy order is NOT upstream-first, and the paragraph above that says so is
+wrong.** Investigated 2026-09-28 with read-only git:
+
+- `aroma_store`'s deploy branch is `hosting-ready`, and it is **not merely
+  behind `master` — it differs by 1439 files.** It was last touched
+  **2026-09-10**, 18 days stale.
+- Two independent causes. It is a *stripped* tree by design (no `docker/`,
+  `docker-compose.yml`, `.codacy/`), and its **vendor plugins are pinned to
+  older versions than production runs** — WooCommerce 11.0.1 there vs **11.1.0
+  live**, Dokan 5.0.16 vs 5.1.1. So "merge master → hosting-ready to ship a
+  feature" also ships a whole unreviewed plugin update wave.
+- **Production was never deployed from `hosting-ready`.** The live site serves
+  WooCommerce 11.1.0, which is `master`'s version. There is no CI/CD (the only
+  `.circleci` file is vendored inside Rank Math) and no git checkout on the
+  host; deploy is a manual FTP/rsync upload from a local working tree.
+
+`hosting-ready` is therefore a staging area nothing deploys from, and it has
+drifted. Following its documented "merge then upload" procedure would be a much
+larger and riskier change than shipping v2.4.0.
+
+**Use the targeted uploader instead: `docker/deploy-targeted.py`.** It takes an
+explicit file list rather than walking a branch, and refuses the vendor plugin
+paths by name, so a feature deploy cannot carry a plugin update with it.
+`--dry-run` lists what would go up without touching the host.
+
+```bash
+python3 docker/deploy-targeted.py --dry-run \
+  wp-content/plugins/lylyrose-core/lylyrose-core.php \
+  wp-content/plugins/lylyrose-core/includes/class-flash-sales.php \
+  wp-content/plugins/lylyrose-core/includes/class-gift-cards.php \
+  wp-content/themes/lylyrose/assets/css/flash-sales.css \
+  wp-content/themes/lylyrose/page-about.php
+```
+
+That is the exact 5-file set (36,221 bytes) pending upload. **Not yet deployed.**
+
+**One deploy-time check worth knowing.** `/incredible-offers/` needs a rewrite
+rule, and `ASC_Flash_Sales::ensure_page()` runs at `init:30` while
+`ASC_Product_Code::maybe_flush()` runs at `init:10` — so the flush happens
+*before* the page exists. That ordering looks like it would leave the route
+404-ing, and it was verified rather than assumed: with the page deleted, the
+version gate at 2.3.0 and `rewrite_rules` removed, a single plain HTTP request
+to `/incredible-offers/` returned **200** with 24 real product cards. WordPress
+resolves the page after `init:30` has created it, so the route works. Do not
+"fix" that priority.
+
+**Promotion order, for the record:** local aroma → remote aroma → local
+lylyrose → remote lylyrose. `aroma_store` is the development/test stage and
+`lylyrose` is production. Aroma's local stack is the test environment; it needs
+no upload, and its remote promotion should use the same targeted-file approach
+rather than a branch merge.
+
 
 
 ## 🔍 Production audit — 2026-09-26 (superseded by the above, kept for history)
