@@ -1961,3 +1961,26 @@ remote backup service`, so the daily set is **host-local only**. That makes 1a-i
 (a remote target) the sole remaining backup gap, still optional — but the
 automated copies now live on the same host as the store they protect, so keep 1b
 (off-host pull) current and 1a manual before risky changes.
+
+### 2026-09-28 — re-read of the 1c evidence, and an arithmetic error found in it
+
+Second independent read of the same fire, again over passive FTP, no trigger of
+any kind. Everything the first pass recorded held up: same six archives, same
+run id `ddea859eb974`, byte-for-byte the same sizes, the 909-line log still
+absent-of-errors and still ending `The backup succeeded and is now complete`, and
+`/` `/shop/` `/checkout/` all 200.
+
+One thing did not hold up. The three docs reported the set as **120,899,203
+bytes (115.3 MB)**. The six archives sum to **120,790,945 (115.2 MiB)**. The
+overstatement is 108,258 B — the size of the run log, which is listed
+separately in all three places and evidently also got folded into the total,
+plus a 249 B rounding residue. Corrected everywhere it appears (6 spots across
+`PRODUCTION_UPDATE_RUNBOOK.md`, `CONTINUATION.md`, `DEVELOPMENT_LOG.md`).
+
+Worth keeping, and it is the same lesson as above one level down: **the file
+listing was the ground truth and the number typed next to it was not.** Every
+per-archive size was right, so the error could not be caught by re-reading any
+individual figure — only by adding them. A wrong total in a backup doc is cheap
+in this instance and expensive the first time someone sizes a quota off it. The
+check that catches it is one `sum()`, and on a doc whose whole claim is
+"these are the real sizes", the sum *is* the claim.
