@@ -2,14 +2,14 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-29.** Items 1, 4, 6, 7 closed; the backup cycle is
+> **Last updated 2026-09-29 (later).** Items 1, 4, 6, 7 closed; the backup cycle is
 > confirmed healthy; the suite is **261/0**. The only open item needing a human is
 > **#2 (per-host settings)**, plus the empty `public_html/wp-content/` skeleton
 > on the marketing site, which needs cPanel File Manager in a browser.
 >
-> **`AROMA_STORE_FOLDER` is now set and the fallback is gone** — see the entry
-> at the end of this list. The checkout form's missing assertions are written
-> and proven to fail against the pre-commit theme (item 8).
+> **The rebrand is LIVE on `lylyrose.ir`** (deployed after the header above was
+> written) — palette, mobile overflow, and the Iran-only checkout form, plus one
+> missed literal. See *"✅ The rebrand is live"*, the last entry in this file.
 
 ## Open as of 2026-09-28
 
@@ -1171,3 +1171,71 @@ changes `scrollWidth` by 0px. And the 79px checkout overflow was previously blam
 at 469px is a **harness artifact**, not a bug. The reliable method is to hide one
 element at a time and watch `documentElement.scrollWidth` — that is what found all
 three.
+
+## ✅ The rebrand is live on `lylyrose.ir` — 2026-09-29 16:40 +0330
+
+**Item 2 is the only thing still open here, and it is human-blocked**: a real
+ZarinPal merchant code, real PWSMS credentials and a real SMTP key cannot be
+supplied from this side. While it was blocked, the *actual* live gap was found and
+closed: the priority-1 rebrand, the overflow fix and the Iran-only checkout form
+were all committed and suite-green but **had never been uploaded**. The live theme
+was still `Version: 1.10.0` with the Digikala red `#ef394e`.
+
+**Deployed — 5 files, 117,522 B, in two commits.** `style.css` (palette + overflow),
+`page.php`, `functions.php`, `assets/css/flash-sales.css`, `assets/css/gift-wrap.css`.
+Staged from `HEAD` with `git archive` and uploaded with `--src /tmp/deploy-staging`,
+never the worktree, per the concurrent-session rule above. `LYLYROSE_FOLDER=lylyroseir`
+so the docroot was right, and the dry-run confirmed it before anything was sent.
+
+**Verified by hash, not by the uploader's message.** All 5 files read back over FTP
+match `git show HEAD:<path>` by SHA1. The uploader's own `5 file(s) uploaded and
+size-verified` is not evidence of *where* it wrote — that is item 7's lesson, and
+`curl` cannot check it either: `curl` of `functions.php` over HTTPS returns 0 bytes
+on this host (empty-string SHA1), so it reads as "totally different" when it is
+merely unreadable. Only FTP settles it.
+
+**The rebrand's one missed literal.** After the deploy, a screenshot of the live
+homepage showed the hero kicker still in saturated red — `.dk-kicker` at
+`rgba(239, 64, 86, .9)`, the old Digikala red, on the most visible element on the
+site. The recolour had swept `style.css` but missed this one, and **261/0 could
+never have caught it**: no test asserts a colour. It is now
+`color-mix(in srgb, var(--dk-red) 90%, transparent)`, which tracks the token instead
+of repeating a literal, and it was checked to actually resolve to `rgb(156, 92, 95)`
+at 0.9 alpha rather than assuming `color-mix` was supported. Version **1.12.1 →
+1.12.2**; the bump is what made Autoptimize rebuild its bundle, and I confirmed the
+live bundle re-emitted at `ver=1.12.2` carrying the new palette.
+
+**How the miss was found, and how to re-run it.** Grep for old hex values across
+the theme lists 9 more hits; the rendered scan is what separates the ones that
+matter from the ones that do not. `functions.php:261,297,301,303,320,330` style the
+**wp-login screen**, which is not visitor-facing and has no `--dk-*` variables in
+scope, and `woocommerce/single-product.php:139` uses `#00a049`/`#f9a825` as a
+*seller grade*, not as brand. Neither should be swept blindly into the palette.
+The detector is a computed-style scan over the old RGB triples, with the browser
+cache disabled — the same class of check as the overflow bisect:
+
+```js
+// OLD = every old palette hex as "r, g, b" triples
+// walk document.querySelectorAll('*'), read getComputedStyle color /
+// backgroundColor / borderTopColor, match the rgba() prefix against OLD
+```
+
+Run with `Network.setCacheDisabled` on. Live result after the fix: **CLEAN** on
+`/`, `/shop/`, `/cart/`, `/checkout/`, `/incredible-offers/`.
+
+**Live state after the deploy:** `/` `/shop/` `/cart/` `/checkout/`
+`/incredible-offers/` `/about/` `/my-account/` `/secure-login/` all **200**;
+horizontal overflow **0** at 390 / 768 / 1440 on `/`, `/shop/`, `/cart/` and
+`/checkout/`, measured with device metrics set *before* navigation, with
+`clientWidth` matching the intended width at every one of the twelve measurements.
+Suite **261/0** before and after the kicker fix. The stray
+`public_html/wp-content/…/class-images.php` from item 7 is still gone (550 over
+FTP); the empty directory skeleton is still there and still needs a browser.
+
+**Still unverified in a browser, and worth not overclaiming:** the checkout form's
+five assertions pass on the suite, but that suite seeds a cart. A `curl` of
+`/checkout/` with an empty session renders «سبد خرید شما» and no form, so the
+Iran-only country pin and the province/city reorder have **not** been seen rendered
+on the live site. They are in the host's `functions.php` (verified by reading the
+bytes) and the code is what the suite exercises, but a real checkout walkthrough is
+the one check nobody has done on production.
