@@ -2046,3 +2046,137 @@ project, after the guessed `updraft_interval_type` option that scheduled nothing
 and the `Fileman:delete_dir` that reported success while doing nothing. A green
 result and a real result are different things, and only the second one is worth
 anything.
+
+## 2026-09-29 — Mobile horizontal overflow: three bugs, two of them un-ported upstream fixes
+
+Companion to the checkout-form entry above (that work is commit `3abc3ade`). This
+entry covers the sideways-scroll bugs found while verifying it at 390px.
+
+### First: the diagnosis in CONTINUATION.md was wrong, twice
+
+`CONTINUATION.md` recorded the 90px overflow as "site-wide, from `.dk-announce`".
+**It is not site-wide.** Hiding `.dk-announce` changes `documentElement.scrollWidth`
+by **0 pixels**; the bar measures exactly 390px. The same file's other claim — that
+the 79px checkout overflow came from `div.dk-drawer-overlay` — was also wrong, and
+wrong for a reason worth keeping:
+
+Under `Emulation.setDeviceMetricsOverride`, `window.innerWidth` reported **469** while
+`documentElement.clientWidth` reported **390**. A `position: fixed` element sizes
+itself to the *layout viewport*, so `.dk-drawer-overlay` measured 469×2880 and looked
+like the culprit. Hiding it — and the drawer, and both at once — moved `scrollWidth`
+by 0. It was a **harness artifact**: emulating on top of a `--window-size` launch left
+the two viewports disagreeing.
+
+**The method that actually finds these** is bisecting by mutation:
+
+```js
+el.style.display = 'none';
+if (de.scrollWidth === vw) { /* this element is the culprit */ }
+```
+
+Run over every element, it names the exact offender. Do not trust a fixed- or
+absolutely-positioned element's width in this harness; do not trust a page's
+"identical overflow on every page" note either.
+
+### The three real bugs
+
+1. **`.dk-cart-stepper` — 79px on `/checkout/`.** Three steps at
+   `white-space: nowrap` (61 + 141 + 90) plus two `flex: 0 0 40px` separators give a
+   min-content width of **372px** in a row with ~310px available. Flex items default to
+   `min-width: auto` and refuse to shrink, so the row simply overflowed. Fixed by
+   wrapping the row below 769px and hiding the separators, which carry no information
+   once the row wraps; desktop keeps `nowrap` and both separators. Wrapping rather than
+   `min-width: 0` because «۲. اطلاعات ارسال و پرداخت» is 141px on one line and
+   shrinking would have made it an unreadable stub.
+2. **`.dk-footer-grid` — 90px, every page.** Grid children default to `min-width: auto`,
+   and the newsletter `<input>`'s intrinsic width resolved the 2-column grid to
+   `261.438px 182px` inside a 358px container.
+3. **`.dk-pagination ul.page-numbers` — 44px on `/shop/`.** A non-wrapping
+   `inline-flex` of 9 items × 44px + 8 gaps = 412px in a 358px column. The
+   `height: auto` in the fix is load-bearing: the `.page-numbers` rule also matches the
+   `<ul>`, so `height: 38px` would clip the wrapped second row.
+
+**Bugs 2 and 3 were already fixed upstream in `aroma_store` since 2026-09-27 and had
+simply never been ported here.** That is the finding worth carrying: a mirror gap in
+*CSS*, invisible to the test suite, which only a rendered-layout check can catch.
+
+**Verified:** `overflow: 0` at 390 / 768 / 1440 on `/`, `/shop/`, `/cart/` and
+`/checkout/`, on this stack and on `aroma_store`.
+
+**Uncommitted, deliberately.** These are working-tree edits only — this repo is shared
+with parallel sessions. `3abc3ade` was made by another session, not this one; the three
+CSS fixes above remain uncommitted and the owning sessions have been messaged.
+
+## 2026-09-29 — The checkout form gets assertions, and the docroot fallback gets deleted
+
+Two follow-ups from `CONTINUATION.md`. Neither was a product bug; both were the
+kind of gap where a green suite means less than it appears to.
+
+### The five checkout assertions, and the one that was worthless
+
+Section 8 asserted nothing about the Iran-only checkout form from `3abc3ade`, so
+**256/0 meant "this broke nothing else", not "this is verified."** Five assertions
+added, and each was **proven to fail against the pre-commit `functions.php` and
+`page.php`** before being kept — reverted in the container, re-run, restored, and
+the restored files diffed byte-identical against the repo.
+
+That check earned its keep immediately. The first draft asserted
+`billing_country_field` appears in the checkout markup — and it **passed against the
+broken build too**, because WooCommerce renders that field unconditionally. It would
+have sat in the suite forever, green, detecting nothing. The replacement asserts the
+reorder script's `addClass( 'is-hidden' )` call, which does not exist before the
+commit.
+
+| Assertion | Detector |
+| --- | --- |
+| country pinned to Iran only | `get_allowed_countries()` → `1\|IR` (250 before) |
+| province/city sort above the address | priorities `25\|26` before `50` (was `80\|70` after `50`) |
+| reorder script ships | `dk_checkout_reorder_fields` / `dk-row-half` in the footer |
+| country row hidden | the script's hide call, **not** the field's presence |
+| page title suppressed | no `dk-page-title` on `/checkout/` |
+
+**What 261/0 still does not cover:** the reorder and the hide are inline JS. The
+suite proves the script ships and what it calls — not that the browser ends up with
+province/city on top. That needs a real browser, exactly as a stale stylesheet
+needs one. Same class of gap as the `style.css` version bump: a suite cannot see a
+rendered result.
+
+### `rm -rf wp-content/cache` breaks the suite, and looks like a regression
+
+While proving the assertions, I cleared the cache from a root shell. Four assertions
+failed: `no autoptimize cache assets on homepage`, `autoptimize cache dir empty`,
+`bell missing for user`, `badge missing`.
+
+The site was fine. Deleting `cache/autoptimize/` from root means the container
+recreates it **root-owned**, so `www-data` (33) cannot write it — the project's
+recurring ownership trap, this time reached by a different route. Fixed with the
+`chown -R 33:33` already used elsewhere in this log, then 261/0. Recorded in
+`CONTINUATION.md` so the next person to bust a cache does not spend a run
+rediscovering it.
+
+### The `public_html` fallback is what sent a deploy to the wrong site
+
+Item 7 of `CONTINUATION.md` is the sharpest deploy lesson in the file: a one-file
+deploy landed on the **Vega Codex marketing site** instead of the store, and every
+check the uploader performs passed. The cause was
+`aroma_store/docker/deploy-targeted.py:186`:
+
+```python
+docroot = args.remote or cfg.get("AROMA_STORE_FOLDER") or "public_html"
+```
+
+`AROMA_STORE_FOLDER` was never set, so the fallback chose `public_html` — a live,
+non-WordPress site. **The fallback is the bug, not the missing variable.** Setting
+the var would have fixed today's symptom while leaving a default that silently
+picks the wrong production site for the next person who provisions a fresh `.env`.
+Deleted: a missing docroot now exits and names the var.
+
+Verified live — a real upload printed `docroot public_html/aroma-store`, and with
+the var stripped from the env the run exits instead of connecting. The upload wrote
+`aroma-store-core.php`, which `git status` shows **unmodified**: it shipped committed
+bytes, so nothing unreviewed left the machine.
+
+**The same gap was one deploy away in this repo.** `LYLYROSE_FOLDER` was present in
+`.env` but **absent from `.env.example`** — as `AROMA_STORE_FOLDER` was. Both
+`.env.example` files now document their docroot, with the reason stated: on this
+account `public_html` is the marketing site, not the store.

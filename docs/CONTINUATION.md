@@ -3,10 +3,13 @@
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
 > **Last updated 2026-09-29.** Items 1, 4, 6, 7 closed; the backup cycle is
-> confirmed healthy; the suite is 256/0. The only open item needing a human is
-> **#2 (per-host settings)**, plus two things I could not finish: the empty
-> `public_html/wp-content/` skeleton on the marketing site, and
-> `AROMA_STORE_FOLDER` still unset in `aroma_store/.env`.
+> confirmed healthy; the suite is **261/0**. The only open item needing a human is
+> **#2 (per-host settings)**, plus the empty `public_html/wp-content/` skeleton
+> on the marketing site, which needs cPanel File Manager in a browser.
+>
+> **`AROMA_STORE_FOLDER` is now set and the fallback is gone** — see the entry
+> at the end of this list. The checkout form's missing assertions are written
+> and proven to fail against the pre-commit theme (item 8).
 
 ## Open as of 2026-09-28
 
@@ -97,20 +100,50 @@
      own success message is not evidence of *where* it wrote. Confirm the
      docroot by reading it back at the intended path, and verify content by
      hash rather than size.
+8. **~~The checkout form has no assertions.~~ DONE 2026-09-29** — section 8 now
+   asserts all five behaviours from `3abc3ade`: country pinned to Iran only
+   (`allowed=1|IR`), province/city sorting above the address (priorities
+   25/26 before 50), the reorder script present, the country row hidden by it,
+   and the page title suppressed. Suite **261/0**.
+   **Each assertion was proven to fail against the pre-commit `functions.php`
+   and `page.php`** before being kept, so they detect a regression rather than
+   restate current behaviour. That check is the whole point: the first draft
+   asserted `billing_country_field` appears in the markup, and it passed on the
+   *broken* build too — WooCommerce always renders that field, so the assertion
+   was worthless. It now asserts the script's `addClass( 'is-hidden' )` call.
+   The reorder and the hide are inline JS, so they are asserted on markup curl
+   can see; their *visible* effect needs a browser and is still unverified.
+9. **`AROMA_STORE_FOLDER` was the root cause of item 7 — now fixed 2026-09-29.**
+   Three parts, and the middle one is the actual fix:
+   - `aroma_store/.env` now sets `AROMA_STORE_FOLDER=public_html/aroma-store`.
+   - **The `public_html` fallback in `aroma_store/docker/deploy-targeted.py:186`
+     is deleted.** A missing docroot now exits instead of picking one. This is
+     the part that matters: the fallback was what made the wrong site look like
+     the right one, and no amount of documenting `--remote` fixed that. The
+     error names the var and mentions `--remote`.
+   - Both `.env.example` files documented their deploy docroot for the first
+     time. **`LYLYROSE_FOLDER` was in `.env` but never in `.env.example`** —
+     the same documentation gap, in this repo, one deploy away from the same
+     failure. Anyone provisioning from the example would have hit it.
+   Verified live: a real upload printed `docroot public_html/aroma-store`, and
+   the guard exits when the var is stripped from the env. That upload wrote
+   `aroma-store-core.php`, which `git status` shows **unmodified** — it shipped
+   the committed bytes, so no unreviewed code went out.
 
-## ✅ Suite green 256/0 — and two things it did not check (2026-09-29)
+## ✅ Suite green 261/0 — and what that number covers (2026-09-29)
 
-`bash docker/run-tests.sh` → **256 passed, 0 failed**, 31 sections, run twice
-(the second after the version bump below). Log:
-`.test-logs/full-tests-20260929-postbump.log`.
+`bash docker/run-tests.sh` → **261 passed, 0 failed**, 31 sections. Baseline
+before today's work was 256/0; the five added checks are the checkout
+assertions in item 8 above. Logs: `.test-logs/full-tests-20260929-postbump.log`
+(the 256/0 run) and the `-checkout-assertions` log written after.
 
-**The checkout form work is now committed in this tree** (country pinned to
-Iran, province/city raised above the address, country row hidden, page title
+**The checkout form work is committed in this tree** (country pinned to Iran,
+province/city raised above the address, country row hidden, page title
 suppressed on checkout, and a new `style.css` block restyling the form because
 the theme drops WooCommerce's stylesheet). It came in uncommitted from another
 session; it is tested, documented in `DEVELOPMENT_LOG.md`, and committed.
 
-Two follow-ups came out of the run, and both matter more than the green:
+Two follow-ups came out of that run:
 
 - **Theme `style.css` needed a version bump and did not have one.** The
   stylesheet is enqueued with `lylyrose_version()` as its only cache-buster,
@@ -120,13 +153,41 @@ Two follow-ups came out of the run, and both matter more than the green:
   browser-default 27px inputs. Bumped to **1.11.0**. The suite cannot catch
   this: a cached stylesheet is still a 200 with valid CSS. **Any future theme
   CSS change needs this bump.**
-- **The new checkout behaviour has no assertions.** The harness change
-  (`billing_city=3322`, was `تهران`) was *required* — the city is a coded select
-  now, so the old value fails — but it is a consequence, not a check. Section 8
-  asserts none of the pinned country, field order, hidden country row, or
-  suppressed title. So 256/0 means "this broke nothing else", **not** "this is
-  verified". Left undone deliberately: those assertions belong with the change,
-  which was another session's.
+- ~~**The new checkout behaviour has no assertions.**~~ **Closed today** — see
+  item 8. The `billing_city=3322` harness change was still a consequence rather
+  than a check, which is what made it worth writing; five real assertions now
+  cover the behaviour and each was proven to fail against the pre-commit theme.
+
+**Still not covered by 261/0, and worth knowing before trusting it:** the
+checkout reorder and the hidden country row are inline JS, so the suite checks
+that the script ships and what it calls — not that the browser ends up with
+province/city on top. Only a real browser shows that, the same way a stale
+stylesheet only shows in a browser.
+
+`style.css` is `www-data`-owned and `kourosh` is not in that group, so the edit
+went through the container — worth knowing before anyone wastes a permission
+error on it:
+
+```bash
+docker exec lylyrose-wp sh -c "sed -i 's/^Version: 1.10.0$/Version: 1.11.0/' /var/www/html/wp-content/themes/lylyrose/style.css"
+```
+
+### ⚠️ Do not `rm -rf wp-content/cache` in the container to bust a cache
+
+Worth recording because it cost 4 failures and looks like a product regression.
+Clearing that directory from a root shell deletes `cache/autoptimize/`, and the
+container recreates it **root-owned**, so `www-data` (33) can no longer write
+autoptimize's cache. The homepage then serves no `cache/autoptimize` assets and
+section 9 fails twice — for a cause that has nothing to do with the code under
+test. The fix is the same `chown -R 33:33` this project has used before:
+
+```bash
+docker exec lylyrose-wp sh -c "chown -R 33:33 /var/www/html/wp-content/cache"
+```
+
+Two other assertions (`bell missing for user`, `badge missing`) went with it —
+same root cause, since both render markup the cache build had been serving.
+After the chown and a page-view to prime the cache, back to 261/0.
 
 `style.css` is `www-data`-owned and `kourosh` is not in that group, so the edit
 went through the container — worth knowing before anyone wastes a permission
@@ -1065,3 +1126,40 @@ it to this change.
 Not addressed, deliberately: the checkout page has a 90px horizontal overflow at
 390px from `.dk-announce`, but home and `/shop/` show the identical 90px — it is a
 site-wide announcement-bar problem, not a checkout one.
+
+## Working tree, uncommitted — three mobile-overflow CSS fixes (2026-09-29)
+
+`wordpress/wp-content/themes/lylyrose/style.css`, **+28 lines**, nothing else touched.
+**A parallel session owns this repo and has been messaged; do not assume these were
+adopted.** Full write-up in `DEVELOPMENT_LOG.md` under *2026-09-29 — Mobile horizontal
+overflow*.
+
+Verified `documentElement.scrollWidth === clientWidth` (overflow **0**) at 390 / 768 /
+1440 on `/`, `/shop/`, `/cart/` and `/checkout/`, here and on `aroma_store`.
+
+1. `.dk-pagination ul.page-numbers { flex-wrap: wrap; justify-content: center; height: auto }`
+   — 9 × 44px + 8 gaps = 412px in a 358px column was 44px of scroll on `/shop/`.
+   `height: auto` is load-bearing; the `.page-numbers` rule also matches the `<ul>`,
+   so `height: 38px` clips the wrapped second row.
+2. `.dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0 }` +
+   `.dk-header-inner { flex-wrap: wrap }` in the existing 768px query — the newsletter
+   `<input>`'s intrinsic width was blowing the 2-col footer grid by 90px.
+3. New trailing block: `.dk-cart-stepper { flex-wrap: wrap; row-gap: 6px }` +
+   `.dk-step-sep { display: none }`, with `@media (min-width: 769px)` restoring `nowrap`
+   and the separators. 372px of `nowrap` steps + separators in a ~310px row was the
+   79px overflow on `/checkout/`.
+
+**Items 1 and 2 are byte-identical to fixes that have been in `aroma_store`'s
+`digikala/style.css` since 2026-09-27 and were never ported here.** Diffing this
+theme's `style.css` against upstream's is worth doing properly — the test suite
+cannot see a missing CSS rule.
+
+**Two corrections to this file, both about overflow diagnosis.** It said the 90px
+overflow was "site-wide, from `.dk-announce`" — it is not; hiding `.dk-announce`
+changes `scrollWidth` by 0px. And the 79px checkout overflow was previously blamed on
+`div.dk-drawer-overlay`, which is also wrong: under
+`Emulation.setDeviceMetricsOverride` the layout viewport (469) and
+`documentElement.clientWidth` (390) disagree, so a `position: fixed` element measured
+at 469px is a **harness artifact**, not a bug. The reliable method is to hide one
+element at a time and watch `documentElement.scrollWidth` — that is what found all
+three.
