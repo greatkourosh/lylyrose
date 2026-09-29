@@ -262,6 +262,44 @@ case "$EMPTY_CHECKOUT" in
   *)    fail "checkout redirects/errors with empty cart ($EMPTY_CHECKOUT)" ;;
 esac
 
+# Iran-only checkout form (3abc3ade). Each of these was verified absent from the
+# pre-commit functions.php, so they detect a regression rather than restate
+# current behaviour. The reordering and the hidden country row are done by
+# inline JS in the footer, so they are asserted on markup curl can see, not on
+# computed style — the JS's effect is only observable in a browser.
+CO_COUNTRIES=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$c = WC()->countries->get_allowed_countries();
+echo count($c), "|", implode(",", array_keys($c));' 2>/dev/null)
+[ "$CO_COUNTRIES" = "1|IR" ] && pass "checkout country pinned to Iran only (allowed=$CO_COUNTRIES)" \
+  || fail "country not pinned to Iran (allowed=$CO_COUNTRIES)"
+
+CO_ORDER=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$f = apply_filters("woocommerce_checkout_fields", WC()->checkout()->get_checkout_fields());
+foreach (array("billing_state","billing_city","billing_address_1") as $k) {
+  echo $k, "=", ($f["billing"][$k]["priority"] ?? "missing"), "|";
+}' 2>/dev/null)
+[ "$CO_ORDER" = "billing_state=25|billing_city=26|billing_address_1=50|" ] \
+  && pass "province and city sort above the address (25/26 before 50)" \
+  || fail "checkout field order wrong ($CO_ORDER)"
+
+html_has "$CHECKOUT_HTML" "dk_checkout_reorder_fields\|dk-row-half" \
+  && pass "checkout re-lays province/city after the Iran-cities script rewrites the block" \
+  || fail "checkout field-reorder script missing"
+# WooCommerce always renders the country field, so its mere presence in the
+# markup proves nothing about the change. What is new is the script hiding it,
+# so assert on that call rather than on the field existing.
+html_has "$CHECKOUT_HTML" "billing_country_field" \
+  && html_has "$CHECKOUT_HTML" "find( '#billing_country_field' ).addClass( 'is-hidden' )" \
+  && pass "country row hidden by the checkout script (one option, so noise removed)" \
+  || fail "country row is not hidden — the pinned-to-Iran select shows a 1-option dropdown"
+if printf '%s' "$CHECKOUT_HTML" | grep -q 'dk-page-title'; then
+  fail "checkout still shows the page title (dk-page-title rendered)"
+else
+  pass "checkout page title suppressed"
+fi
+
 section "9. Autoptimize asset optimization"
 AO_HOME=$(curl -s --max-time 30 "$SITE_URL/")
 html_has "$AO_HOME" "cache/autoptimize" && pass "homepage serves autoptimize assets" || fail "no autoptimize cache assets on homepage"
