@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.11.0
+Version: 1.12.1
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -16,28 +16,38 @@ Tags: e-commerce, rtl-language-support, custom-menu, custom-logo
    Design tokens
    ========================================================================== */
 :root {
-    --dk-red: #ef394e;
-    --dk-red-dark: #d32f45;
-    --dk-red-light: #fef5f6;
-    --dk-badge-red: #d32f2f;
-    --dk-teal: #19bfd3;
-    --dk-teal-dark: #149aa9;
-    --dk-green: #00c853;
-    --dk-orange: #f9a825;
-    --dk-ink: #23254e;
-    --dk-text: #3f4064;
-    --dk-body-text: #424750;
-    --dk-muted: #62666d;
-    --dk-border: #e0e0e2;
-    --dk-bg: #f0f0f1;
+    /* ---- Lyly Rose brand palette (agreed 2026-09-29) -------------------
+       The brand hues are Ivory / Dusty Rose / Espresso / Rose Gold.
+       Values are darkened from the reference palette only where WCAG AA
+       demanded it: the reference Dusty Rose #C98F91 gives only 2.68:1
+       against white text, and 27 rules set white on --dk-red. #9c5c5f is
+       the same hue at 5.11:1. Rose Gold #C9A07C is 2.16:1 on Ivory, so it
+       is kept as a fill/hairline only and #8a6848 (4.58:1) is the text
+       form. --dk-red / --dk-teal keep their old names: 96 call sites, and
+       renaming a token this hot is pure churn for no visual gain. */
+    --dk-red: #9c5c5f;         /* Dusty Rose, darkened for white text      */
+    --dk-red-dark: #7f4a4d;
+    --dk-red-light: #f8f1f0;   /* soft Ivory-Rose panel, for --dk-red text  */
+    --dk-badge-red: #b5484d;   /* discount / sale badges                    */
+    --dk-teal: #8a6848;        /* Rose Gold, darkened                       */
+    --dk-teal-dark: #7a5b3e;
+    --dk-green: #0f7a3e;       /* darkened: #00c853 was 2.24:1 on white    */
+    --dk-orange: #a06a00;
+    --dk-ink: #302522;         /* Espresso                                 */
+    --dk-text: #5a4f49;
+    --dk-body-text: #4a423e;
+    --dk-muted: #6e5f58;       /* 5.54:1 on Ivory, 6.10:1 on white         */
+    --dk-border: #e5dcd4;      /* warm Nude hairline                       */
+    --dk-bg: #f8f3ee;          /* Ivory                                    */
     --dk-white: #ffffff;
-    --dk-star: #f9a825;
+    --dk-star: #96610d;        /* 4.75:1 on Ivory, was 1.79:1             */
     --dk-radius: 12px;
     --dk-radius-sm: 8px;
-    --dk-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 4px 16px rgba(35, 37, 78, .04);
-    --dk-shadow-hover: 0 4px 12px rgba(0, 0, 0, .08), 0 12px 28px rgba(35, 37, 78, .10);
+    --dk-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 4px 16px rgba(48, 37, 34, .04);
+    --dk-shadow-hover: 0 4px 12px rgba(0, 0, 0, .08), 0 12px 28px rgba(48, 37, 34, .10);
     --dk-font: IRANYekanX, IRANYekan, Vazirmatn, IRANSans, Tahoma, sans-serif;
 }
+
 
 * { box-sizing: border-box; }
 
@@ -108,7 +118,7 @@ button, input, select, textarea { font-family: inherit; }
    Announcement top bar (dark, dismissible)
    ========================================================================== */
 .dk-announce {
-    background: #23254e;
+    background: var(--dk-ink);
     color: #fff;
     font-size: 12px;
 }
@@ -185,7 +195,7 @@ button, input, select, textarea { font-family: inherit; }
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(35, 37, 78, .06);
+    box-shadow: 0 2px 8px rgba(48, 37, 34, .06);
 }
 .dk-header-inner {
     display: flex;
@@ -231,7 +241,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .dk-search-input:focus {
     background: #fff;
-    box-shadow: 0 0 0 1px var(--dk-border), 0 2px 8px rgba(35, 37, 78, .08);
+    box-shadow: 0 0 0 1px var(--dk-border), 0 2px 8px rgba(48, 37, 34, .08);
 }
 .dk-search-btn {
     position: absolute;
@@ -368,7 +378,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-drawer-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(35, 37, 78, .5);
+    background: rgba(48, 37, 34, .5);
     opacity: 0;
     pointer-events: none;
     transition: opacity .25s ease;
@@ -411,7 +421,7 @@ button, input, select, textarea { font-family: inherit; }
     padding: 12px 22px;
     font-size: 14px;
     color: var(--dk-text);
-    border-bottom: 1px solid #f1f2f4;
+    border-bottom: 1px solid #efe7de;
 }
 .dk-drawer-nav a:hover { background: var(--dk-red-light); color: var(--dk-red); }
 
@@ -425,7 +435,7 @@ button, input, select, textarea { font-family: inherit; }
     position: relative;
     border-radius: var(--dk-radius);
     overflow: hidden;
-    background: linear-gradient(105deg, #23254e 0%, #3d3f75 55%, #574f8c 100%);
+    background: linear-gradient(105deg, var(--dk-ink) 0%, #4a3a3a 55%, #6b4f4a 100%);
     min-height: 300px;
     display: flex;
     align-items: center;
@@ -594,7 +604,7 @@ button, input, select, textarea { font-family: inherit; }
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #fafafa;
+    background: #faf7f4;
     border: 2px solid #fff;
     display: flex;
     align-items: center;
@@ -610,7 +620,7 @@ button, input, select, textarea { font-family: inherit; }
    Incredible offers carousel
    ========================================================================== */
 .dk-offers {
-    background: linear-gradient(180deg, #ef4056 0%, #d63a50 100%);
+    background: linear-gradient(180deg, var(--dk-red) 0%, var(--dk-red-dark) 100%);
     border-radius: var(--dk-radius);
     margin-top: 26px;
     display: grid;
@@ -697,7 +707,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .dk-progress {
     height: 6px;
-    background: #f1f2f4;
+    background: #efe7de;
     border-radius: 999px;
     overflow: hidden;
 }
@@ -706,7 +716,7 @@ button, input, select, textarea { font-family: inherit; }
     height: 100%;
     width: 62%;
     border-radius: 999px;
-    background: linear-gradient(90deg, var(--dk-red), #ff7a90);
+    background: linear-gradient(90deg, var(--dk-red), #c98f91);
 }
 
 /* ==========================================================================
@@ -809,7 +819,7 @@ button, input, select, textarea { font-family: inherit; }
     background: none;
     border: none;
     cursor: pointer;
-    color: #a1a3a8;
+    color: #a29892;
     padding: 6px;
     z-index: 2;
 }
@@ -901,7 +911,7 @@ button, input, select, textarea { font-family: inherit; }
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    background: #fafafa;
+    background: #faf7f4;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -946,7 +956,7 @@ button, input, select, textarea { font-family: inherit; }
     gap: 6px;
     font-weight: 800;
     font-size: 17px;
-    color: #8a8f99;
+    color: #8a8078;
     transition: color .2s;
 }
 .dk-brandcell:hover { color: var(--dk-ink); }
@@ -1013,7 +1023,7 @@ button, input, select, textarea { font-family: inherit; }
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #f5f6f8;
+    background: #f5efea;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1050,7 +1060,7 @@ button, input, select, textarea { font-family: inherit; }
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: #f5f6f8;
+    background: #f5efea;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1246,7 +1256,7 @@ button, input, select, textarea { font-family: inherit; }
     padding: 7px 9px;
     font-size: 12.5px;
     outline: none;
-    background: #fafafa;
+    background: #faf7f4;
 }
 .dk-price-inputs input:focus { border-color: var(--dk-red); background: #fff; }
 .dk-price-submit {
@@ -1301,6 +1311,22 @@ button, input, select, textarea { font-family: inherit; }
 }
 .dk-pagination .page-numbers.current { background: var(--dk-red); color: #fff; }
 .dk-pagination .page-numbers:hover:not(.current) { color: var(--dk-red); }
+
+/* The list is a non-wrapping inline-flex, so on a narrow column its min-content
+   (11 items x 44px) is wider than the grid track and forces horizontal scroll.
+   Wrapping keeps every control reachable; height:auto undoes the 38px that the
+   rule above also applies to the <ul>, which would clip the second row. */
+.dk-pagination ul.page-numbers {
+    flex-wrap: wrap;
+    justify-content: center;
+    height: auto;
+}
+.dk-pagination .page-numbers { margin-bottom: 6px; }
+
+/* The list is a non-wrapping inline-flex, so on a narrow column its min-content
+   (11 items x 44px) is wider than the grid track and forces horizontal scroll.
+   Wrapping keeps every control reachable; height:auto undoes the 38px that the
+   rule above also applies to the <ul>, which would clip the second row. */
 
 /* ==========================================================================
    Single product
@@ -1410,7 +1436,7 @@ button, input, select, textarea { font-family: inherit; }
 .notes-list { padding-right: 18px; list-style: disc; font-size: 13px; color: var(--dk-muted); }
 .specifications-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .specifications-table th, .specifications-table td { border: 1px solid var(--dk-border); padding: 9px 12px; text-align: right; }
-.specifications-table thead th { background: #f8f9fb; color: var(--dk-ink); }
+.specifications-table thead th { background: #f8f4f0; color: var(--dk-ink); }
 
 /* Related */
 .dk-related { margin-top: 22px; }
@@ -1437,6 +1463,13 @@ button, input, select, textarea { font-family: inherit; }
     .dk-fbt-more { grid-template-columns: repeat(4, 1fr); }
 }
 @media (max-width: 768px) {
+    /* Grid and flex children default to min-width:auto, so the newsletter
+       input's intrinsic width blows the footer grid past the viewport. This was
+       the whole of the 90px horizontal scroll: measured on a real 390px
+       viewport, removing this rule alone returned /, /shop/, /cart/ and
+       /checkout/ to 90px each. The header row wraps for the same reason. */
+    .dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0; }
+    .dk-header-inner { flex-wrap: wrap; }
     .dk-fbt { padding: 14px; }
     .dk-fbt-row { gap: 10px; }
     .dk-fbt-item img { width: 70px; height: 70px; }
@@ -1488,7 +1521,7 @@ button, input, select, textarea { font-family: inherit; }
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #f0f9ff;
+    background: #f4f1f0;
     color: #0fabc6;
     border: 1px dashed #7adcec;
     border-radius: var(--dk-radius-sm);
@@ -1523,7 +1556,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-comment-buyer .dk-check.is-checked::after { background-size: 9px; }
 .dk-comment-author { color: var(--dk-text); font-weight: 600; }
 .dk-comment-date { margin-inline-start: auto; }
-.dk-comment-stars { color: #f9a825; font-size: 12.5px; margin-top: 4px; letter-spacing: 1px; }
+.dk-comment-stars { color: var(--dk-star); font-size: 12.5px; margin-top: 4px; letter-spacing: 1px; }
 .dk-comment-body { font-size: 13px; line-height: 1.9; color: var(--dk-text); margin: 6px 0 0; }
 
 .dk-price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
@@ -1573,7 +1606,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-stock-notify-input:focus {
     outline: none;
     border-color: var(--dk-red);
-    box-shadow: 0 0 0 3px rgba(239, 57, 78, .12);
+    box-shadow: 0 0 0 3px rgba(156, 92, 95, .12);
 }
 .dk-stock-notify-btn {
     height: 42px;
@@ -1587,11 +1620,11 @@ button, input, select, textarea { font-family: inherit; }
     margin-top: 8px;
 }
 .dk-stock-notify-msg.is-error {
-    background: #fff2f2;
+    background: #f8ecec;
     color: var(--dk-red);
 }
 .dk-stock-notify-msg.is-ok {
-    background: #f0f9ff;
+    background: #f4f1f0;
     color: var(--dk-teal);
 }
 
@@ -1622,12 +1655,12 @@ button, input, select, textarea { font-family: inherit; }
 .dk-review-card h3, .dk-qa-card h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; color: var(--dk-ink); }
 .dk-hist-summary { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .dk-hist-avg { font-size: 24px; font-weight: 800; color: var(--dk-ink); }
-.dk-stars { color: #f9a825; }
+.dk-stars { color: var(--dk-star); }
 .dk-muted { color: var(--dk-muted); font-size: 12.5px; }
 .dk-hist-row { display: flex; align-items: center; gap: 10px; padding: 3px 0; font-size: 12px; color: var(--dk-muted); }
 .dk-hist-label { min-width: 52px; white-space: nowrap; }
 .dk-hist-track { flex: 1; height: 8px; background: var(--dk-border); border-radius: 8px; overflow: hidden; }
-.dk-hist-fill { display: block; height: 100%; background: #f9a825; border-radius: 8px; }
+.dk-hist-fill { display: block; height: 100%; background: var(--dk-star); border-radius: 8px; }
 .dk-hist-num { min-width: 24px; text-align: left; }
 .dk-extras-empty { font-size: 13px; color: var(--dk-muted); line-height: 2; margin: 0 0 8px; }
 
@@ -1681,7 +1714,7 @@ button, input, select, textarea { font-family: inherit; }
     grid-template-columns: 96px minmax(0, 1fr) auto;
     gap: 14px;
     padding: 18px 0;
-    border-bottom: 1px solid #f1f2f4;
+    border-bottom: 1px solid #efe7de;
 }
 .dk-cart-item:last-of-type { border-bottom: none; }
 .dk-cart-item-thumb img { width: 96px; height: 96px; object-fit: contain; border-radius: var(--dk-radius-sm); border: 1px solid var(--dk-border); background: #fff; }
@@ -1717,7 +1750,7 @@ button, input, select, textarea { font-family: inherit; }
     flex: 1; min-width: 0; height: 42px; padding: 0 12px;
     border: 1px solid var(--dk-border); border-radius: var(--dk-radius-sm);
     font-size: 13.5px; font-family: inherit; direction: ltr; text-align: left;
-    background: #fafbfc;
+    background: #fbf8f5;
 }
 .dk-coupon-input:focus { outline: none; border-color: var(--dk-red); background: #fff; }
 .dk-coupon-btn {
@@ -1755,21 +1788,21 @@ button, input, select, textarea { font-family: inherit; }
 /* ---- Notifications center (P3 #17) ---- */
 .dk-bell-wrap { position: relative; }
 .dk-bell-btn { display:flex; align-items:center; gap:6px; padding:8px 10px; background:transparent; border:none; cursor:pointer; color:var(--dk-ink); }
-.dk-bell-btn:hover { background:#f3f3f3; }
-.dk-bell-count { position:absolute; top:-4px; right:-6px; background:#ef4056; color:#fff; font-size:10px; min-width:18px; height:18px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
-.dk-bell-dropdown { position:absolute; top:100%; left:-10px; width:320px; max-width:85vw; background:#fff; border:1px solid #e5e5e5; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:9999; padding:10px; margin-top:6px; }
+.dk-bell-btn:hover { background:#f2ebe5; }
+.dk-bell-count { position:absolute; top:-4px; right:-6px; background:var(--dk-red); color:#fff; font-size:10px; min-width:18px; height:18px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
+.dk-bell-dropdown { position:absolute; top:100%; left:-10px; width:320px; max-width:85vw; background:#fff; border:1px solid #e5dcd4; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:9999; padding:10px; margin-top:6px; }
 .dk-bell-header,.dk-bell-footer { display:flex; justify-content:space-between; align-items:center; }
 .dk-bell-header { margin-bottom:8px; font-weight:700; font-size:14px; }
-.dk-bell-view-all { color:#ef4056; text-decoration:none; font-size:12px; font-weight:500; }
+.dk-bell-view-all { color:var(--dk-red); text-decoration:none; font-size:12px; font-weight:500; }
 .dk-bell-list { list-style:none; margin:0 0 8px; padding:0; max-height:300px; overflow-y:auto; }
 .dk-bell-item { border-radius:6px; }
 .dk-bell-item a { display:block; padding:9px 10px; color:#333; text-decoration:none; font-size:13px; line-height:1.5; }
-.dk-bell-item.is-unread { background:#fdf2f4; font-weight:600; }
-.dk-bell-mark-all { background:none; border:none; color:#ef4056; cursor:pointer; font-size:13px; padding:6px 0; }
+.dk-bell-item.is-unread { background:#faf0f0; font-weight:600; }
+.dk-bell-mark-all { background:none; border:none; color:var(--dk-red); cursor:pointer; font-size:13px; padding:6px 0; }
 .dk-notifications { list-style:none; margin:0; padding:0; }
-.dk-notifications li { display:flex; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid #f0f0f0; align-items:center; }
+.dk-notifications li { display:flex; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid #efe8e1; align-items:center; }
 .dk-notifications li a { color:#333; text-decoration:none; font-size:14px; }
-.dk-notifications li.is-unread { background:#fdf2f4; font-weight:600; }
+.dk-notifications li.is-unread { background:#faf0f0; font-weight:600; }
 .dk-notifications-empty { text-align:center; color:var(--dk-muted); padding:40px 0; }
 .dk-notifications-date { font-size:12px; color:var(--dk-muted); white-space:nowrap; }
 
@@ -1789,7 +1822,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-account-login-head { text-align: center; margin-bottom: 18px; }
 .dk-account-login-head h2 { font-size: 16px; color: var(--dk-ink); margin: 8px 0 6px; }
 .dk-account-login-head p { font-size: 12.5px; color: var(--dk-muted); margin: 0; }
-.dk-account-login-ic { display: inline-flex; width: 56px; height: 56px; align-items: center; justify-content: center; background: #f0f9ff; border-radius: 50%; font-size: 26px; }
+.dk-account-login-ic { display: inline-flex; width: 56px; height: 56px; align-items: center; justify-content: center; background: #f4f1f0; border-radius: 50%; font-size: 26px; }
 .dk-account-login .woocommerce-form-login { display: flex; flex-direction: column; gap: 12px; }
 .dk-account-login .woocommerce-form-login p { margin: 0; }
 .dk-account-login .woocommerce-form-login__submit {
@@ -1804,22 +1837,22 @@ button, input, select, textarea { font-family: inherit; }
 .dk-account-register-hint a { color: var(--dk-teal); font-weight: 700; }
 
 /* OTP login (two-tab: quick mobile / password) */
-.dk-otp-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #f4f5f7; border-radius: var(--dk-radius-sm); padding: 4px; }
+.dk-otp-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #f4ece7; border-radius: var(--dk-radius-sm); padding: 4px; }
 .dk-otp-tab { flex: 1; border: none; background: transparent; padding: 10px 8px; border-radius: var(--dk-radius-sm); font-size: 13px; font-weight: 700; color: var(--dk-muted); cursor: pointer; font-family: inherit; }
 .dk-otp-tab.is-active { background: #fff; color: var(--dk-red); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 .dk-otp-form { display: flex; flex-direction: column; gap: 12px; }
 .dk-otp-form p { margin: 0; }
 .dk-otp-hint { font-size: 12.5px; color: var(--dk-muted); margin: 0 0 2px; }
 .dk-otp-hint .dk-otp-back { color: var(--dk-teal); font-size: 11.5px; margin-inline-start: 6px; }
-.dk-otp-form input { background: #f8f9fb; border: 1px solid var(--dk-border); border-radius: var(--dk-radius-sm); height: 46px; text-align: center; letter-spacing: 3px; font-size: 16px; }
+.dk-otp-form input { background: #f8f4f0; border: 1px solid var(--dk-border); border-radius: var(--dk-radius-sm); height: 46px; text-align: center; letter-spacing: 3px; font-size: 16px; }
 .dk-otp-step--code .woocommerce-Input { font-weight: 800; }
 .dk-otp-form .woocommerce-form-login__submit { width: 100%; background: var(--dk-red); border: none; color: #fff; height: 46px; border-radius: var(--dk-radius-sm); font-weight: 800; font-size: 14.5px; cursor: pointer; font-family: inherit; }
 .dk-otp-form .woocommerce-form-login__submit:hover { background: var(--dk-red-dark); }
 .dk-otp-form .woocommerce-form-login__submit:disabled, .dk-otp-resend:disabled { opacity: .6; cursor: not-allowed; }
 .dk-otp-resend { width: 100%; background: #fff; border: 1px solid var(--dk-border); color: var(--dk-teal); height: 42px; border-radius: var(--dk-radius-sm); font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; margin-top: 8px; }
 .dk-otp-msg { font-size: 12.5px; padding: 10px 12px; border-radius: var(--dk-radius-sm); margin: 0; }
-.dk-otp-msg.is-error { background: #fff2f2; color: var(--dk-red); }
-.dk-otp-msg.is-ok { background: #f0f9ff; color: var(--dk-teal); }
+.dk-otp-msg.is-error { background: #f8ecec; color: var(--dk-red); }
+.dk-otp-msg.is-ok { background: #f4f1f0; color: var(--dk-teal); }
 
 .dk-account-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }
 .dk-account-side { position: sticky; top: 76px; }
@@ -1834,15 +1867,15 @@ button, input, select, textarea { font-family: inherit; }
     padding: 11px 12px; border-radius: var(--dk-radius-sm);
     color: var(--dk-ink); font-size: 13.5px; text-decoration: none;
 }
-.dk-account-nav-item:hover { background: #f8f9fb; }
-.dk-account-nav-item.is-active { background: #fff2f2; color: var(--dk-red); font-weight: 700; }
+.dk-account-nav-item:hover { background: #f8f4f0; }
+.dk-account-nav-item.is-active { background: #f8ecec; color: var(--dk-red); font-weight: 700; }
 .dk-account-nav-ic { width: 22px; text-align: center; }
 .dk-account-logout { color: var(--dk-muted); }
 .dk-account-content { background: #fff; border-radius: var(--dk-radius); box-shadow: var(--dk-shadow); padding: 22px; font-size: 13.5px; }
 .dk-account-content h1, .dk-account-content h2 { font-size: 15px; color: var(--dk-ink); }
 .dk-account-content .woocommerce-MyAccount-navigation { display: none; }
 .dk-account-content table { width: 100%; border-collapse: collapse; }
-.dk-account-content th, .dk-account-content td { padding: 10px 8px; text-align: right; border-bottom: 1px solid #f1f2f4; font-size: 12.5px; }
+.dk-account-content th, .dk-account-content td { padding: 10px 8px; text-align: right; border-bottom: 1px solid #efe7de; font-size: 12.5px; }
 
 /* Notices */
 .woocommerce-message, .woocommerce-info, .woocommerce-error {
@@ -1925,7 +1958,7 @@ button, input, select, textarea { font-family: inherit; }
 
 .dk-page-card .dk-page-title { font-size: 20px; color: var(--dk-ink); margin: 0 0 12px; }
 .dk-page-card h2 { font-size: 16px; color: var(--dk-ink); margin: 28px 0 12px; }
-.dk-page-card p { color: #3f4064; line-height: 2; font-size: 14px; margin: 0 0 12px; }
+.dk-page-card p { color: var(--dk-text); line-height: 2; font-size: 14px; margin: 0 0 12px; }
 
 .dk-page-lead {
     background: var(--dk-red-light);
@@ -1941,7 +1974,7 @@ button, input, select, textarea { font-family: inherit; }
     position: relative;
     padding: 0 22px 0 0;
     margin-bottom: 10px;
-    color: #3f4064;
+    color: var(--dk-text);
     line-height: 2;
     font-size: 14px;
 }
@@ -2035,7 +2068,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-form textarea:focus {
     outline: none;
     border-color: var(--dk-red);
-    box-shadow: 0 0 0 3px rgba(239, 57, 78, .12);
+    box-shadow: 0 0 0 3px rgba(156, 92, 95, .12);
 }
 .dk-hp { position: absolute; right: -9999px; }
 
@@ -2158,7 +2191,7 @@ button, input, select, textarea { font-family: inherit; }
 .dk-faq-a {
     padding: 0 16px 14px;
     font-size: 13.5px;
-    color: #3f4064;
+    color: var(--dk-text);
     line-height: 2;
 }
 
@@ -2220,7 +2253,7 @@ button, input, select, textarea { font-family: inherit; }
     font: inherit;
     font-size: 14px;
     color: var(--dk-body-text);
-    background: #fbfbfc;
+    background: #fbf8f5;
     border: 1px solid var(--dk-border);
     border-radius: var(--dk-radius-sm);
     box-shadow: none;
@@ -2233,14 +2266,14 @@ button, input, select, textarea { font-family: inherit; }
     outline: none;
     background: #fff;
     border-color: var(--dk-teal);
-    box-shadow: 0 0 0 3px rgba(25, 191, 211, .12);
+    box-shadow: 0 0 0 3px rgba(138, 104, 72, .14);
 }
 .dk-checkout-card .select2-container,
 .dk-checkout-card .select2-container--default .select2-selection--single { width: 100%; height: 46px; }
 .dk-checkout-card .select2-container .select2-selection--single {
     display: flex;
     align-items: center;
-    background: #fbfbfc;
+    background: #fbf8f5;
     border: 1px solid var(--dk-border);
     border-radius: var(--dk-radius-sm);
 }
@@ -2282,3 +2315,17 @@ button, input, select, textarea { font-family: inherit; }
     .dk-checkout-card .form-row-first,
     .dk-checkout-card .form-row-last { display: block; width: 100%; margin-right: 0; }
 }
+
+/* ---- Cart / checkout stepper ----
+   Each .dk-step is white-space:nowrap, and the two separators are flex:0 0 40px,
+   so the row's min-content width (61 + 141 + 90 + 80 = 372px) is larger than the
+   ~310px available at 390px. Flex items default to min-width:auto, so they refuse
+   to shrink and the page scrolls sideways by exactly the 79px difference. Wrapping
+   the row beats shrinking it: a two-word step stays readable. */
+.dk-cart-stepper { flex-wrap: wrap; row-gap: 6px; }
+.dk-step-sep { display: none; }
+@media (min-width: 769px) {
+    .dk-cart-stepper { flex-wrap: nowrap; }
+    .dk-step-sep { display: block; }
+}
+

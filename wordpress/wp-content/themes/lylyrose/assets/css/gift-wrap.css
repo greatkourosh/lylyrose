@@ -8,29 +8,29 @@
     gap: 8px;
     cursor: pointer;
     font-size: 14px;
-    color: var(--dk-ink, #333);
+    color: var(--dk-ink, #302522);
 }
 .dk-gift-wrap-toggle {
-    accent-color: #ef394e;
+    accent-color: #9c5c5f;
     width: 18px;
     height: 18px;
     flex-shrink: 0;
 }
 .dk-gift-wrap-text {
     font-size: 14px;
-    color: var(--dk-ink, #333);
+    color: var(--dk-ink, #302522);
 }
 .dk-cart-gift-wrap {
-    border-top: 1px solid #eee;
+    border-top: 1px solid #efe7de;
     padding-top: 12px;
     margin-top: 12px;
 }
 .dk-checkout-gift-wrap {
-    background: #fafafa;
+    background: #faf7f4;
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 16px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #efe8e1;
 }
 
 /* Fee row in cart totals */

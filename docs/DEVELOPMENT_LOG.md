@@ -2078,34 +2078,45 @@ Run over every element, it names the exact offender. Do not trust a fixed- or
 absolutely-positioned element's width in this harness; do not trust a page's
 "identical overflow on every page" note either.
 
-### The three real bugs
+### What was actually wrong, after re-measurement
 
-1. **`.dk-cart-stepper` — 79px on `/checkout/`.** Three steps at
-   `white-space: nowrap` (61 + 141 + 90) plus two `flex: 0 0 40px` separators give a
-   min-content width of **372px** in a row with ~310px available. Flex items default to
-   `min-width: auto` and refuse to shrink, so the row simply overflowed. Fixed by
-   wrapping the row below 769px and hiding the separators, which carry no information
-   once the row wraps; desktop keeps `nowrap` and both separators. Wrapping rather than
-   `min-width: 0` because «۲. اطلاعات ارسال و پرداخت» is 141px on one line and
-   shrinking would have made it an unreadable stub.
-2. **`.dk-footer-grid` — 90px, every page.** Grid children default to `min-width: auto`,
-   and the newsletter `<input>`'s intrinsic width resolved the 2-column grid to
-   `261.438px 182px` inside a 358px container.
-3. **`.dk-pagination ul.page-numbers` — 44px on `/shop/`.** A non-wrapping
-   `inline-flex` of 9 items × 44px + 8 gaps = 412px in a 358px column. The
-   `height: auto` in the fix is load-bearing: the `.page-numbers` rule also matches the
-   `<ul>`, so `height: 38px` would clip the wrapped second row.
+**This section originally claimed three separate bugs with three per-page figures —
+79px on `/checkout/`, 90px everywhere, 44px on `/shop/`. That was wrong, and the
+figures are the tell.** A single cause that overflows on every page produces the same
+number on every page. Three independent bugs do not. All four pages read exactly 90px.
 
-**Bugs 2 and 3 were already fixed upstream in `aroma_store` since 2026-09-27 and had
-simply never been ported here.** That is the finding worth carrying: a mirror gap in
-*CSS*, invisible to the test suite, which only a rendered-layout check can catch.
+A bisect-by-mutation control settles it. With all three rules applied, overflow is 0 at
+390 / 768 / 1440 on all four pages. Removing **only** the footer rule — one line,
+`min-width: 0`, nothing else touched — returns all four pages to exactly 90px, and
+changes 768 and 1440 not at all. One rule is load-bearing; the other two fix nothing
+currently observable.
+
+1. **`.dk-footer-grid` — the whole of the 90px, on every page.** Grid children default
+   to `min-width: auto`, and the newsletter `<input>`'s intrinsic width resolved the
+   2-column grid to `261.438px 182px` inside a 358px container. Fixed by
+   `.dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0 }`.
+   This is the only one of the three with a demonstrated before/after.
+2. **`.dk-pagination ul.page-numbers` — not currently a bug.** `flex-wrap: wrap` with
+   `height: auto` is correct and worth keeping; `height: auto` is load-bearing, because
+   the `.page-numbers` rule also matches the `<ul>`, so `height: 38px` would clip the
+   wrapped second row. The 44px it is credited with does not reproduce. It was
+   genuinely missing from HEAD, so the rule was never wrong here — it was absent, and
+   the page was overflowing for a different reason at the same time.
+3. **`.dk-cart-stepper` — not a bug, and was never missing.** `dk-cart-stepper` already
+   appears in `HEAD`'s `style.css`; the `flex-wrap: wrap` / `row-gap: 6px` block
+   restated what was there. The 79px on `/checkout/` did not reproduce either.
+
+**Two of the three were already fixed upstream in `aroma_store` since 2026-09-27 and had
+simply never been ported here** — re-verified against `digikala/style.css` at the time of
+writing (all three patterns present, `Version: 1.11.0`, 81240 bytes). That mirror gap is
+still the finding worth carrying: a gap in *CSS*, invisible to the test suite, which only
+a rendered-layout check can catch. But porting a rule does not prove the rule fixed the
+number attributed to it, and here two of the three did not.
 
 **Verified:** `overflow: 0` at 390 / 768 / 1440 on `/`, `/shop/`, `/cart/` and
-`/checkout/`, on this stack and on `aroma_store`.
-
-**Uncommitted, deliberately.** These are working-tree edits only — this repo is shared
-with parallel sessions. `3abc3ade` was made by another session, not this one; the three
-CSS fixes above remain uncommitted and the owning sessions have been messaged.
+`/checkout/`, against CSS confirmed to contain the rule — Autoptimize minifies, so a
+grep for the spaced source form returns 0 and silently reads as "fix absent". Grep the
+served stylesheet for the minified form before trusting a measurement.
 
 ## 2026-09-29 — The checkout form gets assertions, and the docroot fallback gets deleted
 
@@ -2180,3 +2191,53 @@ bytes, so nothing unreviewed left the machine.
 `.env` but **absent from `.env.example`** — as `AROMA_STORE_FOLDER` was. Both
 `.env.example` files now document their docroot, with the reason stated: on this
 account `public_html` is the marketing site, not the store.
+
+## 2026-09-29 — The mobile overflow has one cause, and the numbers that hid it
+
+The parallel session stopped editing and the CSS work was adopted. Adopting it meant
+checking the measurements rather than repeating them, and two of the three were wrong.
+
+**Identical per-page overflow is the tell.** All four pages read exactly 90px, from a
+cause named in three different places (79px on `/checkout/`, 90px everywhere, 44px on
+`/shop/`). One cause produces one number; three causes produce three. Bisect-by-mutation
+confirms it: delete the footer `min-width: 0` rule and *only* that rule, and all four
+pages return to exactly 90px while 768 and 1440 do not move.
+
+**One of the three fixes was a no-op.** `dk-cart-stepper` already had a rule in `HEAD`;
+the added `flex-wrap: wrap` block restated it. The 79px never existed. The
+`.dk-pagination` rule was genuinely absent from `HEAD` and is correct, but it fixed
+nothing observable — the page was overflowing for the footer reason at the same time.
+Porting a rule from upstream is not the same as confirming it fixed the number
+attributed to it.
+
+**Autoptimize nearly produced a false all-clear.** The first "0px with all fixes"
+measurement was taken against a stale stylesheet. Worse, once the cache *was* cleared,
+grepping the served CSS for the source form `dk-footer-grid > *` returned **0** — the
+served CSS is minified to `dk-footer-grid>*,...`, and a space is the only difference.
+That reads exactly like "the fix is missing" and would have sent this back to
+bisecting a bug that was already fixed. Grep the *served* stylesheet for the *minified*
+form before trusting any CSS measurement:
+
+```bash
+curl -sk https://lylyrose.local/wp-content/cache/autoptimize/autoptimize_single_<hash>.php \
+  | grep -oE "dk-footer-grid[^}]*\}"     # note: no space before '>'
+```
+
+**The recolour is an accessibility fix, verified rather than assumed.** It was
+unmentioned by the session that left it in the tree, so it was checked before being
+committed. `--dk-red` moved `#ef394e` → `#9c5c5f`:
+
+| pair | before | after |
+|---|---|---|
+| `--dk-red` on white | 3.91:1 **fails AA** | 5.11:1 **passes AA** |
+| white on `--dk-red` | 3.91:1 **fails AA** | 5.11:1 **passes AA** |
+
+27 rules set white on `--dk-red`, so the old value was a widespread AA failure, not a
+taste call. `assets/css/flash-sales.css` and `assets/css/gift-wrap.css` were de-hardcoded
+in lockstep to reference the new vars rather than repeat literals.
+
+**Final state:** `overflow: 0` at 390 / 768 / 1440 on all four pages, suite **261/0**,
+`Version: 1.11.0` → `1.12.1`. The bump matters and the suite cannot catch its absence:
+`lylyrose_version()` *is* the cache-buster for `style.css` and both asset files, so a
+CSS change without a bump ships stale CSS to every returning visitor while every test
+still passes.

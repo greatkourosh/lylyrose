@@ -1124,35 +1124,43 @@ gift-card feature (ids 2849–2852) and is unrelated to checkout. Do not attribu
 it to this change.
 
 Not addressed, deliberately: the checkout page has a 90px horizontal overflow at
-390px from `.dk-announce`, but home and `/shop/` show the identical 90px — it is a
-site-wide announcement-bar problem, not a checkout one.
+390px. This is **fixed** as of the commit that ported the footer `min-width: 0` rule —
+see *2026-09-29 — the mobile overflow has one cause, not three* below. The `.dk-announce`
+attribution recorded here was wrong: hiding `.dk-announce` moves `scrollWidth` by 0px.
 
-## Working tree, uncommitted — three mobile-overflow CSS fixes (2026-09-29)
+## Mobile horizontal overflow: one cause, not three (2026-09-29)
 
-`wordpress/wp-content/themes/lylyrose/style.css`, **+28 lines**, nothing else touched.
-**A parallel session owns this repo and has been messaged; do not assume these were
-adopted.** Full write-up in `DEVELOPMENT_LOG.md` under *2026-09-29 — Mobile horizontal
-overflow*.
+`wordpress/wp-content/themes/lylyrose/style.css` — two rules ported from upstream
+`aroma_store`/`digikala/style.css`, plus a recolour in `style.css`,
+`assets/css/flash-sales.css` and `assets/css/gift-wrap.css`. Committed; suite 261/0.
+
+**The 90px is one bug, not three.** Removing only
+`.dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0 }` returns
+all four pages to exactly 90px. The `.dk-pagination` and `.dk-cart-stepper` changes
+credit themselves with 44px and 79px; neither reproduces, and `dk-cart-stepper` was
+already in `HEAD`. Per-page overflow being *identical* on every page is the tell — one
+cause, one number.
 
 Verified `documentElement.scrollWidth === clientWidth` (overflow **0**) at 390 / 768 /
 1440 on `/`, `/shop/`, `/cart/` and `/checkout/`, here and on `aroma_store`.
 
-1. `.dk-pagination ul.page-numbers { flex-wrap: wrap; justify-content: center; height: auto }`
-   — 9 × 44px + 8 gaps = 412px in a 358px column was 44px of scroll on `/shop/`.
-   `height: auto` is load-bearing; the `.page-numbers` rule also matches the `<ul>`,
-   so `height: 38px` clips the wrapped second row.
-2. `.dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0 }` +
+1. `.dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0 }` +
    `.dk-header-inner { flex-wrap: wrap }` in the existing 768px query — the newsletter
-   `<input>`'s intrinsic width was blowing the 2-col footer grid by 90px.
-3. New trailing block: `.dk-cart-stepper { flex-wrap: wrap; row-gap: 6px }` +
-   `.dk-step-sep { display: none }`, with `@media (min-width: 769px)` restoring `nowrap`
-   and the separators. 372px of `nowrap` steps + separators in a ~310px row was the
-   79px overflow on `/checkout/`.
+   `<input>`'s intrinsic width was blowing the 2-col footer grid by 90px. **The only
+   change with a demonstrated before/after.**
+2. `.dk-pagination ul.page-numbers { flex-wrap: wrap; justify-content: center; height: auto }`
+   — correct and kept, but it fixed nothing measurable. `height: auto` remains
+   load-bearing: the `.page-numbers` rule also matches the `<ul>`, so `height: 38px`
+   would clip the wrapped second row.
+3. `.dk-cart-stepper { flex-wrap: wrap; row-gap: 6px }` + `.dk-step-sep { display: none }`
+   with `@media (min-width: 769px)` restoring `nowrap` and the separators. **A no-op:**
+   `dk-cart-stepper` already had a rule in `HEAD`, so this restated existing behaviour.
 
 **Items 1 and 2 are byte-identical to fixes that have been in `aroma_store`'s
 `digikala/style.css` since 2026-09-27 and were never ported here.** Diffing this
 theme's `style.css` against upstream's is worth doing properly — the test suite
-cannot see a missing CSS rule.
+cannot see a missing CSS rule. But note the trap that followed: porting a rule is not
+the same as confirming it fixed the number attributed to it.
 
 **Two corrections to this file, both about overflow diagnosis.** It said the 90px
 overflow was "site-wide, from `.dk-announce`" — it is not; hiding `.dk-announce`
