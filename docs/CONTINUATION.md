@@ -51,15 +51,46 @@
    `/checkout/` since 2026-09-05) and re-scoped the stepper's `is-hidden` rule so
    step 1 actually hides. Verified live with a real cart: 1 / 1 / 1.
    **Deployed from a committed-only copy, not the working tree** — see below.
-7. **Deploy the WebP mime fix to `aroma-store.vegacodex.ir`** — the one file
-   `aroma-store-core/includes/class-images.php`. Local-first per the upstream
-   policy, and the local stack is already proven (item 4), so this is a
-   single-file push to `--remote public_html/aroma-store`. Two things to know:
-   `aroma_store` has **root-owned vendor files**, so a `git checkout` of a stale
-   branch there deletes tracked files partway through before failing — deploy
-   from the commit, not by switching branches; and
-   `deploy-targeted.py` refuses vendor plugin paths by name, so the one file
-   needed here is `aroma-store-core/includes/class-images.php`.
+7. ~~**Deploy the WebP mime fix to `aroma-store.vegacodex.ir`.**~~ **DONE
+   2026-09-29** — deployed and verified, but **only after I first shipped it to
+   the wrong site.** Keep reading; this is the sharpest deploy lesson in the
+   file. The correct path held the old file at the moment of the correct
+   deploy, which is what proved the first upload had gone elsewhere.
+   The task was one file, `aroma-store-core/includes/class-images.php`; the
+   local stack was already proven (item 4), so it was a single-file push.
+   Two things to know: `aroma_store` has **root-owned vendor files**, so a
+   `git checkout` of a stale branch there deletes tracked files partway
+   through before failing — deploy from the commit, not by switching branches;
+   and `deploy-targeted.py` refuses vendor plugin paths by name.
+   - **Correct deploy:** `--remote public_html/aroma-store`, one file, 4,192 B.
+     Verified by sha1 of the downloaded bytes, not by size alone:
+     `HOST_SHA1 == GIT_SHA1 == a21fa22cc5114fc197938b5a0f8198ae524acc86`,
+     and the bytes contain `image/webp`. Live `/` `/shop/`
+     `/incredible-offers/` all **200** afterwards.
+   - **The mistake:** run without `--remote`. `aroma_store/.env` has **no
+     `AROMA_STORE_FOLDER`**, so `deploy-targeted.py:186` fell back to
+     `public_html` — the **Vega Codex marketing site**, which is not even
+     WordPress. The uploader printed
+     `docroot public_html`, wrote the file, and still reported
+     `1 file(s) uploaded and size-verified`. Every check the script does
+     passed. `docs/04_DEPLOYMENT.md:86-96` had already documented this exact
+     trap in bold and I did not read it first.
+   - **Cleanup, partly complete.** Deleted the stray
+     `public_html/wp-content/plugins/aroma-store-core/includes/class-images.php`
+     over FTP (timestamp 07:12:11 confirmed it was mine; the site's own
+     `index.php` is 2026-09-19). The four now-empty directories
+     `…/includes`, `…/aroma-store-core`, `…/plugins`, `public_html/wp-content`
+     **could not be removed**: FTP `RMD` returns 550, and cPanel
+     `Fileman:delete_dir` returns `status: 0` (success) while doing nothing —
+     confirmed over FTP afterwards, not trusted from the API. `Fileman` has no
+     `fileop`/`unlink`. So a harmless empty `public_html/wp-content/` skeleton
+     remains on the marketing site. It is inert — no WordPress there to load
+     it, and the site is **200** — but it is untidy and needs cPanel File
+     Manager (browser) or host support to clear.
+   - **The rule, same shape as the v2.4.0 two-missing-files miss:** a uploader's
+     own success message is not evidence of *where* it wrote. Confirm the
+     docroot by reading it back at the intended path, and verify content by
+     hash rather than size.
 
 ## ⚠️ Other sessions edit this tree concurrently — deploy from a commit, not the worktree
 
