@@ -179,6 +179,22 @@ html_has "$HOME_HTML" 'dir="rtl"' && pass "homepage renders RTL" || fail "homepa
 html_has "$HOME_HTML" "dk-announce" && pass "announcement bar present" || fail "announcement bar missing"
 html_has "$HOME_HTML" "dk-offers\|dk-hero\|dk-story-row" && pass "homepage Digikala sections render" || fail "no Digikala homepage sections found"
 
+# The hero carousel: markup presence is all this section can prove. Whether a
+# click or a drag actually moves a slide needs a real browser, so the
+# interaction half lives in aroma_store's docker/hero-check.py (it needs
+# google-chrome on the host, which the container does not have).
+html_has "$HOME_HTML" "dk-hero-prev" && pass "hero has a previous-slide button" || fail "hero prev button missing"
+html_has "$HOME_HTML" "dk-hero-next" && pass "hero has a next-slide button" || fail "hero next button missing"
+HERO_SLIDES=$(printf '%s' "$HOME_HTML" | grep -o "dk-hero-slide" | grep -c .)
+[ "$HERO_SLIDES" -ge 2 ] && pass "hero renders $HERO_SLIDES slides" || fail "hero has $HERO_SLIDES slide(s); a carousel needs 2+"
+HERO_DOTS=$(printf '%s' "$HOME_HTML" | grep -o 'dk-hero-dots.\{0,400\}' | grep -c '<button')
+[ "$HERO_DOTS" -ge 1 ] && pass "hero dots are real <button>s, not inert <i>" || fail "hero dots are not <button>s; <i> dots cannot be clicked"
+HERO_JS=$(docker exec "$WP_CONTAINER" cat "/var/www/html/wp-content/themes/$ACTIVE_THEME/assets/js/hero.js" 2>/dev/null)
+printf '%s' "$HERO_JS" | grep -c "pointerdown" | grep -q "^[1-9]" \
+  && pass "hero.js wires pointer (drag) events" || fail "hero.js has no drag wiring"
+printf '%s' "$HERO_JS" | grep -c "dk-hero-prev" | grep -q "^[1-9]" \
+  && pass "hero.js wires the nav buttons" || fail "hero.js ignores the nav buttons"
+
 SHOP_HTML=$(curl -s --max-time 30 "$SITE_URL/shop/")
 html_has "$SHOP_HTML" "dk-product-card\|woocommerce" && pass "shop page renders products/woocommerce markup" || fail "shop page missing product markup"
 html_has "$SHOP_HTML" "تومان\|IRT\|&#x62A;&#x648;&#x645;&#x627;&#x646;" && pass "shop shows Toman currency" || fail "Toman not visible on shop page"

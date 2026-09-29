@@ -27,3 +27,8 @@ html, body {
     direction: ltr;
     unicode-bidi: embed;
 }
+/* Hero nav arrows swap sides in LTR; see the RTL block in style.css. */
+.dk-hero-prev { left: 18px; right: auto; }
+.dk-hero-prev::before { transform: rotate(-135deg); margin-right: 0; margin-left: 4px; }
+.dk-hero-next { right: 18px; left: auto; }
+.dk-hero-next::before { transform: rotate(45deg); margin-left: 0; margin-right: 4px; }

@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.12.2
+Version: 1.13.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -440,15 +440,27 @@ button, input, select, textarea { font-family: inherit; }
     display: flex;
     align-items: center;
 }
-.dk-hero-slides { display: contents; }
+.dk-hero-slides { position: relative; width: 100%; min-height: 300px; }
 .dk-hero-slide {
+    position: absolute;
+    inset: 0;
     display: grid;
     grid-template-columns: 1.1fr .9fr;
     align-items: center;
     gap: 24px;
-    width: 100%;
     padding: 40px 56px;
     color: #fff;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .6s ease, visibility 0s .6s;
+    pointer-events: none;
+}
+.dk-hero-slide.is-active {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .6s ease;
+    pointer-events: auto;
 }
 .dk-hero-copy .dk-kicker {
     display: inline-block;
@@ -487,14 +499,57 @@ button, input, select, textarea { font-family: inherit; }
     display: flex;
     gap: 6px;
 }
-.dk-hero-dots i {
+.dk-hero-dots i,
+.dk-hero-dots button {
     width: 8px;
     height: 8px;
+    padding: 0;
+    border: 0;
     border-radius: 999px;
     background: rgba(255, 255, 255, .45);
     transition: all .25s;
+    cursor: pointer;
 }
-.dk-hero-dots i.on { width: 22px; background: #fff; }
+.dk-hero-dots i.on,
+.dk-hero-dots button.on { width: 22px; background: #fff; }
+/* Nav buttons sit at the vertical centre. The sheet is RTL-native, and in RTL
+   the advancing slide travels to the LEFT, so "next" goes on the left. */
+.dk-hero-nav {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .28);
+    color: #fff;
+    cursor: pointer;
+    z-index: 3;
+    transition: background .25s;
+}
+.dk-hero-nav::before {
+    content: '';
+    display: block;
+    width: 11px;
+    height: 11px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+}
+.dk-hero-next { left: 18px; }
+.dk-hero-next::before { transform: rotate(-135deg); margin-left: 4px; }
+.dk-hero-prev { right: 18px; }
+.dk-hero-prev::before { transform: rotate(45deg); margin-right: 4px; }
+.dk-hero-nav:hover { background: rgba(0, 0, 0, .45); }
+.dk-hero-nav:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Drag support: grab the middle of the hero, but keep vertical scrolling
+   (pan-y) so a swipe up/down still scrolls the page on touch. */
+.dk-hero { cursor: grab; touch-action: pan-y; user-select: none; }
+.dk-hero.is-dragging { cursor: grabbing; }
+/* A suppressed transition is what makes a drag track the pointer 1:1 instead
+   of lagging behind the .6s crossfade the autoplay relies on. */
+.dk-hero-slide.is-dragging { transition: none; }
 
 /* ==========================================================================
    Services row
