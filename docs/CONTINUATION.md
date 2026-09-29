@@ -3,20 +3,23 @@
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
 > **Last updated 2026-09-29 (latest).** Items 1, 4, 6, 7 closed; the backup cycle is
-> confirmed healthy; the suite is **267/0**. The only open item needing a human is
-> **#2 (per-host settings)**, plus the empty `public_html/wp-content/` skeleton
-> on the marketing site, which needs cPanel File Manager in a browser.
+> confirmed healthy; the suite is **267/0**; `master` is pushed and in sync with
+> `origin`. **Item 2 (per-host settings) is the only open item and it is
+> human-blocked** — four of its five sub-items need credentials that cannot be
+> minted from this side, and the fifth (Wordfence) is a judgement call. There is
+> no technical work left on it.
+>
+> The stray `public_html/wp-content/` skeleton on the marketing site is **also
+> closed** — it was removed over plain FTP, and the "needs cPanel File Manager in
+> a browser" note was wrong. See *"✅ The stray `public_html/wp-content/` skeleton
+> is gone"*.
 >
 > **The rebrand is LIVE on `lylyrose.ir`** — palette, mobile overflow, and the
 > Iran-only checkout form, plus one missed literal. See *"✅ The rebrand is live"*.
 >
-> **The hero carousel is now LIVE too** (deployed 2026-09-29, `8a89191c`). It was
+> **The hero carousel is LIVE too** (deployed 2026-09-29, `8a89191c`). It was
 > committed and suite-green but had never been uploaded — the same failure mode
-> as the rebrand, one commit later. See *"✅ The hero carousel is live"*, the last
-> entry in this file.
->
-> **⚠️ `master` is 7 commits ahead of `origin/master`** and the local commits are
-> the record of what is live. Do not treat the remote as the source of truth.
+> as the rebrand, one commit later. See *"✅ The hero carousel is live"*.
 
 ## Open as of 2026-09-28
 
@@ -111,18 +114,14 @@
      `1 file(s) uploaded and size-verified`. Every check the script does
      passed. `docs/04_DEPLOYMENT.md:86-96` had already documented this exact
      trap in bold and I did not read it first.
-   - **Cleanup, partly complete.** Deleted the stray
+   - **Cleanup — COMPLETE 2026-09-29.** The stray
      `public_html/wp-content/plugins/aroma-store-core/includes/class-images.php`
-     over FTP (timestamp 07:12:11 confirmed it was mine; the site's own
-     `index.php` is 2026-09-19). The four now-empty directories
-     `…/includes`, `…/aroma-store-core`, `…/plugins`, `public_html/wp-content`
-     **could not be removed**: FTP `RMD` returns 550, and cPanel
-     `Fileman:delete_dir` returns `status: 0` (success) while doing nothing —
-     confirmed over FTP afterwards, not trusted from the API. `Fileman` has no
-     `fileop`/`unlink`. So a harmless empty `public_html/wp-content/` skeleton
-     remains on the marketing site. It is inert — no WordPress there to load
-     it, and the site is **200** — but it is untidy and needs cPanel File
-     Manager (browser) or host support to clear.
+     was deleted over FTP on 2026-09-29 (timestamp 07:12:11 confirmed it was
+     mine; the site's own `index.php` is 2026-09-19), and the four
+     now-empty directories are **gone too**. **The earlier claim that they
+     "could not be removed" was wrong** — see the correction below: FTP `RMD`
+     works fine, and the original attempt almost certainly failed because it
+     was not done **deepest-first**, not because the server refused it.
    - **The rule, same shape as the v2.4.0 two-missing-files miss:** a uploader's
      own success message is not evidence of *where* it wrote. Confirm the
      docroot by reading it back at the intended path, and verify content by
@@ -1314,7 +1313,50 @@ horizontal overflow **0** at 390 / 768 / 1440 on `/`, `/shop/`, `/cart/` and
 `clientWidth` matching the intended width at every one of the twelve measurements.
 Suite **261/0** before and after the kicker fix. The stray
 `public_html/wp-content/…/class-images.php` from item 7 is still gone (550 over
-FTP); the empty directory skeleton is still there and still needs a browser.
+FTP), and **the empty directory skeleton has since been removed too** — see
+*"✅ The stray `public_html/wp-content/` skeleton is gone"*.
+
+## ✅ The stray `public_html/wp-content/` skeleton is gone — 2026-09-29
+
+**The doc was wrong on this one, twice.** It said the four empty directories
+"could not be removed" (FTP `RMD` 550, cPanel `Fileman:delete_dir` a silent
+no-op) and that clearing them "needs cPanel File Manager (browser) or host
+support". Neither is true. **Plain FTP removed all four**, in four `RMD` calls,
+each returning `250 The directory was successfully removed`.
+
+**The cause was ordering, not permissions.** `RMD` cannot remove a directory that
+still has entries, so the chain has to go **deepest-first**:
+`…/aroma-store-core/includes` → `…/aroma-store-core` → `…/plugins` →
+`wp-content`. The original attempt evidently hit a parent before its child was
+gone, got `550`, and the `550` was then read as *"FTP cannot delete directories
+on this host"* — a generalisation from one ordering mistake. **A per-item
+failure was generalised into a capability limit, and the limit was believed
+hard enough to be written down as a permanent property of the host.** That is
+the same shape as the other nine cases in [[production-state-vs-docs]], and it
+is why the entry survived a day in a handoff file: nothing about it is
+checkable by reading it, and it sounds authoritative.
+
+**Prove a directory is empty with `MLSD`, not `LIST`.** Before deleting
+anything the tree was walked recursively with `ftp.mlsd(path, facts=['type',
+'size'])`, which reports every entry **including dotfiles** and is the only
+authoritative answer to "is this really empty". It returned **0 files** across
+all four directories, with only the `cdir`/`pdir` pseudo-entries for `.` and
+`..`. So there was no cPanel-style `.htaccess`/`index.html` guard file — the
+usual reason a directory that *looks* empty refuses to be removed, and the
+reason it is worth checking rather than assuming. `LIST -a` agreed here, but it
+is server-filterable and I would not rely on it alone to justify a delete.
+
+**Verified after the fact, not from the API's own answer.** Each path now fails
+`mlsd` with `550 Can't check for file existence` — the server's way of saying
+the path is gone — and `wp-content` no longer appears in an `mlsd` of
+`/public_html` (29 sibling entries intact, `aroma-store` untouched). The
+`Fileman:delete_dir` no-op is real and still worth knowing about; it was simply
+never needed.
+
+**Nothing else was touched, and the three sites were re-checked.**
+`vegacodex.ir/` **200**; `lylyrose.ir` `/` `/shop/` `/cart/`
+`/incredible-offers/` **200**; `aroma-store.vegacodex.ir` `/` `/shop/`
+`/incredible-offers/` **200**.
 
 **Still unverified in a browser, and worth not overclaiming:** the checkout form's
 five assertions pass on the suite, but that suite seeds a cart. A `curl` of
