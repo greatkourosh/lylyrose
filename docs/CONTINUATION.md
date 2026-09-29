@@ -92,6 +92,56 @@
      docroot by reading it back at the intended path, and verify content by
      hash rather than size.
 
+## ✅ Updraft backup cycle confirmed healthy — checked 2026-09-29 07:47 UTC
+
+Not a listed open item, but the one thing on this file with an actual clock
+attached was overdue, so I checked it. Everything below was read off the live
+site; nothing is inferred from the repo.
+
+- **A second backup set appeared on its own at 00:59 UTC**, run
+  `74ac5e865eb7`, in `lylyroseir/wp-content/updraft/`. That is confirmation by
+  file, which is the only confirmation that counts — the 04:15 set from
+  yesterday is still there beside it. Per
+  [[backup-confirmation-needs-a-file]] I did **not** trigger anything and did
+  not re-read the schedule to prove it.
+- **It is a real, complete backup, not a sized placeholder.** Six archives,
+  115.6 MB. I downloaded three and checked magic bytes and hashes: `db.gz`
+  289,626 B `1f8b`, `uploads.zip` 6,911,044 B `PK`, `plugins.zip` 89,454,091 B
+  `PK`. `log.74ac5e865eb7.txt` is 930 lines with **0** error/warning/fatal
+  matches and ends "The backup succeeded and is now complete" (and the same in
+  Persian). It also records the uploads resume event being unscheduled, which
+  is the tell that the uploads pass genuinely finished rather than stalling.
+- **The schedule is correct, which was the open question from the 2026-09-28
+  pass.** `updraft_interval` and `updraft_interval_database` both read
+  `daily` — so the *interval* got set; only the *stamps* were stale. Both
+  `updraft_backup` and `updraft_backup_database` are scheduled, `daily`,
+  `interval 86400`, next at **2026-09-29 20:46:33 UTC**. `updraftplus_clean_temporary_files`
+  is `twicedaily`, next 16:53:46 UTC. The two hooks sharing one timestamp is
+  expected, not a defect.
+- **`updraft_backup_history` is an option, not a table, and it holds 2 sets.**
+  Read via `get_option()`, it is keyed by backup timestamp: `1790643546` is
+  today's 00:59 set, alongside the 04:15 one. There are **zero** `wp_updraft*`
+  **tables**, so the "history is `NULL`" check in the runbook only works if you
+  read it as an option — querying it as a table silently returns nothing and
+  looks exactly like "no backups have ever run". This is the
+  `UpdraftPlus::get_updraft_backup_history()` trap recorded in
+  [[production-state-vs-docs]] item 6, wearing a different hat.
+  **The load-bearing part:** the history records a sha1 per archive, and they
+  match the bytes I downloaded myself — `plugins0 eeb56ab5…`, `uploads0
+  d9072fe4…`, `db0 664a1d6b…`. So the backup is self-consistent *and* matches
+  what I pulled, which is stronger than either check alone.
+  **I got this wrong first**, in the way this project keeps producing: the
+  table query came back empty and I briefly concluded the history did not exist
+  and the docs were wrong about it. The docs were right. A probe reporting a
+  problem is usually the probe that is wrong — the ninth time.
+- Still true and unresolved: this cycle is **host-local only** — the log says
+  `No remote despatch: user chose no remote backup service`. The copies that
+  protect the site live on the same host as the site. Off-host pull is manual
+  and has not been done.
+- Probe discipline held: random name `_20558198cf03d058b5af9145.php`, deleted
+  immediately, confirmed by **both** an FTP `nlst` that no longer lists it and
+  an HTTP **404**.
+
 ## ⚠️ Other sessions edit this tree concurrently — deploy from a commit, not the worktree
 
 On 2026-09-28, at the moment I was about to deploy the checkout fix,

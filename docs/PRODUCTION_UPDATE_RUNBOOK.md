@@ -348,6 +348,20 @@ and that `updraft_backup_history` is no longer `NULL`. A schedule that was never
 exercised is the same state you are trying to leave behind — the mechanism being
 sound is not the same as it having produced a backup.
 
+> **RESOLVED 2026-09-29.** The cycle fired and is healthy: sets at 04:15 and
+> **00:59** (`74ac5e865eb7`, 115.6 MB, log ends "The backup succeeded and is now
+> complete"), `updraft_interval` and `updraft_interval_database` both `daily`,
+> next fire 20:46:33 UTC. Full evidence in `CONTINUATION.md`.
+>
+> One correction worth keeping: **`updraft_backup_history` is a WordPress
+> *option*, not a database table.** Read it with `get_option()`, ideally through
+> `UpdraftPlus_Options::get_updraft_option()` since the value is filtered. There
+> are **no** `wp_updraft%` tables on this host, so querying it as one returns
+> nothing and reads as "no backup has ever run" — which is how this got
+> misdiagnosed on 2026-09-29. It is an array keyed by backup timestamp, and each
+> entry carries per-archive `sha1`/`sha256`; comparing those against bytes you
+> download yourself is the strongest check available short of a real restore.
+
 **Re-checked 2026-09-27 ~17:10 UTC: schedule intact, fire still pending.** Both
 events remain at the same fire time with `schedule: daily` / `interval: 86400`,
 and no archive or history exists yet — correct, since the fire was ~3h24m away
