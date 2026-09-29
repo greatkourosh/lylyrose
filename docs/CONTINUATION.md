@@ -4,11 +4,15 @@
 
 ## Open as of 2026-09-28
 
-1. **`aroma_store` (upstream) has not been deployed.** `aroma-store.vegacodex.ir`
-   is still v2.3.0 and `/incredible-offers/` 404s there. Its local tree is the
-   source of truth and needs the same targeted push Lyly Rose just got. Note the
-   order: Lyly Rose was deployed **first** here on purpose — `hosting-ready` is
-   vestigial and 1439 files behind, so the *local* aroma tree is what ships.
+1. ~~**`aroma_store` (upstream) has not been deployed.**~~ — **DONE 2026-09-29.**
+   `aroma-store.vegacodex.ir` is **live and serving**: `/`, `/shop/` and
+   `/incredible-offers/` all return **200** (checked 2026-09-29, logged out).
+   The store is **not a separate host** — it is `public_html/aroma-store` on this
+   same cPanel account (`bqwyvowk`), so the `.env` FTP credentials are correct
+   and `--remote public_html/aroma-store` is the right target. A 49-file
+   first-party deploy landed there 2026-09-29. Note the order: Lyly Rose was
+   deployed **first**, on purpose — `hosting-ready` is vestigial and 1439 files
+   behind, so the *local* aroma tree is what ships.
 2. **Per-host settings still open** (needs a human in `/secure-login/`, all
    described in "Known open items" below): ZarinPal real merchant + `sandbox: no`,
    PWSMS real gateway (still the `Logger` sink, so **production SMS is a no-op**
@@ -16,19 +20,27 @@
    (`WP_CACHE` is false today), activate Wordfence.
 3. **1a-ii, a remote UpdraftPlus target** — optional; the daily schedule writes
    host-local only. Keep 1b (off-host pull) current.
-4. **The WebP mime fix is downstream-only; it still needs mirroring upstream.**
-   `ASC_Images` converted uploads to WebP by extending WP's
-   `image_editor_output_format` — which changes the extension WP *writes* — but
-   `wp_insert_attachment()` had already stored the **original** type by then, so
-   every converted upload kept a row saying `image/jpeg`/`image/png` while the
-   file on disk was WebP. Fixed and **deployed to `lylyrose.ir`** (2026-09-28):
-   `log_conversion()` now relabels, guarded on `mime_content_type()` of the real
-   file rather than the path (WP keeps the original, so the path is not evidence),
-   plus a version-keyed `maybe_backfill()` on `init:99` for rows written earlier.
-   Production rows 1826–1829 relabelled; all 100 sampled media rows now read
-   `image/webp`. **The identical bug is still live in `aroma_store`, and that repo
-   is `www-data`-owned — mirroring it upstream needs `sudo`.** Fix there next, or
-   the next upstream release reintroduces it.
+4. ~~**The WebP mime fix is downstream-only; it still needs mirroring upstream.**~~
+   — **DONE 2026-09-29; the fix is now in both repos.** `ASC_Images` converted
+   uploads to WebP by extending WP's `image_editor_output_format` — which changes
+   the extension WP *writes* — but `wp_insert_attachment()` had already stored
+   the **original** type by then, so every converted upload kept a row saying
+   `image/jpeg`/`image/png` while the file on disk was WebP. Fixed first on
+   `lylyrose.ir` (2026-09-28): `log_conversion()` now relabels, guarded on
+   `mime_content_type()` of the real file rather than the path (WP keeps the
+   original, so the path is not evidence), plus a version-keyed
+   `maybe_backfill()` on `init:99` for rows written earlier. Production rows
+   1826–1829 relabelled; all 100 sampled media rows now read `image/webp`.
+   **Mirrored to `aroma_store` 2026-09-29** — the two files were diffed first
+   and differed *only* by this fix (no branding or other divergence), so it was a
+   whole-file copy; `aroma-store-core/includes/class-images.php` is now
+   byte-identical to its `lylyrose-core` counterpart. Proven on real data, not
+   assumed: `image-check.php` reports `LIBRARY_IMAGES: 371` /
+   **`LIBRARY_NON_WEBP: 0`**, and the backfill option read back as
+   `asc_images_mime_version = '1'` with **0** remaining `image/jpeg` and **0**
+   `image/png` rows. `php -l` clean. No new test was needed — the existing
+   section-13 assertion `LIBRARY_NON_WEBP: 0` *is* the detector for this bug.
+   **Not yet deployed to `aroma-store.vegacodex.ir`** — see item 7.
 5. **The backup gotcha to keep in mind:** the recorded 5-file deploy set for
    v2.4.0 was incomplete. It omitted two theme files, so the Offers page shipped
    serving 200 with no CSS and no JS. **Derive deploy file lists per commit with
@@ -39,6 +51,15 @@
    `/checkout/` since 2026-09-05) and re-scoped the stepper's `is-hidden` rule so
    step 1 actually hides. Verified live with a real cart: 1 / 1 / 1.
    **Deployed from a committed-only copy, not the working tree** — see below.
+7. **Deploy the WebP mime fix to `aroma-store.vegacodex.ir`** — the one file
+   `aroma-store-core/includes/class-images.php`. Local-first per the upstream
+   policy, and the local stack is already proven (item 4), so this is a
+   single-file push to `--remote public_html/aroma-store`. Two things to know:
+   `aroma_store` has **root-owned vendor files**, so a `git checkout` of a stale
+   branch there deletes tracked files partway through before failing — deploy
+   from the commit, not by switching branches; and
+   `deploy-targeted.py` refuses vendor plugin paths by name, so the one file
+   needed here is `aroma-store-core/includes/class-images.php`.
 
 ## ⚠️ Other sessions edit this tree concurrently — deploy from a commit, not the worktree
 
