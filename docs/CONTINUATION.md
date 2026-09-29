@@ -2,14 +2,21 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-29 (later).** Items 1, 4, 6, 7 closed; the backup cycle is
-> confirmed healthy; the suite is **261/0**. The only open item needing a human is
+> **Last updated 2026-09-29 (latest).** Items 1, 4, 6, 7 closed; the backup cycle is
+> confirmed healthy; the suite is **267/0**. The only open item needing a human is
 > **#2 (per-host settings)**, plus the empty `public_html/wp-content/` skeleton
 > on the marketing site, which needs cPanel File Manager in a browser.
 >
-> **The rebrand is LIVE on `lylyrose.ir`** (deployed after the header above was
-> written) — palette, mobile overflow, and the Iran-only checkout form, plus one
-> missed literal. See *"✅ The rebrand is live"*, the last entry in this file.
+> **The rebrand is LIVE on `lylyrose.ir`** — palette, mobile overflow, and the
+> Iran-only checkout form, plus one missed literal. See *"✅ The rebrand is live"*.
+>
+> **The hero carousel is now LIVE too** (deployed 2026-09-29, `8a89191c`). It was
+> committed and suite-green but had never been uploaded — the same failure mode
+> as the rebrand, one commit later. See *"✅ The hero carousel is live"*, the last
+> entry in this file.
+>
+> **⚠️ `master` is 7 commits ahead of `origin/master`** and the local commits are
+> the record of what is live. Do not treat the remote as the source of truth.
 
 ## Open as of 2026-09-28
 
@@ -1316,3 +1323,88 @@ Iran-only country pin and the province/city reorder have **not** been seen rende
 on the live site. They are in the host's `functions.php` (verified by reading the
 bytes) and the code is what the suite exercises, but a real checkout walkthrough is
 the one check nobody has done on production.
+
+## ✅ The hero carousel is live on `lylyrose.ir` — 2026-09-29
+
+**The hero did nothing at all, and the header above did not say so.** Item 2 was
+recorded as "the only open item", but the newest commit `8a89191c` — the carousel
+— was committed, suite-green at 267/0, and **not deployed**. Live `hero.js` was a
+**404** and the homepage still rendered **one** slide. This is the rebrand's
+failure mode repeated one commit later: work that is committed, tested and
+documented locally, while production still serves the old build. The doc's own
+"the rebrand is live" section had been written minutes earlier and established
+the pattern; nothing prompted a re-check of the *next* commit.
+
+**Three independent faults, so fixing any one of them changes nothing** (which is
+why the hero looked broken rather than subtly wrong, and why no single-line fix
+worked): there was exactly **one** `.dk-hero-slide` and nothing to switch between;
+the three dots were inert `<i>` elements with **no script anywhere in the theme**
+to drive them; and `.dk-hero-slides` was `display:contents` over a non-absolute
+`.dk-hero-slide`, so the fade geometry had been flattened and any slides added
+would have stacked vertically and all shown at once. Ported from `aroma_store`,
+where the same three were fixed upstream.
+
+**Deployed — 5 files, 140,993 B, from the commit, never the worktree.** Staged
+with `git archive 8a89191c` into `/tmp/deploy-hero --strip-components=1`: the
+deploy script's `--src` root *is* the `wordpress/` parent, so the prefix has to
+come off — pointing `--src` at the nested `wordpress/` dir fails with
+`no such path`. `LYLYROSE_FOLDER=lylyroseir`, and the dry-run confirmed 5 files
+against that docroot before anything was sent.
+
+**The host was diffed before the overwrite, and that is what made this safe.**
+The 4 pre-existing files were read back over FTP and hashed: all four matched
+`4bc1c394` (the last commit that had been deployed) exactly, so the host held no
+uncommitted work and nothing of anyone else's was destroyed. The deploy-from-a-
+commit rule below exists so a *peer session's* work is not shipped; this was the
+opposite check — that the host had nothing I had not accounted for. `hero.js` was
+`MISSING`, which is the expected pre-deploy state, not a fault.
+
+**Verified by hash, not by the uploader's message.** All 5 files read back over
+FTP match the staged bytes by SHA1 (`front-page.php` `19ebcbb0…`, `functions.php`
+`a6701232…`, `style.css` `7c8378c3…`, `hero.js` `f07fd344…`, `en-ltr.css`
+`eb3402a5…`). Site-wide 200 sweep afterwards — `/` `/shop/` `/cart/` `/checkout/`
+`/incredible-offers/` `/about/` `/my-account/` `/secure-login/` `/faq/`
+`/contact/` `/track-order/` all **200**, `<title>Lyly Rose`, `/wp-json/` name
+`Lyly Rose`. That sweep is what rules out a fatal in `functions.php` or
+`front-page.php`: both are syntax boundaries, and every front-end request loads
+them.
+
+**Live render confirmed.** `hero.js` **200**, 5,090 B. The homepage now carries
+**3** `dk-hero-slide`, 3 `dk-hero-copy`/`dk-hero-art`, a `dk-hero-dots` tablist,
+and `dk-hero-prev`/`dk-hero-next` — where before there was 1 slide and no script.
+Theme `style.css` went **1.12.2 → 1.13.0** in the commit, so the Autoptimize
+bundle rebuilt; per the version-bump rule above that bump is load-bearing, and it
+was already present.
+
+**One grep nearly recorded a false alarm.** Counting dots with
+`grep -o '<button[^>]*dk-hero-dot'` returns **0**, because the dots carry no
+`dk-hero-dot` class — only `aria-label="اسلاید ۱"` and an `on` class on the
+active one. The suite's own assertion was rewritten for exactly this reason (see
+below), and I nearly re-introduced the same defect in the *verification* by
+assuming a class name instead of reading the markup. The three dots are real
+`<button type="button">` elements inside `role="tablist"`. **Read the markup; do
+not grep for a selector you assumed.**
+
+**The assertion rewrite is the part worth keeping.** "hero dot navigation present"
+only grepped for the `.dk-hero-dots` *container*, which the pre-fix markup also
+had — so it passed on the broken build and detected nothing. It now asserts the
+dots are real `<button>`s. All six hero assertions were then proven to go red
+against the pre-commit theme: **261/6 reverted, 267/0 on this commit**. A new test
+that passes first try has shown nothing; per [[assert-fails-on-broken-build]] the
+revert is the check.
+
+**Interaction was verified over CDP against `aroma_store` (18/18), not on
+production** — click, drag, wrap-around, drag threshold, vertical-scroll
+passthrough, keyboard, and the RTL arrow side. The RTL detail is the easy one to
+get backwards: in RTL the advancing slide travels **left**, so "next" sits on the
+**left**. `lylyrose.ir` runs the same code, but no one has driven it in a browser
+there yet.
+
+**Still not done, and worth not overclaiming:** the carousel has not been
+*interacted with* on production — only rendered and hash-verified. The
+checkout-form walkthrough noted above is still unperformed too. Both need a real
+browser on the live domain, not a `curl`.
+
+**`master` is 7 commits ahead of `origin/master`** (`8a89191c` back to
+`623a872d`). Production state is still read off the host rather than inferred
+from either.
