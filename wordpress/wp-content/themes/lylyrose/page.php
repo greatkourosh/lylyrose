@@ -6,7 +6,7 @@
  * this template when WC doesn't remap them, so render the content full-width
  * instead of the blog-style editorial cards from index.php.
  *
- * @package Digikala
+ * @package Lyly_Rose
  */
 
 get_header();
@@ -18,7 +18,9 @@ get_header();
 			the_post();
 			?>
 			<article <?php post_class( 'dk-page-content' ); ?> style="background:#fff;border-radius:var(--dk-radius);box-shadow:var(--dk-shadow);padding:24px;">
+				<?php if ( ! is_checkout() ) : ?>
 				<h1 class="dk-page-title" style="font-size:17px;color:var(--dk-ink);margin:0 0 16px;"><?php the_title(); ?></h1>
+			<?php endif; ?>
 				<?php
 				the_content();
 				wp_link_pages();

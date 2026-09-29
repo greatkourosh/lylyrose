@@ -1,6 +1,12 @@
 # Continuation — Current Project State
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
+>
+> **Last updated 2026-09-29.** Items 1, 4, 6, 7 closed; the backup cycle is
+> confirmed healthy; the suite is 256/0. The only open item needing a human is
+> **#2 (per-host settings)**, plus two things I could not finish: the empty
+> `public_html/wp-content/` skeleton on the marketing site, and
+> `AROMA_STORE_FOLDER` still unset in `aroma_store/.env`.
 
 ## Open as of 2026-09-28
 
@@ -91,6 +97,44 @@
      own success message is not evidence of *where* it wrote. Confirm the
      docroot by reading it back at the intended path, and verify content by
      hash rather than size.
+
+## ✅ Suite green 256/0 — and two things it did not check (2026-09-29)
+
+`bash docker/run-tests.sh` → **256 passed, 0 failed**, 31 sections, run twice
+(the second after the version bump below). Log:
+`.test-logs/full-tests-20260929-postbump.log`.
+
+**The checkout form work is now committed in this tree** (country pinned to
+Iran, province/city raised above the address, country row hidden, page title
+suppressed on checkout, and a new `style.css` block restyling the form because
+the theme drops WooCommerce's stylesheet). It came in uncommitted from another
+session; it is tested, documented in `DEVELOPMENT_LOG.md`, and committed.
+
+Two follow-ups came out of the run, and both matter more than the green:
+
+- **Theme `style.css` needed a version bump and did not have one.** The
+  stylesheet is enqueued with `lylyrose_version()` as its only cache-buster,
+  and that function reads the `Version:` header from `style.css` — so ~99 new
+  lines of CSS with `Version: 1.10.0` unchanged would have been served stale
+  from every browser that already had the old file, rendering the checkout with
+  browser-default 27px inputs. Bumped to **1.11.0**. The suite cannot catch
+  this: a cached stylesheet is still a 200 with valid CSS. **Any future theme
+  CSS change needs this bump.**
+- **The new checkout behaviour has no assertions.** The harness change
+  (`billing_city=3322`, was `تهران`) was *required* — the city is a coded select
+  now, so the old value fails — but it is a consequence, not a check. Section 8
+  asserts none of the pinned country, field order, hidden country row, or
+  suppressed title. So 256/0 means "this broke nothing else", **not** "this is
+  verified". Left undone deliberately: those assertions belong with the change,
+  which was another session's.
+
+`style.css` is `www-data`-owned and `kourosh` is not in that group, so the edit
+went through the container — worth knowing before anyone wastes a permission
+error on it:
+
+```bash
+docker exec lylyrose-wp sh -c "sed -i 's/^Version: 1.10.0$/Version: 1.11.0/' /var/www/html/wp-content/themes/lylyrose/style.css"
+```
 
 ## ✅ Updraft backup cycle confirmed healthy — checked 2026-09-29 07:47 UTC
 

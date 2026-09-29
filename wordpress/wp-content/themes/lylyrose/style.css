@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.10.0
+Version: 1.11.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -2182,4 +2182,103 @@ button, input, select, textarea { font-family: inherit; }
 }
 @media (max-width: 480px) {
     .dk-insta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---- Checkout form ----
+   The theme drops WooCommerce's stylesheet, so the fields have to be styled
+   here or they render at the browser default 27px. */
+.dk-checkout-card .form-row { display: block; margin: 0 0 14px; padding: 0; }
+.dk-checkout-card .form-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dk-ink);
+    margin-bottom: 6px;
+}
+.dk-checkout-card .form-row label .required { color: var(--dk-red); border: 0; text-decoration: none; }
+/* render_field() gives the notes row neither form-row-first nor -last, so the
+   flex wrapper would otherwise squeeze it into half a line. */
+.dk-checkout-card .woocommerce-additional-fields__field-wrapper > .form-row { flex: 0 0 100%; }
+/* national id is form-row-first but follows a full-width field, so it would
+   straddle the gutter on its own; it has no natural partner left. */
+.dk-checkout-card #billing_national_id_field,
+.dk-checkout-card #shipping_national_id_field { flex: 0 0 100%; }
+.dk-checkout-card .woocommerce-input-wrapper { display: block; width: 100%; }
+.dk-checkout-card input[type="text"],
+.dk-checkout-card input[type="tel"],
+.dk-checkout-card input[type="email"],
+.dk-checkout-card input[type="number"],
+.dk-checkout-card input[type="password"],
+.dk-checkout-card .input-text,
+.dk-checkout-card select,
+.dk-checkout-card textarea {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 46px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--dk-body-text);
+    background: #fbfbfc;
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+    box-shadow: none;
+    transition: border-color .15s, background .15s;
+}
+.dk-checkout-card textarea { height: auto; min-height: 120px; padding: 10px 12px; line-height: 1.9; resize: vertical; }
+.dk-checkout-card input:focus,
+.dk-checkout-card select:focus,
+.dk-checkout-card textarea:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--dk-teal);
+    box-shadow: 0 0 0 3px rgba(25, 191, 211, .12);
+}
+.dk-checkout-card .select2-container,
+.dk-checkout-card .select2-container--default .select2-selection--single { width: 100%; height: 46px; }
+.dk-checkout-card .select2-container .select2-selection--single {
+    display: flex;
+    align-items: center;
+    background: #fbfbfc;
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+}
+.dk-checkout-card .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: normal;
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--dk-body-text);
+}
+.dk-checkout-card .select2-container .select2-selection--single .select2-selection__arrow { height: 44px; }
+.dk-checkout-card .select2-container .select2-selection--single .select2-selection__clear { color: var(--dk-muted); margin-right: 24px; }
+.dk-checkout-card .select2-hidden { display: none; }
+/* Province and city share a row; the country is pinned to Iran so it is hidden. */
+.dk-checkout-card .form-row-first,
+.dk-checkout-card .form-row-last,
+.dk-checkout-card .dk-row-half { display: inline-block; width: auto; margin-left: 0; }
+.dk-checkout-card .form-row-first,
+.dk-checkout-card .dk-row-half { margin-right: 0; }
+/* select2 anchors its 1px hidden select to the nearest positioned ancestor;
+   with no wrapper it resolves against the page, so pin the row itself. */
+.dk-checkout-card .dk-row-half { position: relative; }
+/* Flex, not inline-block: a 100%-width child makes its own inline-block line
+   box empty, so the next field lands on a fresh line instead of beside it. */
+.dk-checkout-card .woocommerce-billing-fields__field-wrapper,
+.dk-checkout-card .woocommerce-shipping-fields__field-wrapper,
+.dk-checkout-card .woocommerce-additional-fields__field-wrapper { display: flex; flex-wrap: wrap; }
+.dk-checkout-card .woocommerce-billing-fields__field-wrapper > *,
+.dk-checkout-card .woocommerce-shipping-fields__field-wrapper > *,
+.dk-checkout-card .woocommerce-additional-fields__field-wrapper > * { flex: 0 0 calc(50% - 5px); }
+.dk-checkout-card .woocommerce-billing-fields__field-wrapper > .form-row-wide,
+.dk-checkout-card .woocommerce-shipping-fields__field-wrapper > .form-row-wide { flex: 0 0 100%; }
+.dk-checkout-card .woocommerce-billing-fields__field-wrapper > .is-hidden,
+.dk-checkout-card .woocommerce-shipping-fields__field-wrapper > .is-hidden { display: none !important; }
+.dk-checkout-card #order_comments { min-height: 120px; }
+.dk-checkout-card .woocommerce-form__label-for-checkbox { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+.dk-checkout-card .woocommerce-terms-and-conditions-wrapper { font-size: 13px; line-height: 1.9; }
+.dk-checkout-card .woocommerce-privacy-policy-text { font-size: 12.5px; color: var(--dk-muted); line-height: 1.9; }
+@media (max-width: 480px) {
+    .dk-checkout-card .form-row-first,
+    .dk-checkout-card .form-row-last { display: block; width: 100%; margin-right: 0; }
 }

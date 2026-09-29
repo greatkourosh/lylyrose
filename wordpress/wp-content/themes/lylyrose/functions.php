@@ -386,6 +386,91 @@ add_action( 'widgets_init', 'lylyrose_widgets_init' );
  * WooCommerce tweaks
  */
 add_filter( 'woocommerce_enqueue_styles', '__return_false' );
+/**
+ * Checkout: this store ships inside Iran, so the country is not a choice.
+ * Pinning it to a single value also makes WooCommerce collapse the country
+ * select, which removes the 250-entry dropdown from the top of the form.
+ */
+add_filter( 'woocommerce_countries_allowed_countries', function( $countries ) {
+	return array( 'IR' => 'ایران' );
+} );
+add_filter( 'woocommerce_countries_shipping_countries', function( $countries ) {
+	return array( 'IR' => 'ایران' );
+} );
+add_filter( 'woocommerce_checkout_posted_data', function( $data ) {
+	$data['billing_country']  = 'IR';
+	$data['shipping_country'] = 'IR';
+	return $data;
+} );
+
+/**
+ * Checkout field order: province and city first, then the rest of the address.
+ * Runs at 30 so it wins over the national-id plugin (priority 20).
+ */
+add_filter( 'woocommerce_checkout_fields', function( $fields ) {
+	if ( ! isset( $fields['billing'] ) ) {
+		return $fields;
+	}
+	$order = array(
+		'billing_state'       => 25,
+		'billing_city'        => 26,
+		'billing_address_1'   => 50,
+		'billing_address_2'   => 51,
+		'billing_national_id' => 52,
+		'billing_postcode'    => 90,
+	);
+	foreach ( $order as $key => $priority ) {
+		if ( isset( $fields['billing'][ $key ] ) ) {
+			$fields['billing'][ $key ]['priority'] = $priority;
+		}
+	}
+	return $fields;
+}, 30 );
+
+/**
+ * Put province and city back above the address after the Iran-cities script
+ * rewrites the billing block. Also drops the country row: the country is
+ * pinned to Iran, so the one-option select is pure noise.
+ */
+add_action( 'wp_footer', 'dk_checkout_reorder_fields', 5 );
+function dk_checkout_reorder_fields() {
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
+		return;
+	}
+	?>
+	<script>
+	jQuery( function ( $ ) {
+		var armed = 0;
+		function tidy() {
+			// The Iran-cities script rewrites the billing block on every
+			// updated_checkout, which wipes this class off the pickers. Re-apply
+			// it once more per burst rather than on every event.
+			clearTimeout( armed );
+			armed = setTimeout( tidy, 100 );
+			$( '.woocommerce-billing-fields__field-wrapper' ).each( function () {
+				var $w = $( this );
+				[ 'billing_city', 'billing_state' ].forEach( function ( id ) {
+					$w.prepend( $w.find( '#' + id ).closest( '.form-row' ) );
+				} );
+				$w.find( '#billing_country_field' ).addClass( 'is-hidden' );
+				// The Iran-cities script puts form-row-wide back on both pickers and
+				// strips data-priority from the row it re-renders, so the city row is
+				// the one without it. Read the classes off the live select instead.
+				$w.find( '#billing_state, #billing_city' ).closest( '.form-row' )
+					.removeClass( 'form-row-wide' )
+					.addClass( 'dk-row-half' );
+			} );
+		}
+		// The theme's update_order_review fragments hard-code the field set, so
+		// data-priority goes stale and WooCommerce re-inserts the rows in server
+		// order. Re-tidy once the fragments land.
+		tidy();
+		$( document.body ).on( 'updated_checkout change', tidy );
+	} );
+	</script>
+	<?php
+}
+
 
 add_filter( 'loop_shop_columns', function() { return 3; }, 999 );
 

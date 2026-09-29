@@ -1984,3 +1984,65 @@ individual figure — only by adding them. A wrong total in a backup doc is chea
 in this instance and expensive the first time someone sizes a quota off it. The
 check that catches it is one `sum()`, and on a doc whose whole claim is
 "these are the real sizes", the sum *is* the claim.
+
+## Checkout form for a single-country store, and the version bump it needed (2026-09-29)
+
+The checkout UX work (country pinned to Iran, province/city raised above the
+address, country row hidden, page title suppressed on checkout, plus the
+`style.css` block that restyles the form now the theme drops WooCommerce's
+stylesheet) came in uncommitted from another session. Rather than test around
+it, I treated it as the change under test.
+
+**Suite: 256 passed, 0 failed, all 31 sections.** Run twice — once as-is, once
+after the change below — and the second run is what `style.css` is verified
+against. Log: `.test-logs/full-tests-20260929-postbump.log`.
+
+### A cache-busting bug the green suite could not see
+
+`style.css` grew ~99 lines of checkout styling, and `functions.php:68` is the
+only place the stylesheet is enqueued:
+
+```php
+wp_enqueue_style( 'lylyrose-style', get_stylesheet_uri(), array( 'lylyrose-font-vazirmatn' ), lylyrose_version() );
+```
+
+`lylyrose_version()` reads the `Version:` header from `style.css` itself, so that
+header **is** the cache-buster. It still said `1.10.0`, meaning every browser
+with a cached copy keeps serving the old CSS and the checkout renders with
+browser-default 27px inputs — while the suite stays green, because a 200 with
+valid CSS bytes is exactly what a stale stylesheet also returns. Bumped to
+**1.11.0**.
+
+**Worth keeping:** this is the same shape as the "green suite says nothing
+about production" lesson, one level down. The suite proved the PHP is correct;
+it cannot prove a client has the new stylesheet. Any theme CSS change needs the
+header bump, and the bump is not optional bookkeeping.
+
+The file is `www-data`-owned and `kourosh` is not in that group, so the edit
+went through the container:
+
+```bash
+docker exec lylyrose-wp sh -c "sed -i 's/^Version: 1.10.0$/Version: 1.11.0/' /var/www/html/wp-content/themes/lylyrose/style.css"
+```
+
+### A real coverage gap, recorded rather than papered over
+
+The harness edits that came with the change set `billing_city=3322` (was the
+Persian `تهران`) in four ZarinPal/gift-wrap checkout POSTs. That is *required* —
+the city is now a coded select, so the old value would fail. But it is a
+**consequence**, not a check. Section 8 (`Checkout & National ID field`) passes
+5 tests and asserts none of the new behaviour: not the pinned country, not the
+field order, not the hidden country row, not the suppressed page title, not the
+`dk-row-half` class.
+
+So the 256 is honest about what it covers and silent about this. I am not
+adding those assertions here — they belong with the change, which is not mine to
+finish — but the gap should not be invisible. The honest summary is: **the new
+behaviour is unverified by the suite; the suite only confirms it did not break
+anything else.** Anyone claiming this checkout work is tested is overstating it.
+
+Note this is also the third instance of a *silently-passing* check in this
+project, after the guessed `updraft_interval_type` option that scheduled nothing
+and the `Fileman:delete_dir` that reported success while doing nothing. A green
+result and a real result are different things, and only the second one is worth
+anything.

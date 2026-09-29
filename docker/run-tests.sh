@@ -754,9 +754,9 @@ ZP_LOC=$(curl -s --max-time 90 -b "$ZP_JAR" -c "$ZP_JAR" -o /dev/null -w "%{redi
   --data-urlencode "billing_first_name=Test" --data-urlencode "billing_last_name=User" \
   --data-urlencode "billing_email=zpal-e2e@lylyrose.test" --data-urlencode "billing_phone=09123456789" \
   --data-urlencode "billing_address_1=Test Address" --data-urlencode "billing_national_id=0012345679" \
-  --data-urlencode "billing_city=تهران" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
+  --data-urlencode "billing_city=3322" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
   --data-urlencode "shipping_first_name=Test" --data-urlencode "shipping_last_name=User" \
-  --data-urlencode "shipping_address_1=Test Address" --data-urlencode "shipping_city=تهران" --data-urlencode "shipping_state=THR" \
+  --data-urlencode "shipping_address_1=Test Address" --data-urlencode "shipping_city=3322" --data-urlencode "shipping_state=THR" \
   --data-urlencode "shipping_postcode=12345" --data-urlencode "shipping_country=IR" \
   --data-urlencode "payment_method=WC_ZPal" --data-urlencode "woocommerce_checkout_place_order=Place order")
 case "$ZP_LOC" in
@@ -836,7 +836,7 @@ ZP_LOC2=$(curl -s --max-time 90 -b "$ZP_JAR2" -c "$ZP_JAR2" -o /dev/null -w "%{r
   --data-urlencode "billing_first_name=Test" --data-urlencode "billing_last_name=User" \
   --data-urlencode "billing_email=zpal-nok@lylyrose.test" --data-urlencode "billing_phone=09123456789" \
   --data-urlencode "billing_address_1=Test Address" --data-urlencode "billing_national_id=0012345679" \
-  --data-urlencode "billing_city=تهران" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
+  --data-urlencode "billing_city=3322" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
   --data-urlencode "payment_method=WC_ZPal" --data-urlencode "woocommerce_checkout_place_order=Place order")
 ZP_OID2=$(printf '%s' "$ZP_LOC2" | grep -o "order-pay/[0-9]*" | grep -o "[0-9]*")
 if [ -n "$ZP_OID2" ]; then
@@ -877,7 +877,7 @@ RI_LOC=$(curl -s --max-time 90 -b "$RI_JAR" -c "$RI_JAR" -o /dev/null -w "%{redi
   --data-urlencode "billing_first_name=Riya" --data-urlencode "billing_last_name=Test" \
   --data-urlencode "billing_email=riya-review@lylyrose.test" --data-urlencode "billing_phone=09355556666" \
   --data-urlencode "billing_address_1=Test Address" --data-urlencode "billing_national_id=0012345679" \
-  --data-urlencode "billing_city=تهران" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
+  --data-urlencode "billing_city=3322" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
   --data-urlencode "payment_method=WC_ZPal" --data-urlencode "woocommerce_checkout_place_order=Place order")
 RI_OID=$(printf '%s' "$RI_LOC" | grep -o "order-pay/[0-9]*" | grep -o "[0-9]*")
 
@@ -1197,7 +1197,7 @@ GW_LOC=$(curl -s --max-time 30 -b "$GW_JAR" -c "$GW_JAR" -o /dev/null -w "%{redi
   --data-urlencode "billing_first_name=Gift" --data-urlencode "billing_last_name=Wrap" \
   --data-urlencode "billing_email=gw-test@lylyrose.test" --data-urlencode "billing_phone=09120000001" \
   --data-urlencode "billing_address_1=Test" --data-urlencode "billing_national_id=0012345679" \
-  --data-urlencode "billing_city=تهران" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
+  --data-urlencode "billing_city=3322" --data-urlencode "billing_state=THR" --data-urlencode "billing_postcode=12345" --data-urlencode "billing_country=IR" \
   --data-urlencode "asc_gift_wrap=1" \
   --data-urlencode "asc_gift_wrap_nonce=$GW_NONCE" \
   --data-urlencode "payment_method=WC_ZPal" --data-urlencode "woocommerce_checkout_place_order=Place order")
