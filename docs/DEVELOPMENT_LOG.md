@@ -1872,6 +1872,19 @@ but still noise that nearly got recorded as fact:
 - `sms_main_settings` is a 0-length placeholder; the real gateway option is
   `pwsms_settings`. The first probe reported the SMS setting as unusable when it
   had simply read the wrong row.
+  **CORRECTED 2026-09-29 — this one is itself backwards, and the correction did
+  not change the conclusion but did change the reason for it.** `pwsms_settings`
+  is a **legacy option from an older plugin schema** — it holds exactly
+  `sms_gateway_name => PW\PWSMS\Gateways\Logger` and `send_test => 0`, and the
+  string `pwsms_settings` appears **nowhere** in the current
+  `persian-woocommerce-sms` source. The row the plugin actually reads is
+  `sms_main_settings`, and `PW\PWSMS\Settings\Settings::settings_sections()`
+  lists the ten authoritative sections — on production **every one of them is a
+  0-length string**, so `PWSMS()->get_option('sms_gateway')` returns `''` and
+  `get_sms_gateway()` falls through to `Logger` because the active class does not
+  exist. Both rows are empty of credentials; the Logger finding was right, the
+  row it was read from was dead. A row that the current code never reads can
+  still *look* authoritative, which is what made this survive two audits.
 - `function_exists('UpdraftPlus_Options')` is always `false` for a class.
 - `WC()->payment_gateways` is empty from a bare `wp-load.php` — WooCommerce
   populates it during `woocommerce_init`, which the front end fires and a probe

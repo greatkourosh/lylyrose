@@ -29,6 +29,26 @@
    (`WP_CACHE` is false today), activate Wordfence.
 3. **1a-ii, a remote UpdraftPlus target** — optional; the daily schedule writes
    host-local only. Keep 1b (off-host pull) current.
+   **1b DONE 2026-09-29 13:2x UTC.** The newest Updraft set
+   (`74ac5e865eb7`, 2026-09-29 00:59 UTC) is now pulled off-host to
+   `backups/updraft-2026-09-29-0059/` — 7 files, all 7 sizes equal to the host's
+   FTP `SIZE`, and three SHA1s match what `updraft_backup_history` recorded
+   (`plugins0 eeb56ab5…`, `uploads0 d9072fe4…`, `db0 664a1d6b…`). Verified
+   usable, not just correctly sized: `gzip -t` and `unzip -t` both pass, the DB
+   header reads `https://lylyrose.ir` / WP 7.1.2 on PHP 8.1.34, and it holds
+   **101** `CREATE TABLE` statements across **38** populated tables.
+   **⚠️ It is a pre-rebrand snapshot, and that is not a defect — it is the state
+   that existed when it ran.** `themes/lylyrose/style.css` inside it reads
+   `Version: 1.10.0`, still contains the old Digikala red `ef394e`, and has
+   **0** hits for the brand palette `C98F91`. The rebrand deployed at 13:10 UTC,
+   ~12h *after* this set ran, so **no off-host copy of the live database or
+   uploads contains it.** That is recoverable — the rebrand code is in git
+   (`3abc3ade`, `18db23a4`, `4bc1c394`) and this doc records the deploy — but it
+   is the honest gap: the newest off-host *data* is 00:59 UTC, and the newest
+   off-host *code* is 2026-09-27's account archive plus the git history.
+   **What closes it:** the next daily fire (~2026-09-30 00:4x UTC) captures the
+   post-rebrand state, and pulling it is one command. Set a reminder, because
+   nothing on this host will pull it by itself.
 4. ~~**The WebP mime fix is downstream-only; it still needs mirroring upstream.**~~
    — **DONE 2026-09-29; the fix is now in both repos.** `ASC_Images` converted
    uploads to WebP by extending WP's `image_editor_output_format` — which changes
@@ -930,8 +950,8 @@ breaks the site in the same misleading way (redirect to `install.php`). Verified
   | UpdraftPlus remote storage | **Superseded.** Still no remote destination, deliberately (free route, see the runbook). 1a/1b/1c cover it. |
   | Wordfence | **Wordfence is INACTIVE** (not active-and-unconfigured as listed). `wordfence` option empty. It is installed, shipped-but-off. |
   | WP Super Cache | **Genuinely off**: `WP_CACHE` is `false` and there is no `advanced-cache.php` and no `supercache` dir. Needs enabling, not "re-configuring". |
-  | PWSMS | **Confirmed `Logger`** (`PW\PWSMS\Gateways\Logger` in `pwsms_settings`), so SMS is a silent no-op and the P0 OTP login does not work live. Unchanged and still the highest-value gap. |
-  | WP Mail SMTP | **Empty** — no provider, no from-address, no SMTP host or key. Unconfigured. |
+  | PWSMS | **Confirmed `Logger` — but read from a dead row, re-verified 2026-09-29.** `get_sms_gateway()` returns `PW\PWSMS\Gateways\Logger` at send time, so SMS is a silent no-op and the P0 OTP login does not work live. Unchanged and still the highest-value gap. **The option this was originally read from (`pwsms_settings`) is not one the plugin reads** — see the correction below. |
+  | WP Mail SMTP | **Partly configured, not "empty" — re-verified 2026-09-29.** `wp_mail_smtp` is an array with `mailer: mail`, `from_email: info@lylyrose.ir`, `from_name: Lyly Rose`. The from-identity is done; **no provider and no SMTP host/credentials**, so mail still goes out through PHP `mail()`. |
   | ZarinPal | **Enabled and live at checkout — contradicting two docs.** See below. |
 
   **ZarinPal is not "disabled and inert", and it is not "sandbox, so it does not
@@ -964,10 +984,11 @@ breaks the site in the same misleading way (redirect to `install.php`). Verified
 
   Three probes were burned on this audit, all mine and all the same mistake as
   `updraft_interval_type`: reading a value from the wrong place instead of
-  checking. `sms_main_settings` is a 0-length placeholder — the real gateway
-  option is `pwsms_settings`; `function_exists('UpdraftPlus_Options')` is always
-  false for a class; and `WC()->payment_gateways` is empty from a bare
-  `wp-load.php` because WooCommerce only populates it on `woocommerce_init`.
+  checking. `sms_main_settings` is a 0-length placeholder — **the correction
+  below shows that was the wrong row, not the right one**;
+  `function_exists('UpdraftPlus_Options')` is always false for a class; and
+  `WC()->payment_gateways` is empty from a bare `wp-load.php` because WooCommerce
+  only populates it on `woocommerce_init`.
   In all three cases the *site* was fine and my probe was wrong, which is the
   safer direction — but it is also why the gateway list had to be read from the
   rendered checkout HTML rather than from the registry.
@@ -977,6 +998,62 @@ breaks the site in the same misleading way (redirect to `install.php`). Verified
   credentials (still the `Logger` sink, so production SMS is a no-op); WP Mail SMTP
   credentials; WP Super Cache **enable** (`WP_CACHE` is false today); Wordfence
   **activate + configure** (it is inactive). Redis needs nothing — see the table above.
+
+  ### Re-verified 2026-09-29 13:14–13:20 UTC — three read-only probes, no writes
+
+  Item 2 was re-audited rather than assumed, since this file has now been wrong in
+  both directions nine times. Three random-named docroot probes, each `php -l`'d in
+  the container first, uploaded over passive FTP with the bytes read back and
+  SHA1-compared, fetched over HTTPS, then deleted and confirmed gone by **both**
+  an FTP `nlst` and an HTTP 404. No option was written, no backup was triggered,
+  no order was created.
+
+  **The state is unchanged from the 2026-09-27 audit on every item**, so nothing
+  here is a regression. What is new is *how firmly each is now known*, and two
+  corrections to the reasons:
+
+  | Item | Verified live 2026-09-29 |
+  | --- | --- |
+  | ZarinPal | `enabled: yes`, `sandbox: yes`, merchant 36 chars and **all-zero** (the dummy UUID), `access_token` **empty**. Gateway class loads and is **not** in `active_plugins` (it loads another way). Unchanged: pre-launch, needs a real merchant. |
+  | PWSMS | `get_sms_gateway()` returns **`PW\PWSMS\Gateways\Logger`**, `id()` `logger`. **The plugin is active** (`persian-woocommerce-sms/WoocommerceIR_SMS.php`) — it is not a disabled-plugin illusion. All three gateway credential fields empty. **Correction below.** |
+  | WP Mail SMTP | **Correction below** — partly configured, not empty. |
+  | WP Super Cache | `WP_CACHE` `false`, no `advanced-cache.php`, no `supercache/`, `wpcache_home` unset. Genuinely off. |
+  | Wordfence | Plugin directory present, `wfconfig` table present, but **not active** and the `wordfence` option is `null`. Shipped-but-off, as documented. |
+  | Redis | No `WP_REDIS_*` defines, no `object-cache.php`, plugin not active. The 2026-09-27 "already resolved" finding holds. |
+  | Site identity | `home` `https://lylyrose.ir`, `blogname` `Lyly Rose`, WP **7.1.2** — the probe was talking to the right site. |
+
+  **Correction 1 — the PWSMS row is a legacy leftover, and the docs had it
+  backwards.** Both this file and `DEVELOPMENT_LOG.md` say `pwsms_settings` is
+  "the real gateway option" and that `sms_main_settings` is merely a 0-length
+  placeholder. It is the reverse. `pwsms_settings` holds exactly
+  `sms_gateway_name => PW\PWSMS\Gateways\Logger` and `send_test => 0` — the
+  **pre-rename schema of an older plugin version** — and the string
+  `pwsms_settings` appears **nowhere** in the current
+  `persian-woocommerce-sms` source. The row the plugin actually reads is
+  `sms_main_settings`, and all **ten** sections in
+  `Settings::settings_sections()` are 0-length strings on production, so
+  `get_option('sms_gateway')` returns `''`. The Logger conclusion is unchanged and
+  still correct — `get_sms_gateway()` falls back to `Logger` precisely *because*
+  the active class does not exist. But it was previously read off a row no
+  current code consults, and a dead row can still look authoritative. **This is
+  the tenth instance of the runbook's own rule: read the source, not the
+  plausible-looking row.**
+
+  **Correction 2 — WP Mail SMTP is partly configured, not empty.** The old text
+  said "no provider, no from-address, no SMTP host or key." In fact `wp_mail_smtp`
+  is an array with `mailer: mail`, `from_email: info@lylyrose.ir`, `from_name:
+  Lyly Rose`. The from-identity is done and correctly branded; what is missing is
+  the provider and the SMTP credentials, so mail still rides PHP `mail()`. Same
+  actionable outcome, wrong starting description.
+
+  **What this changes about the work itself: nothing — and that is the finding.**
+  Four of the five remaining sub-items are blocked on **credentials that cannot
+  be minted from this side** (a ZarinPal merchant, PWSMS login, an SMTP key), and
+  the fifth — Wordfence — is a judgement call rather than a blocker. Item 2 is
+  genuinely human-blocked, exactly as the header says. It is worth being precise
+  about *why*, though, because the phrasing "per-host settings pass" invites
+  reading it as a task: there is no technical work left on it. Re-running this
+  audit will only re-confirm what is already established.
 - **Cron**: `DISABLE_WP_CRON` is `false` in the deployed config (WP self-triggers). If you
   want a cPanel cron job instead, set it to `true` and add
   `* * * * * /usr/local/bin/php /home3/bqwyvowk/lylyroseir/wp-cron.php >/dev/null 2>&1`.

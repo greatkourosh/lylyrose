@@ -237,6 +237,53 @@ files. It is a small bonus copy, not the rollback point. Updraft splits a backup
 into several `*.zip`/`*.gz` parts — pull them all, and keep each backup's parts
 together in one dated directory.
 
+> **Reclassified 2026-09-29.** "Small bonus copy" was true when the only account
+> archive was 1a. It is now the **newest data copy that exists anywhere** — the
+> 2026-09-27 account archive predates both the 09-28 and 09-29 Updraft sets and
+> every deploy since. Treat the daily Updraft pull as a real backup obligation,
+> not a bonus. This is the exact command used on 2026-09-29; it pulls **every
+> part of one run id** into one dated directory and fails loudly on any size
+> mismatch:
+
+```bash
+python3 - <<'PY'
+import ftplib, os, hashlib
+from dotenv import dotenv_values
+cfg = dotenv_values(".env")
+RUN = "<nonce from the dir listing, e.g. 74ac5e865eb7>"   # one run id, not one file
+dest = "backups/updraft-" + "<datestamp>"
+os.makedirs(dest, exist_ok=True)
+ftp = ftplib.FTP()
+ftp.connect(cfg["PHP_HOST_IP"], 21, timeout=30)
+ftp.login(cfg["PHP_HOST_USERNAME"], cfg["PHP_HOST_PASSWORD"])
+ftp.set_pasv(True)                        # mandatory: active mode gets 425
+ftp.cwd(cfg["LYLYROSE_FOLDER"] + "/wp-content/updraft")
+names = [n for n in ftp.nlst() if RUN in n and not n.startswith("log.")]
+names.append(f"log.{RUN}.txt")
+ok = True
+for n in sorted(names):
+    expected = ftp.size(n)
+    local = os.path.join(dest, n)
+    with open(local, "wb") as fh:
+        ftp.retrbinary("RETR " + n, fh.write)
+    got = os.path.getsize(local)
+    ok &= (got == expected)
+    print(f"  {'OK ' if got == expected else 'BAD'} {n} {got} == {expected} "
+          f"sha1={hashlib.sha1(open(local,'rb').read()).hexdigest()}")
+print("ALL SIZES MATCH HOST:", ok)
+ftp.quit()
+PY
+```
+
+**The SHA1s it prints are the strongest available check**, because Updraft records
+the same values per archive in `updraft_backup_history` — a match proves the copy
+is the one the plugin itself wrote, not merely the right number of bytes. Then
+assert the set is *usable*, not just correctly sized: `gzip -t` on the `db.gz`,
+`unzip -t` on a `themes.zip`/`uploads.zip`, and check the DB header names the
+right site. **And state which state it captures** — a set that ran before your
+last deploy is a valid backup of an older state, and silently filing it as "the
+current one" is how a rollback point goes stale without anyone noticing.
+
 **Verify:** local size equals host size (the script enforces this), and the `tar
 tzf` listing shows the database. Keep at least the two most recent archives
 locally.
