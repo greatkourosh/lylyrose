@@ -20,9 +20,41 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_TABLE_PREFIX: wp_
       WORDPRESS_DEBUG: "${WORDPRESS_DEBUG:-0}"
+      # WordPress emits absolute URLs, so any host pinned here becomes the host
+      # every CSS/JS/image request is sent to -- and a pinned host that only
+      # resolves on this machine renders the site unstyled on every other LAN
+      # device. Derive it from the incoming request instead, so the same site is
+      # reachable as http://192.168.1.13:8030 from a phone and as
+      # https://lylyrose.local through the Caddy proxy.
+      #
+      # HTTP_HOST is client-controlled, so it is matched against an allowlist
+      # rather than trusted: the canonical host, localhost, and bare IP
+      # literals. Everything else falls back -- notably the `wordpress` service
+      # name the cron container calls, which would otherwise make every URL
+      # generated during a cron run point at http://wordpress/.
+      # $_SERVER['HTTPS'] is already normalized from X-Forwarded-Proto by
+      # wp-config-docker.php above. Literal $$ escapes compose interpolation.
+      #
+      # COOKIEHASH must stay fixed: WordPress derives it from siteurl, so leaving
+      # it derived would name the login cookie after whichever host made the
+      # request. A cookie minted over the LAN would then be rejected by the
+      # proxy and vice versa, and every CLI process -- which has no HTTP_HOST at
+      # all -- would compute yet another name and never authenticate.
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_HOME', '${WORDPRESS_SITE_URL:-https://lylyrose.local}');
-        define('WP_SITEURL', '${WORDPRESS_SITE_URL:-https://lylyrose.local}');
+        $$lr_host = isset($$_SERVER['HTTP_HOST']) ? strtolower($$_SERVER['HTTP_HOST']) : '';
+        $$lr_name = '';
+        if (preg_match('/^\[([^\]]+)\](:[0-9]{1,5})?$$/', $$lr_host, $$m)) {
+          $$lr_name = $$m[1];
+        } elseif (preg_match('/^([^:]+)(:[0-9]{1,5})?$$/', $$lr_host, $$m)) {
+          $$lr_name = $$m[1];
+        }
+        $$lr_ok = in_array($$lr_name, array('lylyrose.local', 'localhost'), true)
+          || false !== filter_var($$lr_name, FILTER_VALIDATE_IP);
+        if (!$$lr_ok) { $$lr_host = 'lylyrose.local'; }
+        $$lr_ssl = !empty($$_SERVER['HTTPS']) && $$_SERVER['HTTPS'] !== 'off';
+        define('WP_HOME',    ($$lr_ssl ? 'https' : 'http') . '://' . $$lr_host);
+        define('WP_SITEURL', ($$lr_ssl ? 'https' : 'http') . '://' . $$lr_host);
+        define('COOKIEHASH', 'd9660ad907c1b572751a227e3acdf41e');
         define('FS_METHOD', 'direct');
         define('DISABLE_WP_CRON', true);
         define('WP_REDIS_HOST', 'redis');

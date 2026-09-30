@@ -2,12 +2,41 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-29 (latest).** Items 1, 4, 6, 7 closed; the backup cycle is
-> confirmed healthy; the suite is **267/0**; `master` is pushed and in sync with
-> `origin`. **Item 2 (per-host settings) is the only open item and it is
-> human-blocked** — four of its five sub-items need credentials that cannot be
-> minted from this side, and the fifth (Wordfence) is a judgement call. There is
-> no technical work left on it.
+> **Last updated 2026-09-30 (latest).** `master` is in sync with `origin` and the
+> suite is **268/0** on **both** host forms — `https://lylyrose.local` and
+> `http://192.168.1.13:8030` — green on each.
+>
+> **The real open item is committed now, and it is still not deployed.** A
+> peer session left the `/incredible-offers/` page rewritten from a paginated
+> grid to Digikala-style horizontal carousel rows in the working tree
+> (~19:30–20:55 2026-09-29), and it arrived **red at 264/3**. It is now
+> **268/0**: the three failures were stale assertions pinned to the grid the
+> rewrite deleted, not defects in the feature. The feature itself was verified
+> correct before its tests were touched. See *"🚧 The offers-page carousel rewrite
+> is done locally and NOT deployed"* — **it is still not on `lylyrose.ir`**, and
+> deploying it is the next step. Read that section before deploying it; deploy
+> from the commit, never the worktree, and note the file list spans the plugin
+> *and* the theme.
+>
+> **The host-agnostic config change rode along and is now verified.** Dropping
+> the pinned `WORDPRESS_SITE_URL` passed the LAN-host gate the doc demanded, but
+> only after fixing a **real harness bug** it exposed: `wp-admin` authenticates
+> against `AUTH_COOKIE` over plain HTTP, which the suite did not send, so every
+> `/wp-admin/` assertion 302'd while the front end looked fine. See *"✅ The
+> LAN-host gate was run"*.
+>
+> Item 2 (per-host settings) remains the only *listed* open item and is still
+> human-blocked — four of its five sub-items need credentials that cannot be
+> minted from this side, and the fifth (Wordfence) is a judgement call.
+>
+> **The off-host backup gap is still open, and wider than the last entry says.**
+> Re-checked 2026-09-30 04:47 UTC: the predicted ~00:4x UTC fire has **not
+> happened** — the host still holds only 2 sets and the newest is the 2026-09-29
+> 00:59 UTC one already pulled. The schedule is registered and 8h overdue, which
+> on this low-traffic site is a late fire, not a fault. That set predates the
+> rebrand *and* the hero carousel (theme `1.10.0` vs the repo's `1.13.0`), so
+> the newest off-host copy is three theme versions behind production. See
+> *"⚠️ Re-pulled 2026-09-30"* under item 3.
 >
 > The stray `public_html/wp-content/` skeleton on the marketing site is **also
 > closed** — it was removed over plain FTP, and the "needs cPanel File Manager in
@@ -59,6 +88,82 @@
    **What closes it:** the next daily fire (~2026-09-30 00:4x UTC) captures the
    post-rebrand state, and pulling it is one command. Set a reminder, because
    nothing on this host will pull it by itself.
+
+   ### ⚠️ Re-pulled 2026-09-30 04:47–04:52 UTC — NO new set. The gap above is
+   ### still open, and the predicted fire has not happened.
+
+   The scheduled fire was predicted for **~2026-09-30 00:4x UTC**. Checked at
+   **04:47 UTC**, ~4h past it: **no new set exists.** The host still holds
+   exactly **2** run ids — `ddea859eb974` (09-28 04:17) and `74ac5e865eb7`
+   (09-29 01:01) — the newest still `74ac5e865eb7`, byte-for-byte the set already
+   pulled. Confirmed by **`mlsd`** (not `nlst`/`LIST`, which are server-filterable)
+   grouping every file by run id. **So there was nothing to pull, and the runbook
+   script was correctly not run.** All 7 local parts were re-verified against the
+   host by SHA1 this pass, not merely by size: all 7 **MATCH**.
+
+   **The schedule is registered and healthy — this is a late fire, not a fault.**
+   Read read-only off a docroot probe: `updraft_interval` and
+   `updraft_interval_database` both `daily`; `updraft_backup` and
+   `updraft_backup_database` both stamped **2026-09-29 20:46:33 UTC**, i.e.
+   **overdue by 29,112s (8h05m)**; `updraft_retain` / `updraft_retain_db` both
+   `2`. Per the rule below, "overdue" is not a fault on a low-traffic site —
+   WP-Cron spawns on a front-end request, and `DISABLE_WP_CRON` is unset so
+   self-triggering is permitted. Two plain GETs (`/`, `/shop/`) were issued, which
+   is what normally releases the run, and the directory was re-listed after;
+   still nothing. **Expect this set to land late**, and do not read its absence
+   as a fault or start re-registering the schedule.
+
+   **The SHA1 cross-check was re-run and completed — all SIX archives match**,
+   not the three the earlier entry records. Updraft stores them in
+   `updraft_backup_history[stamp]['checksums']['sha1']` (a nested array, *not* a
+   per-archive `sha1` key as the earlier note implies — that read returns nothing
+   and looks like a missing value):
+
+   | Archive | SHA1 (recorded == local) |
+   | --- | --- |
+   | `plugins` | `eeb56ab561c0346a1d73d4cba840ed94336082af` ✅ |
+   | `themes` | `a24bfd73cfab7b4cc71ae757d3a014723627c718` ✅ |
+   | `uploads` | `d9072fe40af2aec581293af5bfbcfd0eab5e004d` ✅ |
+   | `mu-plugins` | `30fcbfd1229f116bc7f90da62cc2d7a6a0f1d18e` ✅ |
+   | `others` | `ea406fd6393e9c759be3891c3967ea48fe7b1732` ✅ |
+   | `db` | `664a1d6be293d32972fdeaac667b89e12f5570af` ✅ |
+
+   **A probe bug nearly filed a false alarm here.** The first comparison matched
+   archives by the substring `plugins`, which also matches `mu-plugins.zip`, so
+   `plugins` reported a SHA1 **mismatch** against the mu-plugins hash. The data
+   was fine and the *check* was wrong. Match on the nonce-anchored segment
+   (`74ac5e865eb7-plugins.`) and assert exactly one candidate, or a real
+   corruption will hide behind a false positive — the same shape as the
+   `updraft_backup_history`-is-an-option trap.
+
+   **Re-verified usable:** `gzip -t` passes on `db.gz`, it decompresses fully
+   (2,378,145 B), the header names `https://lylyrose.ir` / WP **7.1.2** on PHP
+   8.1.34, and it holds **101** `CREATE TABLE`. `unzip -t` passes on
+   `themes.zip` (623 entries), `uploads.zip` (1,867), `others.zip` (458),
+   `plugins.zip` and `mu-plugins.zip` (1 each).
+
+   **WHICH STATE IT CAPTURES — unchanged and now measured against two more
+   deploys.** The backed-up `themes/lylyrose/style.css` reads **`Version:
+   1.10.0`**. The repo is at **`1.13.1`** in the working tree and **`1.13.0`** at
+   `HEAD` — so the gap is **three minor versions**, not the one the earlier entry
+   implies. The content check is unambiguous, not a version-header lag: the
+   archived stylesheet still contains the old Digikala red `ef394e` and has
+   **0** hits for `C98F91`, while the repo's current file has **0** `ef394e` and
+   **2** `C98F91`. It also **predates the hero carousel**, deployed later the
+   same day: `assets/js/hero.js` is **absent** from the archive, and the archived
+   `front-page.php` carries exactly **1** `dk-hero-slide` where production now
+   has 3 plus real dots. **So the newest off-host copy predates the rebrand, the
+   hero carousel, and the two deploys that carried them.** A rollback to this set
+   would revert all three. That is recoverable — the code is in git — but the
+   newest off-host *data* is still 2026-09-29 00:59 UTC, and nothing on the host
+   will pull the next set by itself.
+
+   Probes: three read-only docroot probes (random `_`-prefixed names), all
+   deleted, each confirmed gone by **both** an FTP `mlsd` showing no `_*.php` and
+   an HTTP **404**. No option was written, no `Backup/*` UAPI function was
+   called, no backup was triggered, and nothing on the host was modified. Site
+   re-checked after: `/` `/shop/` `/cart/` `/checkout/` `/incredible-offers/`
+   all **200**.
 4. ~~**The WebP mime fix is downstream-only; it still needs mirroring upstream.**~~
    — **DONE 2026-09-29; the fix is now in both repos.** `ASC_Images` converted
    uploads to WebP by extending WP's `image_editor_output_format` — which changes
@@ -1447,6 +1552,195 @@ there yet.
 checkout-form walkthrough noted above is still unperformed too. Both need a real
 browser on the live domain, not a `curl`.
 
-**`master` is 7 commits ahead of `origin/master`** (`8a89191c` back to
-`623a872d`). Production state is still read off the host rather than inferred
-from either.
+**`master` was 7 commits ahead of `origin/master`** at the time of writing.
+**Corrected 2026-09-30: it is now level** — those commits are pushed. Read
+`git status` rather than trusting either figure. Production state is still read
+off the host rather than inferred from either.
+
+## 🚧 The offers-page carousel rewrite is committed locally and NOT deployed — 2026-09-30
+
+**The doc above says item 2 is the only open item. It was not.** A peer session
+left a large feature in the working tree — uncommitted, ~19:30–20:55 on
+2026-09-29 — which I inherited mid-flight. The tell was `git status`: nine
+modified files, mtimes hours old, on a branch `origin` had never seen. **This is
+exactly the situation the concurrent-session warning above describes, and the
+warning was right to be there.**
+
+**What it is.** `/incredible-offers/` stops being a paginated 24-card grid and
+becomes Digikala's shape: titled horizontal carousel rows — one per brand, then
+«شگفت‌انگیز روز» and «شگفت‌انگیزهای رو به اتمام» hero rows. Nine files: the
+plugin gains `carousel_rows()` / `sale_brands()` / `filtered_sale_ids()`, the
+page template renders rows instead of a loop + pager, and `flash-sales.js` gains
+RTL-aware nav buttons, a drag, and correct disabled-end state.
+
+**It arrived RED — 264 passed, 3 failed. The failures were the tests, not the
+feature.** All three asserted the old grid:
+
+| Failing assertion | Why it was stale |
+| --- | --- |
+| `product grid missing` | asserted `dk-flash-grid`, a class the rewrite deleted |
+| `card count out of range: 78` | asserted ≤ 24 cards, the old `PER_PAGE` page cap |
+| `offers grid density is , expected 7` | regex'd `grid-template-columns: repeat(7)` out of the CSS |
+
+Rewrote them to assert the new invariants rather than the old shape. **A red
+suite is not automatically a broken feature, and a green one is not
+automatically a correct test** — the job was to tell those apart first.
+
+**The feature was verified BEFORE its tests were touched**, because rewriting an
+assertion to match whatever the code does is how a suite is made to lie:
+
+| Check | Result |
+| --- | --- |
+| Every visible on-sale product renders | **78 visible → 78 cards, 78 unique** |
+| Claim-once invariant (no card twice, none hidden) | **0 duplicated, 0 hidden** |
+| `?sort=cheapest` | prices ascend `850000, 990000, 1606100…` ✅ |
+| `?sort=expensive` | prices descend `24900000, 23000000…` ✅ |
+| `?offer_cat=999999` | empty state, 0 cards ✅ |
+| `?in_stock=1` | 78 cards — **and 0 of 78 on-sale products are out of stock, so the filter is a no-op on this data, not broken** |
+| Horizontal overflow @ 390/768/1440 on 5 pages | **0px**, `scrollWidth == clientWidth` |
+
+**Each new assertion was then proven red against the old build**, per
+[[assert-fails-on-broken-build]]. I reverted the four feature files inside the
+container, confirmed the old grid was live (`dk-flash-grid` 1, `dk-flash-row` 0,
+24 cards), and watched all three fail — the row check at `rows=0`, the CSS check
+returning empty, and the coverage check fataling on the now-undefined
+`carousel_rows()`. Restored afterwards and **SHA1-verified byte-identical**.
+Suite **268/0, green twice.**
+
+**The browser checks matter more than usual here**, because a horizontal
+carousel is precisely the shape this project has twice shipped a sideways-scroll
+bug. `.dk-flash-track` therefore carries `overflow-x: auto` **and**
+`contain: layout` — overflow alone is not enough, since a flex row's min-content
+width still propagates to the document. Measured at 390px: **0px overflow**.
+Note `clientWidth` reads 753 at a 768 viewport and 1425 at 1440: that 15px is
+the **vertical scrollbar**, not overflow. Judge by `scrollWidth - clientWidth`,
+never by `clientWidth` against the intended width, or every desktop reading
+looks broken.
+
+**The RTL handling is correct, and RTL is the easy thing to get backwards.**
+Driving it over CDP: the site computes `direction: rtl`, 10 rows exist, and
+`next` moves `scrollLeft` **−20 → −452** (negative *is* forward in RTL). At the
+far end (`scrollLeft` −1308, the browser's own clamp) `next` disables and `prev`
+re-enables. Rows whose cards all fit have **both** buttons dead, as intended.
+The chevrons are drawn with borders and rotated, not written as `‹`/`›` glyphs,
+because U+2039/U+203A are bidi-mirrored and silently point the wrong way in
+RTL — the same trap `hero-check.py` was written for.
+
+**Nothing here is deployed. `lylyrose.ir` still serves the old grid.** The
+deploy-from-a-commit rule above applies, with one addition: this work spans
+**two** repos' worth of concerns — the plugin class and the theme — and per
+[[aroma_store_is_upstream]] the same feature should be mirrored to
+`aroma_store` first, then back. `style.css` is already bumped **1.13.0 →
+1.13.1**, which per the version-bump rule is load-bearing or Autoptimize serves
+the old CSS.
+
+**Also uncommitted alongside it, and unrelated:** `.env.example` +
+`docker-compose.yml` + the `SITE_URL` comment in `run-tests.sh` drop the
+pinned `WORDPRESS_SITE_URL` in favour of deriving `WP_HOME`/`WP_SITEURL` from
+the request host, so the site works from the LAN port *and* the HTTPS proxy. Per
+[[local-site-urls-are-host-agnostic]] the pin was previously deliberate, so
+**verify the suite stays green on a LAN-reachable host before believing it** —
+and `COOKIEHASH` must not move, or 16 admin tests fail.
+
+### ✅ The LAN-host gate was run — and it found a real harness bug, not a config one
+
+**The gate is now satisfied: `SITE_URL=http://192.168.1.13:8030` → 268/0**, and
+`https://lylyrose.local` → 268/0. The host derivation works, assets resolve to
+the requesting host (no unstyled site on a phone), and `COOKIEHASH` did not move.
+
+**It did not pass the first time, and the failure was worth the run.** The first
+LAN pass was **263/5** — the five section-17 CSV assertions, `admin.php` 302ing
+to the WPS Hide Login `404` page. **The product was fine; the harness could not
+authenticate to `/wp-admin/` over plain HTTP.** `wp-admin` chooses its auth
+scheme from `is_ssl()`:
+
+| `SITE_URL` | scheme `wp-admin` validates | cookie the harness sent | result |
+| --- | --- | --- | --- |
+| `https://lylyrose.local` | `secure_auth` | `SECURE_AUTH_COOKIE` | **200** |
+| `http://192.168.1.13:8030` | **`logged_in`** | `SECURE_AUTH_COOKIE` | **302 → `/404/`** |
+
+Over HTTP it validates the **logged-in** cookie, against *that* cookie's own
+hash, which the `secure_auth` value does not satisfy. Both cookie pairs in
+`run-tests.sh` (section 17's reports pair and the `fetch_auth` helper) now also
+emit `AUTH_COOKIE`, which is what plain-HTTP admin actually reads. Verified
+before keeping it: with the third cookie, LAN `/wp-admin/` returns **200** and
+the export returns a real CSV — `efbbbf` BOM, Persian headers, the seeded order
+row.
+
+**Why it looked host-specific, and why the front end never caught it:** the
+front-end assertions use `logged_in`, which the two-cookie pair *does* satisfy,
+so the bell/AJAX/my-account checks all passed on the failing host. Only
+`/wp-admin/` broke. **A harness that is half-correct for the scheme in play will
+look like a product fault on one host and pass on another** — assert the
+`/wp-admin/` path on *every* host form you claim to support, not just the pages.
+
+**Two false readings of mine, both from probing the site while a suite run was
+in flight.** User 1 keeps a bounded session list, so each
+`WP_Session_Tokens::create()` from a probe evicts the token the running suite
+had just minted — which produced a 302 I then read as "both hosts are broken",
+and in fact the proxy host returned 200 throughout. Diagnose **after** the run
+finishes, or the probe is the fault. (I also reset the local `admin` password
+while probing; restored to `admin123` and confirmed with `wp_check_password`.
+Probe orders deleted, sessions cleared, three `_hprobe*.php` files removed and
+confirmed 404.)
+
+**Site state confirmed independent of the scheme split** while chasing it: a
+real `admin` login through `/secure-login/` returns 200 and a valid CSV on the
+proxy, and the same cookie authenticates on the LAN front end — the only thing
+that differed was which cookie `/wp-admin/` reads.
+
+**Upstream session, 2026-09-30 — reported "262/6, all 6 failures in the OTP
+section". NOT REPRODUCED HERE. The suite is 268/0, five consecutive runs.** Kept
+because two parts of the note are correct and one part of the diagnosis is not.
+
+**What I could not reproduce.** The claimed 262/6 does not exist in this tree.
+Re-ran the full suite after the report: **268 passed, 0 failed**, and **all 18
+OTP assertions pass** — including `rate limit enforced (6th request)`, the one
+most exposed to the state the report blames. Five clean runs total today
+(264/3 → 268/0 ×4). There is no OTP failure here to fix, and no 6 failures to
+attribute to anything.
+
+**The Redis diagnosis was tested directly, and does not hold as stated.** The
+claim is that leftover `asc_otp_*` state in Redis breaks the section, and that
+the suite's own cleanup does not remove it. Two things contradict that:
+
+1. The section's cleanup at `run-tests.sh:704` already deletes
+   `asc_otp_rate_<md5>` for **all three** mobiles it uses, so residue does not
+   accumulate across runs.
+2. I **planted the exact state the report blames** —
+   `SET wp:transient:asc_otp_rate_8d217916786bad67485730f472aa23d8 5 EX 3600`,
+   which is mobile `09367778899` (the rate-limit fixture) already at the 5-request
+   cap — and re-ran. **268/0, `rate limit enforced` still PASS**, and the planted
+   key was gone afterwards (`EXISTS` → 0), i.e. the cleanup deleted it.
+
+So the "clear Redis" remedy is harmless but **treats a symptom this repo does not
+have**, and the claim that `wp_options` DELETE is "a silent no-op here" is wrong
+for the same reason: with no persistent object-cache drop-in these transients are
+in `wp_options` in the first place, so they are deletable normally. The *general*
+point remains sound — a run that dies part-way can leave transients behind, and on
+a host with a real object cache they would not be in `wp_options` at all. Worth
+remembering if the drop-in is ever installed. One key genuinely does survive, with
+a 1-hour TTL: `asc_otp_rate_424f69ef…` from a mobile no section uses, so it
+expires on its own and cannot affect these fixtures.
+
+**Two claims that are correct and worth keeping:**
+
+- **`class-otp.php` has no logic divergence from `aroma_store`.** Diffing the two
+  with the package slug and brand strings normalised (`aroma-store-core` /
+  `lylyrose-core`, آرومالند / لیلی رز) is **byte-identical** — every hunk is a
+  `@package` line, an `__()` text domain, or a brand string. (The note said "one
+  `__()` text domain"; it is actually 11 sites, which does not change the
+  conclusion.) So the OTP code is not a plausible source of a carousel-mirror
+  regression.
+- **The mirror touches zero OTP lines** — confirmed: `run-tests.sh` is 5 hunks /
+  +47−12, and grepping the diff for `otp` returns nothing. (The note said three
+  hunks; the count is five. The load-bearing part — zero OTP lines — holds.)
+
+**The `PWSMS` trap is real and is the most useful thing in the note.** It is a
+**function**: `function_exists('PWSMS')` → **YES**, `class_exists('PWSMS')` → **no**,
+in this repo. Checking with `class_exists` makes a present plugin look missing.
+Keep this regardless of the failure claim above.
+
+**Offers section 28 is green** (10 rows, 78 products / 78 cards, 192px track), and
+the carousel work is mirrored and verified upstream. Still uncommitted in this
+working tree, as always.

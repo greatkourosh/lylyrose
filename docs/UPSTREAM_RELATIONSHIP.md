@@ -15,7 +15,7 @@ mirrored into `lylyrose` if `lylyrose` needs it.
    aroma-store.vegacodex.ir               lylyrose.ir
      digikala theme                         lylyrose theme
    aroma-store-core 2.4.0                 lylyrose-core 2.4.0
-        17 ASC_ classes                     17 ASC_ classes
+        18 ASC_ classes                     18 ASC_ classes
               │                                   ▲
               │  1. implement + test here          │  2. mirror only if
               └───────────────────────────────────┘     lylyrose needs it
@@ -76,7 +76,7 @@ the page served 200 while sending no CSS or JS.
 
 **The feature set is at parity — 2026-09-27.** The `ASC_Flash_Sales` gap that
 stood here since 2026-09-17 is closed: all four files are ported (`lylyrose-core`
-now has **17** classes, matching upstream) and covered by test section 28
+now has **18** classes, matching upstream) and covered by test section 28
 (12 checks, suite **229/0**). The port is a clean rename-map application — the
 only differences from upstream are the four intended `digikala_*` →
 `lylyrose_*` helper calls in `page-incredible-offers.php`; `flash-sales.js` and

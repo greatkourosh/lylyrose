@@ -10,7 +10,11 @@ $sort = ASC_Flash_Sales::param( 'sort', 'newest' );
 $stock_only = ASC_Flash_Sales::param( 'in_stock' ) === '1';
 $base = get_permalink();
 $params = array( 'offer_cat' => $tab, 'sort' => $sort, 'in_stock' => $stock_only ? 1 : 0 );
-$loop = ASC_Flash_Sales::query_products( $tab );
+$rows    = ASC_Flash_Sales::carousel_rows();
+$offered = 0;
+foreach ( $rows as $row ) {
+	$offered += count( $row['ids'] );
+}
 ?>
 <main class="dk-incredible-page dk-container">
 	<section class="dk-flash-hero">
@@ -26,7 +30,7 @@ $loop = ASC_Flash_Sales::query_products( $tab );
 		</a>
 		<?php endforeach; ?>
 	</nav>
-	<div class="dk-offers-heading"><h2>همه شگفت‌انگیزها</h2><span><?php echo esc_html( number_format_i18n( $loop->found_posts ) ); ?> کالا</span></div>
+	<div class="dk-offers-heading"><h2>همه شگفت‌انگیزها</h2><span><?php echo esc_html( number_format_i18n( $offered ) ); ?> کالا</span></div>
 	<form method="get" action="<?php echo esc_url( $base ); ?>" class="dk-offers-toolbar">
 		<input type="hidden" name="offer_cat" value="<?php echo esc_attr( $tab ); ?>">
 		<label>مرتب‌سازی:
@@ -40,37 +44,44 @@ $loop = ASC_Flash_Sales::query_products( $tab );
 		<button type="submit">اعمال</button>
 		<?php if ( $tab || $stock_only || $sort !== 'newest' ) : ?><a href="<?php echo esc_url( $base ); ?>">حذف فیلترها</a><?php endif; ?>
 	</form>
-	<?php if ( $loop->have_posts() ) : ?>
-	<ul class="dk-flash-grid">
-		<?php while ( $loop->have_posts() ) : $loop->the_post();
-			$product = wc_get_product( get_the_ID() );
-			if ( ! $product || ! $product->is_visible() ) { continue; }
-			$end = ASC_Flash_Sales::sale_end( $product );
-			$stock = ASC_Flash_Sales::stock_left( $product );
-			$percent = lylyrose_discount_percent( $product );
-		?>
-		<li class="dk-flash-card" <?php echo $end ? 'data-end="' . esc_attr( $end ) . '"' : ''; ?>>
-			<span class="dk-offer-label">شگفت‌انگیز</span>
-			<a class="dk-offer-product" href="<?php echo esc_url( $product->get_permalink() ); ?>">
-				<?php echo $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ); ?>
-				<h3><?php echo esc_html( $product->get_name() ); ?></h3>
-			</a>
-			<div class="dk-offer-stock"><?php echo ! $product->is_in_stock() ? 'ناموجود' : ( $stock !== null && $stock > 0 && $stock < 10 ? esc_html( sprintf( 'تنها %s عدد در انبار باقی مانده', lylyrose_to_persian_digits( $stock ) ) ) : 'موجود در انبار' ); ?></div>
-			<div class="dk-offer-prices">
-				<?php if ( $percent ) : ?><span class="dk-offer-percent"><?php echo esc_html( lylyrose_to_persian_digits( $percent ) ); ?>٪</span><?php endif; ?>
-				<div><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
+	<?php if ( $rows ) : ?>
+	<?php foreach ( $rows as $row ) : ?>
+	<section class="dk-flash-row <?php echo $row['hero'] ? 'dk-flash-row--hero' : ''; ?>" data-row="<?php echo esc_attr( $row['key'] ); ?>">
+		<div class="dk-flash-row-head">
+			<h2 class="dk-flash-row-title"><?php echo esc_html( $row['title'] ); ?></h2>
+			<?php if ( $row['href'] ) : ?><a class="dk-flash-row-more" href="<?php echo esc_url( $row['href'] ); ?>">مشاهده همه</a><?php endif; ?>
+			<div class="dk-flash-row-nav">
+				<button type="button" class="dk-flash-row-btn" data-dk-row-prev aria-label="قبلی"></button>
+				<button type="button" class="dk-flash-row-btn" data-dk-row-next aria-label="بعدی"></button>
 			</div>
-			<?php if ( $end ) : ?><time class="dk-flash-timer" aria-label="زمان باقی‌مانده پیشنهاد">در حال محاسبه</time><?php endif; ?>
-		</li>
-		<?php endwhile; ?>
-	</ul>
-	<nav class="dk-pagination" aria-label="صفحه‌های پیشنهادها"><?php echo wp_kses_post( paginate_links( array(
-		'base' => add_query_arg( array_merge( $params, array( 'offers_page' => '%#%' ) ), $base ),
-		'format' => '', 'current' => max( 1, absint( ASC_Flash_Sales::param( 'offers_page', 1 ) ) ),
-		'total' => $loop->max_num_pages, 'type' => 'list', 'prev_text' => 'قبلی', 'next_text' => 'بعدی',
-	) ) ); ?></nav>
+		</div>
+		<ul class="dk-flash-track" data-dk-row-track>
+			<?php foreach ( $row['ids'] as $product_id ) :
+				$product = wc_get_product( $product_id );
+				if ( ! $product || ! $product->is_visible() ) { continue; }
+				$end = ASC_Flash_Sales::sale_end( $product );
+				$stock = ASC_Flash_Sales::stock_left( $product );
+				$percent = lylyrose_discount_percent( $product );
+			?>
+			<li class="dk-flash-card" <?php echo $end ? 'data-end="' . esc_attr( $end ) . '"' : ''; ?>>
+				<span class="dk-offer-label">شگفت‌انگیز</span>
+				<a class="dk-offer-product" href="<?php echo esc_url( $product->get_permalink() ); ?>">
+					<?php echo $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ); ?>
+					<h3><?php echo esc_html( $product->get_name() ); ?></h3>
+				</a>
+				<div class="dk-offer-stock"><?php echo ! $product->is_in_stock() ? 'ناموجود' : ( $stock !== null && $stock > 0 && $stock < 10 ? esc_html( sprintf( 'تنها %s عدد در انبار باقی مانده', lylyrose_to_persian_digits( $stock ) ) ) : 'موجود در انبار' ); ?></div>
+				<div class="dk-offer-prices">
+					<?php if ( $percent ) : ?><span class="dk-offer-percent"><?php echo esc_html( lylyrose_to_persian_digits( $percent ) ); ?>٪</span><?php endif; ?>
+					<div><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
+				</div>
+				<?php if ( $end ) : ?><time class="dk-flash-timer" aria-label="زمان باقی‌مانده پیشنهاد">در حال محاسبه</time><?php endif; ?>
+			</li>
+			<?php endforeach; ?>
+		</ul>
+	</section>
+	<?php endforeach; ?>
 	<?php else : ?>
 	<section class="dk-no-products"><h2>پیشنهادی با این فیلترها پیدا نشد</h2><p>دسته‌بندی دیگری انتخاب کنید یا فیلترها را پاک کنید.</p><a href="<?php echo esc_url( $base ); ?>">مشاهده همه پیشنهادها</a></section>
-	<?php endif; wp_reset_postdata(); ?>
+	<?php endif; ?>
 </main>
 <?php get_footer(); ?>

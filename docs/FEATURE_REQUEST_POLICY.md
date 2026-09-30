@@ -93,7 +93,7 @@ building shared code here.
 
 **None — feature parity as of 2026-09-27.** The `ASC_Flash_Sales`
 («پیشنهادهای شگفت‌انگیز» / Incredible Offers) gap that stood here since
-2026-09-17 is closed: all four files are ported, `lylyrose-core` is at 17 classes
+2026-09-17 is closed: all four files are ported, `lylyrose-core` is at 18 classes
 matching upstream, and test section 28 covers the page (suite **229/0**).
 
 This is a shared storefront capability (a sale-product page driven by WooCommerce

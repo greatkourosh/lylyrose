@@ -22,9 +22,11 @@ section() { echo ""; echo "== $1 =="; }
 
 WP_CONTAINER="lylyrose-wp"
 DB_CONTAINER="lylyrose-db"
-# siteurl/home are https://lylyrose.local, so any request to localhost:8030 gets
-# 301-redirected to the canonical host and the port is lost. Test the canonical
-# host directly, or every non-root page 301s and the suite fails for no real reason.
+# WP_HOME/WP_SITEURL are derived from the request host, so the published port
+# (http://127.0.0.1:8030) and the Caddy proxy (https://lylyrose.local) are both
+# canonical and neither redirects to the other. The proxy is the default because
+# it is the scheme a real visitor gets, and it keeps the suite honest about the
+# X-Forwarded-Proto path; override SITE_URL to exercise the port form instead.
 SITE_URL="${SITE_URL:-https://lylyrose.local}"
 THEMES_DIR="/var/www/html/wp-content/themes"
 PLUGINS_DIR="/var/www/html/wp-content/plugins"
@@ -503,11 +505,18 @@ $s = ASC_Reports::get_stats("2026-01-01", "2026-12-31");
 echo $s["orders"] . "|" . $s["items"] . "|" . $s["products"][(int) $argv[1]];' "$FP_MAIN" 2>/dev/null)
 [ "$REP_STATS" = "1|2|2" ] && pass "reports stats aggregate seeded order" || fail "reports stats wrong: $REP_STATS"
 # signed export URL (admin-only endpoint; requires an admin auth cookie)
+# AUTH_COOKIE is load-bearing, not belt-and-braces. wp-admin picks the scheme
+# from is_ssl(): over HTTPS it validates "secure_auth", but over plain HTTP it
+# validates "logged_in" -- against the logged-in cookie's own hash, which the
+# secure_auth value does not satisfy. With only the two cookies, every /wp-admin/
+# request 302s to the WPS Hide Login "404" page whenever SITE_URL is an http://
+# host, while the front-end assertions still pass (they use logged_in). The
+# front end tolerating the cookie is why this looked host-specific.
 REP_PAIR=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 $m = WP_Session_Tokens::get_instance(1);
 $e = time() + 600;
 $t = $m->create($e);
-echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "logged_in", $t);' 2>/dev/null)
+echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "logged_in", $t) . ";" . AUTH_COOKIE . "=" . wp_generate_auth_cookie(1, $e, "auth", $t);' 2>/dev/null)
 REP_TOKEN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 echo ASC_Reports::export_token(1, "2026-01-01", "2026-12-31");' 2>/dev/null)
 REP_CSV=$(curl -s --max-time 90 -b "$REP_PAIR" "$SITE_URL/wp-admin/admin.php?page=asc-reports&asc_export=$REP_TOKEN&from=2026-01-01&to=2026-12-31")
@@ -593,13 +602,15 @@ WC()->cart->empty_cart();' "$FP_ALT" 2>/dev/null)
 # mint a fresh session+cookie pair per fetch — the security stack rotates tokens
 fetch_auth() {
     local PAIR
+    # AUTH_COOKIE here for the same reason as the reports pair above: plain-HTTP
+    # /wp-admin/ authenticates against it rather than against SECURE_AUTH_COOKIE.
     PAIR=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 $uid = username_exists("wallet_tester");
 $m = WP_Session_Tokens::get_instance($uid);
 $m->destroy_all();
 $e = time() + 1200;
 $t = $m->create($e);
-echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "logged_in", $t);' 2>/dev/null)
+echo SECURE_AUTH_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "secure_auth", $t) . ";" . LOGGED_IN_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "logged_in", $t) . ";" . AUTH_COOKIE . "=" . wp_generate_auth_cookie($uid, $e, "auth", $t);' 2>/dev/null)
     curl -sL --max-time 90 -b "$PAIR" "$1"
 }
 WALLET_NAV=$(fetch_auth "$SITE_URL/my-account/")
@@ -1380,16 +1391,42 @@ OF_HTML=$(curl -s --max-time 60 "$OFFERS_URL")
 html_has "$OF_HTML" "dk-flash-card"        && pass "offer cards render"              || fail "no offer cards rendered"
 html_has "$OF_HTML" "dk-flash-tabs"        && pass "category tabs render"            || fail "category tabs missing"
 html_has "$OF_HTML" 'dk-offer-label'       && pass "شگفت‌انگیز label present"        || fail "offer label missing"
-html_has "$OF_HTML" 'dk-flash-grid'        && pass "product grid present"            || fail "product grid missing"
+html_has "$OF_HTML" 'dk-flash-row'         && pass "titled offer rows present"        || fail "no offer rows"
+# Every row must carry a title and a real prev/next pair, or the row scrolls by
+# drag only. Asserting the CONTAINER (as the old grid check did) is worthless:
+# the pre-rewrite markup also had rows-worth-of wrapper, so it detected nothing.
+OF_ROWS=$(printf '%s' "$OF_HTML" | grep -o 'class="dk-flash-row ' | wc -l | tr -d ' ')
+OF_TITLED=$(printf '%s' "$OF_HTML" | grep -o 'dk-flash-row-title' | wc -l | tr -d ' ')
+OF_NAVB=$(printf '%s' "$OF_HTML" | grep -o 'data-dk-row-prev' | wc -l | tr -d ' ')
+[ "$OF_ROWS" -gt 0 ] && [ "$OF_ROWS" = "$OF_TITLED" ] && [ "$OF_ROWS" = "$OF_NAVB" ] \
+  && pass "every row is titled and navigable ($OF_ROWS rows)" \
+  || fail "row chrome incomplete (rows=$OF_ROWS titles=$OF_TITLED prevbtns=$OF_NAVB)"
 
 # 28.2 page is driven by real sale state, not a hardcoded list
 OF_SALE_IDS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo (int) count(wc_get_product_ids_on_sale());' 2>/dev/null)
 [ "${OF_SALE_IDS:-0}" -gt 0 ] && pass "sale products exist to drive the page ($OF_SALE_IDS)" || fail "no sale products — page cannot be verified"
 
-# 28.3 one page holds at most PER_PAGE (24) cards regardless of total on sale
-# grep -o | wc -l, not grep -c: the grid is a single line, so -c counts lines (1).
-OF_CARDS=$(printf '%s' "$OF_HTML" | grep -o "dk-flash-card" | wc -l | tr -d ' ')
-[ "$OF_CARDS" -gt 0 ] && [ "$OF_CARDS" -le 24 ] && pass "page shows at most 24 cards (got $OF_CARDS)" || fail "card count out of range: $OF_CARDS"
+# 28.3 the page shows EVERY visible discounted product, exactly once. Rows
+# claim products as they are built, so a product in two brands is placed in the
+# first row that wanted it — which means both failure directions are live: a
+# double-claim renders the same card twice, and a dropped claim silently hides
+# an offer. Counting cards alone cannot tell those apart, so this compares the
+# rendered rows against the source list in PHP.
+OF_CARDS=$(printf '%s' "$OF_HTML" | grep -o 'class="dk-offer-product"' | wc -l | tr -d ' ')
+OF_COVER=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$ids = array_map("absint", ASC_Flash_Sales::filtered_sale_ids());
+$visible = array();
+foreach ($ids as $id) { $p = wc_get_product($id); if ($p && $p->is_visible()) { $visible[] = $id; } }
+$placed = array();
+foreach (ASC_Flash_Sales::carousel_rows() as $row) { foreach ($row["ids"] as $id) { $placed[] = (int) $id; } }
+$dupes = count($placed) - count(array_unique($placed));
+$hidden = count(array_diff($visible, $placed));
+echo count($visible), " ", $dupes, " ", $hidden;' 2>/dev/null)
+set -- $OF_COVER
+[ "${1:-0}" -gt 0 ] && [ "${2:-1}" -eq 0 ] && [ "${3:-1}" -eq 0 ] \
+  && pass "every visible offer appears exactly once ($1 products, $OF_CARDS cards)" \
+  || fail "coverage broken: $1 visible, $2 duplicated, $3 hidden ($OF_CARDS cards)"
 
 # 28.4 a non-existent category must render the empty state, not a fatal or all products
 OF_EMPTY=$(curl -s --max-time 60 "$OFFERS_URL?offer_cat=999999")
@@ -1542,11 +1579,18 @@ echo ( new WC_Coupon($argv[1]) )->get_id() ? "left" : "gone";' "$GC_CODE" 2>/dev
 [ "$GC_LEFT" = "gone" ] && pass "gift card test data cleaned" || fail "cleanup failed: $GC_LEFT"
 rm -f "$GC_JAR"
 
-# 29.9 parity: the grid density and percent order corrected upstream 2026-09-27
-LR_COLS=$(docker exec "$WP_CONTAINER" php -r '
+# 29.9 the offers page is a horizontal carousel now, so "7 columns" is the wrong
+# shape to assert. What has to hold instead is that a row is a real scroll
+# container with fixed-width cards — without overflow-x the row's min-content
+# widens the document and the whole page scrolls sideways on a phone, which this
+# project has hit twice before.
+LR_TRACK=$(docker exec "$WP_CONTAINER" php -r '
 $c = file_get_contents("/var/www/html/wp-content/themes/lylyrose/assets/css/flash-sales.css");
-if ( preg_match("/\.dk-flash-grid \{[^}]*grid-template-columns:\s*repeat\((\d+)/", $c, $m) ) { echo $m[1]; }' 2>/dev/null)
-[ "$LR_COLS" = "7" ] && pass "offers grid is 7 columns at desktop" || fail "offers grid density is $LR_COLS, expected 7 (Digikala parity)"
+$ok = preg_match("/\.dk-flash-track \{[^}]*overflow-x:\s*auto/", $c)
+   && preg_match("/\.dk-flash-card \{[^}]*flex:\s*0 0 (\d+)px/", $c, $m);
+echo $ok ? $m[1] : "";' 2>/dev/null)
+[ -n "$LR_TRACK" ] && pass "offer rows are horizontal scroll tracks (${LR_TRACK}px cards)" \
+  || fail "offer row is not a scroll track with fixed-width cards (got '$LR_TRACK')"
 
 LR_BADPCT=$(docker exec "$WP_CONTAINER" sh -c \
   "grep -rno '٪[۰-۹]' /var/www/html/wp-content/themes/lylyrose/ 2>/dev/null | wc -l" | tr -dc '0-9')

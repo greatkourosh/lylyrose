@@ -1734,7 +1734,7 @@ never failed the build. The replacement is a `check`, so a dump with any
 localhost URL cannot be staged at all.
 
 The two edits that were real are kept and the feature gap is closed: `ASC_Flash_Sales`
-is ported (17 classes, parity with upstream), covered by test section 28 (12 checks),
+is ported (18 classes, parity with upstream), covered by test section 28 (12 checks),
 and the suite is **229 passed / 0 failed** both before and after the DB fix.
 
 **The lesson, which is the fifth instance of one pattern:** a repo-wide text replace

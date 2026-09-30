@@ -683,6 +683,11 @@ function lylyrose_discount_percent( $product ) {
 /**
  * Representative image for a product category: the term thumbnail when set,
  * otherwise the newest in-category product's image.
+ *
+ * Cached as a root-relative path rather than an absolute URL. The site answers
+ * on more than one host (the published LAN port and the local HTTPS proxy), so
+ * an absolute URL cached from whichever request reached the cache first pins
+ * every later visitor's images to that host for the whole transient TTL.
  */
 function lylyrose_term_image( $term, $size = 'woocommerce_thumbnail' ) {
     $cache_key = 'lylyrose_term_img_' . $term->term_id . '_' . $size;
@@ -716,8 +721,13 @@ function lylyrose_term_image( $term, $size = 'woocommerce_thumbnail' ) {
         }
     }
 
-    set_transient( $cache_key, $url ? $url : '0', 12 * HOUR_IN_SECONDS );
-    return $url;
+    $path = $url ? wp_parse_url( $url, PHP_URL_PATH ) : '';
+    if ( ! $path ) {
+        $path = '0';
+    }
+
+    set_transient( $cache_key, $path, 12 * HOUR_IN_SECONDS );
+    return $path;
 }
 
 /**
