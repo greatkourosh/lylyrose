@@ -1391,6 +1391,21 @@ OF_HTML=$(curl -s --max-time 60 "$OFFERS_URL")
 html_has "$OF_HTML" "dk-flash-card"        && pass "offer cards render"              || fail "no offer cards rendered"
 html_has "$OF_HTML" "dk-flash-tabs"        && pass "category tabs render"            || fail "category tabs missing"
 html_has "$OF_HTML" 'dk-offer-label'       && pass "شگفت‌انگیز label present"        || fail "offer label missing"
+
+# 28.1b every category tile needs an <img>. lylyrose_term_image() can return
+# '' when no product in that term has a thumbnail, and the rail used to render
+# a bare text label in that case, which reads as a broken rail rather than
+# missing content. A placeholder keeps the row even. The first tile is
+# "همه شگفت‌انگیزها", a ٪ glyph rather than a photo, so it is excluded from the
+# comparison — counting it would fail a correct rail.
+OF_RAIL=$(printf '%s' "$OF_HTML" | sed -n 's/.*<nav class="dk-flash-tabs"\(.*\)<\/nav>.*/\1/p')
+OF_TILE_IMGS=$(printf '%s' "$OF_RAIL" | grep -o '<img [^>]*width="72"' | wc -l | tr -d ' ')
+OF_TILE_TABS=$(printf '%s' "$OF_RAIL" | grep -o '<a class="dk-flash-tab' | wc -l | tr -d ' ')
+OF_TILE_NEED=$(( OF_TILE_TABS - 1 ))
+[ "$OF_TILE_IMGS" -ge "$OF_TILE_NEED" ] && [ "$OF_TILE_NEED" -ge 1 ] \
+  && pass "every category tile renders an image ($OF_TILE_IMGS imgs / $OF_TILE_NEED categories)" \
+  || fail "only $OF_TILE_IMGS images for $OF_TILE_NEED category tiles — the rail falls back to a bare label"
+
 html_has "$OF_HTML" 'dk-flash-row'         && pass "titled offer rows present"        || fail "no offer rows"
 # Every row must carry a title and a real prev/next pair, or the row scrolls by
 # drag only. Asserting the CONTAINER (as the old grid check did) is worthless:
@@ -1660,6 +1675,22 @@ SEEDER=$(docker exec "$WP_CONTAINER" sh -c \
 [ "${SEEDER:-0}" -ge 1 ] \
   && pass "create_products.php resolves existing products by SKU before inserting" \
   || fail "create_products.php has no SKU lookup — re-running it will duplicate the catalog"
+
+section "32. Upstream/downstream class parity"
+
+# 32.1 the ASC_ inventory is the standing check that a mirror step was not
+# skipped (UPSTREAM_RELATIONSHIP.md). It was documented as 17 classes in eight
+# places while the real count had been 18 since ASC_Gift_Cards landed — a doc
+# number nothing verifies, so it rotted silently. Pinning the count means a
+# genuinely new class fails here and gets counted deliberately, instead of the
+# docs drifting again. This is the downstream half of the pair: aroma_store's
+# own suite asserts the same 18 against its plugin, so a class added upstream and
+# not mirrored fails on one host or the other.
+CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
+  "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
+[ "${CLASS_COUNT:-0}" = "18" ] \
+  && pass "core plugin exposes 18 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 18 — a new class needs mirroring and a doc count update"
 
 section ""
 echo "==========================================="

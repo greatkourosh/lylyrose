@@ -2,7 +2,7 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-30 (latest).** The suite is **268/0** on **both** host
+> **Last updated 2026-09-30 (latest).** The suite is **270/0** on **both** host
 > forms — `https://lylyrose.local` and `http://192.168.1.13:8030` — green on
 > each, and the rebrand, the hero carousel and the offers carousel are all
 > **live** on `lylyrose.ir`.
@@ -35,7 +35,7 @@
 > and registration `OFF` — **all seven shipped**, and registration reads `yes`
 > live. Every P0–P2 item below it reads DONE, which is why nobody had cause to
 > re-read a list that looked finished. Its own step 5 also still said "229 checks
-> across 28 sections" (now **268/31**). This is
+> across 28 sections" (now **270/32**). This is
 > [[production-state-vs-docs]] in its purest form: a "current state" block is a
 > list of *last known* facts, and nothing in a green suite re-verifies it.
 >
@@ -48,9 +48,9 @@
 > five hours after the fire), so a rollback loses the carousel. The next fire
 > (~20:46 UTC) closes that too. See *"✅ The backup gap is CLOSED"*.
 >
-> **Upstream `d96c2869` is mirrored in the tree but only half of it** — the two
-> theme files arrived, its two new suite assertions did not. See *"🚧 Upstream
-> `d96c2869` is mirrored"*.
+> **Upstream `d96c2869` is now mirrored whole** — the two theme files and its two
+> new suite assertions. Suite **270/0 across 32 sections**. See *"✅ Upstream
+> `d96c2869` is mirrored whole"*.
 >
 > The stray `public_html/wp-content/` skeleton on the marketing site is **also
 > closed** — it was removed over plain FTP, and the "needs cPanel File Manager in
@@ -1668,7 +1668,9 @@ and `COOKIEHASH` must not move, or 16 admin tests fail.
 ### ✅ The LAN-host gate was run — and it found a real harness bug, not a config one
 
 **The gate is now satisfied: `SITE_URL=http://192.168.1.13:8030` → 268/0**, and
-`https://lylyrose.local` → 268/0. The host derivation works, assets resolve to
+`https://lylyrose.local` → 268/0 (both hosts were re-run green at **270/0** on
+2026-09-30 after the two upstream assertions were mirrored). The host derivation
+works, assets resolve to
 the requesting host (no unstyled site on a phone), and `COOKIEHASH` did not move.
 
 **It did not pass the first time, and the failure was worth the run.** The first
@@ -1929,25 +1931,39 @@ object is the reliable route**: the row is `woocommerce_wc_zpal_settings` (the i
 Local copy: `backups/updraft-2026-09-30-0452/`, with the per-file size and SHA1
 record in that directory's `PULL-REPORT.txt`.
 
-## 🚧 Upstream `d96c2869` is mirrored in the tree but its two tests are not
+## ✅ Upstream `d96c2869` is mirrored whole
 
 `aroma_store` commit `d96c2869` ("Render a tile for every offers category, and
-pin the ASC_ count") is **committed there and present here** — this tree's
-`page-incredible-offers.php` and `style.css` carry the identical two edits
-(`wc_placeholder_img_src()` fallback, `Version:` 1.13.1 → 1.13.2), still
-uncommitted, still deliberately not deployed. The theme template was mirrored;
-**the rest of the commit was not.** Upstream also changed `docker/run-tests.sh`
-(+28 lines, two new assertions), and neither exists in this suite:
+pin the ASC_ count") is now mirrored **in full**: the two theme files
+(`page-incredible-offers.php`, `style.css`) *and* both of its new suite
+assertions. Suite **270/0 across 32 sections**.
 
-| Upstream assertion | Present here |
+| Upstream assertion | Mirrored here as |
 | --- | --- |
-| `every category tile renders an image` (28.1b) | **no** |
-| `core plugin exposes 18 ASC_ classes` (new section 32) | **no** |
+| `every category tile renders an image` (28.1b) | 28.1b, verbatim bar `digikala_term_image()` → `lylyrose_term_image()` |
+| `core plugin exposes 18 ASC_ classes` (section 32) | section 32.1, `aroma-store-core` → `lylyrose-core` |
 
-So this repo's suite says **268/0** and still cannot detect either condition the
-upstream commit was written to catch. Per the mirror rule in
-[[aroma_store_is_upstream]] these belong here too, and they are the reason to
-mirror the *commit* rather than just its two theme files.
+The plugin path and the term-image function name are the only two edits; the
+`ASC_` prefix is shared. **The pair is why you mirror the commit, not its files**
+([[aroma_store_is_upstream]]): a green `268/0` in this repo could not detect
+either condition the upstream commit was written to catch.
+
+**Both assertions were proven to fail against a broken build** before being
+committed, per [[assert-fails-on-broken-build]]:
+
+| Assertion | Mutation | Result |
+| --- | --- | --- |
+| 28.1b | removed the `if ( $image )` guard in the container's copy of the template | `FAIL only 0 images for 11 category tiles` |
+| 32.1 | moved `class-gift-cards.php` aside in the container | `FAIL core plugin exposes 17 classes, expected 18` |
+
+Both mutations were reverted and the full suite re-run green afterwards
+(270/0). `wp-content` is a bind mount, so these run in-container as root; the
+template copy was made with `docker cp` because **the theme directory is not
+writable by the host user** (`www-data`-owned, setgid) — a plain `cp` into it
+fails with *permission denied* and the test then silently re-measures the
+*unchanged* file. That failure is quiet: it reports PASS for the right reason by
+accident. **Verify a mutation landed (`php -l`, an `ls` for the scratch file)
+before believing the red.**
 
 **The placeholder fix itself is defensive, not a visible repair — and that is
 worth stating rather than deploying it as a fix.** On this catalogue **all 11**
@@ -1960,7 +1976,12 @@ deploy section above is therefore not reproducible on this catalogue**; the
 change is worth carrying for a future category that arrives with no product
 image, not because a tab is broken today.
 
-**Deploying it is low-risk but also low-value, and the version bump is the
-part that is not optional.** `style.css` 1.13.1 → 1.13.2 is what makes
-Autoptimize re-emit the bundle, so the pair travels together. Everything else
-about the deploy rule still applies: stage from a commit, never the worktree.
+Confirmed by measurement, not assumption: the *pre-fix* build at `843af66b`
+also renders **11 imgs / 11 tiles**, so 28.1b is green at HEAD and this commit
+does not depend on the peer's uncommitted template edit. It guards a future
+category that arrives with no product image.
+
+**Deploying the theme half is still low-value, and the version bump is the part
+that is not optional.** `style.css` 1.13.1 → 1.13.2 is what makes Autoptimize
+re-emit the bundle, so the pair travels together. Everything else about the
+deploy rule still applies: stage from a commit, never the worktree.
