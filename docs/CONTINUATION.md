@@ -2,20 +2,18 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-30 (latest).** `master` is in sync with `origin` and the
-> suite is **268/0** on **both** host forms — `https://lylyrose.local` and
-> `http://192.168.1.13:8030` — green on each.
+> **Last updated 2026-09-30 (latest).** The suite is **268/0** on **both** host
+> forms — `https://lylyrose.local` and `http://192.168.1.13:8030` — green on
+> each, and the rebrand, the hero carousel and the offers carousel are all
+> **live** on `lylyrose.ir`.
 >
-> **The real open item is committed now, and it is still not deployed.** A
-> peer session left the `/incredible-offers/` page rewritten from a paginated
-> grid to Digikala-style horizontal carousel rows in the working tree
-> (~19:30–20:55 2026-09-29), and it arrived **red at 264/3**. It is now
-> **268/0**: the three failures were stale assertions pinned to the grid the
-> rewrite deleted, not defects in the feature. The feature itself was verified
-> correct before its tests were touched. See *"🚧 The offers-page carousel rewrite
-> is done locally and NOT deployed"* — **it is still not on `lylyrose.ir`**, and
-> deploying it is the next step. Read that section before deploying it; deploy
-> from the commit, never the worktree, and note the file list spans the plugin
+> **The offers carousel is deployed** (`843af66b`, six files). The next section
+> down describes the *rewrite* arriving red at 264/3; the failure and the fix are
+> historical, and *"✅ The offers carousel is live"* records the deploy. **Read
+> the deploy section before shipping anything from this tree** — the file list
+> spans the plugin *and* the theme, offers styling lives in
+> `assets/css/flash-sales.css` rather than `style.css`, and the carousel rules
+> are in a **sixth** file that is easy to miss.
 > *and* the theme.
 >
 > **The host-agnostic config change rode along and is now verified.** Dropping
@@ -28,6 +26,18 @@
 > Item 2 (per-host settings) remains the only *listed* open item and is still
 > human-blocked — four of its five sub-items need credentials that cannot be
 > minted from this side, and the fifth (Wordfence) is a judgement call.
+>
+> **`FEATURES_ROADMAP.md`'s "current-state facts" were all false and are now
+> corrected (2026-09-30).** That block was written 2026-08-29 from the
+> pre-feature stack and never revisited, so it still claimed no image
+> optimization, no faceted filters, plain title-only search, no
+> coupons/cart-abandonment/loyalty, no transactional email, four missing pages
+> and registration `OFF` — **all seven shipped**, and registration reads `yes`
+> live. Every P0–P2 item below it reads DONE, which is why nobody had cause to
+> re-read a list that looked finished. Its own step 5 also still said "229 checks
+> across 28 sections" (now **268/31**). This is
+> [[production-state-vs-docs]] in its purest form: a "current state" block is a
+> list of *last known* facts, and nothing in a green suite re-verifies it.
 >
 > **The off-host backup gap is CLOSED as of 2026-09-30.** A **new** Updraft set,
 > `1ba9e09b6fd7`, fired at **04:52 UTC** and has been pulled to
@@ -1894,6 +1904,27 @@ to it, so the bare path made it seek
 `/home3/bqwyvowk/lylyroseirwp-includes/version.php` and fatal. The site was
 fine — the probe was wrong, the **eleventh** time that has happened on this file.
 Do not predefine `ABSPATH`; `__DIR__ . '/wp-load.php'` is enough.
+
+**A second one, same pass, and the same lesson twice in a day.** Checking whether
+the ZarinPal merchant is the all-zero dummy, I wrote
+`ctype_digit($mc) && trim($mc,'0')===''`. `ctype_digit()` rejects the **dashes**
+in a UUID, so the test could never report "dummy" and the probe printed
+`ALL_ZERO=no` — which would have filed a false alarm claiming production holds a
+real merchant. Strip non-digits **first**; the truth is
+`MATCHES_DOC_DUMMY: YES`, exactly as this file has always said. **A predicate that
+cannot return the answer is not a measurement**, and it looked like a finding
+because it returned a confident `no`.
+
+**Two more read-only probes the same pass** (both deleted, both confirmed by FTP
+`mlsd` *and* HTTP 404): production's real stack, and the gateway registry.
+Together they killed three more doc claims — the "version updates are LOCAL ONLY"
+warning (production reads core 7.1.2 / WooCommerce 11.1.2 / Dokan 5.1.3 /
+woo-wallet 1.7.0 / Persian SMS 7.2.3, all active, 18 active plugins, matching
+local) and the empty-directory residue. **Reading settings through the gateway
+object is the reliable route**: the row is `woocommerce_wc_zpal_settings` (the id
+`WC_ZPal` lowercased), and `WC()->payment_gateways()` is empty from a bare
+`wp-load.php` because WooCommerce only populates it on `woocommerce_init` — so
+`do_action('woocommerce_init')` first, or the registry reads as "no gateways".
 
 Local copy: `backups/updraft-2026-09-30-0452/`, with the per-file size and SHA1
 record in that directory's `PULL-REPORT.txt`.

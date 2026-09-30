@@ -20,13 +20,34 @@ ordered by revenue/UX impact vs effort.
 
 Current-state facts this list is built on:
 
-- Guest checkout ON, but **account registration OFF** (`woocommerce_enable_myaccount_registration = no`)
-- No image optimization (no WebP/AVIF conversion) — perfume store is image-heavy
-- Shop/archive pages have **no faceted filters** (no brand/gender/price/attribute sidebar)
-- Search is a plain `?s=` title match — no SKU/code search, no fuzzy matching
-- No coupons marketing surfaces, no cart-abandonment capture, no loyalty points
-- No transactional **email** templates beyond WP defaults; SMS exists
-- Missing pages: تماس با ما, درباره ما, پیگیری سفارش, FAQ
+> ⚠️ **Corrected 2026-09-30.** Every line below was false. This block was written
+> 2026-08-29 from the pre-feature stack and never revisited, so it read as a gap
+> analysis long after all seven gaps closed. It is the same failure as the entries
+> in [[production-state-vs-docs]] — a "current state" list is a list of *last
+> known* facts, and re-verify before acting on it. Re-read against the live site.
+
+- Guest checkout ON, **account registration ON** (`woocommerce_enable_myaccount_registration = yes`, verified live 2026-09-30; this said `no`)
+- ~~No image optimization~~ — **WebP ships**: `ASC_Images` converts future JPEG/PNG on
+  `image_editor_output_format` (2560px cap) and the library is 100% WebP. Section 13.
+- ~~No faceted filters~~ — **shipped 2026-09-01**: `archive-product.php` renders
+  availability/discount toggles, برند checkboxes, جنسیت/غلظت/حجم facets, price
+  range and sort, URL-driven, with `noindex,follow` on permutations.
+- ~~Plain `?s=` title match~~ — **SKU/code search ships**:
+  `ASC_Product_Code::search_redirect()` resolves `sku-<digits>`, `sku <digits>` or
+  bare digits to the product.
+- ~~No coupons / cart-abandonment / loyalty~~ — **all three ship**: `ASC_Coupons`
+  campaign banner + seeded `WELCOME10`; woo-cart-abandonment-recovery v2.1.3 with
+  `ASC_Cart_Abandonment` sending a Persian SMS recovery link; woo-wallet 2% cashback
+  with a top-up product.
+- ~~No transactional email templates~~ — `ASC_Emails` ships ~40 Persian gettext
+  mappings plus branded options, because the `fa_IR` pack misses them.
+- ~~Missing pages~~ — all four ship via `ASC_Store_Pages` with Persian theme
+  templates and footer links; `/contact/` `/about/` `/track-order/` `/faq/` all
+  return **200** on `lylyrose.ir`.
+
+**What is genuinely still absent** (verified 2026-09-30): AVIF, fuzzy search
+(ranking only — a SKU/code lookup exists), and per-host credentials for SMS,
+payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
 
 ---
 
@@ -277,8 +298,11 @@ the store-specific exceptions, is in
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
    ports 8010 → 8030. The `ASC_` prefix is unchanged.
 5. `bash docker/run-tests.sh` in this repo (canonical host `https://lylyrose.local`) must
-   stay green — currently **229 checks across 28 sections**. Test the canonical host, not
+   stay green — currently **268 checks across 31 sections**. Test the canonical host, not
    the mapped port: a `localhost:8030` request 301-redirects and reports mass failures.
+   The host form matters too: `/wp-admin/` authenticates against `SECURE_AUTH_COOKIE` over
+   HTTPS but against `AUTH_COOKIE` over plain HTTP, so a run on the LAN port needs both
+   cookies sent or every admin assertion 302s — see `CONTINUATION.md`.
 6. Update `docs/DEVELOPMENT_LOG.md` and commit on `master`.
 
 Store-specific changes (branding, a campaign page, host config) skip steps 1–3 and are
