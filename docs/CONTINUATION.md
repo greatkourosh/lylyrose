@@ -29,14 +29,18 @@
 > human-blocked — four of its five sub-items need credentials that cannot be
 > minted from this side, and the fifth (Wordfence) is a judgement call.
 >
-> **The off-host backup gap is still open, and wider than the last entry says.**
-> Re-checked 2026-09-30 04:47 UTC: the predicted ~00:4x UTC fire has **not
-> happened** — the host still holds only 2 sets and the newest is the 2026-09-29
-> 00:59 UTC one already pulled. The schedule is registered and 8h overdue, which
-> on this low-traffic site is a late fire, not a fault. That set predates the
-> rebrand *and* the hero carousel (theme `1.10.0` vs the repo's `1.13.0`), so
-> the newest off-host copy is three theme versions behind production. See
-> *"⚠️ Re-pulled 2026-09-30"* under item 3.
+> **The off-host backup gap is CLOSED as of 2026-09-30.** A **new** Updraft set,
+> `1ba9e09b6fd7`, fired at **04:52 UTC** and has been pulled to
+> `backups/updraft-2026-09-30-0452/` — 7 files, sizes 7/7 equal to the host, and
+> **all six** archive SHA1s matching what `updraft_backup_history` recorded, so
+> the copy is provably the one the plugin wrote. It captures the rebrand and the
+> hero carousel but **predates the offers carousel** (host mtimes 09:30/09:34,
+> five hours after the fire), so a rollback loses the carousel. The next fire
+> (~20:46 UTC) closes that too. See *"✅ The backup gap is CLOSED"*.
+>
+> **Upstream `d96c2869` is mirrored in the tree but only half of it** — the two
+> theme files arrived, its two new suite assertions did not. See *"🚧 Upstream
+> `d96c2869` is mirrored"*.
 >
 > The stray `public_html/wp-content/` skeleton on the marketing site is **also
 > closed** — it was removed over plain FTP, and the "needs cPanel File Manager in
@@ -68,6 +72,15 @@
    (`WP_CACHE` is false today), activate Wordfence.
 3. **1a-ii, a remote UpdraftPlus target** — optional; the daily schedule writes
    host-local only. Keep 1b (off-host pull) current.
+   **1b RE-DONE 2026-09-30 11:2x UTC, and it supersedes the entry below.** A new
+   set, `1ba9e09b6fd7`, fired **2026-09-30 04:52 UTC** and is pulled off-host to
+   `backups/updraft-2026-09-30-0452/` — 7 files, 7/7 sizes equal to the host's
+   FTP `SIZE`, **6/6** SHA1s matching `updraft_backup_history`, `unzip -t` and
+   `gzip -t` clean, 101 `CREATE TABLE`, log ending "The backup succeeded and is
+   now complete". It carries the rebrand and the hero carousel; it **predates the
+   offers carousel** (host mtimes 09:30/09:34, five hours after the fire). The
+   cycle has rescheduled to 20:46 UTC. **The only remaining technical item in
+   this file.** See *"✅ The backup gap is CLOSED"*.
    **1b DONE 2026-09-29 13:2x UTC.** The newest Updraft set
    (`74ac5e865eb7`, 2026-09-29 00:59 UTC) is now pulled off-host to
    `backups/updraft-2026-09-29-0059/` — 7 files, all 7 sizes equal to the host's
@@ -1744,3 +1757,179 @@ Keep this regardless of the failure claim above.
 **Offers section 28 is green** (10 rows, 78 products / 78 cards, 192px track), and
 the carousel work is mirrored and verified upstream. Still uncommitted in this
 working tree, as always.
+
+## ✅ The offers carousel is live on `lylyrose.ir` — 2026-09-30
+
+**The section above is now done.** The carousel from commit `843af66b` is deployed
+and verified on the live site. Suite **268/0** before the deploy. Six files, not
+five — see the CSS miss below.
+
+| Check (live, over HTTPS) | Result |
+| --- | --- |
+| `dk-flash-grid` / `dk-flash-row` / `dk-flash-track` | **0 / 10 / 10** — was `1 / 0 / 0` with 24 cards |
+| cards | **78**, matching the 78 on-sale products |
+| horizontal overflow @ 375 / 768 / 1440 | **0px** at all three; `scrollWidth - clientWidth` |
+| nav @ 375 | `−12 → −336`, clamps at `−1613` with `next` disabled, returns to `−12` |
+| nav @ 1440 | `−20 → −452`, clamps at **`−1308`** — the exact figure recorded above |
+| `?sort=cheapest` / `?sort=expensive` / `?in_stock=1` | 200, 78 cards each |
+| `?offer_cat=999999` | 200, 0 cards (empty state) |
+| served `style.css` `Version:` | **1.13.1** |
+
+**The sixth file was `assets/css/flash-sales.css`, and I initially missed it.** The
+carousel rules — `dk-flash-track`, `overflow-x: auto`, `contain: layout` — live in
+that file, **not** in `style.css`. I deployed five files, the page went green
+(10 tracks, 78 cards), and I nearly called it done. It was not: the served
+Autoptimize bundle had **zero** occurrences of `dk-flash-track`. The live
+`flash-sales.css` was **4,222 B against the repo's 6,940 B** — the stale pre-carousel
+copy, still serving the old grid's styling.
+
+**A 200 with the right markup is not the carousel working.** The page HTML was
+correct the whole time; only the styling was absent, which is exactly the failure
+the v2.4.0 two-missing-files deploy already recorded once. Two checks caught it and
+neither is in the suite:
+
+1. **grep the served asset, not the served page.** Walk every
+   `autoptimize_single_*.php` URL on the page and assert the carousel selectors are
+   in one. The version bump alone is not evidence — `?ver=1.13.1` was already on the
+   stale bundle.
+2. **compare the file's size on the host against the repo** before trusting any
+   "assets are served" claim.
+
+Autoptimize rebuilt on its own once the new CSS landed — the `lylyrose-flash-sales-css`
+handle moved to a **new** bundle hash (`b34e56b1…`), and the carousel rules are in
+it. Nothing had to be purged.
+
+**A peer session was editing two of my six files while I deployed, and the
+deploy-from-a-commit rule earned its place a second time.** Mid-run, `style.css`
+moved 1.13.1 → **1.13.2** and `page-incredible-offers.php` gained a
+`wc_placeholder_img_src()` fallback, with mtimes seconds old and neither change
+mine. Upstream `aroma_store` shows the same two edits, so this is a mirrored fix
+for **empty category thumbnails** — visible in the live screenshot as brand tabs
+whose `<img>` is simply absent, which the deployed copy still does
+(`if ( $image ) : ?><img …><?php endif; ?>`).
+
+I staged all six from `git show HEAD:<path>` and deployed that. Verified afterwards
+over FTP: **host == HEAD on all six, and host != worktree on the two the peer was
+holding.** Their work stayed local — neither stolen nor shipped. The live page's
+blank brand thumbnails are therefore expected for now, and are **not** a deploy
+defect.
+
+**One false alarm of mine, and it is the same one this section warns about
+elsewhere: I read `scrollLeft` immediately after a synthetic `.click()` and
+concluded the nav was dead on production.** It was not. The scroll is
+**smooth**, so `scrollLeft` still reads its old value for the duration; 40 clicks
+in a tight loop all land on the same frame. Live and local were in fact
+byte-identical in behaviour once read with a wait. **Measure an animated value
+after the animation, or drive the real control with a trusted input** — a
+synchronous read of a smooth-scrolling track will look broken on a build that
+works. Re-checked over CDP at three widths with the wait in place, live and local
+agree exactly.
+
+Deploy artefacts: pre-deploy copies of all six live files and their SHA256s are in
+`backups/carousels-pre-20260930/`.
+
+## ✅ The backup gap is CLOSED — set `1ba9e09b6fd7` pulled and verified 2026-09-30
+
+**The header above says the off-host gap is "still open, and wider than the last
+entry says". It is not.** The predicted ~00:4x UTC fire was still absent at
+04:47 UTC, so a later pass concluded "no new set exists". **A new set fired at
+04:52 UTC, five minutes after that check, and had simply not landed yet.** The
+conclusion was right on the evidence available and wrong on the fact — the
+doc's standing warning applies to itself here.
+
+| Check | Result |
+| --- | --- |
+| Run id / fired | `1ba9e09b6fd7`, **2026-09-30 04:52 UTC** (predicted ~00:4x, **~4h late**) |
+| Files pulled | **7** (5 archives + `mu-plugins.zip` + the run log), **115,137,185 B** |
+| Size vs host | **7/7 match** — asserted per file, fails loudly on any mismatch |
+| SHA1 vs `updraft_backup_history` | **6/6 match** (see table) |
+| Integrity | `unzip -t` passes on all 5 zips (23,511 / 1,869 / 624 / 457 / 1 entries); `gzip -t` passes on `db.gz` |
+| Run log | 0 error/warning/fatal; ends `The backup succeeded and is now complete` + the Persian line |
+| DB | decompresses fully (2,365,674 B), **101** `CREATE TABLE`, names `https://lylyrose.ir` |
+| Cycle rescheduled | `updraft_backup` + `updraft_backup_database` → **2026-09-30 20:46:33 UTC**, `daily` / 86400 |
+
+**All six recorded SHA1s match the pulled bytes** — the strongest available
+check, because it proves the copy is the one the plugin itself wrote rather than
+merely the right number of bytes:
+
+| Archive | SHA1 (recorded == local) |
+| --- | --- |
+| `plugins` | `248fba4da8f3f447c486fe08ade3ada7754034cb` ✅ |
+| `themes` | `53af6e322976b3b49f06d62a8280895a75af1ff7` ✅ |
+| `uploads` | `0ac745ebbbed536427016453443a0848487806f5` ✅ |
+| `mu-plugins` | `dca5c3bea288936f201a1ea1cd4c58bf74124196` ✅ |
+| `others` | `28cd1c1b03bd6d0b48a81502ac052d87343d9993` ✅ |
+| `db` | `ef16c75cbc716c6241ac50515a0351f1529796a4` ✅ |
+
+**But it still predates the offers carousel — state what a rollback would lose.**
+The archive is at `style.css` **`1.13.0`** (repo working tree `1.13.2`):
+
+| Captured | Not captured |
+| --- | --- |
+| the rebrand (0 × `ef394e`, 2 × `C98F91`) | the offers carousel |
+| the hero carousel (`hero.js` 5,090 B, 4 `dk-hero-slide`) | — |
+| `flash-sales.css` at **4,222 B**, the **pre-carousel** copy | the 6,940 B carousel CSS |
+| offers page still `dk-flash-grid=1`, `dk-flash-row=0` | 10 carousel rows / 78 cards |
+
+The host's `style.css` and `flash-sales.css` carry mtimes **09-30 09:30** and
+**09-30 09:34** UTC — five hours *after* the 04:52 fire. So the carousel landed
+after this set ran, and the newest off-host copy is **one deploy behind** on the
+carousel rather than three theme versions behind as before. That is a large
+improvement, and the next fire (~20:46 UTC) captures the carousel too.
+
+**The one `localhost` in the dump is mysqldump's own header**, not a stranded
+URL: `# Hostname: localhost` in the preamble. There are **0** `localhost`
+occurrences in any table row — the 2026-09-24 search-replace is still clean.
+
+**Probe discipline held.** One read-only docroot probe, random `_`-prefixed name,
+`php -l`'d locally first, uploaded/fetched/deleted, and the deletion confirmed by
+**both** an FTP `mlsd` showing no `_*` files and an HTTP **404**. No option was
+written, no backup was triggered, no `Backup/*` UAPI function was called, nothing
+on the host was modified. Site re-checked after: 11 URLs all **200**, `<title>`
+and `/wp-json/` both `Lyly Rose`.
+
+**A probe bug fired first, and it was mine.** The probe `define( 'ABSPATH',
+__DIR__ )` before requiring `wp-load.php`; WordPress reads `ABSPATH` and appends
+to it, so the bare path made it seek
+`/home3/bqwyvowk/lylyroseirwp-includes/version.php` and fatal. The site was
+fine — the probe was wrong, the **eleventh** time that has happened on this file.
+Do not predefine `ABSPATH`; `__DIR__ . '/wp-load.php'` is enough.
+
+Local copy: `backups/updraft-2026-09-30-0452/`, with the per-file size and SHA1
+record in that directory's `PULL-REPORT.txt`.
+
+## 🚧 Upstream `d96c2869` is mirrored in the tree but its two tests are not
+
+`aroma_store` commit `d96c2869` ("Render a tile for every offers category, and
+pin the ASC_ count") is **committed there and present here** — this tree's
+`page-incredible-offers.php` and `style.css` carry the identical two edits
+(`wc_placeholder_img_src()` fallback, `Version:` 1.13.1 → 1.13.2), still
+uncommitted, still deliberately not deployed. The theme template was mirrored;
+**the rest of the commit was not.** Upstream also changed `docker/run-tests.sh`
+(+28 lines, two new assertions), and neither exists in this suite:
+
+| Upstream assertion | Present here |
+| --- | --- |
+| `every category tile renders an image` (28.1b) | **no** |
+| `core plugin exposes 18 ASC_ classes` (new section 32) | **no** |
+
+So this repo's suite says **268/0** and still cannot detect either condition the
+upstream commit was written to catch. Per the mirror rule in
+[[aroma_store_is_upstream]] these belong here too, and they are the reason to
+mirror the *commit* rather than just its two theme files.
+
+**The placeholder fix itself is defensive, not a visible repair — and that is
+worth stating rather than deploying it as a fix.** On this catalogue **all 11**
+`ASC_Flash_Sales::top_categories()` terms resolve an image, and all 11 brand
+tabs on the live page already render `<img>` (every `src` 200). The only tab
+without one is `همه شگفت‌انگیزها`, which is a `٪` glyph by design and must stay
+that way — which is exactly why upstream's assertion counts `<a
+class="dk-flash-tab"` and subtracts 1. **The blank-thumbnail claim in the
+deploy section above is therefore not reproducible on this catalogue**; the
+change is worth carrying for a future category that arrives with no product
+image, not because a tab is broken today.
+
+**Deploying it is low-risk but also low-value, and the version bump is the
+part that is not optional.** `style.css` 1.13.1 → 1.13.2 is what makes
+Autoptimize re-emit the bundle, so the pair travels together. Everything else
+about the deploy rule still applies: stage from a commit, never the worktree.
