@@ -168,6 +168,23 @@ function lylyrose_gift_wrap_style() {
 }
 add_action( 'wp_enqueue_scripts', 'lylyrose_gift_wrap_style', 20 );
 
+add_action( 'wp_enqueue_scripts', 'lylyrose_flash_sales_assets', 20 );
+
+/**
+ * Perfume finder assets — only on the finder page.
+ */
+function lylyrose_perfume_finder_assets() {
+	if ( ! class_exists( 'ASC_Perfume_Finder' ) || ! ASC_Perfume_Finder::is_finder_page() ) {
+		return;
+	}
+	wp_enqueue_style(
+		'lylyrose-perfume-finder',
+		get_theme_file_uri( 'assets/css/perfume-finder.css' ),
+		array( 'lylyrose-style' ),
+		lylyrose_version()
+	);
+}
+add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_finder_assets', 20 );
 /**
  * Back-in-stock notifier script — only on out-of-stock single product pages.
  */

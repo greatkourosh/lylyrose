@@ -72,6 +72,19 @@ $banners = array(
     array( 'tone' => 'teal',   'emoji' => '🧴', 'title' => __( 'ارزان‌ترین‌ها', 'lylyrose' ), 'sub' => __( 'خرید به‌صرفه', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'cheapest', $shop_url ) ),
 );
 
+// Home-page entry point. The banner is unconditional on class presence: the finder
+// page itself handles a thin catalogue, answering with a shop link rather than a dead
+// end, so gating the banner on coverage would only hide a working page.
+if ( class_exists( 'ASC_Perfume_Finder' ) ) {
+    $banners[] = array(
+        'tone'  => 'rose',
+        'emoji' => '🔍',
+        'title' => __( 'عطرت رو پیدا کن', 'lylyrose' ),
+        'sub'   => __( 'پیشنهاد عطر مناسب شما', 'lylyrose' ),
+        'url'   => get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ),
+    );
+}
+
 // Magazine cards: real blog posts when the site has them, else buying-guide
 // cards that link into the shop.
 $editorial = array();

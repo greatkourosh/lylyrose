@@ -1156,7 +1156,11 @@ printf '%s' "$CS2_JS" | grep -q "step2-ready"  && pass "JS sets step2-ready"    
 # not current), so the rule must not be scoped to step 2 only. Scoped to step 2,
 # step 1 never hid and both cards stayed stacked after "ادامه به پرداخت".
 CS2_CSS=$(docker exec "$WP_CONTAINER" cat /var/www/html/wp-content/themes/lylyrose/style.css)
-printf '%s' "$CS2_CSS" | grep -q '\.dk-checkout-step\.is-hidden[[:space:]]*{' \
+# html_has, not `grep -q`: style.css is ~82 KB, well past the 4 KB pipe buffer, so
+# grep -q exits at the first match and SIGPIPEs the writer, which surfaces under
+# this script's `set -o pipefail` as exit 141. Measured 8 of 15 runs on an
+# unmodified tree — same hazard documented at the html_has helper's definition.
+html_has "$CS2_CSS" '\.dk-checkout-step\.is-hidden[[:space:]]*{' \
   && pass "is-hidden rule covers both step cards" \
   || fail "is-hidden rule not scoped to .dk-checkout-step (step 1 would never hide)"
 
@@ -1684,14 +1688,388 @@ section "32. Upstream/downstream class parity"
 # number nothing verifies, so it rotted silently. Pinning the count means a
 # genuinely new class fails here and gets counted deliberately, instead of the
 # docs drifting again. This is the downstream half of the pair: aroma_store's
-# own suite asserts the same 18 against its plugin, so a class added upstream and
+# own suite asserts the same 19 against its plugin, so a class added upstream and
 # not mirrored fails on one host or the other.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "18" ] \
-  && pass "core plugin exposes 18 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 18 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "19" ] \
+  && pass "core plugin exposes 19 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 19 — a new class needs mirroring and a doc count update"
 
+section "34. Perfume finder (عطرت رو پیدا کن)"
+
+# The finder is a recommender over a catalogue whose fragrance metadata is mostly
+# absent, so the properties worth asserting are the negative ones: that it does not
+# invent attributes, does not rank a product it knows nothing about, and does not
+# pad a short list. A finder that returned three products for every query would pass
+# every "is the page working" check, so each assertion below names the failure it
+# is there to catch.
+
+# 34.1 The page must exist, be reachable, and show the quiz rather than a raw
+# PHP notice — the template is assigned by the plugin, so a page created before the
+# finder existed would render the default page template and nothing at all.
+FINDER_URL="$SITE_URL/perfume-finder/"
+FINDER_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$FINDER_URL")
+[ "$FINDER_CODE" = "200" ] \
+  && pass "perfume finder page responds 200" \
+  || fail "perfume finder page returned $FINDER_CODE (expected 200)"
+
+FINDER_HTML=$(curl -s --max-time 30 "$FINDER_URL")
+html_has "$FINDER_HTML" 'asc-finder__quiz' \
+  && pass "finder shows the quiz on a bare GET" \
+  || fail "finder did not render the quiz — the page template is probably not assigned"
+html_has "$FINDER_HTML" 'name="fragrance"' && html_has "$FINDER_HTML" 'name="budget"' \
+  && pass "quiz exposes the fragrance and budget axes" \
+  || fail "quiz is missing a scoring axis"
+# The budget radios must be labelled from the tier labels, not the raw tier keys:
+# "eco"/"mid" leaking into the UI is the visible symptom of a vocabulary read from
+# the wrong place.
+html_has "$FINDER_HTML" '<span>اقتصادی</span>' \
+  && pass "budget options render their Persian labels, not tier keys" \
+  || fail "budget options render raw tier keys instead of labels"
+
+# 34.2 Submitting the quiz returns at most three ranked cards, each with a
+# percentage, a coverage line and its contributing factors. Fewer than three is a
+# valid outcome and is asserted separately below.
+FINDER_POST=$(curl -s --max-time 60 -X POST "$FINDER_URL" \
+  --data-urlencode "fragrance=گل" \
+  --data-urlencode "gender=زنانه" \
+  --data-urlencode "occasion=مراسم رسمی" \
+  --data-urlencode "season=بهار" \
+  --data-urlencode "personality=کلاسیک" \
+  --data-urlencode "longevity=بلند" \
+  --data-urlencode "budget=premium")
+FINDER_CARDS=$(printf '%s' "$FINDER_POST" | grep -c 'class="asc-finder__result"')
+[ "${FINDER_CARDS:-0}" -ge 1 ] && [ "${FINDER_CARDS:-0}" -le 3 ] \
+  && pass "quiz returns 1-3 ranked cards ($FINDER_CARDS)" \
+  || fail "quiz returned $FINDER_CARDS cards — expected between 1 and 3, never a padded list"
+html_has "$FINDER_POST" 'asc-finder__percent' \
+  && pass "each result carries a match percentage" \
+  || fail "results carry no percentage"
+html_has "$FINDER_POST" 'asc-finder__coverage' \
+  && pass "each result says how much of the weighting it could use" \
+  || fail "results do not report coverage — a high score on one axis reads as a whole-catalogue verdict"
+# The factors are the explainability contract: the visitor must be able to see why
+# something was recommended. No single answer set exercises all three axes — the
+# scorable set is small and the axes do not co-occur on one product — so the occasion
+# label is asserted against the query that actually matches on occasion. Each factor
+# must render as a *match*, not merely appear: a label that only ever shows the
+# "no data recorded" note would still contain the text.
+FINDER_OCC=$(curl -s --max-time 60 -X POST "$FINDER_URL" \
+  --data-urlencode "fragrance=آکواتیک" \
+  --data-urlencode "gender=مردانه" \
+  --data-urlencode "occasion=محل کار" \
+  --data-urlencode "season=بهار" \
+  --data-urlencode "personality=مدرن" \
+  --data-urlencode "budget=mid")
+html_has "$FINDER_POST" "is-match\">رایحه‌های مورد علاقه شما" \
+  && pass "result explains the matched fragrance family" \
+  || fail "the fragrance factor never renders as a match"
+html_has "$FINDER_OCC" "is-match\">مناسب برای موقعیت انتخابی" \
+  && pass "result explains the matched occasion" \
+  || fail "the occasion factor never renders as a match"
+html_has "$FINDER_POST" "is-match\">ماندگاری مورد نظر" \
+  && pass "result explains the matched longevity" \
+  || fail "the longevity factor never renders as a match"
+html_has "$FINDER_POST" "اطلاعاتی برای این مورد ثبت نشده" \
+  && pass "an axis with no data is named rather than silently omitted" \
+  || fail "missing metadata is not disclosed — a gap in the data reads as a match"
+# Percentages are shown in Persian digits to match the rest of the storefront.
+# Spell the digits out as an alternation. A [۰-۹] range is read as a range of the
+# first byte of each character, and ۰..۹ share one: 0xD9..0xD9 collapsed to D9-B9,
+# which is an empty range that some greps then treat as "any latin digit" — so the
+# range matched "100" and the assertion passed on a build with no Persian digits.
+FINDER_FA_DIGITS=$(printf '%s' "$FINDER_POST" | grep -cE 'asc-finder__num">(۰|۱|۲|۳|۴|۵|۶|۷|۸|۹)')
+if [ "${FINDER_FA_DIGITS:-0}" -ge 1 ]; then
+  pass "match percentages render in Persian digits"
+else
+  fail "match percentages are not in Persian digits — they render as latin 0-9"
+fi
+
+# 34.3 The scoring engine's own invariants. Run in the container because they are
+# properties of the PHP, not of any page: determinism, the scorable gate, the cap,
+# and the fact that the weights never smuggle in brand or category as a stand-in for
+# a fragrance characteristic. The probe mutates one product's terms and restores them
+# in a shutdown handler, so a failure here cannot leave the catalogue altered.
+PROBE_SRC=$(mktemp)
+cat > "$PROBE_SRC" <<'PROBE_EOF'
+<?php
+require( '/var/www/html/wp-load.php' );
+if ( ! class_exists( 'ASC_Perfume_Finder' ) ) { echo "class=missing\n"; exit( 0 ); }
+echo "class=present\n";
+
+// These answers have to produce a genuine tie at the cap, because that is the only
+// situation in which the sort's tie-break runs. Occasion is "روزمره" because it is
+// the one occasion term three of the seeded products actually carry; picking one
+// they lack leaves that axis unscored everywhere and the cap never gets contested.
+$ANSWERS = array(
+	'fragrance'   => 'گل',
+	'gender'      => 'زنانه',
+	'occasion'    => 'روزمره',
+	'season'      => 'بهار',
+	'personality' => 'کلاسیک',
+	'longevity'   => 'بلند',
+	'budget'      => 'premium',
+);
+$ids_of = function ( $rows ) {
+	$ids = array();
+	foreach ( $rows as $row ) { $ids[] = (int) $row['id']; }
+	return $ids;
+};
+$run = function () use ( $ANSWERS, $ids_of ) { return $ids_of( ASC_Perfume_Finder::recommend( $ANSWERS ) ); };
+
+// How much of the catalogue is honestly rankable, and is a product with no
+// fragrance data genuinely excluded rather than scored on a default?
+$SCORABLE = 0; $EXCLUDED = 0; $EXCLUDED_ID = 0;
+foreach ( get_posts( array( 'post_type' => 'product', 'numberposts' => -1, 'fields' => 'ids' ) ) as $pid ) {
+	if ( null === ASC_Perfume_Finder::profile( wc_get_product( $pid ) ) ) {
+		$EXCLUDED++;
+		if ( ! $EXCLUDED_ID ) { $EXCLUDED_ID = (int) $pid; }
+	} else { $SCORABLE++; }
+}
+echo "scorable=$SCORABLE\n";
+echo "excluded=$EXCLUDED\n";
+echo "excluded_id=$EXCLUDED_ID\n";
+
+$RUN1 = $run(); $RUN2 = $run();
+echo 'run1=' . implode( ',', $RUN1 ) . "\n";
+echo 'deterministic=' . ( $RUN1 === $RUN2 && $RUN1 ? 'yes' : 'no' ) . "\n";
+echo 'count=' . count( $RUN1 ) . "\n";
+
+// A score that is a whole number inside 0..100 is derived; a float, a negative, or
+// a value over 100 means something else produced it.
+$PCT_OK = true;
+foreach ( ASC_Perfume_Finder::recommend( $ANSWERS ) as $row ) {
+	$pct = $row['result']['percent'];
+	if ( ! is_int( $pct ) || $pct < 0 || $pct > 100 ) { $PCT_OK = false; }
+}
+echo "percent_int_in_range=" . ( $PCT_OK ? 'yes' : 'no' ) . "\n";
+
+echo 'gender_alone=' . count( ASC_Perfume_Finder::recommend( array( 'gender' => 'زنانه' ) ) ) . "\n";
+echo 'no_answers=' . count( ASC_Perfume_Finder::recommend( array() ) ) . "\n";
+// An answer set of nothing but values that are not in the vocabulary carries no
+// preference at all, so it must rank nothing. Every scored axis skips an answer it
+// cannot place, which is what makes an empty result the honest answer here.
+echo 'nonsense_answers=' . count(
+	ASC_Perfume_Finder::recommend( ASC_Perfume_Finder::sanitise_answers(
+		array( 'fragrance' => 'ناموجود', 'occasion' => 'ناموجود', 'budget' => 'ناموجود' )
+	) )
+) . "\n";
+$WEIGHTS = ASC_Perfume_Finder::weights();
+echo 'weights=' . implode( ',', array_keys( $WEIGHTS ) ) . "\n";
+echo 'weights_sum=' . array_sum( $WEIGHTS ) . "\n";
+echo 'sanitise=' . json_encode(
+	ASC_Perfume_Finder::sanitise_answers( array( 'season' => 'بهار', 'fragrance' => 'ناموجود' ) ),
+	JSON_UNESCAPED_UNICODE ) . "\n";
+
+// Strip every scoring axis off one product the answer set actually returns, so the
+// gate and the cap are both observable in the same query.
+$SAVED = array();
+function asc_probe_restore() {
+	global $SAVED;
+	foreach ( $SAVED as $pid => $terms ) {
+		foreach ( $terms as $tax => $ids ) { wp_set_object_terms( $pid, $ids, $tax, false ); }
+		foreach ( $terms as $meta => $val ) {
+			if ( '_' === substr( $meta, 0, 1 ) ) { update_post_meta( $pid, $meta, $val ); }
+		}
+	}
+	$SAVED = array();
+}
+register_shutdown_function( 'asc_probe_restore' );
+
+$TARGET = $RUN1 ? (int) $RUN1[0] : 0;
+echo "mutating=$TARGET\n";
+// Gender is an answer, not a trait: it never contributes to a score.
+$SCORING = $ANSWERS; unset( $SCORING['gender'] );
+// The scorable gate has to hold for every candidate the finder weighs, not only
+// for the three rows the cap returns — by then the gate has already run, so
+// checking the survivors could only ever confirm itself. The filter is scoped to
+// this probe's own request; the HTTP assertions above run in their own.
+if ( $TARGET ) {
+	$SCOPED = static function () { return 200; };
+	add_filter( 'asc_perfume_finder_max_results', $SCOPED );
+	$ALL_CANDIDATES = array();
+	foreach ( ASC_Perfume_Finder::recommend( $SCORING ) as $row ) {
+		$ALL_CANDIDATES[] = (int) $row['id'];
+	}
+	remove_filter( 'asc_perfume_finder_max_results', $SCOPED );
+	$gate_leaks = 0;
+	foreach ( $ALL_CANDIDATES as $cid ) {
+		if ( null === ASC_Perfume_Finder::profile( wc_get_product( $cid ) ) ) { $gate_leaks++; }
+	}
+	echo 'candidates=' . count( $ALL_CANDIDATES ) . "\n";
+	echo 'gate_leaks=' . $gate_leaks . "\n";
+	foreach ( array( 'pa_fragrance_family', 'pa_occasion', 'pa_season', 'pa_personality', 'pa_longevity', 'pa_sillage' ) as $tax ) {
+		if ( ! taxonomy_exists( $tax ) ) { continue; }
+		$SAVED[ $TARGET ][ $tax ] = wp_get_object_terms( $TARGET, $tax, array( 'fields' => 'ids' ) );
+		wp_set_object_terms( $TARGET, array(), $tax, false );
+	}
+	foreach ( array( '_asc_notes_top', '_asc_notes_heart', '_asc_notes_base' ) as $meta ) {
+		$SAVED[ $TARGET ][ $meta ] = get_post_meta( $TARGET, $meta, true );
+		delete_post_meta( $TARGET, $meta );
+	}
+	echo 'mutated_profile=' . ( null === ASC_Perfume_Finder::profile( wc_get_product( $TARGET ) ) ? 'null' : 'present' ) . "\n";
+	$AFTER = $ids_of( ASC_Perfume_Finder::recommend( $ANSWERS ) );
+	echo 'mutated_in_results=' . ( in_array( $TARGET, $AFTER, true ) ? 'yes' : 'no' ) . "\n";
+	echo 'mutated_count=' . count( $AFTER ) . "\n";
+	asc_probe_restore();
+}
+
+// Every row the finder shows must earn something on at least one axis it could be
+// scored against, using the same gender-free answer set as the gate check above.
+$UNMATCHED = 0;
+foreach ( ASC_Perfume_Finder::recommend( $SCORING ) as $row ) {
+	if ( ! ASC_Perfume_Finder::matched( $row ) ) { $UNMATCHED++; }
+}
+echo "unmatched_rows=$UNMATCHED\n";
+
+// The three row shapes matched() has to tell apart: a scored axis that was met,
+// a scored axis that was missed, and an axis the product has no data for. Only
+// the first is a match — a row of misses and a row of gaps must both be rejected.
+$row_of = function ( $factors ) {
+	return array( 'id' => 999999, 'result' => array( 'factors' => $factors ) );
+};
+$HIT    = $row_of( array( array( 'axis' => 'fragrance', 'scored' => true,  'matched' => true ) ) );
+$MISS   = $row_of( array( array( 'axis' => 'fragrance', 'scored' => true,  'matched' => false ) ) );
+$NOSCORE= $row_of( array( array( 'axis' => 'season',    'scored' => false, 'matched' => false ) ) );
+$GAPS   = $row_of( array(
+	array( 'axis' => 'fragrance', 'scored' => true,  'matched' => false ),
+	array( 'axis' => 'season',    'scored' => false, 'matched' => false ),
+) );
+echo 'matched_verdicts=' . (
+	ASC_Perfume_Finder::matched( $HIT )
+	&& ! ASC_Perfume_Finder::matched( $MISS )
+	&& ! ASC_Perfume_Finder::matched( $NOSCORE )
+	&& ! ASC_Perfume_Finder::matched( $GAPS )
+		? 'yes' : 'no'
+) . "\n";
+echo "unmatched_rows=$UNMATCHED\n";
+
+// With the whole vocabulary removed no taxonomy answer is valid, so the submit path
+// must fall back to the quiz rather than answer on the surviving axes.
+$render_submit = function ( $post ) {
+	$_SERVER['REQUEST_METHOD'] = 'POST';
+	$_POST                     = $post;
+	ob_start();
+	ASC_Perfume_Finder::render();
+	$html = ob_get_clean();
+	unset( $_POST );
+	return $html;
+};
+add_filter( 'asc_finder_vocabularies', function () { return array(); } );
+$EMPTY_VOCAB = $render_submit( array( 'fragrance' => 'گل' ) );
+remove_all_filters( 'asc_finder_vocabularies' );
+echo 'empty_vocab_shows_quiz=' . ( false !== strpos( $EMPTY_VOCAB, 'asc-finder__quiz' ) ? 'yes' : 'no' ) . "\n";
+echo 'empty_vocab_results=' . substr_count( $EMPTY_VOCAB, 'class="asc-finder__result"' ) . "\n";
+// Control for the line above: the same submission with the vocabulary intact.
+$WITH_VOCAB = $render_submit( array( 'fragrance' => 'گل' ) );
+echo 'full_vocab_results=' . substr_count( $WITH_VOCAB, 'class="asc-finder__result"' ) . "\n";
+echo 'full_vocab_factors=' . substr_count( $WITH_VOCAB, 'asc-finder__factor' ) . "\n";
+PROBE_EOF
+
+PROBE_OUT=$(docker cp "$PROBE_SRC" "$WP_CONTAINER:/tmp/finder-probe.php" >/dev/null 2>&1 \
+  && docker exec "$WP_CONTAINER" php /tmp/finder-probe.php 2>/dev/null)
+rm -f "$PROBE_SRC"
+probe() { printf '%s\n' "$PROBE_OUT" | grep "^$1=" | tail -1 | cut -d= -f2-; }
+
+[ "$(probe class)" = "present" ] \
+  && pass "ASC_Perfume_Finder is loaded" \
+  || fail "ASC_Perfume_Finder is not loaded — the class is not required by the plugin"
+
+SCORABLE=$(probe scorable)
+EXCLUDED=$(probe excluded)
+[ "${SCORABLE:-0}" -ge 1 ] \
+  && pass "some products are rankable ($SCORABLE of $((SCORABLE + ${EXCLUDED:-0})))" \
+  || fail "no product is rankable — the gate is rejecting the whole catalogue"
+
+# The gate is the feature: a product with no fragrance metadata must be excluded,
+# not scored. The probe strips a real product's terms and re-scores; if the finder
+# defaulted missing attributes instead, that product would still rank.
+[ "$(probe mutated_profile)" = "null" ] \
+  && pass "a product with no fragrance metadata is not rankable" \
+  || fail "a product with no fragrance metadata still produces a profile — attributes are being invented"
+[ "$(probe mutated_in_results)" = "no" ] \
+  && pass "an unrankable product is excluded from the results" \
+  || fail "an unrankable product is still being recommended"
+[ "$(probe gate_leaks)" = "0" ] \
+  && pass "no unrankable product is ranked, checked over the whole candidate list" \
+  || fail "the scorable gate let through $(probe gate_leaks) product(s) with no fragrance metadata — attributes are being invented"
+# If the uncapped candidate list is no longer bigger than the cap, the gate check
+# above can no longer see a leak and would pass against a gate that returns nothing.
+[ "$(probe candidates)" -gt 3 ] \
+  && pass "the scorable-gate check sees more candidates than the cap shows" \
+  || fail "only $(probe candidates) candidate(s) are rankable, so the gate check is vacuous"
+[ "$(probe deterministic)" = "yes" ] \
+  && pass "the same answers produce the same ranking twice over" \
+  || fail "the ranking is not deterministic — two identical requests differ"
+[ "$(probe percent_int_in_range)" = "yes" ] \
+  && pass "match percentages are whole numbers in 0..100" \
+  || fail "a match percentage is not a whole number in 0..100 — the score is not derived"
+
+# A query that matches a sliver of the scorable set must be allowed to come back
+# short. The mutation leaves fewer scorable products than the cap, and the finder
+# must return what exists rather than topping the list up.
+MUTATED_COUNT=$(probe mutated_count)
+[ "${MUTATED_COUNT:-3}" -le 3 ] \
+  && pass "results are capped at 3 and never padded ($MUTATED_COUNT after mutation)" \
+  || fail "results exceeded the 3-item cap ($MUTATED_COUNT)"
+
+[ "$(probe gender_alone)" = "0" ] \
+  && pass "gender alone does not rank anything" \
+  || fail "gender alone produced rankings — gender is being scored as a fragrance trait"
+[ "$(probe no_answers)" = "0" ] \
+  && pass "no answers produce no results" \
+  || fail "an empty answer set produced results"
+[ "$(probe nonsense_answers)" = "0" ] \
+  && pass "answers that are all outside the vocabulary produce no results" \
+  || fail "a submission of nothing but out-of-vocabulary answers still ranked $(probe nonsense_answers) product(s) — the empty-answer guard is not the only thing standing between the user and a padded list"
+[ "$(probe unmatched_rows)" = "0" ] \
+  && pass "no ranked row matches nothing on a scored axis" \
+  || fail "a ranked row matches nothing on any axis it could be scored against — the list is padded"
+# Assert matched() against rows built by hand. Asking "does every returned row
+# match?" can only ever pass, because render() filters through matched() before
+# anything is returned — so a matched() that ignored the factor flags would still
+# satisfy it. This feeds it the three shapes the filter has to judge.
+if [ "$(probe matched_verdicts)" = "yes" ]; then
+  pass "matched() accepts a genuine match and rejects unscored and non-matching rows"
+else
+  fail "matched() is wrong on a hand-built row (got $(probe matched_verdicts)) — it is what stops the list being padded with 0%% matches"
+fi
+
+# Brand and category are not fragrance characteristics. A weight on either would let
+# the finder recommend on a brand name while claiming it reasoned about scent.
+case ",$(probe weights)," in
+  *,brand,*|*,"$ACTIVE_THEME",*|*,"cat",*|*,"product_cat",*)
+    fail "scoring weights include brand or category (got $(probe weights))" ;;
+  *)
+    pass "scoring weights exclude brand and category ($(probe weights))" ;;
+esac
+[ "$(probe weights_sum)" = "100" ] \
+  && pass "scoring weights sum to 100" \
+  || fail "scoring weights sum to $(probe weights_sum), expected 100"
+
+# An answer that is not in the vocabulary is dropped, and per-axis: a season value
+# submitted for occasion must not score against the occasion axis.
+if printf '%s' "$(probe sanitise)" | grep -q '"season":"بهار"' \
+   && ! printf '%s' "$(probe sanitise)" | grep -q 'ناموجود'; then
+  pass "answers outside the vocabulary are dropped, per axis"
+else
+  fail "sanitise_answers kept an invalid or cross-axis answer ($(probe sanitise))"
+fi
+
+[ "$(probe empty_vocab_shows_quiz)" = "yes" ] && [ "$(probe empty_vocab_results)" = "0" ] \
+  && pass "an empty vocabulary falls back to the quiz instead of answering" \
+  || fail "with no vocabulary the finder still answered ($(probe empty_vocab_results) cards) — the control line below shows it should return $(( $(probe full_vocab_results) ))"
+[ "$(probe full_vocab_results)" -ge 1 ] 2>/dev/null \
+  && pass "the same submission with a vocabulary does return results ($(probe full_vocab_results))" \
+  || fail "the vocabulary fallback assertion above passed for the wrong reason: a valid submission also returns nothing"
+
+# 34.4 The finder is reachable from the storefront. A feature nobody can navigate
+# to is not shipped, and the nav entry is theme code, not plugin code, so nothing
+# else in this suite would notice its absence.
+html_has "$HOME_HTML" "$SITE_URL/perfume-finder/" \
+  && pass "the finder is linked from the storefront (nav or home banner)" \
+  || fail "no link to /perfume-finder/ in the homepage markup — the feature is unreachable"
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

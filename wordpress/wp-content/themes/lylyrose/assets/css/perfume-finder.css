@@ -1,0 +1,177 @@
+/* «عطرت رو پیدا کن» — the guided perfume finder page. */
+
+.asc-finder {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 8px 0 40px;
+}
+
+.asc-finder__title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 20px;
+}
+
+.asc-finder__step {
+    border: 1px solid var(--dk-line, #e6e2dd);
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+    margin: 0 0 14px;
+    background: #fff;
+}
+
+.asc-finder__step legend {
+    font-weight: 600;
+    font-size: 15px;
+    padding: 0 6px;
+    color: var(--dk-ink, #3a3330);
+}
+
+.asc-finder__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.asc-finder__option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--dk-line, #e6e2dd);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #fdfcfa;
+    transition: border-color .15s, background .15s;
+}
+
+.asc-finder__option:hover {
+    border-color: var(--dk-rose, #c98f91);
+    background: #fff;
+}
+
+.asc-finder__option input {
+    margin: 0;
+    accent-color: var(--dk-rose, #c98f91);
+}
+
+.asc-finder__actions {
+    margin: 18px 0 0;
+}
+
+.asc-finder__submit {
+    font: inherit;
+    font-weight: 600;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 28px;
+    cursor: pointer;
+    color: #fff;
+    background: var(--dk-rose, #c98f91);
+}
+
+.asc-finder__submit:hover {
+    background: var(--dk-rose-dark, #b87a7c);
+}
+
+.asc-finder__alt {
+    margin: 18px 0 0;
+    font-size: 14px;
+    color: var(--dk-muted, #7a6f6a);
+}
+
+.asc-finder__alt a {
+    color: var(--dk-rose, #c98f91);
+}
+
+.asc-finder__empty {
+    border: 1px dashed var(--dk-line, #e6e2dd);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    color: var(--dk-muted, #7a6f6a);
+}
+
+/* Results */
+.asc-finder__results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.asc-finder__result {
+    border: 1px solid var(--dk-line, #e6e2dd);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 0 0 14px;
+    background: #fff;
+}
+
+.asc-finder__result > a {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dk-ink, #3a3330);
+    text-decoration: none;
+}
+
+.asc-finder__result > a:hover {
+    color: var(--dk-rose, #c98f91);
+}
+
+.asc-finder__percent {
+    float: left;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dk-rose, #c98f91);
+}
+
+/* Sits under the title, not floated: a float beside a long Persian product name
+   drops below it and reads as part of the factor list. */
+.asc-finder__coverage {
+    display: block;
+    margin: 4px 0 10px;
+    font-size: 12px;
+    color: var(--dk-muted, #7a6f6a);
+}
+
+.asc-finder__factors {
+    list-style: none;
+    margin: 0;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--dk-line, #eeeae5);
+}
+
+.asc-finder__factor {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--dk-muted, #7a6f6a);
+}
+
+.asc-finder__factor.is-match {
+    color: var(--dk-ink, #3a3330);
+}
+
+.asc-finder__factor.is-match::before {
+    content: '✓ ';
+    color: var(--dk-rose, #c98f91);
+    font-weight: 700;
+}
+
+.asc-finder__factor.is-unscored {
+    opacity: .7;
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .asc-finder__percent {
+        float: none;
+        display: block;
+    }
+}
+/* Percentages change on every submission; tabular figures stop the card from
+   reflowing as the number changes width. */
+.asc-finder__num {
+    font-variant-numeric: tabular-nums;
+}

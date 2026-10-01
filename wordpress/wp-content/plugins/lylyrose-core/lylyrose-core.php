@@ -100,6 +100,9 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-fragrance-notes.php';
         ASC_Fragrance_Notes::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-perfume-finder.php';
+        ASC_Perfume_Finder::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-stock-notifier.php';
         ASC_Stock_Notifier::init();
 
@@ -146,6 +149,7 @@ class Lylyrose_Core {
             'pa_occasion'          => array( __( 'مناسبت', 'lylyrose-core' ), __( 'مناسبت', 'lylyrose-core' ), __( 'مناسبت‌ها', 'lylyrose-core' ), __( 'مناسبت', 'lylyrose-core' ) ),
             'pa_longevity'         => array( __( 'ماندگاری', 'lylyrose-core' ), __( 'ماندگاری', 'lylyrose-core' ), __( 'ماندگاری‌ها', 'lylyrose-core' ), __( 'ماندگاری', 'lylyrose-core' ) ),
             'pa_sillage'           => array( __( 'پخش بو', 'lylyrose-core' ), __( 'پخش بو', 'lylyrose-core' ), __( 'پخش بو', 'lylyrose-core' ), __( 'پخش بو', 'lylyrose-core' ) ),
+            'pa_personality'       => array( __( 'شخصیت', 'lylyrose-core' ), __( 'شخصیت', 'lylyrose-core' ), __( 'شخصیت‌ها', 'lylyrose-core' ), __( 'شخصیت', 'lylyrose-core' ) ),
         );
 
         foreach ( $taxonomies as $tax => $labels ) {
@@ -192,6 +196,7 @@ class Lylyrose_Core {
             'occasion'          => __( 'مناسبت', 'lylyrose-core' ),
             'longevity'         => __( 'ماندگاری', 'lylyrose-core' ),
             'sillage'           => __( 'پخش بو', 'lylyrose-core' ),
+            'personality'       => __( 'شخصیت', 'lylyrose-core' ),
         );
 
         global $wpdb;

@@ -25,7 +25,8 @@ foreach ( $rows as $row ) {
 		<a class="dk-flash-tab <?php echo ! $tab ? 'is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array_merge( $params, array( 'offer_cat' => 0 ) ), $base ) ); ?>" <?php echo ! $tab ? 'aria-current="page"' : ''; ?>><span class="dk-offers-all">٪</span>همه شگفت‌انگیزها</a>
 		<?php foreach ( ASC_Flash_Sales::top_categories() as $term ) : ?>
 		<a class="dk-flash-tab <?php echo $tab === $term->term_id ? 'is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array_merge( $params, array( 'offer_cat' => $term->term_id ) ), $base ) ); ?>" <?php echo $tab === $term->term_id ? 'aria-current="page"' : ''; ?>>
-			<?php $image = lylyrose_term_image( $term ); if ( $image ) : ?><img src="<?php echo esc_url( $image ); ?>" alt="" width="72" height="72" loading="lazy"><?php endif; ?>
+			<?php $image = lylyrose_term_image( $term ); ?>
+			<img src="<?php echo esc_url( $image ? $image : wc_placeholder_img_src( "woocommerce_thumbnail" ) ); ?>" alt="" width="72" height="72" loading="lazy">
 			<?php echo esc_html( $term->name ); ?>
 		</a>
 		<?php endforeach; ?>

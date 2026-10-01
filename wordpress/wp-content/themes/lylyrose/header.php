@@ -153,6 +153,9 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                     <?php endforeach;
                 endif;
                 ?>
+                <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
+                    <li class="dk-catnav-item"><a href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?></a></li>
+                <?php endif; ?>
                 <li class="dk-catnav-item"><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'همه دسته‌ها', 'lylyrose' ); ?></a></li>
             </ul>
         </div>
@@ -167,6 +170,9 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
         <button class="dk-drawer-close" aria-label="<?php echo esc_attr__( 'بستن منو', 'lylyrose' ); ?>" onclick="this.closest('.dk-drawer').classList.remove('active');document.querySelector('.dk-drawer-overlay').classList.remove('active')">&times;</button>
     </div>
     <nav class="dk-drawer-nav">
+        <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
+            <a href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?></a>
+        <?php endif; ?>
         <a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'فروشگاه', 'lylyrose' ); ?></a>
         <?php if ( is_user_logged_in() ) : ?>
             <a href="<?php echo esc_url( wc_get_account_endpoint_url( 'dashboard' ) ); ?>"><?php esc_html_e( 'حساب کاربری', 'lylyrose' ); ?></a>
