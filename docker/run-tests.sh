@@ -1164,6 +1164,18 @@ html_has "$CS2_CSS" '\.dk-checkout-step\.is-hidden[[:space:]]*{' \
   && pass "is-hidden rule covers both step cards" \
   || fail "is-hidden rule not scoped to .dk-checkout-step (step 1 would never hide)"
 
+# 24.3 The mobile header search. `.dk-search-form` is `flex: 1` (= `1 1 0%`), so on
+# a 375px viewport the menu toggle, logo and the 182px-wide account+cart pair take
+# every pixel and the form measured 0.2px wide — the input was 60px but sat
+# outside the box, so the top search bar was untappable. `flex-wrap: wrap` was
+# already there for the overflow fix; it cannot help while the form's basis is 0.
+# The fix gives it `flex-basis: 100%` on its own row. Assert the basis, not
+# "a rule mentioning dk-search-form" — the base `flex: 1` rule is always present.
+# `*` not `+`: html_has greps in BRE, where `+` is a literal plus sign.
+html_has "$CS2_CSS" '\.dk-search-form[[:space:]]*{[^}]*flex:[[:space:]]*1[[:space:]]*0[[:space:]]*100%' \
+  && pass "mobile header search gets a 100%-basis row (was 0.2px wide)" \
+  || fail "no flex:1 0 100% on .dk-search-form — the mobile search bar collapses to zero width"
+
 section "25. Notifications center (P3 #17)"
 # Seed: create 2 notifications (1 read, 1 unread) and trigger order status change + review reply
 NOTIF_SEED=$(docker exec "$WP_CONTAINER" php -r '
@@ -1465,6 +1477,16 @@ OF_FIRST_EXP=$(printf '%s' "$OF_EXP"  | grep -o 'dk-offer-product" href="[^"]*"'
 # 28.6 stock filter and pagination are accepted
 check_http "$OFFERS_URL?in_stock=1"    "in_stock filter accepted"
 check_http "$OFFERS_URL?offers_page=2" "pagination accepted"
+
+# 28.7 the homepage "مشاهده همه" link must land here. It used to point at
+# /shop/?discount=1, so the offers rail advertised a page that was never
+# reachable from it. Assert the href itself, not just that some anchor exists.
+OF_MORE=$(printf '%s' "$HOME_HTML" | grep -o 'dk-offers-more" href="[^"]*"' | head -1)
+case "$OF_MORE" in
+  *"/incredible-offers/"*) pass "homepage offers link targets incredible-offers" ;;
+  "")                      fail "no dk-offers-more anchor on the homepage" ;;
+  *)                       fail "homepage offers link points elsewhere: $OF_MORE" ;;
+esac
 
 
 section "29. Gift cards (کارت هدیه)"

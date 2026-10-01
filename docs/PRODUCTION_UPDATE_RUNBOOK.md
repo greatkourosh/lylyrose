@@ -586,8 +586,44 @@ After the whole pass, confirm the pending count actually reached zero — an
 "update all" that appears to run and leaves items behind is a known failure mode:
 
 ```
-Updates → should show no pending updates for core, plugins and themes
+Updates → should have no pending updates for core, plugins and themes
 ```
+
+---
+
+## Deploying first-party code (theme or plugin) — added 2026-10-01
+
+`docker/deploy-targeted.py <path>` uploads only the paths you name, and refuses
+vendor directories. It verifies every file's size after the write — but **a size match
+proves bytes landed, not that the site changed.** Two things on this host make the
+difference:
+
+**A PHP template cannot be verified by fetching it.** `curl` of a deployed
+`front-page.php` returns **0 bytes** — it is a template, and executing it emits
+nothing. An md5 comparison against the local file is impossible too. The only real
+check is the **rendered** page: request the route the template draws and grep the
+output. A 0-byte response here means "this is a template", not "the deploy failed".
+
+**CSS is served through Autoptimize, not from the theme directory.** The page links
+`.../cache/autoptimize/autoptimize_single_<hash>.php?ver=<Version>`, where `ver` comes
+from the `Version:` header in `style.css` — that header is the *only* cache-buster.
+Two consequences:
+
+- **Grep the served minified asset, not the source form.** `dk-footer-grid > *` is
+  written `dk-footer-grid>*` after minification, so a grep for the source returns 0
+  and reads exactly like "the fix is missing". Same for `.dk-search-form` →
+  `.dk-search-form{…}`.
+- **A CSS change without a `Version:` bump ships stale CSS** to every browser that
+  already has the file, while every test still passes. Autoptimize does rebuild on
+  its own after an upload, so no manual cache purge is needed — and do **not** issue
+  one by hand: `rm -rf wp-content/cache` recreates the directory root-owned and
+  `www-data` can no longer write, which breaks the homepage and the suite for a
+  reason unrelated to your change.
+
+**Theme files are `www-data`-owned locally** and the host user is not in that group,
+so edit them through the container (`docker exec -u www-data lylyrose-wp`) or the
+write fails with EACCES. Note the local site serves `themes/lylyrose` — not
+`digikala-v1.0.0`, which is a dead directory here.
 
 ---
 

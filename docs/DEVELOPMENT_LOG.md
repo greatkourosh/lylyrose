@@ -2254,3 +2254,117 @@ in lockstep to reference the new vars rather than repeat literals.
 `lylyrose_version()` *is* the cache-buster for `style.css` and both asset files, so a
 CSS change without a bump ships stale CSS to every returning visitor while every test
 still passes.
+
+## 2026-10-01 — The mobile search box was 0.2px wide: `flex: 1` means `flex-basis: 0`
+
+Reported as "the top search box on mobile is not usable". It rendered, it was visible,
+and it was completely untappable. Measured at a real 375px viewport, `.dk-search-form`
+was **0.2px** wide.
+
+**The input was 60px and sat outside the form.** The box the user aims at collapsed
+while its own contents overflowed past it, so the visible control and the form were
+different widths. That is why this read as "not usable" rather than "not visible" —
+there was something there to tap, and tapping it did nothing useful.
+
+**One cause: `flex: 1` is shorthand for `flex: 1 1 0%`.** The base rule is
+
+```css
+.dk-search-form { flex: 1; position: relative; max-width: 620px; }
+```
+
+`flex-basis: 0` means the form starts at zero and grows into whatever is *left over*.
+At 375px there is nothing left over: the menu toggle (36px) + logo (52.4px) +
+account/cart pair (182.4px) plus gaps consume every pixel, so leftover space is 0.2px.
+`flex: 1` on a *roomy* row is exactly right, which is why this reads as fine on desktop
+(620px there) and only breaks at one width.
+
+**`flex-wrap: wrap` was already present and could not help.** The earlier overflow fix
+added `.dk-header-inner { flex-wrap: wrap; }` — but wrapping only moves an item to a
+new row when it does not fit, and an item whose basis is 0 *always* fits. It was
+already wrapping, correctly, and still produced 0.2px. The pre-existing rule made the
+bug look handled.
+
+```css
+.dk-header-inner { flex-wrap: wrap; row-gap: 10px; }
+.dk-header-actions { order: 1; }
+.dk-search-form { order: 2; flex: 1 0 100%; max-width: none; }
+```
+
+`flex: 1 0 100%` gives it a 100% basis so it cannot fit beside anything and is forced
+onto its own row. **`order` is load-bearing and was not in the first attempt:** without
+it, DOM order is toggle → logo → search → actions, so a full-width search row pushes
+the account/cart pair onto a *third* row (measured y=214.6). `order: 1` on the actions
+puts them back on row 1.
+
+**Verified in a browser, because no assertion could see any of this.** At 375px:
+form 343px, input 343px, `inputOverlapsForm: true`, a `document.elementFromPoint` at
+the input's centre returns `INPUT.dk-search-input` (a real hit test, not a computed
+width), `documentScrollWidth == clientWidth == 375` (no new overflow), and
+desktop at 1009px is unchanged at 620px with the toggle hidden. Search itself:
+`?s=عطر&post_type=product` → 200, 12 product cards.
+
+**The regression assertion checks the basis, not the selector.** A test grepping for
+"a rule mentioning `dk-search-form`" passes on the broken build, because the base
+`flex: 1` rule is always in the file. Asserting `flex: 1 0 100%` is what separates
+fixed from broken:
+
+```bash
+html_has "$CS2_CSS" '\.dk-search-form[[:space:]]*{[^}]*flex:[[:space:]]*1[[:space:]]*0[[:space:]]*100%'
+```
+
+Note `[[:space:]]*`, not `+`. `html_has` is `grep -c`, which is **BRE**, where `+` is a
+literal plus sign — the assertion failed on a *correct* build for exactly that reason
+before the pattern was corrected. Suite 303/0 → **304/0**.
+
+### The same fix had to be written twice, into the wrong theme first
+
+The first edit went into `digikala-v1.0.0/style.css` and **failed with EACCES** — the
+memory note "the aroma-store theme is a dead dir, upstream's live theme is digikala"
+is true in the *upstream* repo and false here. The local site serves
+`wp-content/themes/lylyrose`, confirmed by
+`curl -sk https://lylyrose.local/ | grep -o 'themes/[a-z0-9.-]*'`. The failed edit wrote
+nothing to either theme, which was checked before the deploy rather than after.
+
+## 2026-10-01 — Deployed: the mobile search fix and the offers link, both verified on the host
+
+Two files, uploaded separately with `docker/deploy-targeted.py`, both size-verified
+after the write.
+
+**`style.css` 1.14.0 → 1.14.1 — the mobile search fix.** The bump is the whole
+deliverable on the caching side: the served stylesheet URL is
+`.../cache/autoptimize/autoptimize_single_3aca1e20e173685ecf2b67394734d424.php?ver=1.14.1`,
+and that `ver` is read from the `Version:` header. Autoptimize rebuilt the concatenated
+cache on its own after the upload, so no cache purge was needed and none should be
+issued by hand — see the `rm -rf wp-content/cache` warning above for what that costs.
+
+**`front-page.php` — the offers "مشاهده همه" link pointed somewhere unreachable.** It
+went to `/shop/?discount=1`; the offers rail advertises `/incredible-offers/`, which is
+a real page (`is_incredible_offers()` in
+`lylyrose-core/includes/class-flash-sales.php:275`, returns 200 live). Asserted as
+`28.7`, checking the `href` itself rather than that some anchor exists.
+
+**Verified on the host, not from the FTP result.** The deploy script's size check
+proves bytes landed; it proves nothing about what the site now serves.
+
+- `md5sum` of the live `style.css` equals the local file exactly
+  (`3aca1e20e173685ecf2b67394734d424`)
+- the served Autoptimize cache file contains all three rules
+- at 375px on `lylyrose.ir`: form 343px, `hitTargetIsInput: true`, no overflow
+- homepage `dk-offers-more` → `https://lylyrose.ir/incredible-offers/` → 200, 10 offer
+  cards render, no PHP notices in the body
+
+One trap worth recording: `curl` of a live `front-page.php` returns **0 bytes**,
+because it is a template that executes and emits nothing directly. Verifying it by
+md5 against the local file is impossible; the only real check is the rendered homepage.
+Reading the empty response as "the deploy failed" would have been wrong — the
+homepage proved it landed on the first request.
+
+**A second grep that nearly sent this back to bisecting a fixed bug:** the class is
+`dk-offer-card`, not `dk-offer-product`. Counting the wrong name returned `0` and
+looked like the rail had stopped rendering on production. It had not — 10 cards, same
+as local.
+
+**Final state:** suite **304/0**, `Version: 1.14.1`, both files live on `lylyrose.ir`
+and confirmed there. `/incredible-offers/` answers **308 locally** and **200 on
+production** — a local host-agnostic-URL redirect, not a defect, but do not read the
+local 308 as a broken page.

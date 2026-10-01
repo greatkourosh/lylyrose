@@ -64,6 +64,7 @@ if ( is_wp_error( $dk_brands ) ) {
 }
 
 $discount_url = add_query_arg( 'discount', '1', $shop_url );
+$offer_url    = function_exists( 'is_incredible_offers' ) ? home_url( '/incredible-offers/' ) : $discount_url;
 
 $banners = array(
     array( 'tone' => 'rose',   'emoji' => '🏷️', 'title' => __( 'تخفیف‌های ویژه', 'lylyrose' ), 'sub' => __( 'کالاهای تخفیف‌دار', 'lylyrose' ), 'url' => $discount_url ),
@@ -213,7 +214,7 @@ if ( count( $editorial ) < 3 ) {
                     <span class="dk-cd-sep">:</span>
                     <span class="dk-cd-box" data-cd="s">۰۰</span>
                 </div>
-                <a class="dk-offers-more" href="<?php echo esc_url( $discount_url ); ?>"><?php esc_html_e( 'مشاهده همه ‹', 'lylyrose' ); ?></a>
+                <a class="dk-offers-more" href="<?php echo esc_url( $offer_url ); ?>"><?php esc_html_e( 'مشاهده همه ‹', 'lylyrose' ); ?></a>
             </div>
             <div class="dk-offers-rail">
                 <?php while ( $sale->have_posts() ) : $sale->the_post(); global $product; if ( ! $product ) { continue; }

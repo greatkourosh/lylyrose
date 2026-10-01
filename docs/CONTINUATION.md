@@ -2,6 +2,41 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
+> **✅ The mobile search box is fixed and LIVE (2026-10-01).** `.dk-search-form` was
+> **0.2px** wide at 375px — `flex: 1` is `flex: 1 1 0%`, and with the toggle + logo +
+> 182px account/cart pair filling the row there was nothing left to grow into. The
+> input rendered at 60px *outside* the collapsed box, so it looked present and was
+> untappable. Fixed with `flex: 1 0 100%` on its own row plus `order` to keep the
+> actions on row 1. Verified on `lylyrose.ir` itself: 343px, and an
+> `elementFromPoint` at the input's centre returns `INPUT.dk-search-input`.
+> `Version: 1.14.0` → `1.14.1`. Suite **304/0**. See *"The mobile search box was
+> 0.2px wide"* at the end of `DEVELOPMENT_LOG.md`.
+>
+> **The pre-existing `flex-wrap: wrap` on `.dk-header-inner` made this look handled.**
+> It was already wrapping, correctly — but wrapping cannot help an item whose
+> `flex-basis` is 0, because such an item always "fits". Anyone re-reading the
+> overflow fix should know that rule was already there and was not the answer.
+>
+> **Also live as of 2026-10-01: the offers "مشاهده همه" link.** It pointed at
+> `/shop/?discount=1` while the rail advertises `/incredible-offers/`; it now goes
+> there, and `/incredible-offers/` answers 200 on production. Asserted as `28.7`.
+> Note it is **308 locally** (host-agnostic site URL redirect) — do not read that as
+> a broken page.
+>
+> **Editing the theme?** `style.css` is `www-data`-owned and the host user is not in
+> that group, so write it through the container: `docker exec -u www-data lylyrose-wp`.
+> Two traps cost real time today. The local site serves `themes/lylyrose`, **not**
+> `digikala-v1.0.0` — the "upstream's live theme is digikala" memory is about the
+> `aroma_store` repo, not this one; confirm with
+> `curl -sk https://lylyrose.local/ | grep -o 'themes/[a-z0-9.-]*'`. And `html_has`
+> greps in **BRE**, where `+` is a literal plus sign, not a quantifier.
+>
+> **Verifying a deploy reads the *rendered* page, not the uploaded bytes.** `curl` of
+> a live `front-page.php` returns 0 bytes — it is a template that executes. Only the
+> homepage proves the change landed. Likewise the CSS is served through Autoptimize
+> (`.../cache/autoptimize/autoptimize_single_<hash>.php?ver=<Version>`), so grep that
+> minified asset; the source form may not appear in it at all.
+>
 > **✅ Perfume Finder is built and live (2026-10-01).** «عطرت رو پیدا کن» shipped
 > upstream as `aroma_store` `99d5e72d` and mirrored here as `57e70a7c`. Both
 > `/perfume-finder/` pages return 200 and return ranked cards. The suite is
@@ -9,10 +44,10 @@
 > products (IDs 1296–1305) carry authored fragrance data, so 8 of 114 are
 > rankable. The other 104 remain unannotated — see the section at the end.
 >
-> **Last updated 2026-10-01 (latest).** The suite is **302/0** on **both** host
+> **Last updated 2026-10-01 (latest).** The suite is **304/0** on **both** host
 > forms — `https://lylyrose.local` and `http://192.168.1.13:8030` — green on
-> each, and the rebrand, the hero carousel, the offers carousel and the perfume
-> finder are all **live** on `lylyrose.ir`.
+> each, and the rebrand, the hero carousel, the offers carousel, the perfume
+> finder and the mobile search fix are all **live** on `lylyrose.ir`.
 >
 > **The offers carousel is deployed** (`843af66b`, six files). The next section
 > down describes the *rewrite* arriving red at 264/3; the failure and the fix are

@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.14.0
+Version: 1.14.1
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -1524,7 +1524,9 @@ button, input, select, textarea { font-family: inherit; }
        viewport, removing this rule alone returned /, /shop/, /cart/ and
        /checkout/ to 90px each. The header row wraps for the same reason. */
     .dk-footer-grid > *, .dk-header-inner, .dk-header-inner > * { min-width: 0; }
-    .dk-header-inner { flex-wrap: wrap; }
+    .dk-header-inner { flex-wrap: wrap; row-gap: 10px; }
+    .dk-header-actions { order: 1; }
+    .dk-search-form { order: 2; flex: 1 0 100%; max-width: none; }
     .dk-fbt { padding: 14px; }
     .dk-fbt-row { gap: 10px; }
     .dk-fbt-item img { width: 70px; height: 70px; }
