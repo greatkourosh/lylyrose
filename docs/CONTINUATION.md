@@ -2,10 +2,17 @@
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **Last updated 2026-09-30 (latest).** The suite is **270/0** on **both** host
+> **✅ Perfume Finder is built and live (2026-10-01).** «عطرت رو پیدا کن» shipped
+> upstream as `aroma_store` `99d5e72d` and mirrored here as `57e70a7c`. Both
+> `/perfume-finder/` pages return 200 and return ranked cards. The suite is
+> **302/0** on both host forms. The six axes are **not** 0/114 any more: ten
+> products (IDs 1296–1305) carry authored fragrance data, so 8 of 114 are
+> rankable. The other 104 remain unannotated — see the section at the end.
+>
+> **Last updated 2026-10-01 (latest).** The suite is **302/0** on **both** host
 > forms — `https://lylyrose.local` and `http://192.168.1.13:8030` — green on
-> each, and the rebrand, the hero carousel and the offers carousel are all
-> **live** on `lylyrose.ir`.
+> each, and the rebrand, the hero carousel, the offers carousel and the perfume
+> finder are all **live** on `lylyrose.ir`.
 >
 > **The offers carousel is deployed** (`843af66b`, six files). The next section
 > down describes the *rewrite* arriving red at 264/3; the failure and the fix are
@@ -51,6 +58,9 @@
 > **Upstream `d96c2869` is now mirrored whole** — the two theme files and its two
 > new suite assertions. Suite **270/0 across 32 sections**. See *"✅ Upstream
 > `d96c2869` is mirrored whole"*.
+>
+> **Upstream `99d5e72d` is mirrored and live.** Suite is now **302/0 across 33
+> sections** on both host forms. See *"✅ SHIPPED — «عطرت رو پیدا کن»"*.
 >
 > The stray `public_html/wp-content/` skeleton on the marketing site is **also
 > closed** — it was removed over plain FTP, and the "needs cPanel File Manager in
@@ -1985,3 +1995,149 @@ category that arrives with no product image.
 that is not optional.** `style.css` 1.13.1 → 1.13.2 is what makes Autoptimize
 re-emit the bundle, so the pair travels together. Everything else about the
 deploy rule still applies: stage from a commit, never the worktree.
+
+---
+
+## ✅ SHIPPED — «عطرت رو پیدا کن» / LYLY ROSE Perfume Finder
+
+**Requested 2026-09-30.** A guided multi-step perfume recommender: 8–9 questions →
+3 scored products with a real match percentage, a Persian result page, a gift
+branch, a nav entry and a home-page banner. The requester's own framing is right
+on the important point and wrong on one significant one — see *Two corrections*.
+
+### 🔀 It routes UPSTREAM first — this is not a `lylyrose` task to start here
+
+The feature is a **shared storefront capability**, not a brand campaign: a
+scored recommender over the same WooCommerce catalogue both stores run. Under
+[FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md) that means build + test
+in `aroma_store` on `master`, mirror back only once that suite is green, using
+the rename map. Opening it here first is the exact failure the policy exists to
+prevent.
+
+**Upstream has neither the feature nor the data for it.** `aroma_store` is at
+`d96c2869` (same commit this repo mirrored) — no finder class, no
+`ASC_Perfume_Finder`. So this is a fresh upstream feature, not a port.
+
+### ⛔ Blocker: the scoring inputs are 0%-populated — measured, not assumed
+
+The request specifies real weighted scoring (scent 30% / occasion 20% / season
+15% / personality 15% / longevity+sillage 10% / budget 10%) precisely so the
+percentage is *explainable rather than random*. That design shipped. What shipped
+with it is a **weighted score with renormalisation**: weights are relative, and
+the score is divided by the weight of the axes a product *actually populates*.
+An unpopulated axis therefore costs nothing instead of scoring zero, and each
+result prints its own coverage («بر اساس ۴۰% از معیارها») so a high number over
+one axis cannot read as a whole-catalogue verdict.
+
+Coverage as of 2026-10-01, measured on the live container — **10 products now
+carry authored fragrance data** (IDs 1296–1305, plus the same ten scents on
+`aroma-store.vegacodex.ir` at IDs 11–20), so **8 of 114 are rankable**:
+
+| Axis | Weight | Product attribute | Coverage |
+| --- | --- | --- | --- |
+| Scent family | 30% | `pa_fragrance_family` | **8 / 114** |
+| Occasion | 20% | `pa_occasion` | **4 / 114** |
+| Season | 15% | `pa_season` | **2 / 114** |
+| Personality | 15% | `pa_personality` | **7 / 114** |
+| Longevity | 10% | `pa_longevity` | **2 / 114** |
+| Budget | 10% | `_price` | **114 / 114** ✅ |
+
+A product is rankable only if it carries a real fragrance characteristic — a
+note pyramid counts, a brand does not. So the finder returns **1–3 results and
+never pads**, and says so honestly when nothing matches rather than inventing a
+match. `pa_sillage` still has no attribute; it rides the longevity axis.
+
+`fragrance_notes` — the «هرم رایحه» card shipped in 2026-09-04 and listed as
+**DONE** in [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) item 13 — is written by
+the test suite, which seeds its own product and cleans up afterwards. The
+feature is genuinely built and genuinely tested; the **catalogue** is only now
+partly filled, and only by hand.
+
+**The remaining gap is still content authoring, not code.** 104 of 114 products
+still carry none of these axes, and their descriptions are import boilerplate
+(«محصول موجود در آرومالند؛ پیش از انتشار…»), so scent data cannot be *derived*
+from existing text — it has to be written. That remains a content task with two
+consumers: the perfume finder *and* the existing facets.
+
+### 💰 Budget tiers are lopsided — 73% of the catalogue in one bucket
+
+Price is the one axis fully populated, but its spread does not support four
+even tiers. Of 114 priced products:
+
+| Tier | Range (Toman) | Products |
+| --- | --- | --- |
+| اقتصادی | < 15M | **83 (73%)** |
+| متوسط | 15M–50M | 24 (21%) |
+| پریمیوم | 50M–150M | 4 (4%) |
+| لوکس | > 150M | **3 (3%)** |
+
+Median 9.98M, p75 15.5M, **max 906,549,400** — a single outlier 90× the median
+(one flagship item, `#1224`, at ~906M Toman vs a 10M median). A **«لوکس»**
+question step would return **3 products**, and the request asks for **three
+ranked results plus two alternates** — so a luxury-tier answer can barely fill
+the page it is designed to fill. Budget weight must stay low (the requester's
+10% is right), or the finder must widen past the tier before ranking. Decide
+this **before** writing the scoring, not after.
+
+### 🎁 The gift branch has no product pool
+
+`«برای هدیه»` opens a different path (recipient → their style → 3 gifts, plus a
+gift-wrap option). **`product_cat` «ست هدیه» holds exactly 1 product**, and the
+only other low-priced items are 4 gift cards and a 500K sample vial. A gift
+recommender scoring against "suitable for a spouse / mother / colleague" needs a
+pool that does not exist yet. Note `ASC_Gift_Wrap` and the gift-card products
+already exist — the *wrap* is built, the *giftable catalogue* is not.
+
+### ✅ What is genuinely ready
+
+- **114 published products, all priced** — a real ranking surface.
+- **`_asc_notes_top/_heart/_base`** — the meta-box UI and the «هرم رایحه» card
+  renderer are built and tested; populating the meta reuses existing code.
+- **`ASC_Gift_Wrap`** — the packaging option in the gift branch needs no work.
+- **Suite 270/0 across 32 sections** — the bar a mirror must clear.
+
+### Two corrections to the request, both of which shipped
+
+1. **The percentage must come from the scoring, and the scoring needs data.**
+   The requester is right that a random percentage would undermine the feature
+   — and right that the answer is weighted scoring. But **a weighted score over
+   empty axes produces a confident wrong number**: 30% of the weight silently
+   scoring nothing reads as "94% match" with no basis. Percentages must be
+   **renormalised over the axes that actually have data**, and the result page
+   should show *which* axes contributed. That is exactly what shipped: weights
+   are renormalised per product, each result prints its coverage, and an
+   unscorable product is filtered out instead of being ranked low.
+
+2. **It should not ship as the only path to a product.** The nav entry
+   («عطرت رو پیدا کن») and the home banner («نمی‌دونی چه عطری انتخاب کنی؟»)
+   are right and belong in the feature. But a finder that is a *harder* route
+   than the shop grid will lose traffic that the grid currently converts. The
+   empty state links to `/shop/`, so an unanswered or abandoned finder still
+   reaches a product.
+
+### What shipped, and what is left (upstream, `aroma_store` @ `master`)
+
+Done in `99d5e72d` (mirrored here as `57e70a7c`):
+
+- ✅ `ASC_Perfume_Finder` with renormalised weighted scoring, the scorable gate,
+  and Persian-digit percentages.
+- ✅ The quiz UI and Persian result page, 34 assertions in section 34, each
+  proven red on a broken build ([[assert-fails-on-broken-build]]).
+- ✅ Nav entry + home banner on both stores; `/perfume-finder/` returns 200 on
+  `aroma-store.vegacodex.ir` and `lylyrose.ir` and returns ranked cards.
+
+Still open, and it is content authoring rather than code:
+
+1. **Author fragrance data for the other 104 products.** Ten are annotated; the
+   rest carry import boilerplate descriptions that contain no scent
+   information, so the axes cannot be derived — they have to be written.
+   Measure coverage after; the number is the deliverable, not the code.
+2. **Budget tiers are generous.** The result above shows a 12.5M-toman gift set
+   scoring 75% while flagged «خارج از محدوده بودجه شما» — the mid tier caps at
+   50M, so in practice price almost never disqualifies. Worth revisiting against
+   the real price spread.
+3. **The gift branch** waits on a gift pool existing, as it did before.
+
+> ⚠️ **This is not a `lylyrose`-first task.** The data gap is upstream too —
+> both stores share `create_products.php`. Fixing the seeder only here would
+> fork shared code, which the policy forbids outright.
