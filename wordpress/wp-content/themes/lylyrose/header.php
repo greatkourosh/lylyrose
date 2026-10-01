@@ -133,15 +133,16 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                 );
 
                 // If the shop has perfume categories (WooCommerce), prefer them.
+                // Uncapped: the drawer groups every category by slug, so truncating
+                // here would silently empty groups. The catnav slices to 9 itself.
                 $product_cats = function_exists( 'get_terms' ) ? get_terms( array(
                     'taxonomy'   => 'product_cat',
                     'hide_empty' => true,
-                    'number'     => 9,
                     'exclude'    => array( get_option( 'default_product_cat' ) ),
                 ) ) : array();
 
                 if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) :
-                    foreach ( $product_cats as $term ) :
+                    foreach ( array_slice( $product_cats, 0, 9 ) as $term ) :
                         $url = get_term_link( $term );
                         if ( is_wp_error( $url ) ) { continue; }
                         ?>
@@ -179,17 +180,67 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
         <?php else : ?>
             <a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url() ); ?>"><?php esc_html_e( 'ورود | ثبت‌نام', 'lylyrose' ); ?></a>
         <?php endif; ?>
+
         <?php
+        /* Drawer category rows, mirroring the desktop mega-menu grouping. Each row
+           is keyed by slug, so a category this shop has not filled drops out of its
+           group instead of rendering a heading with nothing under it. A row with no
+           'group' key is a standalone link. */
+        $dk_drawer = array(
+            array( 'cats' => array( 'perfume' ) ),
+            array( 'group' => __( 'بر اساس جنسیت', 'lylyrose' ), 'cats' => array( 'men', 'women', 'unisex' ) ),
+            array( 'group' => __( 'بر اساس غلظت', 'lylyrose' ),   'cats' => array( 'eau-de-parfum', 'eau-de-toilette', 'perfume-oil' ) ),
+            array( 'group' => __( 'بر اساس نوع', 'lylyrose' ),     'cats' => array( 'body-spray', 'gift-sets', 'samples' ) ),
+            array( 'cats' => array( 'gift-cards' ) ),
+        );
+
+        // slug => array( name, url ), from live terms when the shop has them.
+        $dk_cats = array();
         if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) {
             foreach ( $product_cats as $term ) {
                 $url = get_term_link( $term );
-                if ( is_wp_error( $url ) ) { continue; }
-                echo '<a href="' . esc_url( $url ) . '">' . esc_html( $term->name ) . '</a>';
+                if ( ! is_wp_error( $url ) ) {
+                    $dk_cats[ $term->slug ] = array( $term->name, $url );
+                }
             }
         } else {
             foreach ( $cat_menu as $label => $slug ) {
-                echo '<a href="' . esc_url( add_query_arg( 'product_cat', $slug, $shop_url ) ) . '">' . esc_html( __( $label, 'lylyrose' ) ) . '</a>';
+                $dk_cats[ $slug ] = array( $label, add_query_arg( 'product_cat', $slug, $shop_url ) );
             }
+        }
+
+        $dk_done = array();
+        foreach ( $dk_drawer as $dk_row ) {
+            $dk_items = array();
+            foreach ( $dk_row['cats'] as $slug ) {
+                $dk_done[] = $slug;
+                if ( isset( $dk_cats[ $slug ] ) ) {
+                    $dk_items[] = $dk_cats[ $slug ];
+                }
+            }
+            if ( empty( $dk_items ) ) { continue; }
+
+            if ( empty( $dk_row['group'] ) ) {
+                foreach ( $dk_items as $dk_item ) {
+                    echo '<a href="' . esc_url( $dk_item[1] ) . '">' . esc_html( $dk_item[0] ) . '</a>';
+                }
+                continue;
+            }
+            ?>
+            <details class="dk-drawer-group">
+                <summary><?php echo esc_html( $dk_row['group'] ); ?></summary>
+                <?php foreach ( $dk_items as $dk_item ) : ?>
+                    <a class="dk-drawer-sub" href="<?php echo esc_url( $dk_item[1] ); ?>"><?php echo esc_html( $dk_item[0] ); ?></a>
+                <?php endforeach; ?>
+            </details>
+            <?php
+        }
+
+        // Anything the rows above did not claim (accessories, or a group slug the
+        // fallback menu lacks) still belongs in the drawer.
+        foreach ( $dk_cats as $dk_slug => $dk_item ) {
+            if ( in_array( $dk_slug, $dk_done, true ) ) { continue; }
+            echo '<a href="' . esc_url( $dk_item[1] ) . '">' . esc_html( $dk_item[0] ) . '</a>';
         }
         ?>
     </nav>
