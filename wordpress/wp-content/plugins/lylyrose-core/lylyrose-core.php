@@ -103,6 +103,12 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-perfume-finder.php';
         ASC_Perfume_Finder::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-finder-tiers.php';
+        ASC_Finder_Tiers::init();
+
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-finder-weights.php';
+        ASC_Finder_Weights::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-stock-notifier.php';
         ASC_Stock_Notifier::init();
 

@@ -1,0 +1,40 @@
+{
+ "ivory": {
+  "label": "عاجی",
+  "red": "#9c5c5f",
+  "teal": "#8a6848",
+  "ink": "#302522",
+  "text": "#5a4f49",
+  "muted": "#6e5f58",
+  "border": "#e5dcd4",
+  "white": "#ffffff",
+  "badge-red": "#b5484d",
+  "bg": "#f8f3ee"
+ },
+ "navy": {
+  "label": "سرمه‌ای",
+  "red": "#070f27",
+  "teal": "#5a6b85",
+  "ink": "#070f27",
+  "text": "#4a5468",
+  "muted": "#5c6675",
+  "border": "#d5dae3",
+  "white": "#fefefe",
+  "badge-red": "#c0392b",
+  "bg": "#eaecef"
+ },
+ "night": {
+  "label": "شب",
+  "red": "#789df9",
+  "teal": "#c4a577",
+  "ink": "#f2f4f8",
+  "text": "#bec4d1",
+  "muted": "#949daf",
+  "border": "#323945",
+  "on-accent": "#0d1016",
+  "on-gold": "#0d1016",
+  "white": "#ffffff",
+  "badge-red": "#f96868",
+  "bg": "#12151c"
+ }
+}
