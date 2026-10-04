@@ -2227,11 +2227,13 @@ the bottom padding needed porting, plus a `style.css` `Version: 1.0.0` →
 uploaded but **not activated**: `lylyrose` is still the live theme, so the site
 is unchanged for visitors.
 
-> ⚠️ **`lylyrose-navy` is still untracked in git.** It was deployed from the
-> working tree, not from a commit — the exact failure
-> [[carousel-deferred-behind-doc-header]] records for the offers carousel, where
-> a green suite and a "shipped" doc both sat on top of code that was never
-> committed. Do not read this section as "the theme is in history".
+> ⚠️ **navy was uploaded from the working tree while entirely untracked in git**
+> — the same shape as [[carousel-deferred-behind-doc-header]], in the opposite
+> direction. There the carousel was committed and never uploaded; here navy was
+> uploaded and not committed, so the deploy rule ("derive the file list per
+> commit with `--name-status`") had no commit to derive from and the list came
+> from `find`. Now tracked in `6a4a072b`, but note the ordering: the host got
+> these bytes *before* git did.
 
 ### Live verification (off the site itself, 2026-10-04)
 
@@ -2255,7 +2257,7 @@ is unchanged for visitors.
    real submission returns **one** card, not three. The three-column grid has
    therefore never been seen with a full row of results. Authoring the other 104
    is the deliverable ([[perfume-finder-data-blocker]]).
-2. **navy is unactivated and uncommitted.** Activating it is the risky step: the
+2. **navy is uploaded but unactivated.** Activating it is the risky step: the
    local suite carries 13 unrelated failures (OTP, mobile login, tier sanitizer)
    and none of them exercise navy.
 3. **The visual check is still missing.** `preview_start` timed out on every
