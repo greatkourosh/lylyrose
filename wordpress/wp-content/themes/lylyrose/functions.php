@@ -25,6 +25,48 @@ function lylyrose_version() {
 }
 
 /**
+ * The visitor-facing palette switcher, rendered in the topbar.
+ *
+ * Deliberately NOT in dk-header-actions next to the account and cart icons: that
+ * row is width-constrained, and .dk-search-form once measured 0.2px wide at a
+ * 375px viewport because the icon pair took every pixel. The topbar is a
+ * text-link row with no such pressure, and it is on the homepage too.
+ *
+ * Renders nothing when the owner has switched the feature off, when the plugin is
+ * absent, or when there is only one palette to choose between — a control with
+ * one option is not a control.
+ */
+function lylyrose_palette_switcher() {
+    if ( ! class_exists( 'ASC_Palette' ) ) {
+        return;
+    }
+    $config = ASC_Palette::get_config();
+    if ( empty( $config['enabled'] ) || count( $config['presets'] ) < 2 ) {
+        return;
+    }
+    $active = ASC_Palette::current_slug();
+    ?>
+    <span class="dk-palette" role="group" aria-label="<?php esc_attr_e( 'انتخاب پالت رنگی', 'lylyrose' ); ?>">
+        <?php foreach ( $config['presets'] as $slug => $cols ) : ?>
+            <?php
+            $label = isset( $cols['label'] ) && '' !== $cols['label'] ? $cols['label'] : $slug;
+            $on    = ( $slug === $active );
+            ?>
+            <button type="button"
+                class="dk-palette-btn<?php echo $on ? ' is-active' : ''; ?>"
+                data-dk-palette="<?php echo esc_attr( $slug ); ?>"
+                aria-pressed="<?php echo $on ? 'true' : 'false'; ?>"
+                title="<?php echo esc_attr( $label ); ?>">
+                <span class="dk-palette-swatch" aria-hidden="true"
+                    style="background:<?php echo esc_attr( $cols['bg'] ?? '#fff' ); ?>;border-color:<?php echo esc_attr( $cols['red'] ?? '#888' ); ?>;"></span>
+                <span class="dk-palette-label"><?php echo esc_html( $label ); ?></span>
+            </button>
+        <?php endforeach; ?>
+    </span>
+    <?php
+}
+
+/**
  * Theme setup
  */
 function lylyrose_setup() {
@@ -86,6 +128,17 @@ function lylyrose_scripts() {
             true
         );
     }
+
+    // The palette switcher is site-wide, not homepage-only: a visitor who picks
+    // Night on the homepage should still have it on the shop and in the cart.
+    // Depends on nothing, so it loads on every page like the header it lives in.
+    wp_enqueue_script(
+        'lylyrose-palette',
+        get_theme_file_uri( 'assets/js/palette.js' ),
+        array(),
+        lylyrose_version(),
+        true
+    );
 }
 add_action( 'wp_enqueue_scripts', 'lylyrose_scripts' );
 

@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.14.6
+Version: 1.14.8
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -165,6 +165,64 @@ button, input, select, textarea { font-family: inherit; }
 }
 .dk-topbar a:hover { color: var(--dk-red); }
 .dk-topbar-sep { opacity: .4; }
+
+/* ---- Palette switcher -------------------------------------------------
+   In the topbar, not the header icon row: that row is width-constrained and
+   .dk-search-form once collapsed to 0.2px at 375px because the icon pair filled
+   it. These are text-sized buttons with a colour chip, so they cost a few pixels
+   and never squeeze the search. */
+.dk-palette {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.dk-palette-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    font: inherit;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--dk-text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--dk-radius-sm);
+    cursor: pointer;
+}
+.dk-palette-btn:hover {
+    color: var(--dk-red);
+    background: var(--dk-red-light);
+}
+/* The pressed state must not rely on colour alone -- aria-pressed carries it for
+   assistive tech, and the ring carries it for everyone else. */
+.dk-palette-btn.is-active,
+.dk-palette-btn[aria-pressed="true"] {
+    color: var(--dk-red);
+    border-color: var(--dk-border);
+    background: var(--dk-red-light);
+    font-weight: 700;
+}
+.dk-palette-btn:focus-visible {
+    outline: 2px solid var(--dk-red);
+    outline-offset: 1px;
+}
+.dk-palette-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1px solid;
+    flex: 0 0 auto;
+}
+/* At 375px the three labels plus their chips do not fit the topbar line. Drop
+   the text and keep the chip: the title attribute still names the palette, and
+   aria-label carries it for assistive tech. */
+@media (max-width: 520px) {
+    .dk-palette-label { display: none; }
+    .dk-palette-btn { padding: 2px 4px; }
+    .dk-topbar-left, .dk-topbar-right { gap: 8px; }
+}
+
 .dk-demo-badge {
     color: var(--dk-red);
     font-weight: 700;
