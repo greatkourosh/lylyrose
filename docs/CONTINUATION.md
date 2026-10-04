@@ -1,6 +1,141 @@
 # Continuation — Current Project State
 
+> **✅ 51 St. Ives body-care products are LIVE on both stores (2026-10-04,
+> `5bbe33c5`).** Verified by reading each site's own database, not from the
+> uploader's report: **51/51 present, 50/51 fully wired**, catalogue 114 → **165**
+> on both `lylyrose.local` and `lylyrose.ir`. Prices are **per product type**
+> (365k–1.25M تومان), not margin-derived — no cost data exists, so these are
+> recommended retail and want a review. One product ships **without a photo**:
+> `STIVES-HM-CURLREVIVE-SOFTSHINY`, because both candidate bottles OCR to zero
+> words and there was no evidence for either. Import is idempotent (keyed on SKU).
+>
+> **The source catalogue's `packshot` field is wrong and must not be reused.**
+> Thirteen of 51 SKUs pointed at the wrong image, and **pages 18 and 19 were
+> inverted** — collagen and aloe swapped. The mapping was rebuilt from the page
+> layout (`2 strips + 3 crops per product` on 19 of 25 pages, confirmed against
+> pages checked by eye) and from OCR of the printed label for the six irregular
+> pages. Four automatic classifiers were tried first and all four failed for one
+> shared reason — each guessed a rule for "is this a bottle photo" instead of
+> deriving the layout. Aspect ratio misfiled squat jars; OCR similarity always
+> preferred the **name block**, which is a cleaner render of the product's own
+> words than the photograph is; word count picked the description blocks; central
+> pixel mass ranked the decorative strips highest. `new_products/stives-products.json`
+> is safe for names and descriptions but **not** for images.
+>
+> **Two products-per-name collisions were real and are fixed.** Six moisturisers
+> sold in two sizes shared one Persian name, and four hair products had been given
+> each other's names in transcription. Every title is now unique — section 31
+> asserts `every published product title is unique (165 products)`.
+>
+> **🎨 Editable colour palettes shipped locally, NOT yet deployed to
+> `lylyrose.ir` (`e3472026`, `07b28771`, 2026-10-04).** The owner asked to merge
+> `lylyrose` and `lylyrose-navy`, make the palette editable, let a visitor switch
+> it from the storefront, and add a night mode. **Only the palette work is done;
+> the theme merge is not.** Read on.
+>
+> **The two themes were the same theme.** Measured file by file, the entire delta
+> was the 23 `:root` custom properties, one added Google font (Playfair Display),
+> and a mechanical `lylyrose_` → `lylyrosenavy_` function-prefix rename.
+> Normalising that prefix left `functions.php` differing only by the font enqueue
+> and `style.css` only by the header block. Nothing functional differed — a
+> maintenance fork, not a feature, and **production runs `lylyrose-navy`** (read
+> off the host, not from the repo).
+>
+> **Why the merge is still open.** `lylyrose-navy/assets/css/perfume-finder.css`
+> and `lylyrose/assets/css/perfume-finder.css` were both modified minutes apart and
+> differ on palette fallbacks (`--dk-line, #e6eaf2` / `#070f27` in navy versus
+> `#e6e2dd` / `#c98f91` in lylyrose), and `lylyrose` additionally carries an
+> `.asc-finder__range` rule that navy lacks — and the plugin **does** emit that
+> class (`class-perfume-finder.php:561`), so merging the wrong way would ship a
+> regression where the price range renders unstyled. Neither session claims the
+> change; it predates both. **`lylyrose` is the survivor**, which preserves both
+> that rule and the 7-line catnav comment at `header.php:138-144` by
+> construction. `lylyrose-navy/` is `nobody:nogroup` and needs `chown` before it
+> can be edited or deleted from the host side.
+>
+> **How the palette works.** `ASC_Palette` (`class-palette.php`) stores one
+> option, `asc_palette`: `{enabled, active, presets}`. Each preset carries the 8
+> editable brand colours (`--dk-red`, `--dk-teal`, `--dk-ink`, `--dk-text`,
+> `--dk-muted`, `--dk-bg`, `--dk-border`, `--dk-badge-red`). The theme already
+> declares 16 colour tokens once in `:root` with 396 `var(--dk-*)` call sites, so
+> a palette is an override of those declarations, not a rewrite.
+>
+> **Emitted with `wp_add_inline_style`, not written into `style.css`.** Autoptimize
+> caches the stylesheet as a hashed file whose only cache-buster is the `Version:`
+> header, so a colour change written into `style.css` ships stale to every browser
+> that already has it — and the suite cannot catch that, because a stale
+> stylesheet is still a 200 with valid CSS. An inline block is not cached as its
+> own hashed file, so switching needs no cache purge. **Do not fall back to
+> purging `wp-content/cache`**: from a root shell the directory returns
+> root-owned, `www-data` can no longer write it, and four assertions fail for a
+> reason unrelated to the change.
+>
+> **Night is derived, not hand-picked, and the derivation caught a real bug.**
+> `docker/contrast-check.py` is the file `lylyrose-navy/style.css:24-25` *claimed*
+> verified every colour at ≥4.5:1. **It did not exist**, so that claim was
+> unchecked; it now does, and both shipped palettes pass every gated pair. The
+> first Night derivation picked a light accent that reads well as *text* on a dark
+> surface, then checked white-on-accent — but a dark UI's accent button carries
+> **dark** text, and that pair measured 2.63:1. Night now derives
+> `--dk-on-accent` / `--dk-on-gold` and clears **7.24:1** and **8.16:1**. Night
+> also re-derives `--dk-red-light`, `--dk-red-dark`, `--dk-green`, `--dk-orange`
+> and `--dk-star`: the light palettes' `--dk-red-light` is a near-white panel,
+> which on `#12151c` would turn every tinted panel into a glaring block.
+>
+> **Two bugs found while verifying, both mine.** (1) `wp_localize_script` was
+> pointed at `'lylyrose-style'`, a **style** handle — it is a script-API function,
+> so it registered nothing and returned without error, `palette.js` found no
+> config and returned early, and the buttons silently did nothing. (2) The
+> switcher went into `dk-topbar-right`, not `dk-header-actions`: that icon row is
+> width-constrained and `.dk-search-form` once measured **0.2px** wide at 375px
+> because the icon pair took every pixel.
+>
+> **The switcher renders in the topbar, not the homepage.** The header renders on
+> the homepage too (above the fold), so this satisfies "a control on the homepage"
+> while also working on shop, cart and checkout — which is where night mode is
+> actually wanted. Renders nothing when `enabled` is false, when the plugin is
+> absent, or when there is one palette or fewer.
+>
+> **`style.css` Version: `1.14.5` → `1.14.8`.** A concurrent session took
+> `1.14.6` in the same file for its offers-rail fix; **`1.14.7` was never committed
+> by anyone** — two sessions bumped the same counter independently. `1.14.8` is
+> strictly higher than both, so no browser is left holding a cached stylesheet.
+>
+> **Suite pins the plugin class count at 21; the palette makes it 22.** The
+> `21 → 22` edit sits inside a concurrent session's 165 uncommitted insertions in
+> `run-tests.sh` rather than replacing them. Section 32's failure message says "a
+> new class needs mirroring and a doc count update" — no assertion ties that count
+> to a doc file, so the only doc obligation is the count recorded here.
+>
+> **Not done:** the theme merge, deployment of any of this to `lylyrose.ir`, a
+> suite run with the 500 resolved, and a browser check of the Night palette in
+> situ. The palette admin page and the switcher markup are verified in the rendered
+> HTML (`3 × data-dk-palette`, `var lylyrosePalette = {...}`), but **no human has
+> looked at Night on screen.**
+
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
+>
+> **⚠️ LOCAL SITE IS ANSWERING 500 AND IT IS NOT ANYONE'S UNCOMMITTED WORK
+> (2026-10-04, ~17:00 UTC).** Every front-end path returns **HTTP 500 with a
+> complete, correct 70 KB page** — the body renders in full and is right, the
+> status code is wrong. `docker/bisect-500.sh` installs each theme revision into
+> the live container and asks the site itself: **500 at `07b28771`, at
+> `2a9c2ee2`, and at `5bbe33c5`** — i.e. before the palette work existed. The
+> database answers, every theme file passes `php -l`, `front-page.php` exists, and
+> there is no `debug.log`. **Production is unaffected**: `/` `/shop/`
+> `/incredible-offers/` `/perfume-finder/` `/cart/` all **200** on `lylyrose.ir`.
+> Whoever finds this, the suite cannot be trusted until it is found: it reads
+> **290/26**, and the 26 include `homepage loads (500)` plus a cascade of
+> cart/FBT/Instagram/footer failures that are all downstream of one bad status.
+>
+> **Two traps cost hours here; both are the project's old lesson wearing a new
+> hat.** (1) *A CLI probe cannot see an HTTP status.* `wp_enqueue_scripts` never
+> fires outside a front-end request, so a `wp_script_is()` check reports "not
+> enqueued" while the page plainly contains the markup — it read as "theme scripts
+> are being stripped" and that was reported as a site fault before being caught.
+> Measure over HTTP. (2) *A cached body is not a live render.* A `curl` that
+> returned 70,266 bytes during the 500 looked like success until the same request
+> was made with a cache-busting query and came back 500.
 >
 > **✅ The mobile search box is fixed and LIVE (2026-10-01).** `.dk-search-form` was
 > **0.2px** wide at 375px — `flex: 1` is `flex: 1 1 0%`, and with the toggle + logo +
