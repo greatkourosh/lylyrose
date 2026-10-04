@@ -2176,3 +2176,89 @@ Still open, and it is content authoring rather than code:
 > ⚠️ **This is not a `lylyrose`-first task.** The data gap is upstream too —
 > both stores share `create_products.php`. Fixing the seeder only here would
 > fork shared code, which the policy forbids outright.
+
+---
+
+## ✅ SHIPPED — the perfume finder goes full-width, and its result card grows
+
+**2026-10-04.** Two commits: `0ff03b7f` (layout + card) and `2a9db6b6` (gutter).
+Deployed to `lylyrose.ir` and verified there, not just locally.
+
+### The page was the last one still inside `.dk-container`
+
+Every other page runs full-bleed; the finder was the only one still wrapped in
+`.dk-container`, so `max-width: 1332px` was the only thing holding it back.
+Dropping that class also drops its `padding: 0 16px`, which is where the
+follow-up came from — see *the 16px gutter is not enough*.
+
+The quiz steps are a two-column grid (one below 768px), and the results a
+`repeat(auto-fit, minmax(320px, 1fr))` grid — three columns at full width, two on
+tablet, one on mobile. `MAX_RESULTS` is 3, so the widest grid matches the
+longest list the finder can return. The card turns **vertical** at ≥768px: a
+132px side image would leave a grid column too narrow to hold a two-column
+`.asc-finder__meta`.
+
+### The result card now carries what a shopper needs to choose
+
+Image, price (with the struck-through original), stock state, rating, every
+profile axis the product has — shown whether or not it scored, because the
+visitor asked what this perfume *is*, not only why it matched — the note
+pyramid, the factor list, and a buy button.
+
+### ⚠️ The 16px gutter is not enough — this is the part worth remembering
+
+The first pass restored 16px and shipped it. On a full-bleed page the removed
+container was the *only* thing keeping content off the viewport edge, and 16px
+is too little once the quiz and the results grid both span the whole width.
+Fixed in `2a9db6b6`: 32px from 900px up.
+
+Bottom padding also drops 60px → 40px, because the page's own space and
+`.dk-footer`'s `margin-top: 40px` were stacking into a 100px gap no other page
+has. The footer's margin is the only bottom space there should be.
+
+### The navy theme got the same fix, and its first deploy
+
+`lylyrose-navy` already shipped the two-column quiz grid, so only the gutter and
+the bottom padding needed porting, plus a `style.css` `Version: 1.0.0` →
+`1.0.1` bump. Verified on `lylyrose.local`, where navy is the active theme.
+
+**The whole theme then went to production for the first time** — 31 files,
+298 KB, all `was None` on the host. Every PHP file was `php -l`'d first. It is
+uploaded but **not activated**: `lylyrose` is still the live theme, so the site
+is unchanged for visitors.
+
+> ⚠️ **`lylyrose-navy` is still untracked in git.** It was deployed from the
+> working tree, not from a commit — the exact failure
+> [[carousel-deferred-behind-doc-header]] records for the offers carousel, where
+> a green suite and a "shipped" doc both sat on top of code that was never
+> committed. Do not read this section as "the theme is in history".
+
+### Live verification (off the site itself, 2026-10-04)
+
+| Check | Result |
+| --- | --- |
+| `lylyrose-navy/style.css` on host | **200** (was 404) — theme now present |
+| navy `perfume-finder.css` on host | 7,613 B, `@media (min-width: 900px)` + `padding-left: 32px` in the served bytes |
+| navy `style.css` on host | `Version: 1.0.1` |
+| Active theme on `/` | `lylyrose-style-css`; `lylyrose-navy` appears **0** times |
+| `<title>` | `Lyly Rose` |
+| Site sweep | `/` `/shop/` `/cart/` `/checkout/` `/my-account/` `/incredible-offers/` `/about/` `/contact/` `/faq/` `/track-order/` `/perfume-finder/` all **200** |
+
+> A 200 proves nothing here. The sweep returned eight `000`s on the first pass
+> and was rate-limiting, not breakage — re-run with a pause and it is green. The
+> CSS assertions are the ones that catch a failed deploy; the status code only
+> catches a dead site.
+
+### Still open
+
+1. **The data gap is unchanged** — 8 of 114 products carry fragrance data, so a
+   real submission returns **one** card, not three. The three-column grid has
+   therefore never been seen with a full row of results. Authoring the other 104
+   is the deliverable ([[perfume-finder-data-blocker]]).
+2. **navy is unactivated and uncommitted.** Activating it is the risky step: the
+   local suite carries 13 unrelated failures (OTP, mobile login, tier sanitizer)
+   and none of them exercise navy.
+3. **The visual check is still missing.** `preview_start` timed out on every
+   attempt this session, so layout was verified through the served DOM and CSS
+   bytes only — never by looking at it.
+

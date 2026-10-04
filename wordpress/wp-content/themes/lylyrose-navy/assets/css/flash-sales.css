@@ -1,0 +1,83 @@
+.dk-incredible-page{ padding-top: 20px; padding-bottom: 40px; }
+.dk-flash-hero { display: flex; align-items: center; justify-content: center; gap: 24px; background: var(--dk-red); color: #fff; padding: 28px 20px; border-radius: 12px; }
+.dk-flash-hero h1 { font-size: 28px; font-weight: 800; margin: 0 0 6px; }
+.dk-flash-hero p { margin: 0; font-size: 14px; }
+.dk-flash-tabs { display: flex; gap: 12px; overflow-x: auto; padding: 24px 0; border-bottom: 1px solid #d5dae3; }
+.dk-flash-tab { flex: 0 0 120px; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 12px; padding: 12px 6px; color: #3e4859; font-size: 12px; text-align: center; border-radius: 8px; }
+.dk-flash-tab img { width: 72px; height: 72px; object-fit: contain; border-radius: 50%; background: #f2f5fa; }
+.dk-flash-tab.is-active { background: #eaeef7; color: #050c22; font-weight: 700; }
+.dk-offers-all { display: grid; place-items: center; width: 72px; height: 72px; font-size: 40px; color: var(--dk-red); }
+.dk-offers-heading { display: flex; align-items: center; justify-content: space-between; padding: 24px 0 16px; }
+.dk-offers-heading h2 { font-size: 20px; margin: 0; }
+.dk-offers-heading span { color: #7a8494; font-size: 12px; }
+.dk-offers-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; padding: 14px 0; border-bottom: 1px solid #d5dae3; font-size: 13px; }
+.dk-offers-toolbar label { display: flex; align-items: center; gap: 8px; }
+.dk-offers-toolbar select { background: #fff; color: #3e4859; border: 1px solid #d5dae3; border-radius: 6px; padding: 8px; font: inherit; }
+.dk-offers-toolbar button { border: 0; background: var(--dk-red); color: #fff; border-radius: 6px; padding: 8px 18px; font: inherit; cursor: pointer; }
+.dk-offers-toolbar a { color: #050c22; }
+.dk-flash-card { flex: 0 0 192px; width: 192px; display: flex; flex-direction: column; min-width: 0; padding: 16px; background: #fff; scroll-snap-align: start; }
+.dk-flash-card:hover { box-shadow: 0 1px 10px #00000018; z-index: 1; }
+.dk-offer-label { color: #070f27; font-size: 13px; font-weight: 800; margin-bottom: 12px; }
+.dk-offer-product { color: #3e4859; }
+.dk-offer-product img { display: block; width: 100%; height: 200px; object-fit: contain; margin: 0 auto 16px; }
+.dk-offer-product h3 { font-size: 12px; font-weight: 600; line-height: 2; height: 48px; overflow: hidden; margin: 0 0 12px; }
+.dk-offer-stock { font-size: 11px; color: #5c6675; min-height: 24px; }
+.dk-offer-prices { display: flex; align-items: start; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 16px; }
+.dk-offer-prices > div { margin-inline-start: auto; text-align: end; display: flex; flex-direction: column-reverse; font-size: 16px; font-weight: 700; }
+.dk-offer-prices del { color: #7a8494; font-size: 12px; font-weight: 400; }
+.dk-offer-prices ins { text-decoration: none; background: transparent; }
+.dk-offer-prices .woocommerce-Price-currencySymbol { font-size: 11px; }
+.dk-offer-percent { border-radius: 20px; padding: 1px 8px; background: #070f27; color: #fff; font-size: 12px; font-weight: 700; }
+.dk-flash-timer { direction: ltr; text-align: left; color: #070f27; font-size: 12px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+/* ---- Titled offer rows (Digikala's HorizontalProductCarousel) ---- */
+.dk-flash-row { margin-top: 28px; background: #fff; border-radius: 12px; padding: 18px 0 8px; }
+.dk-flash-row-head { display: flex; align-items: center; gap: 12px; padding: 0 20px 12px; }
+/* The border is the rule under a carousel title, tinted to the brand. */
+.dk-flash-row-title { font-size: 18px; font-weight: 700; margin: 0; padding-bottom: 8px; border-bottom: 2px solid var(--dk-badge-red); }
+.dk-flash-row-more { color: var(--dk-teal-dark); font-size: 12px; }
+.dk-flash-row-nav { display: flex; gap: 8px; }
+/* Chevrons are drawn with borders, not glyphs: U+2039/U+203A are bidi-mirrored,
+   so a literal arrow silently flips sides in RTL and ends up pointing against
+   its own button — the bug hero-check.py was written to catch on the hero. */
+.dk-flash-row-btn { width: 32px; height: 32px; border: 1px solid var(--dk-border); background: #fff; border-radius: 50%; cursor: pointer; position: relative; }
+/* Chevron corner, then a mirror. Rotating 45deg only works on a box whose two
+   visible edges are top+left or top+right, but border-inline-start resolves to
+   the RIGHT edge under RTL, so a rotation there yields up/down, not sideways. */
+.dk-flash-row-btn::before { content: ''; position: absolute; inset: 0; margin: auto; width: 8px; height: 8px; border-top: 2px solid var(--dk-ink); border-left: 2px solid var(--dk-ink); transform: rotate(135deg); }
+.dk-flash-row-btn[data-dk-row-prev]::before { transform: rotate(-45deg); }
+.dk-flash-row-btn[disabled] { opacity: .35; cursor: default; }
+
+.dk-flash-row--hero { background: var(--dk-red); }
+.dk-flash-row--hero .dk-flash-row-title { color: #fff; border-bottom-color: #fff; }
+.dk-flash-row--hero .dk-flash-row-btn { background: transparent; border-color: #fff; color: #fff; }
+.dk-flash-row--hero .dk-flash-row-more { color: #fff; }
+
+/* The track is the scroll container. Without a real overflow-x the row's
+   min-content (N x 192px) would widen the document and every page would scroll
+   sideways on a phone — the failure this project has hit twice already.
+
+   overflow-x alone is NOT enough here. A flex row's min-content width still
+   propagates to the document, so at 320px the offers page could be dragged
+   sideways 959px into empty space with every box inside the viewport. `contain:
+   layout` stops that propagation; the track keeps its own scrolling. */
+.dk-flash-track { display: flex; gap: 24px; list-style: none; margin: 0; padding: 4px 20px 12px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; cursor: grab; touch-action: pan-y; overscroll-behavior-x: contain; contain: layout; }
+.dk-flash-track::-webkit-scrollbar { display: none; }
+.dk-flash-track.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+.dk-flash-track.is-dragging .dk-flash-card { pointer-events: none; }
+.dk-flash-track.is-dragging * { transition: none !important; }
+
+.dk-incredible-page .dk-no-products { padding: 60px 20px; text-align: center; }
+.dk-incredible-page :is(a,button,input,select):focus-visible { outline: 2px solid #46566e; outline-offset: 4px; }
+@media (max-width: 600px) {
+ .dk-flash-hero { gap: 14px; padding: 24px 12px; }
+ .dk-flash-hero h1 { font-size: 20px; }
+ .dk-flash-hero p { font-size: 11px; }
+ .dk-flash-hero svg { width: 44px; flex-shrink: 0; }
+ .dk-flash-card { flex: 0 0 150px; width: 150px; padding: 12px 8px; }
+ .dk-flash-track { gap: 12px; padding-inline: 12px; }
+ .dk-flash-row-head { padding-inline: 12px; }
+ .dk-flash-row-title { font-size: 15px; }
+ .dk-offer-product img { height: 150px; }
+ .dk-offer-prices > div { font-size: 13px; }
+ .dk-offers-toolbar { gap: 12px; }
+}
