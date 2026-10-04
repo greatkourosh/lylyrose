@@ -18,7 +18,7 @@ if ( ! class_exists( 'ASC_Perfume_Finder' ) || ! function_exists( 'WC' ) ) {
 	return;
 }
 ?>
-<main class="asc-finder-page dk-container">
+<main class="asc-finder-page">
 	<?php ASC_Perfume_Finder::render(); ?>
 </main>
 <?php

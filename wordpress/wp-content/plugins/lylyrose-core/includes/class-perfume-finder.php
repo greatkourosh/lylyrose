@@ -571,43 +571,142 @@ class ASC_Perfume_Finder {
 			return;
 		}
 
+		// Every axis the profile already carries, shown whether or not it scored:
+		// the visitor asked what this perfume IS, not only why it matched.
+		$axes = array(
+			'brand'       => __( 'برند', 'lylyrose-core' ),
+			'gender'      => __( 'جنسیت', 'lylyrose-core' ),
+			'fragrance'   => __( 'خانواده رایحه', 'lylyrose-core' ),
+			'longevity'   => __( 'ماندگاری', 'lylyrose-core' ),
+			'sillage'     => __( 'پخش بو', 'lylyrose-core' ),
+			'season'      => __( 'فصل', 'lylyrose-core' ),
+			'occasion'    => __( 'مناسبت', 'lylyrose-core' ),
+			'personality' => __( 'شخصیت', 'lylyrose-core' ),
+		);
+		$tier_labels = wp_list_pluck( self::price_tiers(), 'label' );
+		$note_titles = array(
+			'top'   => __( 'نوت آغازین', 'lylyrose-core' ),
+			'heart' => __( 'نوت میانی', 'lylyrose-core' ),
+			'base'  => __( 'نوت پایه', 'lylyrose-core' ),
+		);
+
 		echo '<ol class="asc-finder__results">';
 		foreach ( $results as $row ) {
 			$product = $row['product'];
 			$result  = $row['result'];
-			printf(
-				'<li class="asc-finder__result"><a href="%s">%s</a><span class="asc-finder__percent"><span class="asc-finder__num">%s</span>%%</span>',
-				esc_url( get_permalink( $product->get_id() ) ),
-				esc_html( $product->get_name() ),
-				esc_html( self::fa_num( (int) $result['percent'] ) )
-			);
-			// Say how much of the intended weighting was actually available, so a
-			// high percentage earned on one axis is not read as a whole-catalogue
-			// verdict.
-			printf(
-				'<span class="asc-finder__coverage">%s</span>',
-				esc_html(
-					sprintf(
-						/* translators: %d: percentage of the total weight that could be scored. */
-						__( 'بر اساس %s%% از معیارها', 'lylyrose-core' ),
-						self::fa_num( (int) $result['coverage'] )
-					)
-				)
-			);
-			echo '<ul class="asc-finder__factors">';
-			foreach ( $result['factors'] as $factor ) {
-				if ( ! $factor['scored'] ) {
-					printf( '<li class="asc-finder__factor is-unscored">%s</li>', esc_html__( 'اطلاعاتی برای این مورد ثبت نشده', 'lylyrose-core' ) );
-					continue;
-				}
-				printf(
-					'<li class="asc-finder__factor%s">%s%s</li>',
-					$factor['matched'] ? ' is-match' : '',
-					esc_html( $factor['label'] ),
-					$factor['text'] ? ' — ' . esc_html( $factor['text'] ) : ''
-				);
-			}
-			echo '</ul></li>';
+			$profile = $row['profile'];
+			$url     = get_permalink( $product->get_id() );
+			?>
+			<li class="asc-finder__result">
+				<a class="asc-finder__media" href="<?php echo esc_url( $url ); ?>">
+					<?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ) ); ?>
+				</a>
+				<div class="asc-finder__body">
+					<div class="asc-finder__head">
+						<h3 class="asc-finder__name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
+						<span class="asc-finder__percent"><span class="asc-finder__num"><?php echo esc_html( self::fa_num( (int) $result['percent'] ) ); ?></span>٪</span>
+					</div>
+					<?php
+					// Say how much of the intended weighting was actually available, so a
+					// high percentage earned on one axis is not read as a whole-catalogue
+					// verdict.
+					printf(
+						'<span class="asc-finder__coverage">%s</span>',
+						esc_html(
+							sprintf(
+								/* translators: %d: percentage of the total weight that could be scored. */
+								__( 'بر اساس %s%% از معیارها', 'lylyrose-core' ),
+								self::fa_num( (int) $result['coverage'] )
+							)
+						)
+					);
+					?>
+
+					<div class="asc-finder__buy">
+						<span class="asc-finder__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
+						<span class="asc-finder__stock <?php echo $product->is_in_stock() ? 'is-in' : 'is-out'; ?>">
+							<?php echo esc_html( $product->is_in_stock() ? __( 'موجود', 'lylyrose-core' ) : __( 'ناموجود', 'lylyrose-core' ) ); ?>
+						</span>
+					</div>
+
+					<?php if ( $product->get_review_count() > 0 ) : ?>
+						<p class="asc-finder__rating">
+							<span class="asc-finder__stars">&#9733;</span>
+							<?php echo esc_html( self::fa_num( number_format_i18n( $product->get_average_rating(), 1 ) ) ); ?>
+							<span class="asc-finder__reviews">(<?php echo esc_html( self::fa_num( $product->get_review_count() ) ); ?>)</span>
+						</p>
+					<?php endif; ?>
+
+					<?php
+					$meta = array();
+					foreach ( $axes as $key => $label ) {
+						if ( ! empty( $profile[ $key ] ) ) {
+							$meta[] = array( $label, implode( '، ', $profile[ $key ] ) );
+						}
+					}
+					if ( ! empty( $profile['price_tier'] ) && isset( $tier_labels[ $profile['price_tier'] ] ) ) {
+						$meta[] = array( __( 'رده قیمتی', 'lylyrose-core' ), $tier_labels[ $profile['price_tier'] ] );
+					}
+					if ( $meta ) :
+						?>
+						<dl class="asc-finder__meta">
+							<?php foreach ( $meta as $pair ) : ?>
+								<div class="asc-finder__meta-row">
+									<dt><?php echo esc_html( $pair[0] ); ?></dt>
+									<dd><?php echo esc_html( $pair[1] ); ?></dd>
+								</div>
+							<?php endforeach; ?>
+						</dl>
+					<?php endif; ?>
+
+					<?php
+						// profile()'s pyramid is empty on the authored catalogue, which stores notes
+						// under the older _top_notes keys, so read both. Display only: profile() stays
+						// the ranking gate and its output is unchanged.
+						$notes = $profile['notes'];
+						foreach ( array( 'top' => '_top_notes', 'heart' => '_heart_notes', 'base' => '_base_notes' ) as $layer => $meta_key ) {
+							if ( ! empty( $notes[ $layer ] ) ) {
+								continue;
+							}
+							$raw = get_post_meta( $product->get_id(), $meta_key, true );
+							if ( ! $raw ) {
+								continue;
+							}
+							// Older keys hold a serialised array; the pyramid holds newlines.
+							$lines = is_array( $raw ) ? $raw : explode( "\n", (string) $raw );
+							$lines = array_filter( array_map( 'trim', $lines ) );
+							if ( $lines ) {
+								$notes[ $layer ] = $lines;
+							}
+						}
+						if ( $notes ) :
+							?>
+							<div class="asc-finder__notes">
+							<?php foreach ( $notes as $layer => $lines ) : ?>
+								<div class="asc-finder__note-row">
+									<span class="asc-finder__note-layer"><?php echo esc_html( isset( $note_titles[ $layer ] ) ? $note_titles[ $layer ] : $layer ); ?></span>
+									<span class="asc-finder__note-list"><?php echo esc_html( implode( '، ', $lines ) ); ?></span>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					<?php endif; ?>
+
+					<ul class="asc-finder__factors">
+						<?php foreach ( $result['factors'] as $factor ) : ?>
+							<?php if ( ! $factor['scored'] ) : ?>
+								<li class="asc-finder__factor is-unscored"><?php esc_html_e( 'اطلاعاتی برای این مورد ثبت نشده', 'lylyrose-core' ); ?></li>
+							<?php else : ?>
+								<li class="asc-finder__factor<?php echo $factor['matched'] ? ' is-match' : ''; ?>"><?php echo esc_html( $factor['label'] ); ?><?php echo $factor['text'] ? ' — ' . esc_html( $factor['text'] ) : ''; ?></li>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</ul>
+
+					<p class="asc-finder__actions">
+						<a class="asc-finder__view" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'مشاهده و خرید', 'lylyrose-core' ); ?></a>
+					</p>
+				</div>
+			</li>
+			<?php
 		}
 		echo '</ol>';
 		echo '<p class="asc-finder__alt"><a href="' . esc_url( get_permalink( get_page_by_path( self::PAGE_SLUG ) ) ) . '">' . esc_html__( 'شروع دوباره', 'lylyrose-core' ) . '</a></p>';
