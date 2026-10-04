@@ -138,7 +138,10 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                 $product_cats = function_exists( 'get_terms' ) ? get_terms( array(
                     'taxonomy'   => 'product_cat',
                     'hide_empty' => true,
+                    'parent'     => 0,
                     'exclude'    => array( get_option( 'default_product_cat' ) ),
+                    'orderby'    => 'count',
+                    'order'      => 'DESC',
                 ) ) : array();
 
                 if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) :
@@ -195,9 +198,21 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
         );
 
         // slug => array( name, url ), from live terms when the shop has them.
+        // The drawer wants every category, not the top-level slice the catnav
+        // takes: its rows are grouped by slug and its catch-all below renders
+        // whatever the rows did not claim, so an unlisted category is the only
+        // thing that silently disappears from it.
+        $dk_all_cats = function_exists( 'get_terms' ) ? get_terms( array(
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => true,
+            'exclude'    => array( get_option( 'default_product_cat' ) ),
+            'orderby'    => 'count',
+            'order'      => 'DESC',
+        ) ) : array();
+
         $dk_cats = array();
-        if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) {
-            foreach ( $product_cats as $term ) {
+        if ( ! is_wp_error( $dk_all_cats ) && ! empty( $dk_all_cats ) ) {
+            foreach ( $dk_all_cats as $term ) {
                 $url = get_term_link( $term );
                 if ( ! is_wp_error( $url ) ) {
                     $dk_cats[ $term->slug ] = array( $term->name, $url );
