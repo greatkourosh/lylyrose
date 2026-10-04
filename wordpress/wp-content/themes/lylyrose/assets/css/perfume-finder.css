@@ -3,7 +3,17 @@
 .asc-finder {
     max-width: none;
     margin: 0 auto;
-    padding: 8px 16px 60px;
+    padding: 8px 16px 40px;
+}
+
+/* The page runs full-bleed, so the container's 16px gutter is the only thing
+   keeping content off the viewport edge — and it is too little once the quiz
+   and the results grid both span the whole width. */
+@media (min-width: 900px) {
+    .asc-finder {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
 }
 
 .asc-finder__title {
@@ -62,6 +72,13 @@
 .asc-finder__option input {
     margin: 0;
     accent-color: var(--dk-rose, #c98f91);
+}
+
+/* The tier's price range, set smaller and quieter than its label so the four
+   options stay scannable as one row rather than reading as eight words. */
+.asc-finder__range {
+    font-size: 12px;
+    color: var(--dk-muted, #7a6f6a);
 }
 
 .asc-finder__quiz .asc-finder__actions {
