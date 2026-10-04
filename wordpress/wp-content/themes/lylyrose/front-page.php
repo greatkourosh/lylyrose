@@ -222,6 +222,7 @@ if ( count( $editorial ) < 3 ) {
                 <a class="dk-offer-card" href="<?php the_permalink(); ?>">
                     <div class="dk-offer-img"><?php echo $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ); ?></div>
                     <?php if ( $percent ) : ?><span class="dk-offer-discount"><?php echo esc_html( lylyrose_fa_num( $percent ) ); ?>٪</span><?php endif; ?>
+                    <span class="dk-offer-name"><?php echo esc_html( $product->get_name() ); ?></span>
                     <div class="dk-offer-meta">
                         <span class="dk-offer-price-old"><?php echo $product->is_on_sale() ? wp_kses_post( wc_price( $product->get_regular_price() ) ) : ''; ?></span>
                         <span class="dk-offer-price"><b><?php echo wp_kses_post( wc_price( $product->get_price() ) ); ?></b></span>
