@@ -63,6 +63,12 @@ class Lylyrose_Core {
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-gift-wrap.php';
         new ASC_Gift_Wrap();
+
+        // Palette serves CSS to the front end as well as the settings page, so it
+        // is wired here rather than in includes_admin() (which is empty) or in
+        // the WooCommerce block it does not depend on.
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-palette.php';
+        ASC_Palette::init();
     }
 
     protected function includes_woocommerce() {
