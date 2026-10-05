@@ -2399,3 +2399,94 @@ is unchanged for visitors.
    attempt this session, so layout was verified through the served DOM and CSS
    bytes only — never by looking at it.
 
+---
+
+## 🔴 OPEN — the finder card is unreadable, and a duplicated CSS block caused it
+
+**2026-10-05.** `c34c2f64`. Fixed locally, **committed, NOT deployed**.
+Found by looking at `https://lylyrose.ir/perfume-finder/` — the check the
+previous section lists as still missing, which is exactly why it shipped broken.
+
+### What was wrong
+
+The three-up grid gave each card a `minmax(320px, 1fr)` floor, and
+`.asc-finder__media` was set to `width: 100%` inside it. Measured on the live
+page: **card 464px wide, image 430px, card height 1005px**. The image took
+almost the entire column and the spec table and factor list were squeezed into
+the gap beside it.
+
+### The cause is worth remembering: the block was there twice
+
+`perfume-finder.css` carried the full-width grid block **twice**. An earlier
+pass *appended* its replacement above the original instead of replacing it, and
+the later declaration won. Both copies are now gone; the single-column rules
+stand on their own.
+
+> This is the failure mode to check for whenever a CSS "fix" seems not to apply:
+> **grep for the selector and count the matches before assuming the browser
+> cached it.** Two rules for one selector, and the fix is already correct on
+> disk while the page keeps showing the old layout.
+
+### Result
+
+One card per row, capped at 900px, image fixed at 132px beside the text.
+Measured after: **card 900px, image 132px, height 487px**. Mobile (375px)
+checked too — image centred above the text, no overflow.
+
+### What I got wrong, twice
+
+1. **I reported this work as "local only, not uploaded".** It was not — the card
+   work was committed (`0ff03b7f`, `2a9db6b6`) and per `6a4a072b` had reached
+   the host. A green local suite plus a commit log said otherwise, and I
+   repeated a claim I had not checked. See [[production-state-vs-docs]].
+2. **The notes block hid a data bug for a while.** `profile()` reads only
+   `_asc_notes_*`, but the authored catalogue stores notes under the older
+   `_top_notes` / `_heart_notes` / `_base_notes` keys — so the pyramid rendered
+   empty on **all eight** rankable products. The display layer now reads both.
+   `profile()` itself is untouched, because it is the ranking gate and changing
+   it would change scores.
+
+### Coordinate before touching this file — other sessions are working here
+
+- **`lylyrose-navy` is being merged into `lylyrose` and deleted** by the
+  "New product rollout" session. My copy of the fix in
+  `lylyrose-navy/assets/css/perfume-finder.css` is **uncommitted and will be
+  destroyed by that delete.** It was committed to `lylyrose` only, per explicit
+  instruction. Anyone reviving navy must re-apply the single-column rules there.
+- **The active theme in the local DB is `lylyrose-navy`, not `lylyrose`.** The
+  local suite reports **302 passed / 14 failed**, and the failures are *not*
+  mine — the first is `active theme is 'lylyrose-navy', expected 'lylyrose'`,
+  and the rest cascade from it (OTP, hero dots, autoptimize assets, category
+  tiles). Do not "fix" those by switching the theme without asking; it may be
+  deliberate.
+- `front-page.php`, `header.php`, `woocommerce/content-product.php`,
+  `functions.php` and the 31 staged deletions are **not mine**.
+
+### Still open
+
+1. **Not deployed.** `c34c2f64` is on the local branch only. The host still
+   serves the broken grid, and `style.css` there is unchanged.
+2. **The 104-product data gap is still the real ceiling**
+   ([[perfume-finder-data-blocker]]). One authored card per result set means the
+   layout is being judged on a single row.
+3. **Ratings are effectively absent locally** — 1 approved comment in the whole
+   catalogue, so the rating block renders on almost nothing. It is not dead code;
+   it is untested by this data.
+
+
+---
+
+## 2026-10-05 — READ FIRST: `docs/PARALLEL_SESSIONS.md`
+
+Multiple Claude sessions are working this tree at once. Ownership, the
+archive-500 root cause, files that must not be committed, and the roadmap all
+live in **`docs/PARALLEL_SESSIONS.md`**. Read it before staging anything.
+
+Short version: every WooCommerce archive (and `/`) returns 500 because WooCommerce
+is executing `lylyrose-navy/woocommerce/content-product.php`, which calls
+`lylyrosenavy_discount_percent()`, while the active theme's `functions.php`
+defines only the `lylyrose_*` prefix. It is a half-finished theme switch, and
+the fix (revert to navy, or delete navy) is held for the user to decide.
+
+Committed and verified: `2a9c2ee2` — product photos link to their product in
+every card, and the offers rail shows product names.
