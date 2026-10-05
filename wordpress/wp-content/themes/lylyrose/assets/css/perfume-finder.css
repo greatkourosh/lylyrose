@@ -374,38 +374,57 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* ---- Full-width layout (the page no longer carries .dk-container) ---- */
+/* One result per row. A grid would re-introduce the narrow-column squeeze the
+   fixed image width exists to avoid, so the stack stays vertical and the card
+   reclaims the full page width for its spec table. The card itself stops at
+   900px: past that the line lengths get long enough to hurt reading, and the
+   spec table stops gaining anything from the extra width. */
+.asc-finder__results {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    max-width: 900px;
+    margin: 0 auto;
+}
 
-@media (min-width: 768px) {
-    .asc-finder__results {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 16px;
-    }
+.asc-finder__result {
+    flex-direction: row;
+    margin: 0;
+    padding: 18px 20px;
+    gap: 20px;
+}
 
-    .asc-finder__result {
-        flex-direction: column;
-        margin: 0;
-    }
+.asc-finder__media {
+    flex: 0 0 132px;
+    width: 132px;
+}
 
-    .asc-finder__media {
-        flex: 0 0 auto;
-        width: 100%;
-    }
-
-    .asc-finder__head {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-    }
-
-    .asc-finder__meta {
-        grid-template-columns: minmax(0, 1fr);
-    }
+.asc-finder__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 @media (max-width: 767px) {
     .asc-finder__quiz {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    /* Stacked, the image has no side to sit beside, so it centres full-width
+       rather than holding a 132px square in a column of its own. */
+    .asc-finder__result {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .asc-finder__media {
+        width: 168px;
+        flex: 0 0 auto;
+    }
+
+    .asc-finder__body {
+        width: 100%;
+    }
 }
+
+
