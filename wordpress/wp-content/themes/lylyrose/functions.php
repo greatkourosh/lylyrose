@@ -139,6 +139,15 @@ function lylyrose_scripts() {
         lylyrose_version(),
         true
     );
+
+    // Mega menu: tap-to-open for touch, where the CSS :hover never fires.
+    wp_enqueue_script(
+        'lylyrose-mega',
+        get_theme_file_uri( 'assets/js/mega.js' ),
+        array(),
+        lylyrose_version(),
+        true
+    );
 }
 add_action( 'wp_enqueue_scripts', 'lylyrose_scripts' );
 
@@ -798,6 +807,55 @@ function lylyrose_term_image( $term, $size = 'woocommerce_thumbnail' ) {
 
     set_transient( $cache_key, $path, 12 * HOUR_IN_SECONDS );
     return $path;
+}
+
+/**
+ * Mega-menu cells for the "دسته‌بندی کالا" panel: one cell per top-level
+ * category, each carrying its own subcategories when it has any.
+ *
+ * The tree is mostly flat — only مراقبت از پوست and مراقبت از مو have children —
+ * so a cell is usually just its category name. Brands are not repeated per
+ * category here: the category archive a visitor lands on already carries the
+ * brand chips, so a second copy in the nav would be 13 near-identical columns.
+ *
+ * Returns a list of array( 'name', 'url', 'links' ), where 'links' is a list
+ * of array( 'name', 'url' ).
+ */
+function lylyrose_mega_cats_menu( $terms ) {
+	$cells = array();
+
+	foreach ( (array) $terms as $term ) {
+		$url = get_term_link( $term );
+		if ( is_wp_error( $url ) ) {
+			continue;
+		}
+
+		$links = array();
+		$children = get_terms( array(
+			'taxonomy'   => 'product_cat',
+			'hide_empty' => true,
+			'parent'     => $term->term_id,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+		) );
+		if ( ! is_wp_error( $children ) ) {
+			foreach ( $children as $child ) {
+				$child_url = get_term_link( $child );
+				if ( is_wp_error( $child_url ) ) {
+					continue;
+				}
+				$links[] = array( 'name' => $child->name, 'url' => $child_url );
+			}
+		}
+
+		$cells[] = array(
+			'name'  => $term->name,
+			'url'   => $url,
+			'links' => $links,
+		);
+	}
+
+	return $cells;
 }
 
 /**

@@ -119,6 +119,7 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
     <!-- Category nav -->
     <nav class="dk-catnav" aria-label="<?php echo esc_attr__( 'دسته‌بندی کالاها', 'lylyrose' ); ?>">
         <div class="dk-container">
+            <div class="dk-catnav-scroll">
             <ul class="dk-catnav-list">
                 <?php
                 $cat_menu = array(
@@ -134,16 +135,12 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                     'اکسسوری عطر'    => 'accessories',
                 );
 
-                // If the shop has perfume categories (WooCommerce), prefer them.
+                // If the shop has product categories (WooCommerce), prefer them.
                 // Uncapped: the drawer groups every category by slug, so truncating
-                // here would silently empty groups. The catnav slices to 9 itself.
+                // here would silently empty groups.
                 //
-                // Top-level only, biggest first. Subcategories are reachable from
-                // their parent and from the drawer, and the catnav has room for 9:
-                // with children included the main category (عطر و ادکلن, 110
-                // products) fell outside the slice and the shop's primary nav
-                // entry disappeared. Order by count so the slice keeps the
-                // categories a visitor is most likely to want.
+                // Top-level only, biggest first, so the single "دسته‌بندی کالا"
+                // panel leads with the categories a visitor is most likely to want.
                 $product_cats = function_exists( 'get_terms' ) ? get_terms( array(
                     'taxonomy'   => 'product_cat',
                     'hide_empty' => true,
@@ -154,23 +151,53 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                 ) ) : array();
 
                 if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) :
-                    foreach ( array_slice( $product_cats, 0, 9 ) as $term ) :
-                        $url = get_term_link( $term );
-                        if ( is_wp_error( $url ) ) { continue; }
-                        ?>
-                        <li class="dk-catnav-item"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $term->name ); ?></a></li>
-                    <?php endforeach;
+                    $dk_cells = function_exists( 'lylyrose_mega_cats_menu' ) ? lylyrose_mega_cats_menu( $product_cats ) : array();
                 else :
-                    foreach ( $cat_menu as $label => $slug ) : ?>
-                        <li class="dk-catnav-item"><a href="<?php echo esc_url( add_query_arg( 'product_cat', $slug, $shop_url ) ); ?>"><?php echo esc_html( __( $label, 'lylyrose' ) ); ?></a></li>
-                    <?php endforeach;
+                    $dk_cells = array();
+                    foreach ( $cat_menu as $label => $slug ) {
+                        $dk_cells[] = array(
+                            'name'  => __( $label, 'lylyrose' ),
+                            'url'   => add_query_arg( 'product_cat', $slug, $shop_url ),
+                            'links' => array(),
+                        );
+                    }
                 endif;
                 ?>
+                <?php if ( ! empty( $dk_cells ) ) : ?>
+                    <li class="dk-catnav-item dk-mega">
+                        <a href="<?php echo esc_url( $shop_url ); ?>" aria-haspopup="true" aria-expanded="false">
+                            <?php esc_html_e( 'دسته‌بندی کالا', 'lylyrose' ); ?>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </a>
+                        <div class="dk-mega-panel">
+                            <div class="dk-mega-inner">
+                                <div class="dk-mega-cols">
+                                    <?php foreach ( $dk_cells as $dk_cell ) : ?>
+                                        <div class="dk-mega-col">
+                                            <h5><a href="<?php echo esc_url( $dk_cell['url'] ); ?>"><?php echo esc_html( $dk_cell['name'] ); ?></a></h5>
+                                            <?php if ( ! empty( $dk_cell['links'] ) ) : ?>
+                                                <ul>
+                                                    <?php foreach ( $dk_cell['links'] as $dk_link ) : ?>
+                                                        <li><a href="<?php echo esc_url( $dk_link['url'] ); ?>"><?php echo esc_html( $dk_link['name'] ); ?></a></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                <?php endif; ?>
                 <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
                     <li class="dk-catnav-item"><a href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?></a></li>
                 <?php endif; ?>
-                <li class="dk-catnav-item"><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'همه دسته‌ها', 'lylyrose' ); ?></a></li>
+                <?php if ( function_exists( 'is_incredible_offers' ) ) : ?>
+                    <li class="dk-catnav-item"><a href="<?php echo esc_url( home_url( '/incredible-offers/' ) ); ?>"><?php esc_html_e( 'شگفت انگیزها', 'lylyrose' ); ?></a></li>
+                <?php endif; ?>
+                <li class="dk-catnav-item"><a href="<?php echo esc_url( add_query_arg( 'sort', 'popular', $shop_url ) ); ?>"><?php esc_html_e( 'پرفروش‌ترین‌ها', 'lylyrose' ); ?></a></li>
             </ul>
+            </div>
         </div>
     </nav>
 </header>

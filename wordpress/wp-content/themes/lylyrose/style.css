@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.14.9
+Version: 1.15.1
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -366,10 +366,24 @@ button, input, select, textarea { font-family: inherit; }
     display: flex;
     align-items: center;
     gap: 26px;
-    overflow-x: auto;
-    scrollbar-width: none;
 }
-.dk-catnav-list::-webkit-scrollbar { display: none; }
+/* The list scrolls horizontally on narrow screens so long category rows stay
+   reachable. A scroll container clips in BOTH axes once either axis is set to
+   auto (overflow-y: visible is not honoured beside overflow-x: auto — the
+   computed value drops to auto), so a dropdown panel inside it would be cut
+   off at the container's bottom edge. The panels therefore hang off the
+   catnav itself, not off the item, and the sticky nav is the positioning
+   context they resolve against. */
+.dk-catnav-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.dk-catnav-scroll::-webkit-scrollbar { display: none; }
+.dk-catnav-item {
+    position: relative;
+}
 .dk-catnav-item > a {
     display: inline-flex;
     align-items: center;
@@ -384,17 +398,18 @@ button, input, select, textarea { font-family: inherit; }
 .dk-catnav-item > a:hover,
 .dk-catnav-item.current > a { color: var(--dk-red); border-color: var(--dk-red); }
 .dk-catnav-item > a svg { width: 14px; height: 14px; transition: transform .2s; }
-.dk-catnav-item:hover > a svg { transform: rotate(180deg); }
+.dk-catnav-item:hover > a svg,
+.dk-catnav-item:focus-within > a svg { transform: rotate(180deg); }
 
-/* Mega menu */
-.dk-mega {
-    position: relative;
-}
+/* Mega menu. Opens on hover and on keyboard focus within, so the trigger is
+   reachable by tab as well as pointer; JS in assets/js/mega.js adds the same
+   behaviour for touch, which has no hover to begin with. */
+.dk-mega { position: static; }
 .dk-mega-panel {
     position: absolute;
     top: 100%;
-    right: 0;
     left: 0;
+    right: 0;
     background: #fff;
     border: 1px solid var(--dk-border);
     border-top: none;
@@ -404,16 +419,33 @@ button, input, select, textarea { font-family: inherit; }
     padding: 24px 32px;
     z-index: 950;
 }
-.dk-mega:hover .dk-mega-panel { display: block; }
+.dk-mega-inner {
+    max-width: 1332px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+}
 .dk-mega-cols {
+    flex: 1;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    /* One cell per top-level category; the catalogue is wide, so the grid
+       packs as many as fit rather than fixing a column count. */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px 24px;
 }
 .dk-mega-col h5 {
-    margin: 0 0 10px;
+    margin: 0 0 8px;
     font-size: 13.5px;
-    color: var(--dk-ink);
+    line-height: 1.5;
+}
+.dk-mega-col h5 a { color: var(--dk-ink); }
+.dk-mega-col h5 a:hover,
+.dk-mega-col h5 a:focus { color: var(--dk-red); }
+.dk-mega-col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 .dk-mega-col ul li a {
     display: block;
@@ -421,7 +453,13 @@ button, input, select, textarea { font-family: inherit; }
     font-size: 12.5px;
     color: var(--dk-muted);
 }
-.dk-mega-col ul li a:hover { color: var(--dk-red); }
+.dk-mega-col ul li a:hover,
+.dk-mega-col ul li a:focus { color: var(--dk-red); }
+/* Panel placement: the trigger is inside a horizontally scrolling list, so
+   anchoring a full-width panel to the item's own box would make it drift with
+   the scroll offset. Centring it on the viewport instead keeps it put. */
+.dk-mega:hover .dk-mega-panel,
+.dk-mega:focus-within .dk-mega-panel { display: block; }
 
 /* Mobile drawer */
 .dk-menu-toggle {
@@ -2048,6 +2086,11 @@ button, input, select, textarea { font-family: inherit; }
     .dk-menu-toggle { display: inline-flex; }
     .dk-header-actions .dk-hide-mobile { display: none; }
     .dk-catnav { position: static; }
+    /* Below the drawer breakpoint the mega panel has no room and the drawer is
+       the mobile menu, so the panels are dropped entirely rather than made to
+       collapse into something the drawer already does better. */
+    .dk-mega-panel { display: none !important; }
+    .dk-catnav-item > a svg { display: none; }
     .dk-hero-slide { grid-template-columns: 1fr; padding: 28px 22px; text-align: center; }
     .dk-hero-copy h1, .dk-hero-copy h2 { font-size: 22px; }
     .dk-hero-art { display: none; }
