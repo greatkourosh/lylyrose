@@ -1,19 +1,11 @@
 /* «عطرت رو پیدا کن» — the guided perfume finder page. */
 
+/* The page element is a .dk-container, so the quiz, the results heading and the
+   cards share the site's 1332px column and its edges with the header and footer.
+   Centring a narrower block here instead matched nothing else on the page. The
+   sides come from the container; only the vertical space is ours. */
 .asc-finder {
-    max-width: none;
-    margin: 0 auto;
-    padding: 8px 16px 40px;
-}
-
-/* The page runs full-bleed, so the container's 16px gutter is the only thing
-   keeping content off the viewport edge — and it is too little once the quiz
-   and the results grid both span the whole width. */
-@media (min-width: 900px) {
-    .asc-finder {
-        padding-left: 32px;
-        padding-right: 32px;
-    }
+    padding: 28px 0 56px;
 }
 
 .asc-finder__title {
@@ -25,14 +17,14 @@
 .asc-finder__quiz {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 16px;
     align-items: start;
 }
 
 .asc-finder__step {
     border: 1px solid var(--dk-line, #e6e2dd);
     border-radius: 12px;
-    padding: 14px 16px 16px;
+    padding: 16px 18px 18px;
     margin: 0;
     background: #fff;
 }
@@ -57,7 +49,7 @@
     gap: 6px;
     border: 1px solid var(--dk-line, #e6e2dd);
     border-radius: 999px;
-    padding: 6px 12px;
+    padding: 7px 14px;
     font-size: 14px;
     cursor: pointer;
     background: #fdfcfa;
@@ -83,6 +75,7 @@
 
 .asc-finder__quiz .asc-finder__actions {
     grid-column: 1 / -1;
+    margin: 4px 0 0;
 }
 
 .asc-finder__submit {
@@ -118,8 +111,12 @@
     color: var(--dk-muted, #7a6f6a);
 }
 
-/* Results */
+/* One result per row: a two-up grid squeezes the fixed 132px image and the spec
+   table into a column too narrow to read. */
 .asc-finder__results {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -128,11 +125,12 @@
 .asc-finder__result {
     border: 1px solid var(--dk-line, #e6e2dd);
     border-radius: 14px;
-    padding: 16px;
-    margin: 0 0 14px;
+    padding: 20px 22px;
+    margin: 0;
     background: #fff;
     display: flex;
-    gap: 16px;
+    flex-direction: row;
+    gap: 20px;
     align-items: flex-start;
 }
 
@@ -156,6 +154,44 @@
 .asc-finder__body {
     flex: 1 1 auto;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Full-width cards leave a wide empty band beside the title, price and button if
+   the spec table sits under them, so from this width the card splits: identity
+   and actions on the right, the table and note pyramid on the left. Below it the
+   two columns are narrower than the content needs, so the stack is kept. */
+@media (min-width: 900px) {
+    .asc-finder__body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+        gap: 6px 32px;
+        align-content: start;
+    }
+
+    .asc-finder__head,
+    .asc-finder__coverage,
+    .asc-finder__buy,
+    .asc-finder__rating,
+    .asc-finder__actions {
+        grid-column: 1;
+    }
+
+    .asc-finder__meta,
+    .asc-finder__notes,
+    .asc-finder__factors {
+        grid-column: 2;
+    }
+
+    .asc-finder__meta {
+        grid-row: 1 / span 3;
+    }
+
+    .asc-finder__notes {
+        grid-row: 4;
+    }
 }
 
 .asc-finder__head {
@@ -243,13 +279,13 @@
 
 .asc-finder__meta {
     margin: 0 0 10px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border: 1px solid var(--dk-line, #eeeae5);
     border-radius: 10px;
     background: #fdfcfa;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 16px;
+    gap: 8px 20px;
 }
 
 .asc-finder__meta-row {
@@ -278,7 +314,7 @@
 
 .asc-finder__notes {
     margin: 0 0 10px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border: 1px solid var(--dk-line, #eeeae5);
     border-radius: 10px;
     background: #fdfcfa;
@@ -303,7 +339,7 @@
 .asc-finder__factors {
     list-style: none;
     margin: 0;
-    padding: 10px 0 0;
+    padding: 12px 0 0;
     border-top: 1px solid var(--dk-line, #eeeae5);
 }
 
@@ -329,7 +365,7 @@
 }
 
 .asc-finder__actions {
-    margin: 12px 0 0;
+    margin: 14px 0 0;
 }
 
 .asc-finder__view {
@@ -348,61 +384,10 @@
     color: #fff;
 }
 
-@media (max-width: 600px) {
-    .asc-finder__result {
-        flex-direction: column;
-    }
-
-    .asc-finder__media {
-        flex: 0 0 auto;
-        width: 168px;
-        align-self: center;
-    }
-
-    .asc-finder__head {
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .asc-finder__meta {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
 /* Percentages change on every submission; tabular figures stop the card from
    reflowing as the number changes width. */
 .asc-finder__num {
     font-variant-numeric: tabular-nums;
-}
-
-/* One result per row. A grid would re-introduce the narrow-column squeeze the
-   fixed image width exists to avoid, so the stack stays vertical and the card
-   reclaims the full page width for its spec table. The card itself stops at
-   900px: past that the line lengths get long enough to hurt reading, and the
-   spec table stops gaining anything from the extra width. */
-.asc-finder__results {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.asc-finder__result {
-    flex-direction: row;
-    margin: 0;
-    padding: 18px 20px;
-    gap: 20px;
-}
-
-.asc-finder__media {
-    flex: 0 0 132px;
-    width: 132px;
-}
-
-.asc-finder__body {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
 }
 
 @media (max-width: 767px) {
@@ -410,8 +395,8 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
-    /* Stacked, the image has no side to sit beside, so it centres full-width
-       rather than holding a 132px square in a column of its own. */
+    /* Stacked, the image has no side to sit beside, so it centres rather than
+       holding a 132px square in a column of its own. */
     .asc-finder__result {
         flex-direction: column;
         align-items: center;
@@ -427,4 +412,13 @@
     }
 }
 
+@media (max-width: 600px) {
+    .asc-finder__head {
+        flex-direction: column;
+        gap: 2px;
+    }
 
+    .asc-finder__meta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
