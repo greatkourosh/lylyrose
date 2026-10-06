@@ -2435,3 +2435,84 @@ it. All three went red — `story row renders`, `story row has its gradient ring
 **Final state:** suite **330 passed, 0 failed**, `Version: 1.17.0`, verified against
 served output — `dk-story-row` present with its rings (11 circles),
 `dk-service-row` absent, 5 top-banner cells.
+
+---
+
+## 2026-10-06 — Night palette repaired; prices are whole تومان
+
+Deployed to production and verified live. Theme `Version:` → **1.24.0**,
+suite **335 passed, 0 failed**.
+
+### `--dk-white` is a surface token, not a constant
+
+60 rules read `--dk-white` as a background. The visitor asked for white to follow the
+عاجی palette; read literally that would break night, since a constant `#ffffff` on a
+`#12151c` page is a white slab. So it became a per-palette surface: night ships
+`#1b1f28`, ivory keeps `#ffffff`. 53 `background:#fff` became `var(--dk-white)`, plus 3
+`#faf7f4` and one `2px solid #fff` ring.
+
+Two literals were left alone on purpose: `.dk-track-status` keeps `background: #fff4e0`
+(a warm pill, not a surface), and 5 hero/photo-overlay rules keep `color: #fff` because
+they sit over imagery, not over a palette fill.
+
+### Labels on a filled accent need their own token
+
+A dark palette has a *light* accent (night `--dk-red` is `#789df9`), so the white label
+on it drops to 2.63:1 — and 2.33:1 on the gold. `--dk-on-accent` / `--dk-on-gold` /
+`--dk-on-ink` now carry that flip; ivory is the light case and gets `#ffffff`. 35
+`color:#fff` rules on accent fills moved to them, including 3 `!important` variants.
+
+### `color-mix()` amounts need percentages
+
+The footer's 15 translucent whites (`rgba(255,255,255,.88)` over `--dk-red`) became
+`color-mix(in srgb, var(--dk-on-accent) 88%, transparent)` so the veil derives from the
+same token as its fill. Written first as `.88`, which is **invalid** — the declaration
+is dropped silently, the rule falls back to the inherited colour, and the footer text
+sits at 1.86:1. The suite stayed green through it. Only `docker/night-audit.py` caught
+it, because it reads computed styles rather than asserting a pattern.
+
+### `--dk-body-text` was never in the palette map
+
+`ASC_Palette::CSS_PROP` had no `body-text` entry, so the token stayed at the light
+theme's `#4a423e` on a `#12151c` page — 1.86:1 across roughly 140 nodes. Adding it to
+`CSS_PROP` plus a night default (`#d5d9e2`) is the single biggest win in this pass.
+
+### A third defect, in a file nobody was looking at
+
+`perfume-finder.css` read `var(--dk-rose)` and `var(--dk-rose-dark)`. **Neither token is
+defined anywhere**, so every `var()` fell back to a hardcoded `#c98f91` / `#b87a7c` and
+the finder ignored every palette including night. Repointed at `--dk-red` /
+`--dk-red-dark`. A colour sweep misses this class of bug by construction — it only
+moves rules that *use* the variable.
+
+### Prices: why `wc_price_args` and not `wc_get_price_decimals`
+
+`wc_get_price_decimals()` feeds tax, shipping and refund arithmetic — and
+`wc-deprecated-functions.php` builds a SQL `DECIMAL(10,n)` column type from it, where
+the precision is real and rounding it away would change totals WooCommerce computes.
+So the filter is scoped to `wc_price_args`, which only builds the display string.
+
+`'woocommerce_price_trim_zeros'` is not equivalent: it strips *trailing* zeros, so a
+price genuinely landing on `.5` would still print one digit. The first draft of this
+work used `wc_get_price_decimals` and was revised for the reason above.
+
+### Verification
+
+`docker/night-audit.py` (new) walks visible elements through CDP and reports computed
+contrast pairs under 4.5:1. It had to be new: night is applied by rewriting `:root` in
+JS, so there is **no night block in the stylesheet to grep for** and reading the source
+only ever shows the light tokens.
+
+Night **140 → 16** rows. The remaining 16 are audit blind spots, not defects — a
+`linear-gradient` background reports `rgba(0,0,0,0)` from `getComputedStyle`, so
+`.dk-offers` children and the hero photos get compared against the page rather than
+their real fill. The audit now walks to the nearest ancestor with a real fill, which
+removed the footer false positives but cannot see a gradient.
+
+Mutation-checked: reverting one `color-mix` line took it back to 43 rows, so the audit
+detects its own regressions. Production re-audited separately — 16 rows, matching local.
+
+**Caveat for the next pass:** the contrast audit is not wired into `docker/run-tests.sh`,
+so none of this is enforced on a normal suite run. The palette values could be asserted
+directly instead — `night` `white=#1b1f28` `body=#d5d9e2` `on-accent=#0d1016` — which
+would be cheap and would not depend on a browser.

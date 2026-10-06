@@ -45,7 +45,7 @@ class ASC_Palette {
 	);
 
 	/** Tokens a palette may also carry without exposing them in the form. */
-	const EXTRA = array( 'on-accent', 'on-gold', 'white' );
+	const EXTRA = array( 'on-accent', 'on-gold', 'on-ink', 'white' );
 
 	/** The three palettes that ship. Values match the theme's :root. */
 	public static function defaults() {
@@ -83,13 +83,18 @@ class ASC_Palette {
 				'teal'      => '#c4a577',
 				'ink'       => '#f2f4f8',
 				'text'      => '#bec4d1',
+				'body-text' => '#d5d9e2',
 				'muted'     => '#949daf',
 				'bg'        => '#12151c',
 				'border'    => '#323945',
-				'white'     => '#ffffff',
+				// --dk-white is the card surface, not a constant. Every surface
+				// rule reads it, so on a dark page it has to be a lighter dark;
+				// #ffffff left a white slab sitting on #12151c.
+				'white'     => '#1b1f28',
 				'badge-red' => '#f96868',
 				'on-accent' => '#0d1016',
 				'on-gold'   => '#0d1016',
+				'on-ink'    => '#0d1016',
 				// Derived steps, re-derived for a dark surface. Leaving the
 				// light values in would put a #f8f1f0 panel on #12151c.
 				'red-dark'  => '#5b7fd4',
@@ -108,6 +113,9 @@ class ASC_Palette {
 		'teal'      => '--dk-teal',
 		'ink'       => '--dk-ink',
 		'text'      => '--dk-text',
+		// The token the theme's body copy reads. Without it here a dark palette
+		// kept the light --dk-body-text and left dark-brown text on a dark page.
+		'body-text' => '--dk-body-text',
 		'muted'     => '--dk-muted',
 		'bg'        => '--dk-bg',
 		'border'    => '--dk-border',
@@ -115,6 +123,7 @@ class ASC_Palette {
 		'badge-red' => '--dk-badge-red',
 		'on-accent' => '--dk-on-accent',
 		'on-gold'   => '--dk-on-gold',
+		'on-ink'    => '--dk-on-ink',
 		// Not editable in the form, but a dark palette MUST carry them: the
 		// light palettes' --dk-red-light is a near-white panel used for tinted
 		// surfaces, and leaving it in place on a #12151c background turns every

@@ -2515,3 +2515,38 @@ like a failure. Details and the herestring fix are in `DEVELOPMENT_LOG.md`.
 
 Still open, not requested: the older `dk-banner-grid` further down renders 4-across
 with a 5th tile orphaned onto its own row, clashing with the new grid.
+
+---
+
+## 2026-10-06 — Night palette repaired, prices are whole تومان, deployed to production
+
+Three visitor-reported faults, all fixed and **verified on `https://lylyrose.ir`**:
+
+- **Night mode colours.** Dark text on dark cards, white labels on the light-blue
+  night accents, and white card slabs on the dark page. `--dk-body-text` was not in
+  the palette's `CSS_PROP` map so it never changed, `--dk-on-accent`/`--dk-on-gold`
+  existed but nothing read them, and 66 rules hardcoded `background:#fff`.
+- **White should follow the عاجی palette.** `--dk-white` is now a real per-palette
+  **surface** token (60 rules read it), so night uses `#1b1f28` and ivory stays
+  `#ffffff`. Do not put it back to a constant.
+- **Price decimals.** Prices are whole تومان; `wc_price_args` now sets `decimals: 0`.
+  Deliberately not `wc_get_price_decimals` — that also feeds tax/shipping/refunds and
+  builds a SQL `DECIMAL(10,n)`. Not `woocommerce_price_trim_zeros` either: that only
+  strips trailing zeros, so a genuine `.5` would still print one digit.
+
+Theme `Version:` → **1.24.0**. Suite **335 passed, 0 failed**. Deployed with
+`docker/deploy-targeted.py` naming the 5 changed paths explicitly (never merge a deploy
+branch — it drags a vendor update wave along).
+
+**How it was verified:** `docker/night-audit.py` reads *computed* contrast through CDP,
+because night is applied by rewriting `:root` in JS and there is no night block in the
+stylesheet to grep for. Night went **140 → 16** rows under 4.5:1, and the live audit
+matches local exactly. The remaining 16 are audit blind spots, not defects: a
+`linear-gradient` background is invisible to `getComputedStyle().backgroundColor`, so
+those elements get compared against the page instead of the fill they sit on.
+
+Two traps worth keeping: `color-mix()` amounts need **`88%`, not `.88`** (the bare
+fraction is invalid, the declaration is silently dropped, and the text falls back to
+the inherited colour at 1.86:1 — the suite stayed green through it), and
+`perfume-finder.css` was reading `--dk-rose`, a token **defined nowhere**, so every
+`var()` fell back to a hardcoded hex and the finder ignored all palettes.

@@ -10,6 +10,65 @@ pass — a stale version of this file is worse than none.
 
 ---
 
+## 0d. Night palette + price decimals session — shipped to production (2026-10-06)
+
+Three visitor-reported faults, all fixed, all **on production**. Suite 335/0.
+
+Theme `Version:` is now **1.24.0**, and that is what production serves.
+
+| File | Change |
+|---|---|
+| `lylyrose-core/includes/class-palette.php` | `body-text` and `on-ink` added to `CSS_PROP`; night defaults gained `body-text`, a dark `white` surface, and the three `on-*` label colours |
+| `lylyrose/style.css` | `:root` gained `--dk-on-accent` / `--dk-on-gold` / `--dk-on-ink`; 53 `background:#fff` → `var(--dk-white)`; 35 `color:#fff` on accent fills → the `on-*` tokens; 15 translucent footer whites → `color-mix(in srgb, var(--dk-on-accent) N%, transparent)`; `.dk-brandcell` literal → `var(--dk-muted)`. `Version:` → **1.24.0** |
+| `lylyrose/assets/css/flash-sales.css` | 4 surfaces + accents to tokens |
+| `lylyrose/assets/css/perfume-finder.css` | 4 surfaces to tokens, **and** the never-defined `--dk-rose` / `--dk-rose-dark` replaced with `--dk-red` / `--dk-red-dark` |
+| `lylyrose/functions.php` | `lylyrose_price_args()` on `wc_price_args` sets `decimals: 0` |
+
+### Three things that will bite the next person
+
+**`--dk-white` is a surface token, not a constant.** 60 rules read it, so on a dark
+page it must be a lighter dark (`#1b1f28` in night) or every card renders as a white
+slab on `#12151c`. Do not "tidy" it back to `#ffffff`.
+
+**`color-mix()` amounts need percentages.** `color-mix(in srgb, var(--dk-on-accent) .88, transparent)`
+is invalid — `.88` silently drops the declaration, the rule falls back to the
+inherited colour, and the footer text lands at **1.86:1**. It must be `88%`. This
+happened once during this session and the audit caught it; a green suite did not.
+
+**`color-mix()` and gradients are invisible to the contrast audit.** `getComputedStyle
+().backgroundColor` reports `rgba(0,0,0,0)` for both, so the audit compares those
+elements against the page instead of the fill they sit on. The audit now walks to the
+nearest ancestor with a real fill, which fixed the footer false positives but **cannot**
+see a `linear-gradient` background — `.dk-offers` and the hero photos still report
+their children's contrast against the wrong backdrop. The 16 remaining rows in
+`docker/night-audit.py` output are all of this kind and are **known good**, not
+outstanding work.
+
+### Why `wc_price_args` and not `wc_get_price_decimals`
+
+Prices are whole تومان, so `.۰۰` is noise. But `wc_get_price_decimals()` also feeds
+tax, shipping and refund arithmetic — and via `wc-deprecated-functions.php` it builds
+a SQL `DECIMAL(10,n)` column type, where the precision is real. Filtering
+`wc_price_args` changes the *display* string only.
+
+`'woocommerce_price_trim_zeros'` is **not** the same fix: it strips trailing zeros, so
+a price genuinely landing on `.5` would still show one digit.
+
+### Measured, not assumed
+
+`docker/night-audit.py` reports computed contrast, because night is applied by
+rewriting `:root` in JS — there is no night block in the stylesheet to grep for.
+Night went **140 → 16** rows under 4.5:1; the 16 are the false positives above.
+Reverting one of the `color-mix` lines took it back to 43, so the audit does detect
+its own regressions.
+
+The palette values are also worth asserting directly, since the CSS proves nothing
+about the preset: **night** `white=#1b1f28` `body=#d5d9e2` `on-accent=#0d1016`
+`red=#789df9` `bg=#12151c`; **ivory** keeps `white=#ffffff`. All three confirmed on
+the live host, and live night audit matches local exactly.
+
+---
+
 ## 0b. Homepage redesign session — what it touched, and what is still loose (2026-10-06)
 
 > **Header restored 2026-10-06.** The finder session's edit above had consumed this

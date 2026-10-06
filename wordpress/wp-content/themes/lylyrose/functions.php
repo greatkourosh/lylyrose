@@ -975,6 +975,24 @@ function lylyrose_to_persian_digits( $text ) {
 }
 
 /**
+ * Prices are whole تومان, so no decimal part is ever meaningful. WooCommerce
+ * defaults to 2 and renders "۹,۲۰۰,۰۰۰.۰۰".
+ *
+ * Scoped to wc_price's display args on purpose. The store option stays at 2
+ * because wc_get_price_decimals() also feeds tax, shipping and refund
+ * arithmetic, where the precision is real and rounding it away would change
+ * the totals WooCommerce computes.
+ *
+ * Also not 'woocommerce_price_trim_zeros': that only strips trailing zeros, so
+ * a price that genuinely lands on .5 would still show one digit.
+ */
+function lylyrose_price_args( $args ) {
+    $args['decimals'] = 0;
+    return $args;
+}
+add_filter( 'wc_price_args', 'lylyrose_price_args', 100 );
+
+/**
  * Persian digits for prices — fa (RTL) only, so EN keeps Latin numerals.
  */
 function lylyrose_persian_price( $html ) {

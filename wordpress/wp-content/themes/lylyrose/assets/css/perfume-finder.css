@@ -26,7 +26,7 @@
     border-radius: 12px;
     padding: 16px 18px 18px;
     margin: 0;
-    background: #fff;
+    background: var(--dk-white);
 }
 
 .asc-finder__step legend {
@@ -57,13 +57,13 @@
 }
 
 .asc-finder__option:hover {
-    border-color: var(--dk-rose, #c98f91);
-    background: #fff;
+    border-color: var(--dk-red);
+    background: var(--dk-white);
 }
 
 .asc-finder__option input {
     margin: 0;
-    accent-color: var(--dk-rose, #c98f91);
+    accent-color: var(--dk-red);
 }
 
 /* The tier's price range, set smaller and quieter than its label so the four
@@ -85,12 +85,12 @@
     border-radius: 10px;
     padding: 12px 28px;
     cursor: pointer;
-    color: #fff;
-    background: var(--dk-rose, #c98f91);
+    color: var(--dk-on-accent);
+    background: var(--dk-red);
 }
 
 .asc-finder__submit:hover {
-    background: var(--dk-rose-dark, #b87a7c);
+    background: var(--dk-red-dark);
 }
 
 .asc-finder__alt {
@@ -100,7 +100,7 @@
 }
 
 .asc-finder__alt a {
-    color: var(--dk-rose, #c98f91);
+    color: var(--dk-red);
 }
 
 .asc-finder__empty {
@@ -127,7 +127,7 @@
     border-radius: 14px;
     padding: 20px 22px;
     margin: 0;
-    background: #fff;
+    background: var(--dk-white);
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -138,7 +138,7 @@
     flex: 0 0 132px;
     width: 132px;
     display: block;
-    background: #fff;
+    background: var(--dk-white);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -243,14 +243,14 @@
 }
 
 .asc-finder__name a:hover {
-    color: var(--dk-rose, #c98f91);
+    color: var(--dk-red);
 }
 
 .asc-finder__percent {
     flex-shrink: 0;
     font-size: 18px;
     font-weight: 700;
-    color: var(--dk-rose, #c98f91);
+    color: var(--dk-red);
 }
 
 /* Sits under the title, not floated: a float beside a long Persian product name
@@ -385,7 +385,7 @@
 
 .asc-finder__factor.is-match::before {
     content: '✓ ';
-    color: var(--dk-rose, #c98f91);
+    color: var(--dk-red);
     font-weight: 700;
 }
 
@@ -402,16 +402,16 @@
     display: inline-block;
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
-    background: var(--dk-rose, #c98f91);
+    color: var(--dk-on-accent);
+    background: var(--dk-red);
     border-radius: 10px;
     padding: 9px 22px;
     text-decoration: none;
 }
 
 .asc-finder__view:hover {
-    background: var(--dk-rose-dark, #b87a7c);
-    color: #fff;
+    background: var(--dk-red-dark);
+    color: var(--dk-on-accent);
 }
 
 /* Percentages change on every submission; tabular figures stop the card from
