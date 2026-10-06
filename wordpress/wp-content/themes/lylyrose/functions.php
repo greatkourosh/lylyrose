@@ -853,6 +853,68 @@ function lylyrose_promo_image( $args = array(), $size = 'medium' ) {
 }
 
 /**
+ * The photo an owner picked for a hero slide, as a root-relative path.
+ *
+ * Nothing is derived from the catalogue: a product packshot stretched to full
+ * bleed looks worse than no photo at all, so an unset slide deliberately renders
+ * nothing and keeps the hero's own gradient. What is wanted here is a scene
+ * shot, and only the owner knows which one.
+ *
+ * Root-relative for the reason lylyrose_term_image() gives — the site answers on
+ * more than one host, and an absolute URL would pin the photo to whichever host
+ * the theme mod happened to be saved from.
+ */
+function lylyrose_hero_photo( $key ) {
+	$id = (int) get_theme_mod( 'lylyrose_hero_photo_' . $key );
+	if ( ! $id ) {
+		return '';
+	}
+	$url = wp_get_attachment_image_url( $id, 'full' );
+	if ( ! $url ) {
+		return '';
+	}
+	return wp_parse_url( $url, PHP_URL_PATH ) ?: '';
+}
+
+/**
+ * A "تصویر اسلاید" control per hero slide, under Appearance → Customize.
+ *
+ * The five keys are the slide identifiers from front-page.php, not array
+ * indices: the perfume-finder slide is conditional, so an indexed key would
+ * silently repoint every photo the moment that plugin is switched off.
+ */
+function lylyrose_customize_register( $wp_customize ) {
+	$slides = array(
+		'sale'    => __( 'اسلاید ۱ — پیشنهاد ویژه امروز', 'lylyrose' ),
+		'newest'  => __( 'اسلاید ۲ — جدیدترین محصولات', 'lylyrose' ),
+		'popular' => __( 'اسلاید ۳ — پرفروش‌ترین‌ها', 'lylyrose' ),
+		'finder'  => __( 'اسلاید ۴ — عطرت رو پیدا کن', 'lylyrose' ),
+		'offers'  => __( 'اسلاید ۵ — شگفت‌انگیزها', 'lylyrose' ),
+	);
+
+	$wp_customize->add_section( 'lylyrose_hero', array(
+		'title'       => __( 'تصویر اسلایدهای صفحه اصلی', 'lylyrose' ),
+		'priority'    => 30,
+		'description' => __( 'تصویری که پشت هر اسلاید بنشیند. خالی بگذارید تا همان پس‌زمینهٔ گرادیانی بماند؛ عکس محصول برای این کار مناسب نیست.', 'lylyrose' ),
+	) );
+
+	foreach ( $slides as $key => $label ) {
+		$wp_customize->add_setting( 'lylyrose_hero_photo_' . $key, array(
+			'default'           => 0,
+			'sanitize_callback' => 'absint',
+			'transport'         => 'refresh',
+		) );
+
+		$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'lylyrose_hero_photo_' . $key, array(
+			'label'       => $label,
+			'section'     => 'lylyrose_hero',
+			'settings'    => 'lylyrose_hero_photo_' . $key,
+			'description' => __( 'تصویر عریض (حداقل ۱۶۰۰ پیکسل عرض) مناسب است.', 'lylyrose' ),
+		) ) );
+	}
+}
+add_action( 'customize_register', 'lylyrose_customize_register' );
+/**
  * Mega-menu cells for the "دسته‌بندی کالا" panel: one cell per top-level
  * category, each carrying its own subcategories when it has any.
  *

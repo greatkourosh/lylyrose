@@ -177,32 +177,27 @@ if ( count( $editorial ) < 3 ) {
             'title'  => __( 'تا ', 'lylyrose' ) . '<strong>' . __( '۴۰٪ تخفیف', 'lylyrose' ) . '</strong>' . __( ' روی منتخب کالاها', 'lylyrose' ),
             'text'   => __( 'فرصت محدود؛ همین حالا خرید کنید و از تخفیف‌های شگفت‌انگیز بهره‌مند شوید.', 'lylyrose' ),
             'cta'    => __( 'مشاهده پیشنهادها', 'lylyrose' ),
+            'key'    => 'sale',
             'url'    => $shop_url,
             'art'    => '🛒',
-            'q'      => array(
-                'meta_query' => array(
-                    array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
-                    array( 'key' => '_sale_price',  'compare' => 'EXISTS' ),
-                ),
-            ),
         ),
         array(
             'kicker' => __( 'تازه‌های فروشگاه', 'lylyrose' ),
             'title'  => __( 'جدیدترین محصولات ', 'lylyrose' ) . '<strong>' . __( 'رسیدند', 'lylyrose' ) . '</strong>',
             'text'   => __( 'تازه‌ترین محصولات از برندهای محبوب — اولین نفر باشید که آن‌ها را امتحان می‌کنید.', 'lylyrose' ),
             'cta'    => __( 'دیدن جدیدترین‌ها', 'lylyrose' ),
+            'key'    => 'newest',
             'url'    => add_query_arg( 'orderby', 'date', $shop_url ),
             'art'    => '✨',
-            'q'      => array( 'orderby' => 'date', 'order' => 'DESC' ),
         ),
         array(
             'kicker' => __( 'انتخاب خریداران', 'lylyrose' ),
             'title'  => __( 'پرفروش‌ترین‌های ', 'lylyrose' ) . '<strong>' . __( 'این هفته', 'lylyrose' ) . '</strong>',
             'text'   => __( 'محصولاتی که مشتریان بیشتری آن‌ها را دوست دارند — با ضمانت اصالت و ارسال سریع.', 'lylyrose' ),
             'cta'    => __( 'مشاهده پرفروش‌ها', 'lylyrose' ),
+            'key'    => 'popular',
             'url'    => add_query_arg( 'orderby', 'popularity', $shop_url ),
             'art'    => '🔥',
-            'q'      => array( 'meta_key' => 'total_sales', 'orderby' => 'meta_value_num', 'order' => 'DESC' ),
         ),
     );
 
@@ -212,9 +207,9 @@ if ( count( $editorial ) < 3 ) {
             'title'  => __( 'عطرت رو ', 'lylyrose' ) . '<strong>' . __( 'پیدا کن', 'lylyrose' ) . '</strong>',
             'text'   => __( 'به چند پرسش کوتاه پاسخ بده و عطری که به سلیقه‌ات می‌خورد را پیدا کن.', 'lylyrose' ),
             'cta'    => __( 'شروع کن', 'lylyrose' ),
+            'key'    => 'finder',
             'url'    => get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ),
             'art'    => '🔍',
-            'photo'  => $dk_perfume_photo,
         );
     }
 
@@ -223,16 +218,9 @@ if ( count( $editorial ) < 3 ) {
         'title'  => __( 'شگفت ', 'lylyrose' ) . '<strong>' . __( 'انگیزه‌ها', 'lylyrose' ) . '</strong>',
         'text'   => __( 'جدیدترین تخفیف‌های فروشگاه روی عطر، ادکلن و محصولات مراقبتی.', 'lylyrose' ),
         'cta'    => __( 'مشاهده شگفت‌انگیزها', 'lylyrose' ),
+        'key'    => 'offers',
         'url'    => $offer_url,
         'art'    => '🎁',
-        // Newest on-sale, which is the offers page's own default sort.
-        'q'      => array(
-            'meta_query' => array(
-                array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
-                array( 'key' => '_sale_price',  'compare' => 'EXISTS' ),
-            ),
-            'orderby' => 'date', 'order' => 'DESC',
-        ),
     );
     ?>
     <div class="dk-container">
@@ -240,9 +228,12 @@ if ( count( $editorial ) < 3 ) {
             <div class="dk-hero-slides">
                 <?php
                 foreach ( $dk_hero_slides as $dk_i => $dk_slide ) :
-                    $dk_slide_photo = isset( $dk_slide['q'] ) ? lylyrose_promo_image( $dk_slide['q'] ) : $dk_slide['photo'];
+                    // The photo behind a slide is the owner's choice, set in Appearance
+                    // → Customize. An unset slide keeps the hero's own gradient, which
+                    // reads better than a product packshot stretched to full bleed.
+                    $dk_slide_photo = lylyrose_hero_photo( $dk_slide['key'] );
                     ?>
-                    <div class="dk-hero-slide<?php echo 0 === $dk_i ? ' is-active' : ''; ?>"<?php if ( $dk_slide_photo ) : ?> style="--dk-hero-photo:url(&quot;<?php echo esc_url( $dk_slide_photo ); ?>&quot;);"<?php endif; ?>>
+                    <div class="dk-hero-slide<?php echo 0 === $dk_i ? ' is-active' : ''; ?><?php echo $dk_slide_photo ? ' has-photo' : ''; ?>"<?php if ( $dk_slide_photo ) : ?> style="--dk-hero-photo:url(&quot;<?php echo esc_url( $dk_slide_photo ); ?>&quot;);"<?php endif; ?>>
                         <div class="dk-hero-copy">
                             <span class="dk-kicker"><?php echo esc_html( $dk_slide['kicker'] ); ?></span>
                             <h1><?php echo wp_kses( $dk_slide['title'], array( 'strong' => array() ) ); ?></h1>

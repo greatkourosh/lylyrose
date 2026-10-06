@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.18.0
+Version: 1.19.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -558,11 +558,13 @@ button, input, select, textarea { font-family: inherit; }
     transition: opacity .6s ease;
     pointer-events: auto;
 }
-/* Each slide wears the photo its own copy promises. Same shape as .dk-banner: the
-   negative z-index is what sinks both layers under the copy, and isolation keeps
-   them from escaping behind the hero's own gradient. */
+/* A photo set in the customizer goes behind the copy; an unset slide keeps the
+   hero's own gradient. Same shape as .dk-banner: the negative z-index is what
+   sinks both layers under the copy, and isolation keeps them from escaping
+   behind the hero's own gradient. Scoped to .has-photo so the scrim never
+   darkens a slide that has no photo to read through. */
 .dk-hero-slide { isolation: isolate; }
-.dk-hero-slide::before {
+.dk-hero-slide.has-photo::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -571,7 +573,7 @@ button, input, select, textarea { font-family: inherit; }
     background-size: cover;
     background-position: center;
 }
-.dk-hero-slide::after {
+.dk-hero-slide.has-photo::after {
     content: "";
     position: absolute;
     inset: 0;
