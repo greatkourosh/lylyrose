@@ -51,6 +51,41 @@ if ( is_wp_error( $dk_cats ) ) {
     $dk_cats = array();
 }
 
+// The top banner grid is a fixed set of entry points, not "the biggest
+// categories": مراقبت از پوست / مراقبت از مو carry their products in child
+// terms, so a hide_empty query drops both. Resolve the slugs in order and keep
+// the ones that exist, so one renamed category costs its own cell and not the
+// whole row. آرایشی has no product_cat at all, so it falls back to a shop
+// search — the cell is part of the design, the link is the best real target.
+$dk_top_banners = array();
+foreach ( array(
+    'perfume'   => array( 'label' => __( 'عطر', 'lylyrose' ),   'search' => false, 'svg' => '<path d="M9 3h6M10 3v3.2L7.4 9.7A4 4 0 0 0 7 12.3V19a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6.7a4 4 0 0 0-.4-2.6L14 6.2V3"/><path d="M7 12h10"/>' ),
+    'cosmetics' => array( 'label' => __( 'آرایشی', 'lylyrose' ), 'search' => true,  'svg' => '<path d="M9 9h6v11a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><rect x="8" y="4" width="8" height="5" rx="1"/><path d="M9 6.5h6"/>' ),
+    'skin-care' => array( 'label' => __( 'مراقبت پوست', 'lylyrose' ), 'search' => false, 'svg' => '<circle cx="12" cy="12" r="8.2"/><path d="M8.6 10.4h.01M15.4 10.4h.01M9.4 15.4c1.6 1.3 3.6 1.3 5.2 0"/>' ),
+    'hair-care' => array( 'label' => __( 'مراقبت مو', 'lylyrose' ), 'search' => false, 'svg' => '<path d="M12 4c3 0 4.6 2.3 4.6 5.2 0 4-1.2 6.6-2 8.2-.5-1.6-.6-3.3-.4-4.9-1.3 1.4-2.9 1.9-4.4 1.9-.5 1.2-.6 2.2-.5 3.1-1.3-1.6-1.9-3.8-1.9-6 0-3.7 1.7-7.5 4.6-7.5z"/>' ),
+    'gift-sets' => array( 'label' => __( 'ست‌ها و هدیه', 'lylyrose' ), 'search' => false, 'svg' => '<rect x="3.4" y="9.6" width="17.2" height="10.4" rx="1.4"/><path d="M2.6 9.6h18.8M12 9.6V20"/><path d="M12 9.6S10.6 4.4 8 4.4a2.1 2.1 0 0 0 0 5.2M12 9.6s1.4-5.2 4-5.2a2.1 2.1 0 0 1 0 5.2"/>' ),
+) as $dk_tb_slug => $dk_tb_cfg ) {
+    if ( $dk_tb_cfg['search'] || ! $has_woo ) {
+        $dk_top_banners[] = array(
+            'label' => $dk_tb_cfg['label'],
+            'url'   => add_query_arg( 's', $dk_tb_cfg['label'], $shop_url ),
+            'svg'   => $dk_tb_cfg['svg'],
+        );
+        continue;
+    }
+    $dk_tb_term = get_term_by( 'slug', $dk_tb_slug, 'product_cat' );
+    if ( $dk_tb_term && ! is_wp_error( $dk_tb_term ) ) {
+        $dk_tb_url = get_term_link( $dk_tb_term );
+        if ( ! is_wp_error( $dk_tb_url ) ) {
+            $dk_top_banners[] = array(
+                'label' => $dk_tb_cfg['label'],
+                'url'   => $dk_tb_url,
+                'svg'   => $dk_tb_cfg['svg'],
+            );
+        }
+    }
+}
+
 // Popular brands (pa_brand attribute terms) -> shop filtered by ?dk_brands[]=<id>.
 $dk_brands = $has_woo ? get_terms( array(
     'taxonomy'   => 'pa_brand',
@@ -173,6 +208,7 @@ if ( count( $editorial ) < 3 ) {
             <div class="dk-service-item"><span class="dk-service-icon">💳</span><div><strong><?php esc_html_e( 'پرداخت در محل', 'lylyrose' ); ?></strong><small><?php esc_html_e( 'در تمام شهرها', 'lylyrose' ); ?></small></div></div>
         </section>
     </div>
+    -->
 
     <!-- Stories -->
     <div class="dk-container">
@@ -195,6 +231,20 @@ if ( count( $editorial ) < 3 ) {
                         <?php endif; ?>
                     </span></span>
                     <span><?php echo esc_html( $story_term->name ); ?></span>
+                </a>
+            <?php endforeach; ?>
+        </section>
+    </div>
+
+    <!-- Top banners -->
+    <div class="dk-container">
+        <section class="dk-top-banner-grid" aria-label="<?php echo esc_attr__( 'دسته‌بندی‌های پرطرفدار', 'lylyrose' ); ?>">
+            <?php foreach ( $dk_top_banners as $dk_tb ) : ?>
+                <a class="dk-top-banner" href="<?php echo esc_url( $dk_tb['url'] ); ?>">
+                    <span class="dk-top-banner-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><?php echo $dk_tb['svg']; // phpcs:ignore WordPress.Security.EscapeOutput -- static inline markup, not user input ?></svg>
+                    </span>
+                    <b><?php echo esc_html( $dk_tb['label'] ); ?></b>
                 </a>
             <?php endforeach; ?>
         </section>

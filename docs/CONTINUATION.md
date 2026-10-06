@@ -2490,3 +2490,28 @@ the fix (revert to navy, or delete navy) is held for the user to decide.
 
 Committed and verified: `2a9c2ee2` — product photos link to their product in
 every card, and the offers rail shows product names.
+
+---
+
+## 2026-10-06 — Homepage redesign landed and verified
+
+`dk-top-banner-grid` (5 cells), brand-coloured footer, `Version:` → **1.17.0**.
+`dk-story-row` is **back** — it was removed by mistake earlier in this session and the
+owner corrected it — and `dk-service-row` is **parked** inside an HTML comment, not
+deleted, so it can come back by uncommenting. Homepage order is now
+Hero → Stories → Top banners → Offers.
+
+Suite: **330 passed, 0 failed**, checked against served output rather than source.
+
+**Before staging, read `docs/PARALLEL_SESSIONS.md` §0b.** All three files this work
+touched also carry another session's uncommitted changes, and the tree cannot separate
+them by file — `front-page.php` has a peer's hero-carousel rework, `docker/run-tests.sh`
+has peer weight-editor and price-tier sections. Committing those files as-is sweeps
+that work in.
+
+Also fixed a real test bug: `set -o pipefail` plus `printf … | grep -q` returns 141 on
+SIGPIPE once the payload passes the 64KB pipe buffer, which made a correct build look
+like a failure. Details and the herestring fix are in `DEVELOPMENT_LOG.md`.
+
+Still open, not requested: the older `dk-banner-grid` further down renders 4-across
+with a 5th tile orphaned onto its own row, clashing with the new grid.

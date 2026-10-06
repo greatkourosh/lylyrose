@@ -2368,3 +2368,70 @@ as local.
 and confirmed there. `/incredible-offers/` answers **308 locally** and **200 on
 production** — a local host-agnostic-URL redirect, not a defect, but do not read the
 local 308 as a broken page.
+
+---
+
+## 2026-10-06 — Homepage: top banner grid, brand-coloured footer, and the row I removed by mistake
+
+Four changes from a design screenshot, one of which I got wrong on the first pass.
+
+### The design change
+
+- **`.dk-top-banner-grid`** — a new five-cell row above the offers rail: عطر,
+  آرایشی, مراقبت پوست, مراقبت مو, ست‌ها و هدیه, each with a line-art SVG.
+  It is a **fixed** set of entry points, not "the biggest categories": مراقبت از پوست
+  and مراقبت از مو carry their stock in child terms, so a `hide_empty` query drops
+  both. The slugs are resolved in order and a missing one costs only its own cell.
+  آرایشی has no `product_cat` at all, so it falls back to a shop search — the cell
+  is part of the design and the search is the best real target.
+- **Footer recoloured** to `var(--dk-red)`. The palette's Dusty Rose `#c98f91` is
+  only **2.68:1** against white text, so the footer wears the theme's darkened
+  `--dk-red` `#9c5c5f` (same hue, **5.11:1**) instead, and every rule below it that
+  set a dark colour on white now sets white on rose.
+
+### The row I removed by mistake
+
+The request was to **hide `dk-story-row`** and I read it as permission to restructure
+the area above the banners, which took the **story row** out and left the service row
+in — the opposite of the intent. The correction was explicit: keep `dk-story-row`,
+disable `dk-service-row`.
+
+Restored surgically, not with `git checkout HEAD --`: `front-page.php` carries another
+session's uncommitted hero-carousel rework, so a wholesale revert would have destroyed
+it. Only the story block was lifted from `git show HEAD:` and only the story CSS from
+HEAD's `style.css`; the service row was wrapped in an HTML comment rather than deleted,
+so "for now" stays reversible. Its `.dk-service-*` CSS is still in place, so bringing
+it back is uncommenting.
+
+**Final homepage order:** Hero → Stories → Top banners → Offers.
+
+### The test bug this exposed
+
+The `style.css ships the dk-story-row rules` assertion **failed on a correct build**.
+The rule was present; the assertion was wrong:
+
+```bash
+set -o pipefail                                    # run-tests.sh:8
+printf '%s' "$FOOTER_CSS" | grep -q '^\.dk-story-row {'
+# PIPESTATUS = 141 0    <- grep matched; printf died on SIGPIPE
+```
+
+`style.css` is **91KB**, past the 64KB pipe buffer, so grep exits early on its match,
+`printf` takes SIGPIPE, and `pipefail` reports the pipeline's failure. The rule was
+there the whole time. Fixed with a herestring, which has no second process to kill.
+
+**This is latent across the suite, not a one-off.** Every `printf … | grep -q` can
+misfire the moment its payload outgrows the pipe buffer — harmless today
+(`HOME_HTML` still fits), a spurious failure later. Worth converting wholesale.
+
+### Proving the assertions were worth writing
+
+A new assertion that passes first try may detect nothing, so the markup was mutated:
+the service row un-parked and the story row commented out, copied into `lylyrose-wp`,
+and **confirmed via curl that the mutation reached the served page** before trusting
+it. All three went red — `story row renders`, `story row has its gradient rings`,
+`service row is parked`. Restored from a pre-mutation backup and re-verified by md5.
+
+**Final state:** suite **330 passed, 0 failed**, `Version: 1.17.0`, verified against
+served output — `dk-story-row` present with its rings (11 circles),
+`dk-service-row` absent, 5 top-banner cells.

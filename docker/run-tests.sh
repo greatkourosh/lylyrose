@@ -191,6 +191,41 @@ HERO_SLIDES=$(printf '%s' "$HOME_HTML" | grep -o "dk-hero-slide" | grep -c .)
 [ "$HERO_SLIDES" -ge 2 ] && pass "hero renders $HERO_SLIDES slides" || fail "hero has $HERO_SLIDES slide(s); a carousel needs 2+"
 HERO_DOTS=$(printf '%s' "$HOME_HTML" | grep -o 'dk-hero-dots.\{0,400\}' | grep -c '<button')
 [ "$HERO_DOTS" -ge 1 ] && pass "hero dots are real <button>s, not inert <i>" || fail "hero dots are not <button>s; <i> dots cannot be clicked"
+# Design change 2026-10-06: the story row stayed, the service row is parked,
+# and a five-cell top banner grid sits under them.
+html_has "$HOME_HTML" "dk-story-row" \
+  && pass "story row renders on the homepage" \
+  || fail "story row is missing from the homepage; it was only parked, not removed"
+printf '%s' "$HOME_HTML" | grep -q 'dk-story-ring' \
+  && pass "story row has its gradient rings" || fail "story row renders without its rings"
+# The service row is commented out in front-page.php, not deleted: if it ever
+# comes back by accident the design silently doubles up again.
+printf '%s' "$HOME_HTML" | grep -q 'dk-service-row' \
+  && fail "service row renders; it is parked until the design wants it back" \
+  || pass "service row is parked"
+# The grid resolves its categories by slug, because مراقبت از پوست and مراقبت از مو
+# hold their products in child terms and disappear from an hide_empty query.
+TOP_GRID=$(printf '%s' "$HOME_HTML" | grep -o 'dk-top-banner-grid.\{0,4000\}')
+[ -n "$TOP_GRID" ] && pass "top banner grid renders" || fail "top banner grid missing from the homepage"
+DK_TB_CELLS=$(printf '%s' "$TOP_GRID" | grep -o 'class="dk-top-banner"' | grep -c .)
+[ "$DK_TB_CELLS" -eq 5 ] && pass "top banner grid has $DK_TB_CELLS cells" || fail "top banner grid has $DK_TB_CELLS cells; the design calls for 5"
+# آرایشی has no product_cat, so it links to a shop search rather than a term
+# archive; the other four are slugs that must resolve to real archives.
+for DK_CAT in "عطر" "مراقبت پوست" "مراقبت مو" "ست‌ها و هدیه"; do
+  printf '%s' "$TOP_GRID" | grep -q "<b>$DK_CAT</b>" \
+    && pass "top banner grid has $DK_CAT" || fail "top banner grid is missing $DK_CAT"
+done
+printf '%s' "$TOP_GRID" | grep -q '<b>آرایشی</b>' \
+  && pass "top banner grid has آرایشی" || fail "top banner grid is missing آرایشی"
+printf '%s' "$TOP_GRID" | grep -q 'product-category/skin-care/' \
+  && pass "top banner skin-care cell resolves to a real archive" \
+  || fail "top banner skin-care cell does not link to its archive"
+# The footer wears the brand rose; verify the served CSS, not the source file.
+FOOTER_CSS=$(docker exec "$WP_CONTAINER" cat "/var/www/html/wp-content/themes/$ACTIVE_THEME/style.css" 2>/dev/null)
+printf '%s' "$FOOTER_CSS" | grep -A2 '^\.dk-footer {' | grep -q 'var(--dk-red)' \
+  && pass "footer background uses the brand colour" || fail "footer background is not the brand colour"
+grep -q '^\.dk-story-row {' <<< "$FOOTER_CSS" \
+  && pass "style.css ships the dk-story-row rules" || fail "style.css has no dk-story-row rules; the markup would render unstyled"
 HERO_JS=$(docker exec "$WP_CONTAINER" cat "/var/www/html/wp-content/themes/$ACTIVE_THEME/assets/js/hero.js" 2>/dev/null)
 printf '%s' "$HERO_JS" | grep -c "pointerdown" | grep -q "^[1-9]" \
   && pass "hero.js wires pointer (drag) events" || fail "hero.js has no drag wiring"
