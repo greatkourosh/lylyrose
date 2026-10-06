@@ -243,6 +243,16 @@ printf '%s' "$HERO_JS" | grep -c "pointerdown" | grep -q "^[1-9]" \
   && pass "hero.js wires pointer (drag) events" || fail "hero.js has no drag wiring"
 printf '%s' "$HERO_JS" | grep -c "dk-hero-prev" | grep -q "^[1-9]" \
   && pass "hero.js wires the nav buttons" || fail "hero.js ignores the nav buttons"
+# A drag that leaves the hero gets no pointerup without an explicit capture, so the
+# drag stays live: the slide keeps its offset and then tracks the cursor with no
+# button held. Both halves are needed — capturing without releasing breaks the
+# next gesture.
+printf '%s' "$HERO_JS" | grep -c "setPointerCapture" | grep -q "^[1-9]" \
+  && pass "hero.js captures the pointer so a drag that leaves the hero still ends" \
+  || fail "hero.js never calls setPointerCapture — a drag that wanders off the hero never receives its pointerup, so the slide stays stuck to the cursor"
+printf '%s' "$HERO_JS" | grep -c "releasePointerCapture" | grep -q "^[1-9]" \
+  && pass "hero.js releases the pointer capture when the drag ends" \
+  || fail "hero.js takes a pointer capture it never releases, so the following drag starts from a broken state"
 
 SHOP_HTML=$(curl -s --max-time 30 "$SITE_URL/shop/")
 html_has "$SHOP_HTML" "dk-product-card\|woocommerce" && pass "shop page renders products/woocommerce markup" || fail "shop page missing product markup"

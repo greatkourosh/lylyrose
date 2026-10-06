@@ -85,6 +85,12 @@
         pointerId = e.pointerId;
         activeSlide = slides[index];
         width = hero.getBoundingClientRect().width || 1;
+        // Capture the pointer for the whole gesture. Without this, pointermove and
+        // pointerup only fire on the element under the pointer, so a drag that
+        // wanders off the hero never receives the pointerup that ends it: the drag
+        // stays engaged, the slide keeps its offset, and hovering back over the
+        // hero makes it follow the cursor with no button held.
+        try { hero.setPointerCapture(pointerId); } catch (err) { /* not capturable */ }
         hero.classList.add('is-dragging');
         if (activeSlide) { activeSlide.classList.add('is-dragging'); }
         stop();
@@ -108,6 +114,8 @@
     function onUp(e) {
         if (!dragging || (e && e.pointerId !== pointerId)) { return; }
         dragging = false;
+        // Capture was taken in onDown; release it so the next gesture starts clean.
+        try { hero.releasePointerCapture(pointerId); } catch (err) { /* already gone */ }
         hero.classList.remove('is-dragging');
         if (activeSlide) {
             activeSlide.classList.remove('is-dragging');
