@@ -150,56 +150,88 @@ if ( count( $editorial ) < 3 ) {
             <div class="woocommerce-info"><?php esc_html_e( 'برای نمایش محصولات، افزونه WooCommerce را نصب و فعال کنید.', 'lylyrose' ); ?></div>
         </div>
     <?php endif; ?>
-
     <!-- Hero -->
+    <?php
+    // Slides live in an array so the dots are generated from the same source:
+    // hero.js pairs dot n with slide n, and a hand-maintained dot count is one
+    // added slide away from a dead dot.
+    $dk_hero_slides = array(
+        array(
+            'kicker' => __( 'پیشنهاد ویژه امروز', 'lylyrose' ),
+            'title'  => __( 'تا ', 'lylyrose' ) . '<strong>' . __( '۴۰٪ تخفیف', 'lylyrose' ) . '</strong>' . __( ' روی منتخب کالاها', 'lylyrose' ),
+            'text'   => __( 'فرصت محدود؛ همین حالا خرید کنید و از تخفیف‌های شگفت‌انگیز بهره‌مند شوید.', 'lylyrose' ),
+            'cta'    => __( 'مشاهده پیشنهادها', 'lylyrose' ),
+            'url'    => $shop_url,
+            'art'    => '🛒',
+        ),
+        array(
+            'kicker' => __( 'تازه‌های فروشگاه', 'lylyrose' ),
+            'title'  => __( 'جدیدترین محصولات ', 'lylyrose' ) . '<strong>' . __( 'رسیدند', 'lylyrose' ) . '</strong>',
+            'text'   => __( 'تازه‌ترین محصولات از برندهای محبوب — اولین نفر باشید که آن‌ها را امتحان می‌کنید.', 'lylyrose' ),
+            'cta'    => __( 'دیدن جدیدترین‌ها', 'lylyrose' ),
+            'url'    => add_query_arg( 'orderby', 'date', $shop_url ),
+            'art'    => '✨',
+        ),
+        array(
+            'kicker' => __( 'انتخاب خریداران', 'lylyrose' ),
+            'title'  => __( 'پرفروش‌ترین‌های ', 'lylyrose' ) . '<strong>' . __( 'این هفته', 'lylyrose' ) . '</strong>',
+            'text'   => __( 'محصولاتی که مشتریان بیشتری آن‌ها را دوست دارند — با ضمانت اصالت و ارسال سریع.', 'lylyrose' ),
+            'cta'    => __( 'مشاهده پرفروش‌ها', 'lylyrose' ),
+            'url'    => add_query_arg( 'orderby', 'popularity', $shop_url ),
+            'art'    => '🔥',
+        ),
+    );
+
+    if ( class_exists( 'ASC_Perfume_Finder' ) ) {
+        $dk_hero_slides[] = array(
+            'kicker' => __( 'راهنمای انتخاب', 'lylyrose' ),
+            'title'  => __( 'عطرت رو ', 'lylyrose' ) . '<strong>' . __( 'پیدا کن', 'lylyrose' ) . '</strong>',
+            'text'   => __( 'به چند پرسش کوتاه پاسخ بده و عطری که به سلیقه‌ات می‌خورد را پیدا کن.', 'lylyrose' ),
+            'cta'    => __( 'شروع کن', 'lylyrose' ),
+            'url'    => get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ),
+            'art'    => '🔍',
+        );
+    }
+
+    $dk_hero_slides[] = array(
+        'kicker' => __( 'تا ۴۰٪ تخفیف', 'lylyrose' ),
+        'title'  => __( 'شگفت ', 'lylyrose' ) . '<strong>' . __( 'انگیزه‌ها', 'lylyrose' ) . '</strong>',
+        'text'   => __( 'جدیدترین تخفیف‌های فروشگاه روی عطر، ادکلن و محصولات مراقبتی.', 'lylyrose' ),
+        'cta'    => __( 'مشاهده شگفت‌انگیزها', 'lylyrose' ),
+        'url'    => $offer_url,
+        'art'    => '🎁',
+    );
+    ?>
     <div class="dk-container">
         <section class="dk-hero" aria-roledescription="carousel" aria-label="<?php echo esc_attr__( 'پیشنهادهای ویژه', 'lylyrose' ); ?>">
             <div class="dk-hero-slides">
-                <div class="dk-hero-slide is-active">
-                    <div class="dk-hero-copy">
-                        <span class="dk-kicker"><?php esc_html_e( 'پیشنهاد ویژه امروز', 'lylyrose' ); ?></span>
-                        <h1><?php esc_html_e( 'تا ', 'lylyrose' ); ?><strong><?php esc_html_e( '۴۰٪ تخفیف', 'lylyrose' ); ?></strong><?php esc_html_e( ' روی منتخب کالاها', 'lylyrose' ); ?></h1>
-                        <p><?php esc_html_e( 'فرصت محدود؛ همین حالا خرید کنید و از تخفیف‌های شگفت‌انگیز بهره‌مند شوید.', 'lylyrose' ); ?></p>
-                        <a class="dk-btn dk-btn-primary" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'مشاهده پیشنهادها', 'lylyrose' ); ?></a>
+                <?php foreach ( $dk_hero_slides as $dk_i => $dk_slide ) : ?>
+                    <div class="dk-hero-slide<?php echo 0 === $dk_i ? ' is-active' : ''; ?>">
+                        <div class="dk-hero-copy">
+                            <span class="dk-kicker"><?php echo esc_html( $dk_slide['kicker'] ); ?></span>
+                            <h1><?php echo wp_kses( $dk_slide['title'], array( 'strong' => array() ) ); ?></h1>
+                            <p><?php echo esc_html( $dk_slide['text'] ); ?></p>
+                            <a class="dk-btn dk-btn-primary" href="<?php echo esc_url( $dk_slide['url'] ); ?>"><?php echo esc_html( $dk_slide['cta'] ); ?></a>
+                        </div>
+                        <div class="dk-hero-art" aria-hidden="true">
+                            <span style="font-size:120px;"><?php echo esc_html( $dk_slide['art'] ); ?></span>
+                        </div>
                     </div>
-                    <div class="dk-hero-art" aria-hidden="true">
-                        <span style="font-size:120px;">🛒</span>
-                    </div>
-                </div>
-                <div class="dk-hero-slide">
-                    <div class="dk-hero-copy">
-                        <span class="dk-kicker"><?php esc_html_e( 'تازه‌های فروشگاه', 'lylyrose' ); ?></span>
-                        <h1><?php esc_html_e( 'جدیدترین محصولات ', 'lylyrose' ); ?><strong><?php esc_html_e( 'رسیدند', 'lylyrose' ); ?></strong></h1>
-                        <p><?php esc_html_e( 'تازه‌ترین محصولات از برندهای محبوب — اولین نفر باشید که آن‌ها را امتحان می‌کند.', 'lylyrose' ); ?></p>
-                        <a class="dk-btn dk-btn-primary" href="<?php echo esc_url( add_query_arg( 'orderby', 'date', $shop_url ) ); ?>"><?php esc_html_e( 'دیدن جدیدترین‌ها', 'lylyrose' ); ?></a>
-                    </div>
-                    <div class="dk-hero-art" aria-hidden="true">
-                        <span style="font-size:120px;">✨</span>
-                    </div>
-                </div>
-                <div class="dk-hero-slide">
-                    <div class="dk-hero-copy">
-                        <span class="dk-kicker"><?php esc_html_e( 'انتخاب خریداران', 'lylyrose' ); ?></span>
-                        <h1><?php esc_html_e( 'پرفروش‌ترین‌های ', 'lylyrose' ); ?><strong><?php esc_html_e( 'این هفته', 'lylyrose' ); ?></strong></h1>
-                        <p><?php esc_html_e( 'محصولاتی که مشتریان بیشتری آن‌ها را دوست دارند — با ضمانت اصالت و ارسال سریع.', 'lylyrose' ); ?></p>
-                        <a class="dk-btn dk-btn-primary" href="<?php echo esc_url( add_query_arg( 'orderby', 'popularity', $shop_url ) ); ?>"><?php esc_html_e( 'مشاهده پرفروش‌ها', 'lylyrose' ); ?></a>
-                    </div>
-                    <div class="dk-hero-art" aria-hidden="true">
-                        <span style="font-size:120px;">🔥</span>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
             <div class="dk-hero-dots" role="tablist">
-                <button type="button" class="on" aria-label="<?php esc_attr_e( 'اسلاید ۱', 'lylyrose' ); ?>"></button>
-                <button type="button" aria-label="<?php esc_attr_e( 'اسلاید ۲', 'lylyrose' ); ?>"></button>
-                <button type="button" aria-label="<?php esc_attr_e( 'اسلاید ۳', 'lylyrose' ); ?>"></button>
+                <?php foreach ( $dk_hero_slides as $dk_i => $dk_slide ) : ?>
+                    <button type="button" <?php echo 0 === $dk_i ? 'class="on" ' : ''; ?>aria-label="<?php echo esc_attr( sprintf( __( 'اسلاید %s', 'lylyrose' ), lylyrose_fa_num( $dk_i + 1 ) ) ); ?>"></button>
+                <?php endforeach; ?>
             </div>
             <button type="button" class="dk-hero-nav dk-hero-prev" aria-label="<?php esc_attr_e( 'اسلاید قبلی', 'lylyrose' ); ?>"></button>
             <button type="button" class="dk-hero-nav dk-hero-next" aria-label="<?php esc_attr_e( 'اسلاید بعدی', 'lylyrose' ); ?>"></button>
         </section>
     </div>
 
-    <!-- Services -->
+    <!-- Services: parked for now, the design wants the top banners higher up.
+         Delete this whole div to retire it for good. -->
+    <!--
     <div class="dk-container">
         <section class="dk-service-row" aria-label="<?php echo esc_attr__( 'مزایای خرید', 'lylyrose' ); ?>">
             <div class="dk-service-item"><span class="dk-service-icon">🚚</span><div><strong><?php esc_html_e( 'ارسال سریع', 'lylyrose' ); ?></strong><small><?php esc_html_e( 'تحویل اکسپرس در تهران', 'lylyrose' ); ?></small></div></div>

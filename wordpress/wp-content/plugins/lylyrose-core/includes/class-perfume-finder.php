@@ -53,17 +53,25 @@ class ASC_Perfume_Finder {
 	}
 
 	/**
-	 * Price tier boundaries (Toman), derived from _price. Filterable because the
-	 * catalogue's spread is skewed: a hardcoded split leaves the top tier nearly
-	 * empty. Tuned against the real distribution rather than round numbers.
+	 * Price tier boundaries (Toman), derived from _price. Each tier carries a
+	 * human-readable 'range' alongside its label so the quiz can show what
+	 * "متوسط" actually means.
+	 *
+	 * The boundaries come from ASC_Finder_Tiers, which reads the owner's setting:
+	 * auto derives them from the catalogue's own price percentiles, manual uses
+	 * what was typed in. Kept filterable so a site can still override in code.
 	 */
 	public static function price_tiers() {
-		return apply_filters( 'asc_finder_price_tiers', array(
-			'eco'      => array( 'max' => 15000000,   'label' => 'اقتصادی' ),
-			'mid'      => array( 'max' => 50000000,   'label' => 'متوسط' ),
-			'premium'  => array( 'max' => 150000000,  'label' => 'پریمیوم' ),
-			'luxury'   => array( null,              'label' => 'لوکس' ),
-		) );
+		$tiers = class_exists( 'ASC_Finder_Tiers' ) ? ASC_Finder_Tiers::get() : array();
+		if ( ! $tiers ) {
+			$tiers = array(
+				'eco'     => array( 'max' => 15000000,  'label' => 'اقتصادی' ),
+				'mid'     => array( 'max' => 50000000,  'label' => 'متوسط' ),
+				'premium' => array( 'max' => 150000000, 'label' => 'پریمیوم' ),
+				'luxury'  => array( 'max' => null,       'label' => 'لوکس' ),
+			);
+		}
+		return apply_filters( 'asc_finder_price_tiers', $tiers );
 	}
 
 	/**
@@ -544,10 +552,13 @@ class ASC_Perfume_Finder {
 		echo '<legend>' . esc_html__( 'بودجه تقریبی؟', 'lylyrose-core' ) . '</legend>';
 		echo '<div class="asc-finder__options">';
 		foreach ( self::price_tiers() as $key => $tier ) {
+			// The range is shown beside the label, not instead of it: "متوسط"
+			// alone does not tell a shopper whether it means 15M or 50M.
 			printf(
-				'<label class="asc-finder__option"><input type="radio" name="budget" value="%s"> <span>%s</span></label>',
+				'<label class="asc-finder__option"><input type="radio" name="budget" value="%s"> <span>%s</span>%s</label>',
 				esc_attr( $key ),
-				esc_html( $tier['label'] )
+				esc_html( $tier['label'] ),
+				empty( $tier['range'] ) ? '' : ' <span class="asc-finder__range">' . esc_html( $tier['range'] ) . '</span>'
 			);
 		}
 		echo '</div></fieldset>';
@@ -583,7 +594,14 @@ class ASC_Perfume_Finder {
 			'occasion'    => __( 'مناسبت', 'lylyrose-core' ),
 			'personality' => __( 'شخصیت', 'lylyrose-core' ),
 		);
-		$tier_labels = wp_list_pluck( self::price_tiers(), 'label' );
+		// "متوسط (تا ۹٬۹۷۰٬۰۰۰ تومان)" on the card, not a bare "متوسط" — the
+		// range is what makes the tier comparable to what the shopper picked.
+		$tier_labels = array();
+		foreach ( self::price_tiers() as $tier_key => $tier ) {
+			$tier_labels[ $tier_key ] = empty( $tier['range'] )
+				? $tier['label']
+				: $tier['label'] . ' (' . $tier['range'] . ')';
+		}
 		$note_titles = array(
 			'top'   => __( 'نوت آغازین', 'lylyrose-core' ),
 			'heart' => __( 'نوت میانی', 'lylyrose-core' ),

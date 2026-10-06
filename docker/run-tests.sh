@@ -189,8 +189,13 @@ html_has "$HOME_HTML" "dk-hero-prev" && pass "hero has a previous-slide button" 
 html_has "$HOME_HTML" "dk-hero-next" && pass "hero has a next-slide button" || fail "hero next button missing"
 HERO_SLIDES=$(printf '%s' "$HOME_HTML" | grep -o "dk-hero-slide" | grep -c .)
 [ "$HERO_SLIDES" -ge 2 ] && pass "hero renders $HERO_SLIDES slides" || fail "hero has $HERO_SLIDES slide(s); a carousel needs 2+"
-HERO_DOTS=$(printf '%s' "$HOME_HTML" | grep -o 'dk-hero-dots.\{0,400\}' | grep -c '<button')
+HERO_DOTS=$(printf '%s' "$HOME_HTML" | grep -oE 'aria-label="اسلاید [۰-۹0-9]+"' | grep -c .)
 [ "$HERO_DOTS" -ge 1 ] && pass "hero dots are real <button>s, not inert <i>" || fail "hero dots are not <button>s; <i> dots cannot be clicked"
+# hero.js pairs dot n with slide n, so a dot count that disagrees with the slide
+# count leaves a dead dot at the end of the row.
+# HERO_SLIDES reads one high: the grep also matches the `dk-hero-slides` wrapper.
+[ "$HERO_DOTS" -eq "$(( HERO_SLIDES - 1 ))" ] && pass "hero dots match the slide count ($HERO_DOTS)" || fail "hero has $(( HERO_SLIDES - 1 )) slide(s) but $HERO_DOTS dot(s); a dot with no slide behind it does nothing"
+
 # Design change 2026-10-06: the story row stayed, the service row is parked,
 # and a five-cell top banner grid sits under them.
 html_has "$HOME_HTML" "dk-story-row" \
@@ -1745,13 +1750,16 @@ section "32. Upstream/downstream class parity"
 # number nothing verifies, so it rotted silently. Pinning the count means a
 # genuinely new class fails here and gets counted deliberately, instead of the
 # docs drifting again. This is the downstream half of the pair: aroma_store's
-# own suite asserts the same 19 against its plugin, so a class added upstream and
-# not mirrored fails on one host or the other.
+# own suite asserts the same count against its plugin, so a class added upstream
+# and not mirrored fails on one host or the other.
+# 21 since ASC_Finder_Weights (the finder's weight editor) and ASC_Finder_Tiers
+# (its budget-tier editor) landed. Both are downstream-only: they configure the
+# finder rather than mirror an upstream feature.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "19" ] \
-  && pass "core plugin exposes 19 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 19 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "22" ] \
+  && pass "core plugin exposes 22 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 22 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -1918,6 +1926,40 @@ echo 'weights_sum=' . array_sum( $WEIGHTS ) . "\n";
 echo 'sanitise=' . json_encode(
 	ASC_Perfume_Finder::sanitise_answers( array( 'season' => 'بهار', 'fragrance' => 'ناموجود' ) ),
 	JSON_UNESCAPED_UNICODE ) . "\n";
+
+// The admin weight editor is the only way to retune the weighting, so it has to
+// reach the filter. Writing the option directly is enough to prove the wiring:
+// a weighting that renormalises on the way through, sums to 100, and changes the
+// score it produces. The option is removed in the same run, so a failure here
+// cannot leave the catalogue permanently re-weighted.
+$SAVED_W = get_option( 'asc_finder_weights' );
+$BASE_W  = ASC_Perfume_Finder::weights();
+$ANSWERS_W = array( 'fragrance' => 'گل', 'occasion' => 'روزمره', 'budget' => 'premium' );
+$rows_of = function () use ( $ANSWERS_W ) {
+	$out = array();
+	foreach ( ASC_Perfume_Finder::recommend( $ANSWERS_W ) as $row ) {
+		$out[] = (int) $row['id'] . ':' . (int) $row['result']['percent'];
+	}
+	return implode( ',', $out );
+};
+$BASE_ROWS = $rows_of();
+update_option( 'asc_finder_weights', array(
+	'fragrance' => 60, 'occasion' => 20, 'season' => 10,
+	'personality' => 0, 'longevity' => 0, 'budget' => 0,
+) );
+$SAVED_W_AFTER = ASC_Perfume_Finder::weights();
+$SAVED_ROWS    = $rows_of();
+if ( $SAVED_W ) { update_option( 'asc_finder_weights', $SAVED_W ); } else { delete_option( 'asc_finder_weights' ); }
+echo 'weights_editor_applied=' . wp_json_encode( $SAVED_W_AFTER ) . "\n";
+// 60/20/10 over a total of 90 rescales to 67/22/11; the rounding drift is folded
+// into the largest axis so the total lands exactly on 100.
+echo 'weights_editor_expected=' . wp_json_encode( array(
+	'fragrance' => 67, 'occasion' => 22, 'season' => 11,
+	'personality' => 0, 'longevity' => 0, 'budget' => 0,
+) ) . "\n";
+echo 'weights_editor_sum=' . array_sum( $SAVED_W_AFTER ) . "\n";
+echo 'weights_editor_changed_results=' . ( $BASE_ROWS !== $SAVED_ROWS ? 'yes' : 'no' ) . "\n";
+echo 'weights_editor_base=' . wp_json_encode( $BASE_W ) . "\n";
 
 // Strip every scoring axis off one product the answer set actually returns, so the
 // gate and the cap are both observable in the same query.
@@ -2105,6 +2147,20 @@ esac
   && pass "scoring weights sum to 100" \
   || fail "scoring weights sum to $(probe weights_sum), expected 100"
 
+# The admin editor is the only way to retune the weighting. Three things have to
+# hold: the stored array reaches the finder, it is renormalised to 100 on the way
+# through, and it actually changes what the visitor sees. A page that saves but
+# does not reach the filter would pass a render-only check.
+[ "$(probe weights_editor_applied)" = "$(probe weights_editor_expected)" ] \
+  && pass "the admin weight editor reaches the scoring filter" \
+  || fail "the stored weighting did not reach the finder (got $(probe weights_editor_applied), expected $(probe weights_editor_expected))"
+[ "$(probe weights_editor_sum)" = "100" ] \
+  && pass "a weighting saved as 60/20/10 renormalises to 100" \
+  || fail "the editor stored a weighting summing to $(probe weights_editor_sum), expected 100"
+[ "$(probe weights_editor_changed_results)" = "yes" ] \
+  && pass "the saved weighting changes the results the visitor sees" \
+  || fail "a different weighting produced identical results — the editor is not wired to scoring"
+
 # An answer that is not in the vocabulary is dropped, and per-axis: a season value
 # submitted for occasion must not score against the occasion axis.
 if printf '%s' "$(probe sanitise)" | grep -q '"season":"بهار"' \
@@ -2127,6 +2183,115 @@ fi
 html_has "$HOME_HTML" "$SITE_URL/perfume-finder/" \
   && pass "the finder is linked from the storefront (nav or home banner)" \
   || fail "no link to /perfume-finder/ in the homepage markup — the feature is unreachable"
+# 35. Price-tier settings. The tiers used to be four hardcoded boundaries, so
+# this asserts the two properties that make them safe to expose to the owner: a
+# saved manual set actually reaches the quiz, and a bad one cannot.
+section "35. Perfume finder price tiers"
+TIERS_SAN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$out = ASC_Finder_Tiers::sanitize(array("mode" => "manual", "tiers" => array(
+  array("key" => "eco",    "max" => "5000000",  "label" => "ارزان"),
+  array("key" => "eco",    "max" => "9000000",  "label" => "تکراری"),
+  array("key" => "neg",    "max" => "-500",     "label" => "منفی"),
+  array("key" => "zero",   "max" => "0",        "label" => "صفر"),
+  array("key" => "nokey",  "max" => "1000",     "label" => ""),
+  array("key" => "mid",    "max" => "20000000", "label" => "<script>x</script>"),
+  array("key" => "luxury", "max" => "",         "label" => "لوکس"),
+)));
+echo $out["mode"] . "|" . count($out["tiers"]) . "|"
+   . $out["tiers"][0]["label"] . "|" . $out["tiers"][0]["max"] . "|"
+   . (isset($out["tiers"][1]) ? $out["tiers"][1]["key"] : "none") . "|"
+   . $out["tiers"][1]["max"];' 2>/dev/null)
+# Only rows a real form post can produce are exercised here, because that is the
+# only way the option is written. A duplicate key loses to the first one; a
+# negative or zero ceiling is dropped rather than clamped into a tier that would
+# match nothing; an empty label is not a tier; and a row whose label is nothing
+# but a script tag sanitises down to an empty string, so it is dropped too rather
+# than stored as a tier called "x".
+[ "$TIERS_SAN" = "manual|2|ارزان|5000000|luxury|" ] \
+  && pass "tier sanitizer drops duplicate keys, non-positive ceilings and empty labels" \
+  || fail "tier sanitizer accepted bad input (got '$TIERS_SAN')"
+
+# Auto mode is the default and must survive a save that carries nothing usable,
+# otherwise switching back to auto would blank the quiz's budget step.
+TIERS_EMPTY=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$o = ASC_Finder_Tiers::sanitize(array("mode" => "auto", "tiers" => array(array("key" => "", "label" => ""))));
+echo $o["mode"] . "|" . (isset($o["tiers"]) ? "leftover" : "clean") . "|"
+   . count(ASC_Finder_Tiers::get());' 2>/dev/null)
+[ "$TIERS_EMPTY" = "auto|clean|4" ] \
+  && pass "an unusable manual set falls back to auto, which yields four tiers" \
+  || fail "auto fallback broken (got '$TIERS_EMPTY') — the quiz would render an empty budget step"
+
+# The boundaries must actually move with the catalogue. The tier keys are fixed,
+# so a boundary that never changes is the bug: the top two tiers used to hold 4
+# and 3 of 114 products, which is not a set a shopper can shop.
+TIERS_AUTO=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+wp_cache_delete("asc_finder_tier_cuts");
+$t = ASC_Finder_Tiers::get();
+$split = array_fill_keys(array_keys($t), 0);
+foreach (get_posts(array("post_type"=>"product","post_status"=>"publish","numberposts"=>-1,"fields"=>"ids","no_found_rows"=>true)) as $pid) {
+  $pr = wc_get_product($pid);
+  if ( ! $pr ) { continue; }
+  $split[ASC_Perfume_Finder::price_tier($pr->get_price())]++;
+}
+echo implode(",", array_keys($t)) . "|" . $t["eco"]["max"] . "|" . $t["luxury"]["max"]
+   . "|" . implode(",", $split);' 2>/dev/null)
+[ "${TIERS_AUTO%%|*}" = "eco,mid,premium,luxury" ] \
+  && pass "auto mode always yields the four tier keys the scorer expects" \
+  || fail "auto mode returned the wrong tier keys: '$TIERS_AUTO'"
+[ "${TIERS_AUTO#*|}" != "15000000|50000000|150000000|" ] \
+  && pass "auto mode derives boundaries from the catalogue, not the old constants (${TIERS_AUTO#*|})" \
+  || fail "auto mode returned the old hardcoded split"
+
+# Every tier must be shoppable: a boundary set that leaves one of them nearly
+# empty is the exact failure this feature was added to fix.
+TIERS_SPLIT=${TIERS_AUTO##*|}
+TIERS_SMALLEST=$(printf '%s' "$TIERS_SPLIT" | tr ',' '\n' | sort -n | head -1)
+[ "${TIERS_SMALLEST:-0}" -ge 10 ] \
+  && pass "auto mode spreads the catalogue across all four tiers ($TIERS_SPLIT)" \
+  || fail "a tier holds fewer than 10 of the catalogue's products ($TIERS_SPLIT) — that tier is not shoppable"
+
+# A manual save must reach the rendered quiz, not just the option row. This is the
+# whole point of the page: the owner edits a boundary and the visitor sees it.
+docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+update_option("asc_finder_tiers", array("mode" => "manual", "tiers" => array(
+  array("key" => "eco", "max" => 12345678, "label" => "کلید تست"),
+)));' >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
+TIERS_HTML=$(curl -s --max-time 60 "$FINDER_URL")
+html_has "$TIERS_HTML" 'کلید تست' \
+  && pass "a manual tier label reaches the quiz" \
+  || fail "the saved manual tier is not in the quiz — the setting is inert"
+# The range is asserted SEPARATELY and against its own text. Folding it into the
+# assertion above would let the label alone satisfy it, so dropping the range
+# from the markup entirely would still leave this section green. The manual tier
+# is set to 12345678 above, so its range must carry that number in Persian
+# digits — an empty <span> with the right class would otherwise pass. The
+# thousands separator here is a comma, which is what number_format_i18n emits.
+TIERS_RANGE=$(printf '%s' "$TIERS_HTML" | grep -o 'asc-finder__range[^<]*</span>' | head -1)
+case "$TIERS_RANGE" in
+  *۱۲,۳۴۵,۶۷۸*)
+    pass "the tier's price range shows the saved boundary in Persian digits" ;;
+  *)
+    fail "the quiz shows no price range for the saved tier (got '$TIERS_RANGE') — a bare label does not tell a shopper what \"متوسط\" means" ;;
+esac
+
+# ...and a save that names only one tier still yields all four. Dropping the
+# other three would leave most products unrankable on the budget axis, and the
+# owner gets no warning — the form simply saves what is on screen.
+TIERS_KEYS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$t = ASC_Finder_Tiers::get();
+echo implode(",", array_keys($t)) . "|" . $t["eco"]["max"] . "|" . $t["eco"]["label"] . "|" . $t["premium"]["label"];' 2>/dev/null)
+[ "$TIERS_KEYS" = "eco,mid,premium,luxury|12345678|کلید تست|پریمیوم" ] \
+  && pass "a partial manual save fills the unlisted tiers instead of dropping them" \
+  || fail "unexpected tier set '$TIERS_KEYS'"
+
+docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); delete_option("asc_finder_tiers"); wp_cache_delete("asc_finder_tier_cuts");' >/dev/null 2>&1
+docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
+TIERS_BACK=$(curl -s --max-time 60 "$FINDER_URL")
+html_has "$TIERS_BACK" 'name="budget"' \
+  && pass "deleting the option restores automatic tiers and the quiz still renders" \
+  || fail "the quiz lost its budget step after the option was deleted — auto mode does not regenerate"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"
