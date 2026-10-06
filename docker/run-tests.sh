@@ -210,7 +210,14 @@ printf '%s' "$HOME_HTML" | grep -q 'dk-service-row' \
   || pass "service row is parked"
 # The grid resolves its categories by slug, because مراقبت از پوست and مراقبت از مو
 # hold their products in child terms and disappear from an hide_empty query.
-TOP_GRID=$(printf '%s' "$HOME_HTML" | grep -o 'dk-top-banner-grid.\{0,4000\}')
+# grep is ugrep here, and \{0,4000\} over the ~100KB one-line homepage spins
+# forever — a hung suite prints no FAILs, so it reads green. Bounded slice instead.
+TOP_GRID=$(printf '%s' "$HOME_HTML" | python3 -c '
+import sys
+h = sys.stdin.read()
+i = h.find("dk-top-banner-grid")
+print(h[i:i+20000] if i >= 0 else "")
+')
 [ -n "$TOP_GRID" ] && pass "top banner grid renders" || fail "top banner grid missing from the homepage"
 DK_TB_CELLS=$(printf '%s' "$TOP_GRID" | grep -o 'class="dk-top-banner"' | grep -c .)
 [ "$DK_TB_CELLS" -eq 5 ] && pass "top banner grid has $DK_TB_CELLS cells" || fail "top banner grid has $DK_TB_CELLS cells; the design calls for 5"
@@ -1850,6 +1857,49 @@ if [ "${FINDER_FA_DIGITS:-0}" -ge 1 ]; then
 else
   fail "match percentages are not in Persian digits — they render as latin 0-9"
 fi
+
+# 34.2b The result card's reading stack. The CSS splits the card at >=900px and needs
+# the wrapper to exist for the grid and for the button to sit beside the whole stack
+# rather than beside whichever sibling happens to land on row 1 — so assert the
+# markup shape (open, then the buy button after the closing tag) and not just the
+# class name, which a stray div could satisfy.
+FINDER_STACK=$(printf '%s' "$FINDER_POST" | grep -c 'asc-finder__stack')
+[ "$FINDER_STACK" -eq "$FINDER_CARDS" ] \
+  && pass "every result card wraps its content in exactly one reading stack ($FINDER_STACK/$FINDER_CARDS)" \
+  || fail "found $FINDER_STACK reading stacks across $FINDER_CARDS result cards — expected one each"
+
+# The button must be a sibling of the stack, inside .asc-finder__body, so the flex
+# row can put it beside the stack. Inside the stack it would sit under the factor
+# list instead. Order matters: close the stack, then open the actions.
+FINDER_BTN_SIBLING=$(printf '%s' "$FINDER_POST" \
+  | python3 -c '
+import re, sys
+h = sys.stdin.read()
+# One card is enough: every card is emitted by the same loop.
+m = re.search(r"<div class=\"asc-finder__body\">(.*?)</div>\s*</li>", h, re.S)
+if not m:
+    print("nocard"); raise SystemExit
+body = m.group(1)
+# The actions block must come after the stack close and before the body close.
+act_i = body.find("asc-finder__actions")
+# Count divs: the stack closes when depth returns to its own level.
+depth, stack_end = 0, None
+i = body.find("<div class=\"asc-finder__stack\">")
+if i >= 0:
+    for mm in re.finditer(r"<(/?)div\b", body[i:]):
+        depth += 1 if not mm.group(1) else -1
+        if depth == 0:
+            stack_end = i + mm.start()
+            break
+print("ok" if (stack_end is not None and act_i > stack_end) else "bad")
+')
+[ "$FINDER_BTN_SIBLING" = "ok" ] \
+  && pass "the buy button sits outside the reading stack, as a sibling of it" \
+  || fail "the buy button is inside the reading stack, so it renders under the factor list instead of beside it"
+
+html_has "$FINDER_POST" 'asc-finder__factors' \
+  && pass "results render the factor list the stack lays out" \
+  || fail "results carry no factor list — the stack has nothing to divide into columns"
 
 # 34.3 The scoring engine's own invariants. Run in the container because they are
 # properties of the PHP, not of any page: determinism, the scorable gate, the cap,

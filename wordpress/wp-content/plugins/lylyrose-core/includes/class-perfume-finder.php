@@ -620,6 +620,7 @@ class ASC_Perfume_Finder {
 					<?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ) ); ?>
 				</a>
 				<div class="asc-finder__body">
+					<div class="asc-finder__stack">
 					<div class="asc-finder__head">
 						<h3 class="asc-finder__name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
 						<span class="asc-finder__percent"><span class="asc-finder__num"><?php echo esc_html( self::fa_num( (int) $result['percent'] ) ); ?></span>٪</span>
@@ -718,6 +719,7 @@ class ASC_Perfume_Finder {
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</ul>
+					</div>
 
 					<p class="asc-finder__actions">
 						<a class="asc-finder__view" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'مشاهده و خرید', 'lylyrose-core' ); ?></a>

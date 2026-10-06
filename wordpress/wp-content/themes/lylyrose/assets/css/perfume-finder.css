@@ -159,38 +159,68 @@
     gap: 2px;
 }
 
-/* Full-width cards leave a wide empty band beside the title, price and button if
-   the spec table sits under them, so from this width the card splits: identity
-   and actions on the right, the table and note pyramid on the left. Below it the
-   two columns are narrower than the content needs, so the stack is kept. */
+/* Everything worth reading, in its own source order. The wrapper is what lets the
+   desktop split put the button beside the whole stack instead of beside whichever
+   sibling happens to be on row 1. */
+.asc-finder__stack {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Full-width cards leave a wide empty band beside the title, price and button, so
+   from this width the card splits in two: the reading stack, and the buy button
+   beside it at the bottom. Aligning to the bottom rather than the top is what
+   ties the button to the last thing it follows instead of floating it. */
 @media (min-width: 900px) {
     .asc-finder__body {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 32px;
+    }
+
+    .asc-finder__actions {
+        flex: 0 0 auto;
+        margin: 0 0 2px;
+    }
+
+    /* One stretched column leaves the spec box and the note pyramid more than
+       half empty, so the stack takes two columns. Which product it is stays full
+       width — a title and a price have no useful second half — and the spec table,
+       the note pyramid and the factor list divide the rest between them. */
+    .asc-finder__stack {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-        gap: 6px 32px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2px 32px;
         align-content: start;
     }
 
     .asc-finder__head,
     .asc-finder__coverage,
     .asc-finder__buy,
-    .asc-finder__rating,
-    .asc-finder__actions {
-        grid-column: 1;
-    }
-
-    .asc-finder__meta,
-    .asc-finder__notes,
-    .asc-finder__factors {
-        grid-column: 2;
+    .asc-finder__rating {
+        grid-column: 1 / -1;
     }
 
     .asc-finder__meta {
-        grid-row: 1 / span 3;
+        grid-column: 1;
+        grid-row: span 2;
+        align-self: start;
     }
 
     .asc-finder__notes {
-        grid-row: 4;
+        grid-column: 2;
+        align-self: start;
+    }
+
+    .asc-finder__factors {
+        grid-column: 2;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 4px 24px;
+        align-content: start;
     }
 }
 

@@ -12,6 +12,45 @@ pass — a stale version of this file is worse than none.
 
 ## 0b. Homepage redesign session — what it touched, and what is still loose (2026-10-06)
 
+> **Header restored 2026-10-06.** The finder session's edit above had consumed this
+> section's heading; its body text was untouched.
+
+**Uncommitted work on `master`, present when this session started.** Two files, and
+they belong together: the card's content is wrapped in `.asc-finder__stack`, and the
+CSS splits that wrapper into a two-column grid at `>= 900px` with the buy button
+beside it at the bottom.
+
+| File | Change |
+|---|---|
+| `lylyrose-core/includes/class-perfume-finder.php` | wraps head/coverage/buy/rating/meta/notes/factors in `<div class="asc-finder__stack">`; `.asc-finder__actions` stays a **sibling** inside `.asc-finder__body` |
+| `lylyrose/assets/css/perfume-finder.css` | new `.asc-finder__stack` rule; the `>= 900px` block now makes `.asc-finder__body` `flex-direction: row` + `align-items: flex-end`, and lays the stack out as `repeat(2, minmax(0, 1fr))` with the factor list on `auto-fit, minmax(190px, 1fr)` |
+
+Measured with CDP at a real viewport (`docker/measure-finder.py`), **not** from the
+CSS: 1440 → `row`/`flex-end`, stack 938px + button 132px, factors 2×214px, no
+horizontal overflow. 900 → still `row`, factors correctly collapse to one 230px
+track rather than clipping. 768 and 420 → `column`, stack and body both full width,
+no overflow. **No width regresses.**
+
+### The two things that will bite the next person
+
+**The button must stay outside the stack.** Inside it, the flex row cannot put it
+beside anything and it renders under the factor list — the exact wide empty band
+the redesign removed. This is not visible from the CSS alone, so
+`run-tests.sh` §34.2b now asserts the *shape* (the stack opens, then `.asc-finder__actions`
+appears after its closing `</div>`), not just that the class exists. Verified the
+assertion goes red: moving the actions block back inside the stack flips it to
+`bad`. See [[assert-fails-on-broken-build]].
+
+**`grep -o 'dk-top-banner-grid.\{0,4000\}'` in `run-tests.sh:213` hung forever and
+is now fixed.** `grep` here is ugrep, and that bounded repeat over the ~100KB
+one-line homepage spins at 100% CPU — and a hung suite prints no `FAIL`, so
+`grep -c FAIL` reads **0** and the run looks green. Replaced with a `python3`
+`find` + `html[i:i+20000]` slice: same coverage, no backtracking. Recorded in
+[[run-tests-grep-hangs-on-homepage]]; **any assertion in this suite with a payload
+over 64KB is still suspect until rewritten.**
+
+---
+
 Landed: `dk-top-banner-grid` (5 cells), brand-coloured footer, `Version:` → 1.17.0.
 `dk-story-row` was **restored** — an earlier pass of this same session removed it by
 mistake and the owner corrected it — and `dk-service-row` is **parked**, not deleted:
@@ -117,7 +156,17 @@ still runs navy, needs the two fixes mirrored there.**
 `wp-content` was still `nobody`-owned. **Both are now false** — see the correction
 at the top of §5 and the resolved row in §3.
 
----
+> **Superseded 2026-10-06, again.** The navy deletion *is* committed: `50a8c651`
+> "Merge lylyrose-navy into lylyrose: one theme, palette as data", preceded by
+> `732a2b46` preserving the full-width finder redesign before the removal. So
+> §0's §6.1 blockers ("navy's enqueue + cache TTL", "navy's style.css Version",
+> "navy's integration tests") describe work that **no longer applies to any
+> checkout** — navy is not just gone from disk, it is merged and gone from
+> history's tip. §0's last row also still says production runs navy; that is now
+> false too, see [[production-now-runs-lylyrose]].
+>
+> **This section is kept only as a record of the sequence.** Do not use it to
+> decide what is left. Read §6 and verify on the live host.
 
 ## 1. The blocker: every WooCommerce archive returns 500
 
