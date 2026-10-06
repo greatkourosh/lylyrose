@@ -26,7 +26,7 @@ by hand:
 | File | This session's change | The other session's work in the same file |
 |---|---|---|
 | `front-page.php` | top-banner markup, story row, parked service row | hero carousel rebuilt to `$dk_hero_slides` + generated dots |
-| `style.css` | story CSS restored, footer recolour, top-banner CSS, `Version:` | — (clean; all hunks are this session's) |
+| `style.css` | story CSS restored, footer recolour, top-banner CSS, `Version:` | **`Version:` 1.17.0 → 1.18.0** bumped later by another session (2026-10-06). This column is no longer clean. |
 | `docker/run-tests.sh` | story/service/top-banner/footer assertions | weight-editor and price-tier sections; the ASC_ class count 19 → 22 |
 
 `class-perfume-finder.php` is **not** this session's work and was left uncommitted —
@@ -40,6 +40,53 @@ grep finds a match early and `printf` takes SIGPIPE — the assertion fails on a
 build. `style.css` is 91KB, past the 64KB pipe buffer, so it hit this. Use a
 herestring (`grep -q PATTERN <<< "$VAR"`) for large payloads. Any assertion in this
 suite with a payload over 64KB is suspect until rewritten.
+
+---
+
+## 0c. Banner-photo session — `lylyrose_promo_image()` and the hero nav (2026-10-06)
+
+Added `lylyrose_promo_image()` to `lylyrose/functions.php` (just above
+`lylyrose_mega_cats_menu`). Each promotional cell now wears a photo pulled from
+the **same query its own link already sorts by**, so "پرفروش‌ترین‌ها" is not
+captioned over a random bottle. Returns a root-relative path, cached 12 hours in
+a transient — same reasoning as `lylyrose_term_image()`: the site answers on more
+than one host, so an absolute URL cached from whichever request won the race
+would pin every later visitor's photos to that host.
+
+| File | Change |
+|---|---|
+| `lylyrose/functions.php` | new `lylyrose_promo_image()` |
+| `lylyrose/front-page.php` | `'q'` on all 4 static banners + 4 hero slides; `'photo'` on the 2 finder cells; `--dk-banner-cols` resolved in PHP (`< 6` → one row, `>= 6` → `ceil(n/2)`); `--dk-banner-photo` / `--dk-hero-photo` emitted inline |
+| `lylyrose/style.css` | photo `::before` + scrim `::after` on both; `isolation: isolate` on `.dk-hero-slide`; `.dk-hero-nav` flex-centred so the **chevron inside** each button is centred (the button pair stays on the hero's left/right edges) |
+
+**`isolation: isolate` on `.dk-hero-slide` is load-bearing, not decoration.**
+Without it the slides have no stacking context, the `z-index: -1` photo layers
+paint behind the hero's own gradient, and the photos are invisible. They must
+also stay at `-1`, not `0`: a positioned pseudo-element at `z-index: 0` paints
+*after* non-positioned block children in the same context and would cover the
+copy. `h1HitAtCentre: "copy"` is the assertion that catches this — it hit-tests
+the middle of the h1 and reports what actually painted there.
+
+**A wrong query is a silent content bug.** Slide 1 and slide 5 both rendered
+`dior-300x300.webp` because both reached for "any product on sale". Reading
+`class-flash-sales.php` showed the offers page defaults to `orderby => date DESC`,
+so slide 5's query was aligned to that. Compare rendered images across cells, not
+just "is a photo set".
+
+Measured, not assumed: grid 5 cols × 1 row at 1440 (`justify-content: center`,
+all cells 249×237 at an identical `y`), hero nav 40×40 flex with an 11×11 chevron
+and both margins `0px`. Suite **330 passed, 0 failed** — unchanged.
+
+**≤1024px collapses to 2 columns and 3 rows, and that is pre-existing, not
+regression.** `style.css:2160` declares `.dk-banner-grid { grid-template-columns:
+repeat(2, 1fr); }` — a literal, in a later media query, deliberately left alone.
+It is the only mobile rule for this grid, so 5 cells at ≤1024px give rows of
+2/2/1 and the `>= 6 → two rows` promise does not hold there. Honoring the rule at
+every width means `repeat(var(--dk-banner-cols), minmax(0, 1fr))` in the
+media query too, which would put 5 phone-sized cells across at 420px. **Left as
+a deliberate simplification.** Change it when a mobile grid lands with a design
+for it. Photos, scrims, hero photo and centred chevrons were re-measured at
+1024/900/768/420 and survive every width with no horizontal overflow.
 
 ---
 
@@ -66,9 +113,9 @@ already been executed on disk, though not committed. **What is left is narrower
 than §6 implies: commit the navy deletion, and decide whether production, which
 still runs navy, needs the two fixes mirrored there.**
 
-`LRPROBE` is still in `lylyrose/functions.php:879` and `wp-content` is still
-`nobody`-owned, so §5 stands unchanged: 42 files in the `lylyrose` theme are
-not writable by this session.
+`LRPROBE` was still in `lylyrose/functions.php:879` when this was written, and
+`wp-content` was still `nobody`-owned. **Both are now false** — see the correction
+at the top of §5 and the resolved row in §3.
 
 ---
 
@@ -167,7 +214,7 @@ wanted, that is a build, not a missing label.
 
 | Path | Why |
 |---|---|
-| `lylyrose/functions.php` | Carries my leftover `LRPROBE` shutdown block. Inert — it echoes an HTML comment only on a fatal — but it is debugging scaffolding and must not ship. I lost write access before I could remove it (see §5). **Confirmed still present at line 879 on 2026-10-05.** |
+| ~~`lylyrose/functions.php`~~ | **RESOLVED — no longer applies.** The `LRPROBE` shutdown block was removed in `8932318b`. Verified 2026-10-06: `grep -rn LRPROBE --include=*.php` matches nothing outside `docker/reveal-fatal.php`'s comment, and `git log -S LRPROBE` names that commit as the only one. It is gone from HEAD *and* from the working tree, so it was never lost by a later patch. |
 | `lylyrose-core/includes/class-finder-tiers.php` | Untracked, belongs to the peer session |
 | `lylyrose-core/includes/class-finder-weights.php` | Untracked, belongs to the peer session |
 | `lylyrose-core/lylyrose-core.php`, `class-perfume-finder.php` | Peer's in-flight work |
@@ -197,6 +244,30 @@ discover it was load-bearing.
 ---
 
 ## 5. Environment blockers
+
+**⚠ CORRECTION 2026-10-06 — both blockers below are gone.** Do not plan around
+them. Verified directly, not inferred:
+
+- `wp-content` is **`www-data`-owned**, not `nobody`:
+  `stat -c '%U:%G' wordpress/wp-content` → `www-data:www-data`.
+  `functions.php` and `style.css` are `www-data`-owned too.
+- **The docker socket works from the shell.**
+  `docker exec -u www-data lylyrose-wp php -r '…'` returns normally.
+
+The consequence is the opposite of what §5 warns about: those files are *not*
+writable by the `kourosh` session user, so the Edit/Write tools fail with
+`EACCES`. **Every write goes through the container as `www-data`:**
+
+```bash
+docker exec -u www-data lylyrose-wp php < /tmp/patch.php
+```
+
+Write the patch as a heredoc'd file with a `rep()` helper that asserts
+`substr_count($haystack, $needle) === 1` and aborts the whole patch when an anchor
+is not unique. Inline `php -r` one-liners are not survivable here — nested
+quoting plus emoji produce `Parse error: Unclosed '('`.
+
+The original text follows for history.
 
 **`wp-content` was chowned to `nobody` mid-session** (2026-10-04 ~22:53). This
 session can no longer write anywhere under
@@ -234,9 +305,9 @@ original sequence, trimmed to what still applies.
    switched and is what made the 500 in §1. Committing it makes the 500
    structurally impossible. This is the user's call, not this session's — it
    destroys the theme production runs.
-2. **Restore ownership** with the `chown` in §5, then delete the `LRPROBE`
-   block from `lylyrose/functions.php:879`. It is inert (an HTML comment on a
-   fatal) but it is debugging scaffolding and must not ship.
+2. ~~**Restore ownership** … then delete the `LRPROBE` block.~~ **DONE**
+   (`LRPROBE` removed in `8932318b`; ownership already restored to `www-data`).
+   No `chown` needed — see the correction at the top of §5.
 3. **Production still runs navy.** `lylyrose`'s fixes reach the live site only
    once navy is gone there too, or the two fixes are mirrored into it. Which of
    those is right depends on step 1 and is a user decision.

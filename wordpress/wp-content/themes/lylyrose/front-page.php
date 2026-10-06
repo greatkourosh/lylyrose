@@ -101,11 +101,26 @@ if ( is_wp_error( $dk_brands ) ) {
 $discount_url = add_query_arg( 'discount', '1', $shop_url );
 $offer_url    = function_exists( 'is_incredible_offers' ) ? home_url( '/incredible-offers/' ) : $discount_url;
 
+// The finder cells want a perfume photo. The category carries no thumbnail of its
+// own, so lylyrose_term_image() falls back to the first product in it.
+$dk_perfume_cat = $has_woo ? get_term_by( 'slug', 'perfume', 'product_cat' ) : false;
+if ( is_wp_error( $dk_perfume_cat ) ) {
+    $dk_perfume_cat = false;
+}
+$dk_perfume_photo = $dk_perfume_cat ? lylyrose_term_image( $dk_perfume_cat, 'medium' ) : '';
+
 $banners = array(
-    array( 'tone' => 'rose',   'emoji' => '🏷️', 'title' => __( 'تخفیف‌های ویژه', 'lylyrose' ), 'sub' => __( 'کالاهای تخفیف‌دار', 'lylyrose' ), 'url' => $discount_url ),
-    array( 'tone' => 'violet', 'emoji' => '✨', 'title' => __( 'جدیدترین‌ها', 'lylyrose' ), 'sub' => __( 'تازه‌های فروشگاه', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'newest', $shop_url ) ),
-    array( 'tone' => 'gold',   'emoji' => '🔥', 'title' => __( 'پرفروش‌ترین‌ها', 'lylyrose' ), 'sub' => __( 'انتخاب خریداران', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'popular', $shop_url ) ),
-    array( 'tone' => 'teal',   'emoji' => '🧴', 'title' => __( 'ارزان‌ترین‌ها', 'lylyrose' ), 'sub' => __( 'خرید به‌صرفه', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'cheapest', $shop_url ) ),
+    array( 'tone' => 'rose',   'emoji' => '🏷️', 'title' => __( 'تخفیف‌های ویژه', 'lylyrose' ), 'sub' => __( 'کالاهای تخفیف‌دار', 'lylyrose' ), 'url' => $discount_url,
+        'q'    => array( 'meta_query' => array(
+            array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
+            array( 'key' => '_sale_price',  'compare' => 'EXISTS' ),
+        ) ) ),
+    array( 'tone' => 'violet', 'emoji' => '✨', 'title' => __( 'جدیدترین‌ها', 'lylyrose' ), 'sub' => __( 'تازه‌های فروشگاه', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'newest', $shop_url ),
+        'q'    => array( 'orderby' => 'date', 'order' => 'DESC' ) ),
+    array( 'tone' => 'gold',   'emoji' => '🔥', 'title' => __( 'پرفروش‌ترین‌ها', 'lylyrose' ), 'sub' => __( 'انتخاب خریداران', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'popular', $shop_url ),
+        'q'    => array( 'meta_key' => 'total_sales', 'orderby' => 'meta_value_num', 'order' => 'DESC' ) ),
+    array( 'tone' => 'teal',   'emoji' => '🧴', 'title' => __( 'ارزان‌ترین‌ها', 'lylyrose' ), 'sub' => __( 'خرید به‌صرفه', 'lylyrose' ), 'url' => add_query_arg( 'sort', 'cheapest', $shop_url ),
+        'q'    => array( 'meta_key' => '_price', 'orderby' => 'meta_value_num', 'order' => 'ASC' ) ),
 );
 
 // Home-page entry point. The banner is unconditional on class presence: the finder
@@ -118,6 +133,7 @@ if ( class_exists( 'ASC_Perfume_Finder' ) ) {
         'title' => __( 'عطرت رو پیدا کن', 'lylyrose' ),
         'sub'   => __( 'پیشنهاد عطر مناسب شما', 'lylyrose' ),
         'url'   => get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ),
+        'photo' => $dk_perfume_photo,
     );
 }
 
@@ -163,6 +179,12 @@ if ( count( $editorial ) < 3 ) {
             'cta'    => __( 'مشاهده پیشنهادها', 'lylyrose' ),
             'url'    => $shop_url,
             'art'    => '🛒',
+            'q'      => array(
+                'meta_query' => array(
+                    array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
+                    array( 'key' => '_sale_price',  'compare' => 'EXISTS' ),
+                ),
+            ),
         ),
         array(
             'kicker' => __( 'تازه‌های فروشگاه', 'lylyrose' ),
@@ -171,6 +193,7 @@ if ( count( $editorial ) < 3 ) {
             'cta'    => __( 'دیدن جدیدترین‌ها', 'lylyrose' ),
             'url'    => add_query_arg( 'orderby', 'date', $shop_url ),
             'art'    => '✨',
+            'q'      => array( 'orderby' => 'date', 'order' => 'DESC' ),
         ),
         array(
             'kicker' => __( 'انتخاب خریداران', 'lylyrose' ),
@@ -179,6 +202,7 @@ if ( count( $editorial ) < 3 ) {
             'cta'    => __( 'مشاهده پرفروش‌ها', 'lylyrose' ),
             'url'    => add_query_arg( 'orderby', 'popularity', $shop_url ),
             'art'    => '🔥',
+            'q'      => array( 'meta_key' => 'total_sales', 'orderby' => 'meta_value_num', 'order' => 'DESC' ),
         ),
     );
 
@@ -190,6 +214,7 @@ if ( count( $editorial ) < 3 ) {
             'cta'    => __( 'شروع کن', 'lylyrose' ),
             'url'    => get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ),
             'art'    => '🔍',
+            'photo'  => $dk_perfume_photo,
         );
     }
 
@@ -200,13 +225,24 @@ if ( count( $editorial ) < 3 ) {
         'cta'    => __( 'مشاهده شگفت‌انگیزها', 'lylyrose' ),
         'url'    => $offer_url,
         'art'    => '🎁',
+        // Newest on-sale, which is the offers page's own default sort.
+        'q'      => array(
+            'meta_query' => array(
+                array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
+                array( 'key' => '_sale_price',  'compare' => 'EXISTS' ),
+            ),
+            'orderby' => 'date', 'order' => 'DESC',
+        ),
     );
     ?>
     <div class="dk-container">
         <section class="dk-hero" aria-roledescription="carousel" aria-label="<?php echo esc_attr__( 'پیشنهادهای ویژه', 'lylyrose' ); ?>">
             <div class="dk-hero-slides">
-                <?php foreach ( $dk_hero_slides as $dk_i => $dk_slide ) : ?>
-                    <div class="dk-hero-slide<?php echo 0 === $dk_i ? ' is-active' : ''; ?>">
+                <?php
+                foreach ( $dk_hero_slides as $dk_i => $dk_slide ) :
+                    $dk_slide_photo = isset( $dk_slide['q'] ) ? lylyrose_promo_image( $dk_slide['q'] ) : $dk_slide['photo'];
+                    ?>
+                    <div class="dk-hero-slide<?php echo 0 === $dk_i ? ' is-active' : ''; ?>"<?php if ( $dk_slide_photo ) : ?> style="--dk-hero-photo:url(&quot;<?php echo esc_url( $dk_slide_photo ); ?>&quot;);"<?php endif; ?>>
                         <div class="dk-hero-copy">
                             <span class="dk-kicker"><?php echo esc_html( $dk_slide['kicker'] ); ?></span>
                             <h1><?php echo wp_kses( $dk_slide['title'], array( 'strong' => array() ) ); ?></h1>
@@ -318,10 +354,19 @@ if ( count( $editorial ) < 3 ) {
     <?php endif; ?>
 
     <!-- Banners -->
+    <?php
+    // Fewer than six cells fit a single row at this width; from six up they wrap
+    // onto two balanced rows rather than one thin one. ceil() is not expressible
+    // in CSS, so the count is resolved here and handed over as a custom property.
+    $dk_banner_cols = count( $banners ) < 6 ? count( $banners ) : (int) ceil( count( $banners ) / 2 );
+    ?>
     <div class="dk-container">
-        <section class="dk-banner-grid" aria-label="<?php echo esc_attr__( 'پیشنهادهای ویژه', 'lylyrose' ); ?>">
-            <?php foreach ( $banners as $banner ) : ?>
-                <a class="dk-banner dk-banner-tone-<?php echo esc_attr( $banner['tone'] ); ?>" href="<?php echo esc_url( $banner['url'] ); ?>">
+        <section class="dk-banner-grid dk-banner-grid-<?php echo (int) $dk_banner_cols; ?>" style="--dk-banner-cols: <?php echo (int) $dk_banner_cols; ?>;" aria-label="<?php echo esc_attr__( 'پیشنهادهای ویژه', 'lylyrose' ); ?>">
+            <?php
+            foreach ( $banners as $banner ) :
+                $banner_photo = isset( $banner['q'] ) ? lylyrose_promo_image( $banner['q'] ) : $banner['photo'];
+                ?>
+                <a class="dk-banner dk-banner-tone-<?php echo esc_attr( $banner['tone'] ); ?><?php echo $banner_photo ? ' has-photo' : ''; ?>" href="<?php echo esc_url( $banner['url'] ); ?>"<?php if ( $banner_photo ) : ?> style="--dk-banner-photo:url(&quot;<?php echo esc_url( $banner_photo ); ?>&quot;);"<?php endif; ?>>
                     <span class="emoji"><?php echo esc_html( $banner['emoji'] ); ?></span>
                     <b><?php echo esc_html( __( $banner['title'], 'lylyrose' ) ); ?></b>
                     <small><?php echo esc_html( __( $banner['sub'], 'lylyrose' ) ); ?></small>

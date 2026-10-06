@@ -810,6 +810,49 @@ function lylyrose_term_image( $term, $size = 'woocommerce_thumbnail' ) {
 }
 
 /**
+ * A photo that matches what a promotional cell is selling.
+ *
+ * A banner captioned "پرفروش‌ترین‌ها" over a picture of something else reads as a
+ * bug, so the caller picks the product with the same query its own link already
+ * sorts by. $args goes straight to get_posts().
+ *
+ * Returns a root-relative path, never an absolute URL: the site answers on more
+ * than one host, and a URL cached from whichever request won the race would pin
+ * every later visitor's photos to that host. Same reasoning as
+ * lylyrose_term_image().
+ */
+function lylyrose_promo_image( $args = array(), $size = 'medium' ) {
+    $cache_key = 'lylyrose_promo_img_' . md5( $size . wp_json_encode( $args ) );
+    $cached    = get_transient( $cache_key );
+    if ( false !== $cached ) {
+        return $cached ? $cached : '';
+    }
+
+    $ids = get_posts( array_merge( array(
+        'post_type'      => 'product',
+        'post_status'    => 'publish',
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+        'meta_query'     => array( array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ) ),
+    ), $args ) );
+
+    $path = '0';
+    if ( $ids ) {
+        $url = get_the_post_thumbnail_url( $ids[0], $size );
+        if ( $url ) {
+            $found = wp_parse_url( $url, PHP_URL_PATH );
+            if ( $found ) {
+                $path = $found;
+            }
+        }
+    }
+
+    set_transient( $cache_key, $path, 12 * HOUR_IN_SECONDS );
+    return $path;
+}
+
+/**
  * Mega-menu cells for the "دسته‌بندی کالا" panel: one cell per top-level
  * category, each carrying its own subcategories when it has any.
  *

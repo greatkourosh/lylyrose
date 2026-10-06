@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.17.0
+Version: 1.18.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -558,6 +558,26 @@ button, input, select, textarea { font-family: inherit; }
     transition: opacity .6s ease;
     pointer-events: auto;
 }
+/* Each slide wears the photo its own copy promises. Same shape as .dk-banner: the
+   negative z-index is what sinks both layers under the copy, and isolation keeps
+   them from escaping behind the hero's own gradient. */
+.dk-hero-slide { isolation: isolate; }
+.dk-hero-slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--dk-hero-photo, none);
+    background-size: cover;
+    background-position: center;
+}
+.dk-hero-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to left, rgba(48, 37, 34, .92) 0%, rgba(48, 37, 34, .74) 48%, rgba(48, 37, 34, .32) 100%);
+}
 .dk-hero-copy .dk-kicker {
     display: inline-block;
     background: color-mix(in srgb, var(--dk-red) 90%, transparent);
@@ -616,6 +636,9 @@ button, input, select, textarea { font-family: inherit; }
     width: 40px;
     height: 40px;
     margin-top: -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
     border: 0;
     border-radius: 999px;
@@ -634,9 +657,9 @@ button, input, select, textarea { font-family: inherit; }
     border-right: 2px solid currentColor;
 }
 .dk-hero-next { left: 18px; }
-.dk-hero-next::before { transform: rotate(-135deg); margin-left: 4px; }
+.dk-hero-next::before { transform: rotate(-135deg); }
 .dk-hero-prev { right: 18px; }
-.dk-hero-prev::before { transform: rotate(45deg); margin-right: 4px; }
+.dk-hero-prev::before { transform: rotate(45deg); }
 .dk-hero-nav:hover { background: rgba(0, 0, 0, .45); }
 .dk-hero-nav:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 /* Drag support: grab the middle of the hero, but keep vertical scrolling
@@ -929,11 +952,15 @@ button, input, select, textarea { font-family: inherit; }
 /* ==========================================================================
    Banner grid
    ========================================================================== */
+/* --dk-banner-cols is the per-row cell count, resolved in front-page.php: one
+   row while there are fewer than six cells, two balanced rows from six up.
+   The fallback covers a cached page rendered before the attribute existed. */
 .dk-banner-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--dk-banner-cols, 4), minmax(0, 1fr));
     gap: 14px;
     margin-top: 26px;
+    justify-content: center;
 }
 .dk-banner {
     border-radius: var(--dk-radius);
@@ -955,8 +982,20 @@ button, input, select, textarea { font-family: inherit; }
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: radial-gradient(circle at 70% 20%, rgba(255, 255, 255, .18), transparent 55%);
+    background-image: var(--dk-banner-photo, none);
+    background-size: cover;
+    background-position: center;
 }
+/* The scrim only earns its place once a photo is behind the caption — the tone
+   gradient already carries the white text when there isn't one. */
+.dk-banner.has-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to top, rgba(48, 37, 34, .88) 0%, rgba(48, 37, 34, .55) 45%, rgba(48, 37, 34, .3) 100%);
+}
+.dk-banner > * { position: relative; z-index: 1; }
 .dk-banner small { font-weight: 400; opacity: .85; font-size: 11.5px; margin-top: 4px; }
 .dk-banner b { font-size: 15.5px; }
 .dk-banner .emoji { font-size: 38px; line-height: 1; margin-bottom: 10px; }
