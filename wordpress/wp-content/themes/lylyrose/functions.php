@@ -563,6 +563,33 @@ function dk_checkout_reorder_fields() {
 
 add_filter( 'loop_shop_columns', function() { return 3; }, 999 );
 
+/**
+ * Product thumbnails are portrait photos of bottles (up to 3.5:1 tall), but
+ * WooCommerce's default is a hard 1:1 crop, which slices the top and bottom off
+ * the product before it ever reaches CSS. Every consumer of this size already
+ * renders with object-fit: contain, so an uncropped thumbnail is the shape they
+ * expect. Width stays at the WooCommerce default so grid density is unchanged.
+ *
+ * The hook name looks like it targets the core 'thumbnail' size (150x150) and it
+ * does not: WooCommerce strips the 'woocommerce_' prefix from the size name
+ * before firing this filter, so 'woocommerce_thumbnail' fires
+ * 'woocommerce_get_image_size_thumbnail'. The cache key below, built from the
+ * FULL name, is the only place the prefix survives.
+ */
+add_filter( 'woocommerce_get_image_size_thumbnail', function( $size ) {
+    $size['height'] = '';
+    $size['crop']   = 0;
+    return $size;
+} );
+
+/**
+ * wc_get_image_size() memoises into the WooCommerce cache group and returns
+ * before the filter above runs, so the stale cropped entry must be dropped.
+ */
+add_action( 'after_setup_theme', function() {
+    wp_cache_delete( 'size-woocommerce_thumbnail', 'woocommerce' );
+}, 5 );
+
 add_filter( 'woocommerce_output_related_products_args', function( $args ) {
     $args['posts_per_page'] = 4;
     $args['columns'] = 4;

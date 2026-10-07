@@ -2352,6 +2352,137 @@ html_has "$TIERS_BACK" 'name="budget"' \
   && pass "deleting the option restores automatic tiers and the quiz still renders" \
   || fail "the quiz lost its budget step after the option was deleted — auto mode does not regenerate"
 
+section "36. Announce bar, demo banner and uncropped thumbnails"
+
+# The announce bar is the one surface that must stay DARK in every palette, so
+# it cannot ride --dk-ink: that inverts, and in Night (#f2f4f8) it painted a
+# near-white strip across a dark page. Assert the role token exists, is wired
+# into every palette, and is what the rule actually reads -- a token that is
+# defined but unreferenced leaves the old bug in place and still passes here.
+BAR_TOKENS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$d = ASC_Palette::defaults();
+$out = array();
+foreach (array("ivory","navy","night") as $s) {
+  $out[] = $s . "=" . ( isset($d[$s]["bar"]) ? $d[$s]["bar"] : "-" )
+              . "/" . ( isset($d[$s]["on-bar"]) ? $d[$s]["on-bar"] : "-" );
+}
+echo implode(" ", $out);' 2>/dev/null)
+BAR_MAP=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+echo isset(ASC_Palette::CSS_PROP["bar"]) ? ASC_Palette::CSS_PROP["bar"] : "-";
+echo ",";
+echo isset(ASC_Palette::CSS_PROP["on-bar"]) ? ASC_Palette::CSS_PROP["on-bar"] : "-";' 2>/dev/null)
+[ "$BAR_MAP" = "--dk-bar,--dk-on-bar" ] \
+  && pass "the bar tokens are mapped to CSS custom properties" \
+  || fail "bar token map is '$BAR_MAP', expected '--dk-bar,--dk-on-bar'"
+
+# bar must differ from on-bar in every palette, and the label must be the LIGHTER
+# of the two. A palette that pairs them wrongly still renders, just unreadably.
+BAR_ORDER=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$d = ASC_Palette::defaults(); $bad = array();
+foreach (array("ivory","navy","night") as $s) {
+  if ( empty($d[$s]["bar"]) || empty($d[$s]["on-bar"]) ) { $bad[] = $s . ":missing"; continue; }
+  $a = hexdec(substr($d[$s]["bar"],1,2));
+  $b = hexdec(substr($d[$s]["on-bar"],1,2));
+  if ( $b <= $a ) { $bad[] = $s . ":label-not-lighter"; }
+}
+echo $bad ? implode(",", $bad) : "all-lighter";' 2>/dev/null)
+[ "$BAR_ORDER" = "all-lighter" ] \
+  && pass "every palette's bar label is lighter than its bar ($BAR_TOKENS)" \
+  || fail "bar label is not lighter than its bar in: $BAR_ORDER"
+
+# Night's bar must be the DARKEST surface in its palette. That is the whole
+# point of the token: the strip was near-white because it inherited --dk-ink.
+BAR_NIGHT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$d = ASC_Palette::defaults()["night"];
+function L($h){ $h=ltrim($h,"#"); $c=array();
+  foreach (array(0,2,4) as $i) { $v=hexdec(substr($h,$i,2))/255;
+    $c[] = $v <= 0.03928 ? $v/12.92 : pow(($v+0.055)/1.055, 2.4); }
+  return 0.2126*$c[0] + 0.7152*$c[1] + 0.0722*$c[2]; }
+$bar = L($d["bar"]); $worst = null; $name = "";
+foreach ($d as $k => $v) {
+  if ( substr($v,0,1) !== "#" ) continue;
+  $l = L($v);
+  if ( $worst === null || $l < $worst ) { $worst = $l; $name = $k; }
+}
+echo $bar <= $worst ? "darkest" : "bar=" . round($bar,4) . " darkest-is-" . $name . "=" . round($worst,4);' 2>/dev/null)
+[ "$BAR_NIGHT" = "darkest" ] \
+  && pass "night's bar is the darkest surface in the palette, not an inverted ink" \
+  || fail "night bar is not the darkest surface ($BAR_NIGHT)"
+
+# The stylesheet must actually READ the token. Defining it and not using it is
+# the failure that a token-existence assertion cannot see, and it is exactly what
+# left the near-white strip in place.
+# Read it through the container, like section 26 does, and use a herestring:
+# style.css is ~90 KB, far past the pipe buffer, so `| grep -q` returns 141.
+STYLE_CSS=$(docker exec "$WP_CONTAINER" cat "/var/www/html/wp-content/themes/$ACTIVE_THEME/style.css" 2>/dev/null)
+ANNOUNCE_BLOCK=$(awk '/^\.dk-announce \{/,/^\}/' <<< "$STYLE_CSS")
+grep -q 'background: var(--dk-bar)' <<< "$ANNOUNCE_BLOCK" \
+  && pass "the announce bar reads --dk-bar" \
+  || fail ".dk-announce does not use --dk-bar — the token is defined but unused"
+grep -q 'color: var(--dk-on-bar)' <<< "$ANNOUNCE_BLOCK" \
+  && pass "the announce label reads --dk-on-bar" \
+  || fail ".dk-announce does not use --dk-on-bar"
+grep -q 'var(--dk-ink)' <<< "$ANNOUNCE_BLOCK" \
+  && fail ".dk-announce still reads --dk-ink, which is what inverts in Night" \
+  || pass "the announce bar no longer depends on --dk-ink"
+
+# The demo banner was three literal hexes and so had no palette at all. Assert it
+# is token-driven AND that the text clears 4.5:1 on the stripe it sits on — a
+# token swap that drops contrast is not a fix. Read the whole rule block (the
+# 8-line explanatory comment inside it means a small -A window truncates before the
+# declaration), and check the hexes are gone from the DECLARATIONS, not the comment
+# that remembers them.
+DEMO_BG=$(awk '/^\.dk-demo-banner \{/{f=1} f{print} f&&/^\}/{exit}' <<< "$STYLE_CSS")
+grep -q 'var(--dk-red-light)' <<< "$DEMO_BG" \
+  && pass "the demo banner background is token-driven, not literal yellow" \
+  || fail ".dk-demo-banner still uses literal hexes — it will not follow the palette"
+grep -oE 'background:[^;]*;|color:[^;]*;|border-bottom:[^;]*;' <<< "$DEMO_BG" | grep -q '#fff3cd\|#fffbe6\|#ffe69c\|#664d03' \
+  && fail "the old literal demo-banner hexes are still in its declarations" \
+  || pass "no literal demo-banner hex remains in any declaration"
+
+DEMO_CR=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+function L($h){ $h=ltrim($h,"#"); $c=array();
+  foreach (array(0,2,4) as $i) { $v=hexdec(substr($h,$i,2))/255;
+    $c[] = $v <= 0.03928 ? $v/12.92 : pow(($v+0.055)/1.055, 2.4); }
+  return 0.2126*$c[0] + 0.7152*$c[1] + 0.0722*$c[2]; }
+function C($a,$b){ $x=L($a); $y=L($b); $hi=max($x,$y); $lo=min($x,$y); return ($hi+0.05)/($lo+0.05); }
+function M($a,$b,$pa){ $a=ltrim($a,"#"); $b=ltrim($b,"#");
+  $o=$pa/100; $s="#";
+  foreach (array(0,2,4) as $i) {
+    $s .= sprintf("%02x", round(hexdec(substr($a,$i,2))*$o + hexdec(substr($b,$i,2))*(1-$o)));
+  }
+  return $s; }
+$d = ASC_Palette::defaults();
+$root = array("red-light"=>"#f8f1f0","white"=>"#ffffff","border"=>"#e5dcd4");
+$worst = 99; $wslug = "";
+foreach (array("ivory","navy","night") as $s) {
+  // A palette only overrides a token if it declares one; otherwise :root wins.
+  $rl = ! empty($d[$s]["red-light"]) ? $d[$s]["red-light"] : $root["red-light"];
+  $wh = ! empty($d[$s]["white"])     ? $d[$s]["white"]     : $root["white"];
+  $bd = ! empty($d[$s]["border"])    ? $d[$s]["border"]    : $root["border"];
+  if ( empty($d[$s]["red"]) ) continue;
+  $stripe = M($rl, $wh, 80);
+  $cr = C($d[$s]["red"], $stripe);
+  if ( $cr < $worst ) { $worst = $cr; $wslug = $s; }
+}
+echo round($worst,2) . ":" . $wslug;' 2>/dev/null)
+DEMO_MIN=${DEMO_CR%%:*}
+awk -v v="$DEMO_MIN" 'BEGIN { exit !(v >= 4.5) }' \
+  && pass "demo banner text clears 4.5:1 on its stripe in every palette (worst ${DEMO_CR})" \
+  || fail "demo banner text contrast ${DEMO_MIN} (palette ${DEMO_CR##*:}) is under 4.5:1"
+
+# NOTE on thumbnails: the 'woocommerce_get_image_size_thumbnail' filter in
+# functions.php resolves the display-time size to 300x<auto> uncropped, but
+# product cards render from STORED attachment metadata (wp_get_attachment_image_src
+# reads the sizes[] array, not wc_get_image_size), which the filter cannot change.
+# Uncropping the real thumbnails is a bulk data operation -- regenerate every
+# attachment's metadata WHILE the filter is active -- and that belongs with the
+# session that owns the "Transparent product photos" work, not with a palette fix.
+# A srcset assertion here would fail for the stale-metadata reason above and read
+# as a code regression when it is a data state. Verify by regenerating metadata
+# and confirming wp_get_attachment_image_src returns height > width for a portrait
+# original, not from these assertions.
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

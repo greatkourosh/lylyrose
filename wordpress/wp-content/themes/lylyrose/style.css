@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.24.0
+Version: 1.25.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -46,6 +46,12 @@ Tags: e-commerce, rtl-language-support, custom-menu, custom-logo
     --dk-on-accent: #ffffff;
     --dk-on-gold: #ffffff;
     --dk-on-ink: #ffffff;
+    /* The announcement strip is the one surface that must stay DARK in every
+       palette, so it cannot be expressed through --dk-ink: that inverts, and in
+       Night (#f2f4f8) it put a near-white bar across a dark page. A role token
+       states the intent outright and each palette supplies its own value. */
+    --dk-bar: #302522;         /* the dark strip above the header           */
+    --dk-on-bar: #ffffff;      /* its label                                 */
     --dk-star: #96610d;        /* 4.75:1 on Ivory, was 1.79:1             */
     --dk-radius: 12px;
     --dk-radius-sm: 8px;
@@ -124,8 +130,8 @@ button, input, select, textarea { font-family: inherit; }
    Announcement top bar (dark, dismissible)
    ========================================================================== */
 .dk-announce {
-    background: var(--dk-ink);
-    color: var(--dk-on-ink);
+    background: var(--dk-bar);
+    color: var(--dk-on-bar);
     font-size: 12px;
 }
 .dk-announce .dk-container {
@@ -142,12 +148,12 @@ button, input, select, textarea { font-family: inherit; }
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: color-mix(in srgb, var(--dk-on-ink) 70%, transparent);
+    color: color-mix(in srgb, var(--dk-on-bar) 70%, transparent);
     font-size: 18px;
     cursor: pointer;
     line-height: 1;
 }
-.dk-announce-close:hover { color: var(--dk-on-ink); }
+.dk-announce-close:hover { color: var(--dk-on-bar); }
 
 /* ==========================================================================
    Top bar
@@ -236,9 +242,17 @@ button, input, select, textarea { font-family: inherit; }
 
 /* Demo-mode banner */
 .dk-demo-banner {
-    background: repeating-linear-gradient(45deg, #fff3cd, #fff3cd 12px, #fffbe6 12px, #fffbe6 24px);
-    border-bottom: 1px solid #ffe69c;
-    color: #664d03;
+    /* Was three literal hexes (#fff3cd/#fffbe6 stripes, #ffe69c hairline,
+       #664d03 text) and so had no palette at all: the striped yellow slab stayed
+       yellow in Night. --dk-red-light is the one token that is a tinted panel in
+       every palette -- Night overrides it to #1e2534 -- and --dk-red reads at
+       4.58:1 on it in Ivory and 5.83:1 in Night. The stripes mix toward the card
+       surface, which keeps the 45-degree pattern without adding a token. */
+    background: repeating-linear-gradient(45deg,
+        var(--dk-red-light) 0 12px,
+        color-mix(in srgb, var(--dk-red-light) 80%, var(--dk-white)) 12px 24px);
+    border-bottom: 1px solid color-mix(in srgb, var(--dk-red-light) 60%, var(--dk-border));
+    color: var(--dk-red);
     font-size: 13px;
     font-weight: 600;
     padding: 8px 0;

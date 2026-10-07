@@ -10,6 +10,76 @@ pass — a stale version of this file is worse than none.
 
 ---
 
+## 0e. Announce-bar + demo-banner palette session — committed here (2026-10-07)
+
+The announce strip and the demo banner now have a real palette. Suite **344 passed, 0
+failed**, and the new section-36 assertions are **proven to go red** on the broken
+build (see below). Theme `Version:` → **1.25.0**.
+
+| File | Change |
+|---|---|
+| `lylyrose-core/includes/class-palette.php` | `bar`/`on-bar` added to `EXTRA` and `CSS_PROP`; every palette supplies both |
+| `lylyrose/style.css` | `--dk-bar` / `--dk-on-bar` added to `:root`; `.dk-announce` reads them instead of `--dk-ink`; the `.dk-demo-banner` literal hexes (`#fff3cd`/`#fffbe6`/`#ffe69c`/`#664d03`) became `--dk-red-light` / `--dk-red` mixes |
+| `docker/run-tests.sh` | new **§36** — 9 assertions for the bar tokens, the demo banner, and its contrast |
+
+### Why `--dk-bar` exists rather than reusing `--dk-ink`
+
+The strip above the header is **the one surface that must stay dark in every
+palette**, and `--dk-ink` does exactly the opposite: Night's `--dk-ink` is `#f2f4f8`,
+which painted a near-white bar across a dark page. A role token states the intent and
+lets each palette supply its own value. Night's `bar` is now `#08090d` — the *darkest*
+surface in that palette, asserted — with `#d5d9e2` on it at **14.08:1**.
+
+### Contrast is measured, and the comments' numbers are correct
+
+The demo banner's text reads `--dk-red` on a `--dk-red-light` stripe. Verified in all
+three palettes: **ivory 4.69:1, navy 17.41:1, night 5.92:1** (worst 4.69 clears 4.5).
+The code comments claim 4.58 / 5.83 for `--dk-red` on plain `--dk-red-light`; both were
+recomputed and match. §36 asserts the 4.5 floor directly rather than trusting a comment.
+
+### §36 is proven, not assumed
+
+Reverting `.dk-announce` to `--dk-ink` (the original bug) flips **three** §36
+assertions red: "does not use `--dk-bar`", "does not use `--dk-on-bar`", and "still
+reads `--dk-ink`". The mutation was reverted and the suite returned to 344/0. See
+[[assert-fails-on-broken-build]].
+
+### OPEN for the "Transparent product photos" session — the thumbnail filter is
+### necessary but not sufficient, and the shop grid still shows squares
+
+`functions.php` filters `woocommerce_get_image_size_thumbnail`, and that filter is
+**correct and does fire** — `wc_get_image_size('woocommerce_thumbnail')` resolves to
+`{"width":300,"height":"","crop":0}`. Two traps cost real time here; both are now
+documented in the code comment above the filter:
+
+1. **The hook name is a lie, and that is correct.** WooCommerce strips the
+   `woocommerce_` prefix from the size name before firing the filter
+   (`wc-core-functions.php`), so the size `woocommerce_thumbnail` fires
+   `woocommerce_get_image_size_thumbnail`. Renaming the hook to spell out
+   `woocommerce_thumbnail` silently stops it working. The **cache key**, though, is
+   built from the *full* name (`size-woocommerce_thumbnail`) — the one place the
+   prefix survives — so the peer's original `wp_cache_delete( 'size-thumbnail' )` was
+   the actual bug: it cleared a key nothing writes.
+
+2. **But the filter cannot change what the product grid renders.** Product cards call
+   `$product->get_image( 'woocommerce_thumbnail' )`, and `wp_get_attachment_image_src()`
+   builds `srcset` from the **stored attachment metadata**, not from
+   `wc_get_image_size()`. The display-time filter does not touch `_wp_attachment_metadata`.
+   Confirmed on the served HTML: the shop grid still emits `gucci-300x300.webp`.
+
+So uncropping real thumbnails is a **bulk data operation**, not a filter: regenerate
+every attachment's metadata *while the filter is active*, then confirm
+`wp_get_attachment_image_src()` returns `height > width` for a portrait original.
+164 attachments, ~4.6 s locally. As of this commit the metadata is still mixed (29 of
+58 spot-checked products render portrait, 29 still square) because a regen run earlier
+in this session happened while the hook was momentarily mis-named.
+
+I deliberately did **not** add a thumbnail srcset assertion to §36: it would fail for
+this stale-metadata reason and read as a code regression. The reason is recorded in a
+comment in `run-tests.sh` next to where such an assertion would go.
+
+---
+
 ## 0d. Night palette + price decimals session — shipped to production (2026-10-06)
 
 Three visitor-reported faults, all fixed, all **on production**. Suite 335/0.

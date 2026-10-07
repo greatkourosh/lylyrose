@@ -44,8 +44,10 @@ class ASC_Palette {
 		'badge-red' => 'رنگ برچسب تخفیف',
 	);
 
-	/** Tokens a palette may also carry without exposing them in the form. */
-	const EXTRA = array( 'on-accent', 'on-gold', 'on-ink', 'white' );
+	/** Tokens a palette may also carry without exposing them in the form.
+	 *  'bar'/'on-bar' are the strip above the header: the one surface that has
+	 *  to stay dark in every palette, which --dk-ink does not do. */
+	const EXTRA = array( 'on-accent', 'on-gold', 'on-ink', 'white', 'bar', 'on-bar' );
 
 	/** The three palettes that ship. Values match the theme's :root. */
 	public static function defaults() {
@@ -61,6 +63,10 @@ class ASC_Palette {
 				'border'    => '#e5dcd4',
 				'white'     => '#ffffff',
 				'badge-red' => '#b5484d',
+				// Matches :root, so the light palettes keep this strip exactly as it
+				// renders today. Only Night needs a different value.
+				'bar'       => '#302522',
+				'on-bar'    => '#ffffff',
 			),
 			'navy'  => array(
 				'label' => 'سرمه‌ای',
@@ -73,6 +79,8 @@ class ASC_Palette {
 				'border'    => '#d5dae3',
 				'white'     => '#fefefe',
 				'badge-red' => '#c0392b',
+				'bar'       => '#070f27',
+				'on-bar'    => '#ffffff',
 			),
 			// Derived by docker/contrast-check.py --derive-night, not hand-picked:
 			// a dark surface needs a LIGHT accent, and the label on that accent has
@@ -95,6 +103,11 @@ class ASC_Palette {
 				'on-accent' => '#0d1016',
 				'on-gold'   => '#0d1016',
 				'on-ink'    => '#0d1016',
+				// Night's --dk-ink is #f2f4f8, which rendered this strip near-white
+				// across the dark page. The bar is now the darkest surface in the
+				// palette and the label stays light on it: 14.01:1.
+				'bar'       => '#08090d',
+				'on-bar'    => '#d5d9e2',
 				// Derived steps, re-derived for a dark surface. Leaving the
 				// light values in would put a #f8f1f0 panel on #12151c.
 				'red-dark'  => '#5b7fd4',
@@ -124,6 +137,10 @@ class ASC_Palette {
 		'on-accent' => '--dk-on-accent',
 		'on-gold'   => '--dk-on-gold',
 		'on-ink'    => '--dk-on-ink',
+		// The strip above the header. Carried per palette because it is the one
+		// surface that must stay dark, which --dk-ink does not do.
+		'bar'       => '--dk-bar',
+		'on-bar'    => '--dk-on-bar',
 		// Not editable in the form, but a dark palette MUST carry them: the
 		// light palettes' --dk-red-light is a near-white panel used for tinted
 		// surfaces, and leaving it in place on a #12151c background turns every
