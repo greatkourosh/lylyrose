@@ -115,7 +115,7 @@
 > matching `style.css` in the tree, so production and repo agree on the version.
 > The local site reports the same `1.25.0`.
 >
-> **Suite is now 347/0** (was 304/0), local, `https://lylyrose.local`, whole file
+> **Suite is now 351/0** (was 347/0), local, `https://lylyrose.local`, whole file
 > including the previously-hanging homepage regex. Sections 34–36 were added by the
 > night-palette and announce-bar passes; §36 grew from 9 to 12 assertions on
 > 2026-10-08 when the thumbnail cache purge finally got coverage.
@@ -123,7 +123,7 @@
 ## Open items, re-verified on-site 2026-10-08
 
 Every line below was checked against the running container and the served HTML, not
-against a previous session's notes. Suite at time of writing: **347 passed, 0 failed**.
+against a previous session's notes. Suite at time of writing: **351 passed, 0 failed**.
 
 1. **✅ RESOLVED 2026-10-08 — the deploy gap is closed. Committed `911fa1ad`,
    uploaded, `diff-host.py` reads 57/0.** `wp-content/themes/lylyrose/functions.php`
@@ -142,8 +142,8 @@ against a previous session's notes. Suite at time of writing: **347 passed, 0 fa
    persistent object cache — local dev now, and any live host where Redis is switched
    on later. Three assertions now guard it (§36), and the registered-size one was
    proven red, not assumed: with the purge reverted **and** a stale entry planted,
-   `add_image_sizes()` registers 300x300 crop=true and two assertions fail (345/2);
-   restored, the entry self-heals on the next request and the suite returns to 347/0.
+   `add_image_sizes()` registers 300x300 crop=true and two assertions fail (349/2);
+   restored, the entry self-heals on the next request and the suite returns to 351/0.
 
 2. **Item 2 is unchanged and still human-blocked** — per-host credentials for
    ZarinPal (real merchant, `sandbox: no`), PWSMS, and WP Mail SMTP. Production SMS
@@ -155,10 +155,11 @@ against a previous session's notes. Suite at time of writing: **347 passed, 0 fa
    AVIF, and fuzzy search.** (Fuzzy is not the same as the SKU/code lookup, which
    ships and works.)
 
-4. **Perfume Finder data is 10 of 165 products.** The other 155 are content
-   authoring, not a code fix — the finder, the note pyramid and the tiers all work.
-   The remaining 155 need note-pyramid and finder-factor data entered by a human.
-   Both live DBs need their own pass and their IDs differ per host.
+4. **Perfume Finder data is 110 of 165 products** — the full perfume catalogue.
+   The other 55 are content authoring, not a code fix (they are St. Ives body care
+   and other non-perfumes with no scent family to annotate). The finder, the note
+   pyramid and the tiers all work; the other 55 need a human to decide they are not
+   perfumes at all. Both live DBs need their own pass and their IDs differ per host.
 
 5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
    gift card "deferred" pending a latency fix. Measured: 4 published products carry
@@ -181,7 +182,7 @@ verified). Changing the bytes needs wider source photos — a content task.
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
 > **✅ RESOLVED 2026-10-08 — the 500 was a probe mu-plugin of our own making, not
-> the theme. The suite is trustworthy; it reads 347/0.** The bisect that exonerated
+> the theme. The suite is trustworthy; it reads 351/0.** The bisect that exonerated
 > the theme was right to exonerate it, but it was looking in the wrong place: the
 > fatal was in `wp-content/mu-plugins/asc-tracer.php`, a **diagnostic file this repo
 > wrote**, whose line 61 stringified a Closure. `wp-content/error.log` still holds
@@ -257,9 +258,10 @@ verified). Changing the bytes needs wider source photos — a content task.
 > **✅ Perfume Finder is built and live (2026-10-01).** «عطرت رو پیدا کن» shipped
 > upstream as `aroma_store` `99d5e72d` and mirrored here as `57e70a7c`. Both
 > `/perfume-finder/` pages return 200 and return ranked cards. The suite is
-> **302/0** on both host forms. The six axes are **not** 0/114 any more: ten
+> **302/0** on both host forms. ~~The six axes are **not** 0/114 any more: ten
 > products (IDs 1296–1305) carry authored fragrance data, so 8 of 114 are
-> rankable. The other 104 remain unannotated — see the section at the end.
+> rankable. The other 104 remain unannotated~~ — **superseded: 110 of 165 are
+> rankable today**, see the coverage table near the end of this file.
 >
 > **Last updated 2026-10-01 (latest).** The suite is **304/0** on **both** host
 > forms — `https://lylyrose.local` and `http://192.168.1.13:8030` — green on
@@ -2316,23 +2318,37 @@ An unpopulated axis therefore costs nothing instead of scoring zero, and each
 result prints its own coverage («بر اساس ۴۰% از معیارها») so a high number over
 one axis cannot read as a whole-catalogue verdict.
 
-Coverage as of 2026-10-01, measured on the live container — **10 products now
-carry authored fragrance data** (IDs 1296–1305, plus the same ten scents on
-`aroma-store.vegacodex.ir` at IDs 11–20), so **8 of 114 are rankable**:
+Coverage as of 2026-10-08, measured on the live container — **110 of 165 published
+products now carry authored fragrance data**, so **110 are rankable**:
 
 | Axis | Weight | Product attribute | Coverage |
 | --- | --- | --- | --- |
-| Scent family | 30% | `pa_fragrance_family` | **8 / 114** |
-| Occasion | 20% | `pa_occasion` | **4 / 114** |
-| Season | 15% | `pa_season` | **2 / 114** |
-| Personality | 15% | `pa_personality` | **7 / 114** |
-| Longevity | 10% | `pa_longevity` | **2 / 114** |
-| Budget | 10% | `_price` | **114 / 114** ✅ |
+| Scent family | 30% | `pa_fragrance_family` | **110 / 165** |
+| Occasion | 20% | `pa_occasion` | **110 / 165** |
+| Season | 15% | `pa_season` | **110 / 165** |
+| Personality | 15% | `pa_personality` | **110 / 165** |
+| Longevity | 10% | `pa_longevity` | **110 / 165** |
+| Budget | 10% | `_price` | **165 / 165** ✅ |
+
+**Superseded 2026-10-08.** The figures this table used to carry — 8 of 114
+rankable, per-axis coverage of 2–8 — described the catalogue as of 2026-10-01,
+before the 51-product St. Ives import and the perfume-catalogue authoring pass
+took it to 165 products with 110 of them annotated. The numbers above were
+measured on the live container today, not carried forward.
+
+**The 55 that are still bare are the 55 that were never perfumes.** Every
+St. Ives body-care product has no scent family, no occasion and no pyramid,
+because a hair mask is not a fragrance and inventing one would be worse than
+the gap. The 110 annotated products are the perfume catalogue. A re-count that
+reports "55 unrankable" as an authoring backlog is reading the wrong rows.
+
+`pa_sillage` is **0 / 165** and still has no attribute; it rides the longevity
+axis. That gap is unchanged and is a taxonomy registration, not authoring.
 
 A product is rankable only if it carries a real fragrance characteristic — a
 note pyramid counts, a brand does not. So the finder returns **1–3 results and
 never pads**, and says so honestly when nothing matches rather than inventing a
-match. `pa_sillage` still has no attribute; it rides the longevity axis.
+match.
 
 `fragrance_notes` — the «هرم رایحه» card shipped in 2026-09-04 and listed as
 **DONE** in [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) item 13 — is written by
@@ -2340,11 +2356,11 @@ the test suite, which seeds its own product and cleans up afterwards. The
 feature is genuinely built and genuinely tested; the **catalogue** is only now
 partly filled, and only by hand.
 
-**The remaining gap is still content authoring, not code.** 104 of 114 products
-still carry none of these axes, and their descriptions are import boilerplate
-(«محصول موجود در آرومالند؛ پیش از انتشار…»), so scent data cannot be *derived*
-from existing text — it has to be written. That remains a content task with two
-consumers: the perfume finder *and* the existing facets.
+**The remaining gap is still content authoring, not code.** The 55 products that
+carry none of these axes are the body-care lines, and they are bare *correctly* —
+their descriptions are import boilerplate rather than scent data, so there is
+nothing to derive and inventing a family for a hair mask would be worse than the
+gap. The perfume catalogue itself is fully annotated at 110/165.
 
 ### 💰 Budget tiers are lopsided — 73% of the catalogue in one bucket
 
@@ -2505,13 +2521,26 @@ is unchanged for visitors.
 
 ### Still open
 
-1. **The data gap is unchanged** — 8 of 114 products carry fragrance data, so a
+> **Both items below are stale as written and are kept only as a record of the
+> session that wrote them.** Item 1 was true when 8 of 114 products carried
+> fragrance data; it is **110 of 165** today, measured on the live container, and
+> a real submission returns a full three-card row. Item 2 refers to `navy`,
+> which no longer exists on disk or in history (`50a8c651`) — there is nothing to
+> activate. Only item 3 is still open, and it is a process gap rather than a
+> defect.
+
+1. ~~**The data gap is unchanged** — 8 of 114 products carry fragrance data, so a
    real submission returns **one** card, not three. The three-column grid has
    therefore never been seen with a full row of results. Authoring the other 104
-   is the deliverable ([[perfume-finder-data-blocker]]).
-2. **navy is uploaded but unactivated.** Activating it is the risky step: the
+   is the deliverable ([[perfume-finder-data-blocker]]).~~
+   **Closed by the authoring pass.** 110 of 165 products carry fragrance data,
+   every perfume among them annotated on all five scent axes, and §34 asserts a
+   full three-result row. The 55 bare products are body-care lines that correctly
+   have no scent family.
+2. ~~**navy is uploaded but unactivated.** Activating it is the risky step: the
    local suite carries 13 unrelated failures (OTP, mobile login, tier sanitizer)
-   and none of them exercise navy.
+   and none of them exercise navy.~~ **Moot — navy is gone** (`50a8c651`,
+   2026-10-06). `lylyrose` is the only theme, on both hosts.
 3. **The visual check is still missing.** `preview_start` timed out on every
    attempt this session, so layout was verified through the served DOM and CSS
    bytes only — never by looking at it.

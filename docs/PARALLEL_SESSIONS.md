@@ -41,7 +41,7 @@ recomputed and match. §36 asserts the 4.5 floor directly rather than trusting a
 
 Reverting `.dk-announce` to `--dk-ink` (the original bug) flips **three** §36
 assertions red: "does not use `--dk-bar`", "does not use `--dk-on-bar`", and "still
-reads `--dk-ink`". The mutation was reverted and the suite returned to 347/0. See
+reads `--dk-ink`". The mutation was reverted and the suite returned to 351/0. See
 [[assert-fails-on-broken-build]].
 
 ### RESOLVED 2026-10-08 — the thumbnail filter was never the blocker. The 29 unscaled
@@ -135,8 +135,10 @@ That is the entire reason the purge is load-bearing rather than decorative.
 **Both new assertions were proven red, not assumed.** Reverting the block to the
 committed version (which drops only the prefixed key) flips the purge assertion.
 Planting the stale entry on top of that flips the registered-size assertion too — two
-FAILs, 345/2. Restoring the file returned it to **347/0**, and the stale entry
-self-healed on the next request, which is the purge working as written.
+FAILs, 345/2. Restoring the file returned it to **347/0** — the figure this run
+measured — and the stale entry self-healed on the next request, which is the purge
+working as written. (The suite now stands at 351/0 after §23, §34 and §37 grew by
+four assertions; the 345/2 and 347/0 figures above are left as the run recorded them.)
 
 ### This is a deploy gap on production for a different reason than it looks
 
