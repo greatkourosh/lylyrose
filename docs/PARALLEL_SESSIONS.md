@@ -12,7 +12,7 @@ pass — a stale version of this file is worse than none.
 
 ## 0e. Announce-bar + demo-banner palette session — committed here (2026-10-07)
 
-The announce strip and the demo banner now have a real palette. Suite **344 passed, 0
+The announce strip and the demo banner now have a real palette. Suite **347 passed, 0
 failed**, and the new section-36 assertions are **proven to go red** on the broken
 build (see below). Theme `Version:` → **1.25.0**.
 
@@ -20,7 +20,7 @@ build (see below). Theme `Version:` → **1.25.0**.
 |---|---|
 | `lylyrose-core/includes/class-palette.php` | `bar`/`on-bar` added to `EXTRA` and `CSS_PROP`; every palette supplies both |
 | `lylyrose/style.css` | `--dk-bar` / `--dk-on-bar` added to `:root`; `.dk-announce` reads them instead of `--dk-ink`; the `.dk-demo-banner` literal hexes (`#fff3cd`/`#fffbe6`/`#ffe69c`/`#664d03`) became `--dk-red-light` / `--dk-red` mixes |
-| `docker/run-tests.sh` | new **§36** — 9 assertions for the bar tokens, the demo banner, and its contrast |
+| `docker/run-tests.sh` | new **§36** — 9 assertions for the bar tokens, the demo banner, and its contrast, plus 3 added 2026-10-08 for the thumbnail size-cache purge (see the correction below) |
 
 ### Why `--dk-bar` exists rather than reusing `--dk-ink`
 
@@ -41,16 +41,21 @@ recomputed and match. §36 asserts the 4.5 floor directly rather than trusting a
 
 Reverting `.dk-announce` to `--dk-ink` (the original bug) flips **three** §36
 assertions red: "does not use `--dk-bar`", "does not use `--dk-on-bar`", and "still
-reads `--dk-ink`". The mutation was reverted and the suite returned to 344/0. See
+reads `--dk-ink`". The mutation was reverted and the suite returned to 347/0. See
 [[assert-fails-on-broken-build]].
 
-### OPEN for the "Transparent product photos" session — the thumbnail filter is
-### necessary but not sufficient, and the shop grid still shows squares
+### RESOLVED 2026-10-08 — the thumbnail filter was never the blocker. The 29 unscaled
+### images are narrower than 300px, so WordPress will not scale them up.
+
+Re-measured against the running container and the served HTML. **The OPEN block this
+replaces gave the right symptom and the wrong cause**, and would have sent the next
+person to run a bulk regen that provably cannot change the output.
 
 `functions.php` filters `woocommerce_get_image_size_thumbnail`, and that filter is
 **correct and does fire** — `wc_get_image_size('woocommerce_thumbnail')` resolves to
-`{"width":300,"height":"","crop":0}`. Two traps cost real time here; both are now
-documented in the code comment above the filter:
+`{"width":300,"height":"","crop":0}`, and `wp_get_registered_image_subsizes()` reports
+`woocommerce_thumbnail` as `300x0` (uncropped). Two traps cost real time here; both are
+now documented in the code comment above the filter:
 
 1. **The hook name is a lie, and that is correct.** WooCommerce strips the
    `woocommerce_` prefix from the size name before firing the filter
@@ -59,24 +64,95 @@ documented in the code comment above the filter:
    `woocommerce_thumbnail` silently stops it working. The **cache key**, though, is
    built from the *full* name (`size-woocommerce_thumbnail`) — the one place the
    prefix survives — so the peer's original `wp_cache_delete( 'size-thumbnail' )` was
-   the actual bug: it cleared a key nothing writes.
+   the actual bug: it cleared a key nothing writes. The uncommitted +10 in
+   `functions.php` deletes **both** spellings, which is correct.
 
-2. **But the filter cannot change what the product grid renders.** Product cards call
-   `$product->get_image( 'woocommerce_thumbnail' )`, and `wp_get_attachment_image_src()`
-   builds `srcset` from the **stored attachment metadata**, not from
-   `wc_get_image_size()`. The display-time filter does not touch `_wp_attachment_metadata`.
-   Confirmed on the served HTML: the shop grid still emits `gucci-300x300.webp`.
+2. **The filter cannot change what the product grid renders**, and no data operation
+   can either. Product cards call `$product->get_image( 'woocommerce_thumbnail' )`,
+   and `wp_get_attachment_image_src()` builds `srcset` from the **stored attachment
+   metadata**, not from `wc_get_image_size()`. But regenerating that metadata is
+   **not** the fix, for a reason this block previously got wrong.
 
-So uncropping real thumbnails is a **bulk data operation**, not a filter: regenerate
-every attachment's metadata *while the filter is active*, then confirm
-`wp_get_attachment_image_src()` returns `height > width` for a portrait original.
-164 attachments, ~4.6 s locally. As of this commit the metadata is still mixed (29 of
-58 spot-checked products render portrait, 29 still square) because a regen run earlier
-in this session happened while the hook was momentarily mis-named.
+### The census, measured (2026-10-08)
 
-I deliberately did **not** add a thumbnail srcset assertion to §36: it would fail for
-this stale-metadata reason and read as a code regression. The reason is recorded in a
-comment in `run-tests.sh` next to where such an assertion would go.
+164 attachments with metadata. **128 have no `woocommerce_thumbnail` size at all** and
+render the full original — 1,154 KB that a thumbnail would have shrunk.
+
+| | with `woocommerce_thumbnail` | without |
+|---|---|---|
+| square / landscape originals | 20 | 99 |
+| portrait originals | 16 | **29** |
+
+**All 29 portrait originals that lack a thumbnail are 246–258px wide.** WordPress
+never scales an image *up* to a registered size, so for those the full original **is**
+the smallest image that exists — `-300x300` is unobtainable, and asking for it would
+mean *enlarging* the bottle. The remaining 99 are 300x300 originals, where serving the
+original costs nothing at all.
+
+Verified on attachment **4683** (`STIVES-FC-TEATREE-ACNE`, 250x812), with a backup
+taken first and the metadata restored afterwards: `wp_generate_attachment_metadata()`
+emits `medium`, `thumbnail`, `woocommerce_gallery_thumbnail` and **not**
+`woocommerce_thumbnail`, and `wp_get_attachment_image_src()` keeps returning the full
+`250x812` original before and after. Confirmed back at `(none)` sizes on restore.
+
+So the earlier note's "29 still square" was wrong twice: they are portrait, and they are
+not croppable at all. The grid emitting `gucci-300x300.webp` is likewise not a stale
+metadata artifact — **gucci's original is genuinely 600x600**.
+
+**What would actually change the bytes** is replacing the 29 narrow originals with
+wider source images (or reshooting them), which is a content task, not a code one.
+Whether narrow cards should be padded to a uniform grid box is a design call, not a
+bug fix.
+
+### CORRECTION 2026-10-08 — only the *per-attachment* assertion is unwriteable. The
+### registered-size one is writable, and §36 now asserts it (3 assertions).
+
+The line above read "§36 deliberately still asserts nothing about thumbnails — the
+assertion would be unwriteable, not merely fragile." That was true of the assertion
+that claim was reasoned about, and it was then generalised to the whole topic, which
+made §36 look unjustifiably bare.
+
+**The unwriteable one is per-attachment `srcset`.** For those 128 attachments the
+correct output *is* the un-scaled original, so there is no expected filename or
+dimension to assert. That still stands.
+
+**The writable one is the registered size**, and it is the part that belongs to the
+code rather than to the data. §36 now asserts three things:
+
+| Assertion | What it pins |
+|---|---|
+| the purge drops both key spellings | the peer bug that shipped is the thing being guarded |
+| the thumbnail size is registered uncropped | `300x0`, so grids never hard-crop |
+| the size filter is still attached | the size above is not correct by accident |
+
+**Why the middle one is the load-bearing claim, measured two ways.** The filter runs
+inside `wc_get_image_size()` **before** `wp_cache_set`, so a cache *miss* stores the
+correct uncropped value on its own — the stale entry only predates the filter's own
+commit. Plant a stale `{width:300,height:300,crop:1}` and, with the purge removed,
+`add_image_sizes()` registers **300x300 crop=true**; with it, **300x0 crop=false**.
+That is the entire reason the purge is load-bearing rather than decorative.
+
+**Both new assertions were proven red, not assumed.** Reverting the block to the
+committed version (which drops only the prefixed key) flips the purge assertion.
+Planting the stale entry on top of that flips the registered-size assertion too — two
+FAILs, 345/2. Restoring the file returned it to **347/0**, and the stale entry
+self-healed on the next request, which is the purge working as written.
+
+### This is a deploy gap on production for a different reason than it looks
+
+`CONTINUATION.md` calls the uncommitted `+10` the entire deploy gap. True, and worth
+shipping — but **production has no persistent object cache**
+(`wp_using_ext_object_cache()` is `false` there, verified by probe), so the stale
+entry this purge repairs **cannot survive a request** on the live host, and production
+already registers `300x0` uncropped and renders uncropped grids. Verified on
+`lylyrose.ir`: `size-thumbnail` = `{"width":300,"height":"","crop":0}`,
+`woocommerce_thumbnail` registered `{"width":300,"height":0,"crop":false}`.
+
+So the deploy is a **latent-fault fix, not a live bug fix**: it removes a footgun that
+only bites a host with a persistent object cache (local dev, and any host where Redis
+gets enabled later). Nothing on the live site is broken today by its absence. That
+distinction was missing from the "commit it or discard it" framing and should travel
+with the commit.
 
 ---
 

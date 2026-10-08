@@ -107,11 +107,78 @@
 > new class needs mirroring and a doc count update" — no assertion ties that count
 > to a doc file, so the only doc obligation is the count recorded here.
 >
-> **Not done:** the theme merge, deployment of any of this to `lylyrose.ir`, a
-> suite run with the 500 resolved, and a browser check of the Night palette in
-> situ. The palette admin page and the switcher markup are verified in the rendered
-> HTML (`3 × data-dk-palette`, `var lylyrosePalette = {...}`), but **no human has
-> looked at Night on screen.**
+> **✅ The theme merge is DONE and LIVE (`50a8c651`, 2026-10-05).** The block
+> above described the merge as pending and named the "palette not deployed"
+> state as current. Both are stale now. Verified against production today
+> (2026-10-08): `lylyrose.ir/` and `/shop/` both return **200**, both emit
+> **3 × `data-dk-palette`**, and the served stylesheet is `ver=1.25.0` —
+> matching `style.css` in the tree, so production and repo agree on the version.
+> The local site reports the same `1.25.0`.
+>
+> **Suite is now 347/0** (was 304/0), local, `https://lylyrose.local`, whole file
+> including the previously-hanging homepage regex. Sections 34–36 were added by the
+> night-palette and announce-bar passes; §36 grew from 9 to 12 assertions on
+> 2026-10-08 when the thumbnail cache purge finally got coverage.
+
+## Open items, re-verified on-site 2026-10-08
+
+Every line below was checked against the running container and the served HTML, not
+against a previous session's notes. Suite at time of writing: **347 passed, 0 failed**.
+
+1. **One uncommitted file, and it is the entire deploy gap.** `docker/diff-host.py`
+   reports **56 identical / 1 differing / 0 absent**, the difference being
+   `wp-content/themes/lylyrose/functions.php` (host 40,375 → local 41,044). `HEAD`'s
+   copy is byte-for-byte 40,375, so **nothing committed is missing from production** —
+   production is exactly at `HEAD`. The gap is purely the uncommitted `+10` that
+   purges both spellings of the WooCommerce size cache key
+   (`size-thumbnail` **and** `size-woocommerce_thumbnail`). Commit it, or discard it;
+   nothing else needs uploading. Re-run `diff-host.py` to confirm the 57/0.
+
+   **Ship it — but it is a latent-fault fix, not a live bug fix, and the urgency
+   framing here was wrong.** Verified by probe on the live host 2026-10-08:
+   `wp_using_ext_object_cache()` is **false** there, so the stale cache entry this
+   purge repairs **cannot survive a request** in production. Production already
+   registers `woocommerce_thumbnail` as `{"width":300,"height":0,"crop":false}` and
+   serves uncropped grids today. The purge's value is that it removes a footgun which
+   only bites a host with a persistent object cache — local dev now, and any live host
+   where Redis is switched on later. Three assertions now guard it (§36), and the
+   registered-size one was proven red, not assumed: with the purge reverted **and** a
+   stale entry planted, `add_image_sizes()` registers 300x300 crop=true and two
+   assertions fail (345/2); restored, the entry self-heals on the next request and
+   the suite returns to 347/0.
+
+2. **Item 2 is unchanged and still human-blocked** — per-host credentials for
+   ZarinPal (real merchant, `sandbox: no`), PWSMS, and WP Mail SMTP. Production SMS
+   is still a no-op, which means **OTP login does not work on `lylyrose.ir` today**;
+   it is the single highest-impact item here, and no code change can unblock it.
+   WP Super Cache is still not enabled.
+
+3. **Genuinely absent, confirmed by absence of any reference in theme or suite:**
+   AVIF, and fuzzy search.** (Fuzzy is not the same as the SKU/code lookup, which
+   ships and works.)
+
+4. **Perfume Finder data is 10 of 165 products.** The other 155 are content
+   authoring, not a code fix — the finder, the note pyramid and the tiers all work.
+   The remaining 155 need note-pyramid and finder-factor data entered by a human.
+   Both live DBs need their own pass and their IDs differ per host.
+
+5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
+   gift card "deferred" pending a latency fix. Measured: 4 published products carry
+   `_asc_is_gift_card` (IDs 2663/2664/2666/2668, SKUs `GC-500K`…`GC-5000K`), the
+   `ASC_Gift_Cards` class loads, and `asc_gift_cards_seeded` is set. The roadmap's
+   claim that `pw-woocommerce-gift-cards` must be reinstalled is obsolete — the
+   feature was rebuilt in-house.
+
+### Not fixed, and not fixable in code
+
+**128 of 164 attachments have no `woocommerce_thumbnail` size and render the full
+original** (1,154 KB where a thumbnail would serve less). Do **not** treat this as a
+bug to regen away — see `docs/PARALLEL_SESSIONS.md` §"RESOLVED 2026-10-08" for the
+measurement. In short: all 29 portrait originals that lack it are 246–258px **wide**,
+WordPress never scales an image up, and so the original is the smallest image that
+exists; the other 99 are 300x300 originals, where serving the original costs nothing.
+A regeneration was proven a no-op on attachment 4683 (backup taken, run, restored and
+verified). Changing the bytes needs wider source photos — a content task.
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >

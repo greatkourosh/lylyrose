@@ -45,9 +45,14 @@ Current-state facts this list is built on:
   templates and footer links; `/contact/` `/about/` `/track-order/` `/faq/` all
   return **200** on `lylyrose.ir`.
 
-**What is genuinely still absent** (verified 2026-09-30): AVIF, fuzzy search
-(ranking only — a SKU/code lookup exists), and per-host credentials for SMS,
+**What is genuinely still absent** (verified 2026-09-30, **re-verified 2026-10-08** —
+still true, by absence of any reference in the theme or the suite): AVIF, fuzzy
+search (ranking only — a SKU/code lookup exists), and per-host credentials for SMS,
 payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
+
+**Perfume Finder content coverage: 10 of 165 products** (re-verified 2026-10-08 —
+`_asc_notes_*` on 10 products, 0 rows of finder-factor data). The remaining 155 are
+content authoring, not code. See `CONTINUATION.md` §"Open items, re-verified".
 
 ---
 
@@ -249,13 +254,14 @@ payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
   `woocommerce_cart_calculate_fees`, persisted as order fee line item (HPOS-safe),
   checkbox on cart + status in checkout, AJAX `asc_gift_wrap_toggle` + no-JS fallback.
   digikala theme v1.9.0 CSS. Tests section 26.
-- Gift card: **deferred**. `pw-woocommerce-gift-cards` is PHP 8.2-compatible
-  (lint OK) and integrates with `ti-woocommerce-wishlist`, but the shop's
-  ~27-39s page latency made the installer's smoke-test false-negative (auto-
-  deactivate). Reinstall + activate once the shop latency is fixed; then
-  Persian email template + `GC-XXXX` codes. Tracked upstream as demand **D2** in
-  `aroma_store/docs/FEATURES_ROADMAP.md` — build it there first, per
-  [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md).
+- Gift card: **✅ DONE — rebuilt in-house, this entry is obsolete (corrected
+  2026-10-08).** It was deferred because `pw-woocommerce-gift-cards` auto-deactivated
+  on a false-negative smoke test. That plugin was never needed: lylyrose-core
+  `ASC_Gift_Cards` ships it natively — on payment it issues a unique `GC-XXXXXXXX`
+  coupon worth the card, stores the code in `_asc_gift_card_code`, and exposes
+  recipient fields. Verified on-site 2026-10-08: 4 published products carry
+  `_asc_is_gift_card` (IDs 2663/2664/2666/2668, SKUs `GC-500K` / `GC-1000K` /
+  `GC-2000K` / `GC-5000K`), the class loads, and `asc_gift_cards_seeded` is set.
 
 ### 19. ✅ DONE — Back-in-stock notifier (موجود شد به من خبر بده) (see DEVELOPMENT_LOG)
 
@@ -298,7 +304,7 @@ the store-specific exceptions, is in
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
    ports 8010 → 8030. The `ASC_` prefix is unchanged.
 5. `bash docker/run-tests.sh` in this repo (canonical host `https://lylyrose.local`) must
-   stay green — currently **304 checks across 34 sections**. Test the canonical host, not
+   stay green — currently **347 checks across 36 sections**. Test the canonical host, not
    the mapped port: a `localhost:8030` request 301-redirects and reports mass failures.
    The host form matters too: `/wp-admin/` authenticates against `SECURE_AUTH_COOKIE` over
    HTTPS but against `AUTH_COOKIE` over plain HTTP, so a run on the LAN port needs both

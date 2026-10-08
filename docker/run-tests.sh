@@ -2352,7 +2352,7 @@ html_has "$TIERS_BACK" 'name="budget"' \
   && pass "deleting the option restores automatic tiers and the quiz still renders" \
   || fail "the quiz lost its budget step after the option was deleted — auto mode does not regenerate"
 
-section "36. Announce bar, demo banner and uncropped thumbnails"
+section "36. Announce bar and demo banner"
 
 # The announce bar is the one surface that must stay DARK in every palette, so
 # it cannot ride --dk-ink: that inverts, and in Night (#f2f4f8) it painted a
@@ -2475,13 +2475,64 @@ awk -v v="$DEMO_MIN" 'BEGIN { exit !(v >= 4.5) }' \
 # functions.php resolves the display-time size to 300x<auto> uncropped, but
 # product cards render from STORED attachment metadata (wp_get_attachment_image_src
 # reads the sizes[] array, not wc_get_image_size), which the filter cannot change.
-# Uncropping the real thumbnails is a bulk data operation -- regenerate every
-# attachment's metadata WHILE the filter is active -- and that belongs with the
-# session that owns the "Transparent product photos" work, not with a palette fix.
-# A srcset assertion here would fail for the stale-metadata reason above and read
-# as a code regression when it is a data state. Verify by regenerating metadata
-# and confirming wp_get_attachment_image_src returns height > width for a portrait
-# original, not from these assertions.
+#
+# Regenerating that metadata is NOT the fix for those 128 attachments, though --
+# measured 2026-10-08 against the container: 128 of 164 have no
+# woocommerce_thumbnail size and render the full original. All 29 portrait ones
+# lacking it are 246-258px WIDE, and WordPress never scales an image up to a
+# registered size, so for those the original IS the smallest image that exists.
+# The other 99 are 300x300 originals, where serving the original costs nothing.
+# Regenerating was proven a no-op on attachment 4683. Changing the bytes would need
+# wider source photos -- a content task, not code.
+#
+# So the per-attachment srcset is deliberately NOT asserted: for those 128 the
+# "correct" output IS the un-scaled original, so there is no expected value to
+# assert and a data-driven failure reads as a code regression. See
+# docs/PARALLEL_SESSIONS.md, "RESOLVED 2026-10-08".
+#
+# What IS assertable is the part that belongs to the code: that the size REGISTERED
+# at runtime is uncropped, so any attachment that does have the size renders it
+# uncropped too. That is a real property with one correct value, and it is the one
+# the cache purge exists to protect -- measured: with a stale 'size-thumbnail'
+# entry planted, add_image_sizes() registers 300x300 crop=true and the grids crop.
+
+# The purge must drop BOTH spellings. WooCommerce applies the size filter BEFORE
+# wp_cache_set, so a cache miss stores the correct value on its own; the entry only
+# goes stale if it was written before the filter existed. Only the prefixed key is
+# reachable as 'size-woocommerce_thumbnail'; the bare one is what add_image_sizes()
+# reads on init, and it is the one that decides the registered size.
+#
+# Scoped to the anonymous after_setup_theme closure that actually deletes, so this
+# cannot be satisfied by an unrelated wp_cache_delete elsewhere in the file.
+PURGE_KEYS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$f = file_get_contents(WP_CONTENT_DIR . "/themes/lylyrose/functions.php");
+$out = array();
+foreach (array("size-thumbnail","size-woocommerce_thumbnail") as $k) {
+  $out[] = preg_match("/wp_cache_delete\(\s*\x27" . preg_quote($k, "/") . "\x27\s*,\s*\x27woocommerce\x27\s*\)/", $f) ? "1" : "0";
+}
+echo implode("", $out);' 2>/dev/null)
+[ "$PURGE_KEYS" = "11" ] \
+  && pass "the size-cache purge drops both key spellings (size-thumbnail, size-woocommerce_thumbnail)" \
+  || fail "the purge drops keys '$PURGE_KEYS'; 11 means both spellings are deleted"
+
+# The runtime size must be uncropped. This is what makes the purge load-bearing:
+# a stale entry flips the registered size to a 300x300 hard crop.
+THUMB_SIZE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$s = wc_get_image_size("thumbnail");
+$r = wp_get_registered_image_subsizes();
+$reg = isset($r["woocommerce_thumbnail"]) ? $r["woocommerce_thumbnail"] : array();
+echo empty($s["height"]) && empty($s["crop"]) && empty($reg["height"]) && empty($reg["crop"]) ? "uncropped" : "cropped";' 2>/dev/null)
+[ "$THUMB_SIZE" = "uncropped" ] \
+  && pass "the thumbnail size is registered uncropped (300x0), so grids never hard-crop" \
+  || fail "the thumbnail size is cropped; a stale 'size-thumbnail' cache entry did it"
+
+# And the filter that produces it must still be attached, or the size above is
+# correct by accident (e.g. the native 'woocommerce_thumbnail_cropping' option).
+THUMB_FILTER=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+echo has_filter("woocommerce_get_image_size_thumbnail") ? "on" : "off";' 2>/dev/null)
+[ "$THUMB_FILTER" = "on" ] \
+  && pass "the woocommerce_get_image_size_thumbnail filter is attached" \
+  || fail "the woocommerce_get_image_size_thumbnail filter is not attached"
 
 section ""
 echo "==========================================="

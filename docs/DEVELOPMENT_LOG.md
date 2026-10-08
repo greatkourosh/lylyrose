@@ -2516,3 +2516,130 @@ detects its own regressions. Production re-audited separately — 16 rows, match
 so none of this is enforced on a normal suite run. The palette values could be asserted
 directly instead — `night` `white=#1b1f28` `body=#d5d9e2` `on-accent=#0d1016` — which
 would be cheap and would not depend on a browser.
+
+---
+
+## 2026-10-08 — Documentation audit: three stale claims corrected, none of them code
+
+A pass over every doc claim about current state, checked against the running container
+and the served HTML rather than against earlier notes. Suite **347/0**. No production
+code changed in this pass; every edit is prose. The three corrections all had the same
+shape — a note that was correct when written, stayed unedited, and started pointing the
+next person at work that cannot succeed.
+
+### The thumbnail OPEN block prescribed a regen that provably does nothing
+
+`PARALLEL_SESSIONS.md` §0e said the attachment metadata was still mixed and that the
+fix was "a bulk data operation — regenerate every attachment's metadata *while the
+filter is active*" (164 attachments, ~4.6s). Two measurements kill it:
+
+- **128 of 164** attachments have no `woocommerce_thumbnail` size at all and render
+  the full original. The block's own spot check said "29 of 58 render portrait, 29
+  still square" — that framing is wrong twice. The 29 portrait originals that lack a
+  size are all **246–258px wide**, and WordPress never scales an image *up* to a
+  registered size, so for those the original **is** the smallest image that exists.
+  A `-300x300` variant is unobtainable without enlarging the bottle.
+- The other 99 are 300x300 originals, where serving the original costs nothing.
+
+Proved the no-op on attachment **4683** (`STIVES-FC-TEATREE-ACNE`, 250x812): dumped the
+metadata to a file first, ran `wp_generate_attachment_metadata()`, and it emitted
+`medium` / `thumbnail` / `woocommerce_gallery_thumbnail` but **not**
+`woocommerce_thumbnail` — `wp_get_attachment_image_src()` returned the same full
+`250x812` original before and after. Restored from the backup and confirmed the sizes
+were back to `(none)`.
+
+The filter itself was never at fault: `wc_get_image_size('woocommerce_thumbnail')`
+resolves to `{"width":300,"height":"","crop":0}` and the registered subsize is `300x0`.
+And the grid emitting `gucci-300x300.webp` is not stale metadata — **gucci's original
+is genuinely 600x600**, so no filter and no regen was ever going to change it.
+
+What would actually move the bytes is re-shooting the 29 narrow products wider, which
+is content work, not a code fix.
+
+### §36 was named for something it never checked
+
+The section header read *"Announce bar, demo banner and uncropped thumbnails"* and all
+nine assertions were bar tokens, demo banner and contrast — no thumbnail assertion
+anywhere, and the old block explains it was left out deliberately to avoid a red suite.
+The explanation was sound **for the per-attachment `srcset`** — that one really is
+unwriteable rather than merely fragile, because for those 128 attachments the
+"correct" output *is* the un-scaled original, so there is no expected value to compare
+against. But it was over-generalised to the whole of §36, and that is what sent the next
+pass hunting a fix that could not exist: the *registered runtime size* is not in that
+class, because `300×0 crop=false` is its single correct value, readable straight from
+`wc_get_image_size()`. Retitled to *"Announce bar and demo banner"*, the note rewritten
+to carry the measurement, and §36 extended by three assertions — see the next entry.
+
+### The palette "Not done" block and the gift-card deferral were both stale
+
+`CONTINUATION.md` described the navy→lylyrose theme merge as pending and listed "no
+human has looked at Night on screen" as current. It merged on 2026-10-05 (`50a8c651`)
+and production has moved on since: `lylyrose.ir/` and `/shop/` both return 200, both
+emit **3 × `data-dk-palette`**, and serve `ver=1.25.0` — matching the tree, so repo and
+production agree on the version. The suite is 347/0, not the 304/0 quoted above it.
+
+The roadmap deferred gift cards pending a latency fix in `pw-woocommerce-gift-cards`,
+which was never needed — `ASC_Gift_Cards` ships it in-house. Four published products
+carry `_asc_is_gift_card` (2663/2664/2666/2668, `GC-500K`…`GC-5000K`).
+
+**One real gap, and it is one file.** `diff-host.py`: 56 identical / **1 differing** /
+0 absent — `functions.php` at host 40,375 vs local 41,044. `HEAD`'s copy is exactly
+40,375, so production is at `HEAD` and nothing committed is missing. The gap is only the
+uncommitted `+10` purging both spellings of the size cache key. Commit or discard it;
+upload nothing else.
+
+### The lesson, which is the eleventh instance now
+
+Each of these was true when written and then silently stopped being true. What made
+this pass cheap was checking claims against the running system rather than the docs —
+`diff-host.py`, `wp_get_attachment_image_src()` on a live attachment, the served HTML.
+A note asserting *absence* ("AVIF is not implemented") stays true unattended, but a
+note asserting *state* ("the merge is pending", "gift cards are deferred") has a shelf
+life, and this repo has now produced eleven of them. When one is found, check whether
+the neighbouring ones moved too: the three here were in three different files.
+
+---
+
+## 2026-10-08 — Uncropped thumbnails: §36 grew three assertions, and the deploy is a latent-fault fix
+
+Suite **347/0** (was 344/0). Code change is the `+10` already in `functions.php` — an
+uncropped-thumbnail filter plus a cache purge — now committed alongside three new
+assertions that actually cover it.
+
+### The assertions are writeable after all; the previous note said otherwise
+
+The block above claimed no thumbnail assertion could be written. That is true only of
+the *per-attachment `srcset`*. The **registered runtime size** has exactly one correct
+value and is a single `wc_get_image_size('thumbnail')` call away, so §36 now asserts:
+
+| # | assertion | why it is safe |
+|---|-----------|----------------|
+| 12 | both key spellings (`size-thumbnail`, `size-woocommerce_thumbnail`) are purged | anchored on the `wp_cache_delete()` calls themselves, not on a loose `after_setup_theme` regex |
+| 13 | the size registers uncropped — `300×0`, `crop=false` — and the registered subsize agrees | the only correct value; a stale cache entry is the one thing that can make it wrong |
+| 14 | the `woocommerce_get_image_size_thumbnail` filter is attached | presence only, no rendering |
+
+### Two-way measurement, and proof the assertions go red
+
+With a stale `size-thumbnail` planted in Redis, `add_image_sizes()` registers
+`300×300 crop=true` **without** the purge and `300×0 crop=false` **with** it — so the
+purge is load-bearing, not cosmetic. Reverting it to `HEAD`'s copy then produces
+`FAIL … drops keys '01'`, and planting the stale entry on top of that gives
+**345 passed / 2 failed**, including `FAIL the thumbnail size is cropped`. Restored:
+**347/0**. Both failures were observed, not inferred.
+
+### The docblock's justification was half wrong
+
+`wc-core-functions.php` applies the filter *before* `wp_cache_set()`, so a cache miss
+self-heals on the next request; the purge is not needed to correct a stale entry. It is
+needed because `add_image_sizes()` reads the cache while registering sizes, i.e. during
+`after_setup_theme` — before the request that would heal it. Worth recording, since the
+original comment sold the filter as doing the work the purge actually does.
+
+### And it is a latent fault on production, not a live bug
+
+`wp_using_ext_object_cache()` is **false** on `lylyrose.ir` — no persistent object cache
+— and production already registers `300×0 crop:false`. So this ships no visible change to
+the live site. It is load-bearing on local dev (Redis attached) and on any host that
+later enables one. `CONTINUATION.md` framed it as urgent; that framing was wrong, and
+deploying it under that description would have made the next reader hunt for a bug that
+was never there.

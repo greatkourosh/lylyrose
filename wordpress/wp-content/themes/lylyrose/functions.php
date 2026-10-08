@@ -585,8 +585,18 @@ add_filter( 'woocommerce_get_image_size_thumbnail', function( $size ) {
 /**
  * wc_get_image_size() memoises into the WooCommerce cache group and returns
  * before the filter above runs, so the stale cropped entry must be dropped.
+ *
+ * Both spellings of the key need dropping, and which one matters depends on the
+ * caller: the key is built from the name as passed in, so
+ * wc_get_image_size( 'woocommerce_thumbnail' ) stores 'size-woocommerce_thumbnail'
+ * while add_image_sizes() asks for wc_get_image_size( 'thumbnail' ) and stores
+ * 'size-thumbnail'. The second one is what registers the size the <img> tags are
+ * actually built from, so purging only the prefixed name leaves the grids cropped.
+ * Both entries predate this filter and live in the persistent object cache, which
+ * survives deploys, so purging them is the only repair.
  */
 add_action( 'after_setup_theme', function() {
+    wp_cache_delete( 'size-thumbnail', 'woocommerce' );
     wp_cache_delete( 'size-woocommerce_thumbnail', 'woocommerce' );
 }, 5 );
 
