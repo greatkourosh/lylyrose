@@ -2644,3 +2644,48 @@ the live site. It is load-bearing on local dev (Redis attached) and on any host 
 later enables one. `CONTINUATION.md` framed it as urgent; that framing was wrong, and
 deploying it under that description would have made the next reader hunt for a bug that
 was never there.
+
+---
+
+## 2026-10-08 — The "site is down" warning was four days stale: a probe mu-plugin of our own making
+
+Suite **347/0**. No code change; one stale-warning correction and one deletion.
+
+`CONTINUATION.md` still carried a loud 2026-10-04 warning that the local site answered
+500 on every front-end path and that **the suite therefore could not be trusted**
+(it read 290/26). Both halves were false. The site answers **200** on `/` and `/shop/`,
+and the suite has been green throughout.
+
+### The bisect exonerated the theme correctly, and was still looking in the wrong place
+
+`docker/bisect-500.sh` installed each theme revision and asked the site: 500 at
+`07b28771`, `2a9c2ee2`, `5bbe33c5` — all predating the palette work, so no theme
+revision was guilty. That reasoning was sound and the theme really was innocent. The
+fault was in `wp-content/mu-plugins/asc-tracer.php`, a diagnostic file **this repo
+wrote**, whose line 61 stringified a Closure:
+
+```
+PHP Fatal error: Uncaught Error: Object of class Closure could not be converted
+to string in /var/www/html/wp-content/mu-plugins/asc-tracer.php:61
+Stack trace: #0 wp-includes/class-wp-hook.php(353): {closure}('')
+```
+
+`wp-content/error.log` is the only surviving record, and it is untracked — one of the
+54 files this repo has been carrying around. Two earlier attempts to find the cause
+failed for reasons that are now obvious in that log's own directory: `.err-visible.txt`
+records `ini: (none)`, so `php -i` never located a php.ini and nothing was changed, and
+`.after-restart.txt` still reads `home=500 shop=500`, i.e. the last person to look at
+this never re-checked after their restart.
+
+### mu-plugins are the one place a probe is a permanent change
+
+They auto-load on every request and cannot be deactivated, so a probe left behind is
+indistinguishable from a site-wide outage — which is why a stale tracer made three
+unrelated commits look guilty. And every check this project owns passes it: `php -l`
+accepts it, `deploy-targeted.py` only ships what it is told to, `diff-host.py` only
+walks first-party paths. The whole `mu-plugins/` directory is now gone from the tree and
+the container, and the empty 0-byte `asc-reveal.php` that outlived it went with it.
+
+**The 26 failures were all downstream of that one status**, so there was never a second
+fault hiding behind it — worth stating plainly, because "the suite is untrustworthy"
+invites re-auditing everything else.

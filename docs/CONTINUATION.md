@@ -180,18 +180,35 @@ verified). Changing the bytes needs wider source photos — a content task.
 
 > Handoff point: read this, then `git log --oneline -10` and `git status` to pick up.
 >
-> **⚠️ LOCAL SITE IS ANSWERING 500 AND IT IS NOT ANYONE'S UNCOMMITTED WORK
-> (2026-10-04, ~17:00 UTC).** Every front-end path returns **HTTP 500 with a
-> complete, correct 70 KB page** — the body renders in full and is right, the
-> status code is wrong. `docker/bisect-500.sh` installs each theme revision into
-> the live container and asks the site itself: **500 at `07b28771`, at
-> `2a9c2ee2`, and at `5bbe33c5`** — i.e. before the palette work existed. The
-> database answers, every theme file passes `php -l`, `front-page.php` exists, and
-> there is no `debug.log`. **Production is unaffected**: `/` `/shop/`
-> `/incredible-offers/` `/perfume-finder/` `/cart/` all **200** on `lylyrose.ir`.
-> Whoever finds this, the suite cannot be trusted until it is found: it reads
-> **290/26**, and the 26 include `homepage loads (500)` plus a cascade of
-> cart/FBT/Instagram/footer failures that are all downstream of one bad status.
+> **✅ RESOLVED 2026-10-08 — the 500 was a probe mu-plugin of our own making, not
+> the theme. The suite is trustworthy; it reads 347/0.** The bisect that exonerated
+> the theme was right to exonerate it, but it was looking in the wrong place: the
+> fatal was in `wp-content/mu-plugins/asc-tracer.php`, a **diagnostic file this repo
+> wrote**, whose line 61 stringified a Closure. `wp-content/error.log` still holds
+> the only surviving record:
+>
+> ```
+> PHP Fatal error: Uncaught Error: Object of class Closure could not be converted
+> to string in /var/www/html/wp-content/mu-plugins/asc-tracer.php:61
+> Stack trace: #0 wp-includes/class-wp-hook.php(353): {closure}('')
+> ```
+>
+> mu-plugins auto-load on **every** request and are not skippable by deactivation,
+> which is exactly why a probe left behind looks like a site-wide outage — and why
+> `docker/bisect-500.sh` kept finding 500 at commits that predate the probe. The
+> file no longer exists (`find` returns 0; the whole `mu-plugins/` directory is gone
+> from both the tree and the container), and `/` and `/shop/` answer **200** locally.
+> The 26 failures were all downstream of that one status, so there was never a
+> second fault hiding behind it.
+>
+> **The lesson generalises past this file: an mu-plugin left in place is invisible
+> to every check this project has.** `php -l` passes it, `deploy-targeted.py` only
+> ships what it is told, and `diff-host.py` only compares first-party files it walks.
+> Anything placed in `mu-plugins/` is a live, permanent change to every request and
+> must be deleted the moment the probe is finished, not left for the next session.
+>
+> **Production was never affected**: `/` `/shop/` `/incredible-offers/`
+> `/perfume-finder/` `/cart/` all **200** on `lylyrose.ir`, then and now.
 >
 > **Two traps cost hours here; both are the project's old lesson wearing a new
 > hat.** (1) *A CLI probe cannot see an HTTP status.* `wp_enqueue_scripts` never
