@@ -33,7 +33,16 @@ verified** (UpdraftPlus daily schedule set 2026-09-27, both backup cron events
 registered and recurring, and the site's cron loopback confirmed working — see
 1c below). **The first real fire also happened: on 2026-09-28 04:15 UTC it
 produced a complete 115.2 MB set**, verified in the log, by checksum, and against
-the live directories. Only 1a-ii (UpdraftPlus host-local, optional) remains,
+the live directories.
+
+**Re-pulled 2026-10-08 — the newest off-host copy is now current again.** Run
+`16f610036650` (2026-10-08 03:44 UTC) is pulled to `backups/updraft-2026-10-08-0344/`,
+7/7 sizes equal to the host, archives pass `gzip -t`/`unzip -t`, and its archived
+`style.css` reads `Version: 1.25.0` — the version production serves — so it
+captures today's deployed state rather than a stale one. **Eight days and two
+sets had gone unpulled** before this was caught; nothing re-checks the host
+automatically, so list it (`mlsd`, not `nlst`) before trusting any claim that the
+off-host copy is current. Only 1a-ii (UpdraftPlus host-local, optional) remains,
 and it is optional.
 
 **1c's original cPanel route does not exist on this host** — no Backup schedule
@@ -241,7 +250,33 @@ together in one dated directory.
 > archive was 1a. It is now the **newest data copy that exists anywhere** — the
 > 2026-09-27 account archive predates both the 09-28 and 09-29 Updraft sets and
 > every deploy since. Treat the daily Updraft pull as a real backup obligation,
-> not a bonus. This is the exact command used on 2026-09-29; it pulls **every
+> not a bonus.
+>
+> **Re-pulled 2026-10-08 — two sets had gone unpulled, and the newest is current.**
+> Listing the host with `mlsd` (not `nlst`) found **four** run ids, not two: the
+> two already pulled, plus `1da172bdb9e6` (**2026-10-07 02:06 UTC**) and
+> `16f610036650` (**2026-10-08 03:44 UTC**). The gap was eight days — the
+> previous entry's "cycle has rescheduled" note was written when the newest set was
+> same-day, and nothing re-checked afterwards. **This is the fifth time a set has
+> fired without anyone pulling it**, so the obligation is now stated as a check to
+> perform, not a one-time command: *list the host before believing you are
+> current.*
+>
+> Pulled `16f610036650` to `backups/updraft-2026-10-08-0344/` — 7/7 sizes equal to
+> the host's FTP `SIZE`. `gzip -t` and `unzip -t` pass on `db.gz`, `themes.zip`
+> and `uploads.zip`; the DB header names `https://lylyrose.ir`, WP **7.1.3**,
+> 101 `CREATE TABLE`; the log ends "The backup succeeded and is now complete" with
+> **0** error/warning/fatal matches.
+>
+> **What state it captures — checked, not assumed.** The archived
+> `themes/lylyrose/style.css` reads **`Version: 1.25.0`**, which equals the repo
+> working tree and the version production serves. So this set captures the
+> **current** deployed state, including the 2026-10-06 night-palette pass and the
+> `911fa1ad` deploy. The content check is the load-bearing part, not the version
+> header: a backup taken before the last deploy is a valid backup of an *older*
+> state, and filing it as current is how a rollback point goes stale unnoticed.
+>
+> **This is the exact command used on 2026-09-29**; it pulls **every
 > part of one run id** into one dated directory and fails loudly on any size
 > mismatch:
 

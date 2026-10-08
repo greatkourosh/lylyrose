@@ -286,6 +286,31 @@ verified). Changing the bytes needs wider source photos — a content task.
 > human-blocked — four of its five sub-items need credentials that cannot be
 > minted from this side, and the fifth (Wordfence) is a judgement call.
 >
+> **✅ The off-host backup was 8 days and two sets stale — re-pulled 2026-10-08.**
+> This was the last technically-actionable item in this file, and every previous
+> entry described it as current. `mlsd` on the host found **four** run ids, not
+> the two recorded: `1da172bdb9e6` (**2026-10-07 02:06 UTC**) and `16f610036650`
+> (**2026-10-08 03:44 UTC**) had both fired and neither had been pulled. Pulled
+> `16f610036650` to `backups/updraft-2026-10-08-0344/` — 7/7 sizes equal to the
+> host's FTP `SIZE`, `gzip -t` and `unzip -t` pass, the DB header names
+> `https://lylyrose.ir` on WP 7.1.3 with **101** `CREATE TABLE`, and the log ends
+> "The backup succeeded and is now complete" with **0** error/warning/fatal hits.
+>
+> **It captures current state, and that was checked rather than assumed.** The
+> archived `themes/lylyrose/style.css` reads `Version: 1.25.0` — equal to the repo
+> tree and to the version production serves — so it holds the night-palette pass
+> and the `911fa1ad` deploy. A backup that ran *before* the last deploy is a
+> perfectly valid backup of an *older* state; filing it as "the current one" is
+> how a rollback point goes stale without anyone noticing.
+>
+> **This is the fifth recorded occasion of a set firing unpulled.** The schedule
+> is healthy and always has been — nothing is broken host-side. What is missing is
+> a *check*: nothing re-lists the directory after a session ends, so the gap only
+> closes when someone happens to look. **List the host before believing the
+> off-host copy is current**, and `mlsd` rather than `nlst`, which is
+> server-filterable. The daily cadence means this recurs every 8–9 days of quiet
+> work. Full command and SHA1s in `PRODUCTION_UPDATE_RUNBOOK.md` §1b.
+>
 > **`FEATURES_ROADMAP.md`'s "current-state facts" were all false and are now
 > corrected (2026-09-30).** That block was written 2026-08-29 from the
 > pre-feature stack and never revisited, so it still claimed no image
