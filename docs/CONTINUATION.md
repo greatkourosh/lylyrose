@@ -286,11 +286,11 @@ verified). Changing the bytes needs wider source photos — a content task.
 > human-blocked — four of its five sub-items need credentials that cannot be
 > minted from this side, and the fifth (Wordfence) is a judgement call.
 >
-> **✅ The off-host backup was 8 days and two sets stale — re-pulled 2026-10-08.**
+> **✅ The off-host backup was 8 days and one set stale — re-pulled 2026-10-08.**
 > This was the last technically-actionable item in this file, and every previous
-> entry described it as current. `mlsd` on the host found **four** run ids, not
-> the two recorded: `1da172bdb9e6` (**2026-10-07 02:06 UTC**) and `16f610036650`
-> (**2026-10-08 03:44 UTC**) had both fired and neither had been pulled. Pulled
+> entry described it as current. The host holds **two** runs: `16f610036650`
+> (**2026-10-08 03:44 UTC**) and `1da172bdb9e6` (**2026-10-07 02:06 UTC**), and
+> neither had been pulled — the newest local copy was the 09-30 set. Pulled
 > `16f610036650` to `backups/updraft-2026-10-08-0344/` — 7/7 sizes equal to the
 > host's FTP `SIZE`, `gzip -t` and `unzip -t` pass, the DB header names
 > `https://lylyrose.ir` on WP 7.1.3 with **101** `CREATE TABLE`, and the log ends
@@ -303,13 +303,23 @@ verified). Changing the bytes needs wider source photos — a content task.
 > perfectly valid backup of an *older* state; filing it as "the current one" is
 > how a rollback point goes stale without anyone noticing.
 >
-> **This is the fifth recorded occasion of a set firing unpulled.** The schedule
-> is healthy and always has been — nothing is broken host-side. What is missing is
-> a *check*: nothing re-lists the directory after a session ends, so the gap only
-> closes when someone happens to look. **List the host before believing the
-> off-host copy is current**, and `mlsd` rather than `nlst`, which is
-> server-filterable. The daily cadence means this recurs every 8–9 days of quiet
-> work. Full command and SHA1s in `PRODUCTION_UPDATE_RUNBOOK.md` §1b.
+> **The 09-30 sets are gone from the host, not unpulled** — UpdraftPlus prunes to
+> a retention count, so the 09-29 and 09-30 runs were pruned before this was
+> noticed. They were already pulled (`backups/updraft-2026-09-29-0059` and
+> `-2026-09-30-0452`), so no state was lost. The 10-07 run is the only host-side
+> one still unpulled, and it is bracketed by 09-30 and 10-08 locally, so it adds
+> nothing worth another 115 MB.
+>
+> **The schedule is healthy; what failed was the *check*.** Nothing re-lists the
+> host after a session ends, so this recurs every 8–9 days of quiet work — and has
+> now happened five times. **`docker/backup-check.py` closes it**: read-only, exits
+> 1 when the newest host run is not pulled complete, and prints which run to pull.
+> Run it weekly.
+>
+> **Count runs by id, never by mtime date-group.** An early listing here bucketed
+> files by their mtime prefix and reported **four** runs; two of those buckets were
+> `.htaccess`, `index.html`, `web.config` and the `..` entry. `backup-check.py`
+> skips those and groups on the id embedded in the filename.
 >
 > **`FEATURES_ROADMAP.md`'s "current-state facts" were all false and are now
 > corrected (2026-09-30).** That block was written 2026-08-29 from the

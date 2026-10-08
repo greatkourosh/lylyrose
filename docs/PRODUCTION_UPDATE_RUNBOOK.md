@@ -35,15 +35,15 @@ registered and recurring, and the site's cron loopback confirmed working — see
 produced a complete 115.2 MB set**, verified in the log, by checksum, and against
 the live directories.
 
-**Re-pulled 2026-10-08 — the newest off-host copy is now current again.** Run
+**Re-pulled 2026-10-08 — the newest off-host copy is current again.** Run
 `16f610036650` (2026-10-08 03:44 UTC) is pulled to `backups/updraft-2026-10-08-0344/`,
 7/7 sizes equal to the host, archives pass `gzip -t`/`unzip -t`, and its archived
 `style.css` reads `Version: 1.25.0` — the version production serves — so it
-captures today's deployed state rather than a stale one. **Eight days and two
-sets had gone unpulled** before this was caught; nothing re-checks the host
-automatically, so list it (`mlsd`, not `nlst`) before trusting any claim that the
-off-host copy is current. Only 1a-ii (UpdraftPlus host-local, optional) remains,
-and it is optional.
+captures today's deployed state rather than a stale one. **Eight days and one run
+had gone unpulled** before this was caught. Nothing re-checks the host
+automatically, so run **`docker/backup-check.py`** (read-only, non-zero exit when
+stale) before trusting any claim that the off-host copy is current. Only 1a-ii
+(UpdraftPlus host-local, optional) remains, and it is optional.
 
 **1c's original cPanel route does not exist on this host** — no Backup schedule
 control, no Backup Wizard, and the `Cron` UAPI module is not installed at all.
@@ -161,6 +161,22 @@ size and a date, not a 0-byte entry or an error the UI scrolls past. On the host
 
 ### Do this — 1b. Pull a copy off the host (free off-site)
 
+**First, check whether you need to — `docker/backup-check.py`.** Read-only: it
+lists the host and the local backup dirs, pulls nothing, and exits non-zero when
+the newest host run is not pulled complete.
+
+```bash
+python3 docker/backup-check.py    # exit 0 = current, 1 = stale (it names the run)
+```
+
+Run it weekly. It exists because the schedule is healthy and has always been,
+while the *check* was missing — five occasions a run fired and nobody noticed,
+with the gap reaching eight days before anyone looked.
+
+The pull stays a **manual, deliberate** step below: it moves real customer and
+order data onto this machine, which is not something an unattended job should do
+on its own.
+
 The host is reachable over **passive FTP** — the same channel the 2026-09-24
 deploy used, confirmed reachable from this machine. Fetch the account archive
 from 1a so the rollback point lives somewhere other than the web host. This is a
@@ -252,15 +268,24 @@ together in one dated directory.
 > every deploy since. Treat the daily Updraft pull as a real backup obligation,
 > not a bonus.
 >
-> **Re-pulled 2026-10-08 — two sets had gone unpulled, and the newest is current.**
-> Listing the host with `mlsd` (not `nlst`) found **four** run ids, not two: the
-> two already pulled, plus `1da172bdb9e6` (**2026-10-07 02:06 UTC**) and
-> `16f610036650` (**2026-10-08 03:44 UTC**). The gap was eight days — the
-> previous entry's "cycle has rescheduled" note was written when the newest set was
-> same-day, and nothing re-checked afterwards. **This is the fifth time a set has
-> fired without anyone pulling it**, so the obligation is now stated as a check to
-> perform, not a one-time command: *list the host before believing you are
-> current.*
+> **Re-pulled 2026-10-08 — a run had gone unpulled, and the newest is current.**
+> The host held **two** runs, `16f610036650` (**2026-10-08 03:44 UTC**) and
+> `1da172bdb9e6` (**2026-10-07 02:06 UTC**), and the newest local copy was the
+> 09-30 set — an **eight-day** gap. The previous entry's "cycle has rescheduled"
+> note was written when the newest set was same-day, and nothing re-checked
+> afterwards.
+>
+> **This is the fifth time a set has fired without anyone pulling it**, so §1b now
+> has a *check* alongside the command: **`docker/backup-check.py`**, read-only,
+> exits 1 when the newest host run is not pulled complete. Run it weekly.
+>
+> **Count runs by the id in the filename, never by an mtime date-group.** A
+> listing done here grouped files by their mtime prefix and reported **four**
+> runs; two buckets were `.htaccess`, `index.html`, `web.config` and the `..`
+> entry. Also note UpdraftPlus **prunes** to its retention count, so older runs
+> disappear from the host — the 09-29 and 09-30 sets are gone, though both were
+> already pulled, so nothing was lost. Pruning is the reason a check must ask the
+> host what it has *now*, not what it had last time.
 >
 > Pulled `16f610036650` to `backups/updraft-2026-10-08-0344/` — 7/7 sizes equal to
 > the host's FTP `SIZE`. `gzip -t` and `unzip -t` pass on `db.gz`, `themes.zip`
