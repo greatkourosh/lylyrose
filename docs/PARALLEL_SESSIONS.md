@@ -154,6 +154,12 @@ gets enabled later). Nothing on the live site is broken today by its absence. Th
 distinction was missing from the "commit it or discard it" framing and should travel
 with the commit.
 
+**Shipped 2026-10-08** as `911fa1ad`, uploaded via `deploy-targeted.py`, and
+`diff-host.py` now reads **57 identical / 0 differing / 0 absent**. Post-deploy checks:
+`/`, `/shop/` and `/product-category/perfume/` all 200, three palettes still emitted,
+and the `300×300` in `/shop/` HTML traced back to a 600×600 original — a correct
+downscale, not a crop.
+
 ---
 
 ## 0d. Night palette + price decimals session — shipped to production (2026-10-06)

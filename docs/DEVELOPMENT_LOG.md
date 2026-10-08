@@ -2584,9 +2584,10 @@ carry `_asc_is_gift_card` (2663/2664/2666/2668, `GC-500K`…`GC-5000K`).
 
 **One real gap, and it is one file.** `diff-host.py`: 56 identical / **1 differing** /
 0 absent — `functions.php` at host 40,375 vs local 41,044. `HEAD`'s copy is exactly
-40,375, so production is at `HEAD` and nothing committed is missing. The gap is only the
-uncommitted `+10` purging both spellings of the size cache key. Commit or discard it;
-upload nothing else.
+40,375, so production was at `HEAD` and nothing committed was missing. The gap was only
+the uncommitted `+10` purging both spellings of the size cache key. **Closed later the
+same day**: committed as `911fa1ad` and uploaded, and `diff-host.py` now reads
+**57 identical / 0 differing / 0 absent**.
 
 ### The lesson, which is the eleventh instance now
 

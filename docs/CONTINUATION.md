@@ -125,27 +125,25 @@
 Every line below was checked against the running container and the served HTML, not
 against a previous session's notes. Suite at time of writing: **347 passed, 0 failed**.
 
-1. **One uncommitted file, and it is the entire deploy gap.** `docker/diff-host.py`
-   reports **56 identical / 1 differing / 0 absent**, the difference being
-   `wp-content/themes/lylyrose/functions.php` (host 40,375 → local 41,044). `HEAD`'s
-   copy is byte-for-byte 40,375, so **nothing committed is missing from production** —
-   production is exactly at `HEAD`. The gap is purely the uncommitted `+10` that
-   purges both spellings of the WooCommerce size cache key
-   (`size-thumbnail` **and** `size-woocommerce_thumbnail`). Commit it, or discard it;
-   nothing else needs uploading. Re-run `diff-host.py` to confirm the 57/0.
+1. **✅ RESOLVED 2026-10-08 — the deploy gap is closed. Committed `911fa1ad`,
+   uploaded, `diff-host.py` reads 57/0.** `wp-content/themes/lylyrose/functions.php`
+   was the entire gap (host 40,375 → local 41,044); it went up via
+   `deploy-targeted.py`, which size-verified it at 41,044 B, and production now agrees
+   with the tree on all 57 first-party files.
 
-   **Ship it — but it is a latent-fault fix, not a live bug fix, and the urgency
-   framing here was wrong.** Verified by probe on the live host 2026-10-08:
+   **Shipped as a latent-fault fix, not a live bug fix — the earlier urgency framing
+   here was wrong.** Verified by probe on the live host 2026-10-08:
    `wp_using_ext_object_cache()` is **false** there, so the stale cache entry this
    purge repairs **cannot survive a request** in production. Production already
    registers `woocommerce_thumbnail` as `{"width":300,"height":0,"crop":false}` and
-   serves uncropped grids today. The purge's value is that it removes a footgun which
-   only bites a host with a persistent object cache — local dev now, and any live host
-   where Redis is switched on later. Three assertions now guard it (§36), and the
-   registered-size one was proven red, not assumed: with the purge reverted **and** a
-   stale entry planted, `add_image_sizes()` registers 300x300 crop=true and two
-   assertions fail (345/2); restored, the entry self-heals on the next request and
-   the suite returns to 347/0.
+   serves uncropped grids today — confirmed again after the deploy, where the
+   `300×300` in `/shop/` HTML is a correct downscale of a 600×600 original, not a crop.
+   The purge's value is that it removes a footgun which only bites a host with a
+   persistent object cache — local dev now, and any live host where Redis is switched
+   on later. Three assertions now guard it (§36), and the registered-size one was
+   proven red, not assumed: with the purge reverted **and** a stale entry planted,
+   `add_image_sizes()` registers 300x300 crop=true and two assertions fail (345/2);
+   restored, the entry self-heals on the next request and the suite returns to 347/0.
 
 2. **Item 2 is unchanged and still human-blocked** — per-host credentials for
    ZarinPal (real merchant, `sandbox: no`), PWSMS, and WP Mail SMTP. Production SMS
