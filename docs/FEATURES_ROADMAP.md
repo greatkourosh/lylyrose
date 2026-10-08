@@ -304,7 +304,11 @@ the store-specific exceptions, is in
    `aroma-store-core` → `lylyrose-core`, `digikala` → `lylyrose`, آرومالند → لیلی رز,
    ports 8010 → 8030. The `ASC_` prefix is unchanged.
 5. `bash docker/run-tests.sh` in this repo (canonical host `https://lylyrose.local`) must
-   stay green — currently **347 checks across 36 sections**. Test the canonical host, not
+   stay green — currently **347 checks across 35 sections**. (Numbered 1–32 and
+   34–36: there is no §33, and never was — `git log -S 'section "33'` returns
+   nothing. A pre-existing numbering gap, not a skipped section. Renumbering it
+   away would churn every cross-reference in the docs for no coverage gained.)
+   Test the canonical host, not
    the mapped port: a `localhost:8030` request 301-redirects and reports mass failures.
    The host form matters too: `/wp-admin/` authenticates against `SECURE_AUTH_COOKIE` over
    HTTPS but against `AUTH_COOKIE` over plain HTTP, so a run on the LAN port needs both

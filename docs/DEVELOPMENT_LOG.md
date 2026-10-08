@@ -2689,3 +2689,33 @@ the container, and the empty 0-byte `asc-reveal.php` that outlived it went with 
 **The 26 failures were all downstream of that one status**, so there was never a second
 fault hiding behind it — worth stating plainly, because "the suite is untrustworthy"
 invites re-auditing everything else.
+
+---
+
+## 2026-10-08 — Full-suite verification run: 347/0, and the section count was off by one in our favour
+
+Ran `docker/run-tests.sh` end to end and captured the whole output rather than trusting
+the trailer: **347 PASS lines, 0 FAIL/ERROR/Fatal, exit 0**, `ALL TESTS PASSED`.
+
+Worth recording *how* that was checked, because the project's own history has a run
+that hung on the homepage grid regex and printed no FAILs — which reads identically to
+green. Three things distinguish a real run from that:
+
+- **exit code**, not just the summary line;
+- **PASS lines counted** (347) against the summary's own number, so a section that died
+  mid-way could not quietly stop contributing;
+- **section headers counted against the file**, which is where this run found its only
+  discrepancy.
+
+### That last check turned up a docs error of our own making
+
+The file has 36 `section` calls but only **35** numbered ones — the 36th is the
+`section ""` trailer. And the numbered ones run **1–32 and 34–36**: there is no §33,
+and `git log --all -S 'section "33'` returns nothing, so it never existed. Not a skipped
+section, a pre-existing numbering gap.
+
+`FEATURES_ROADMAP.md` claimed "347 checks across **36** sections" — a figure I had
+written earlier today by counting `^section ` in the file, which included the empty
+trailer. Corrected to 35, with the gap noted. Deliberately **not** renumbered: closing
+the gap would renumber 34–36 and touch every cross-reference in four documents, for no
+change in coverage. The numbering is cosmetic; the count is not.
