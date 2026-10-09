@@ -39,7 +39,11 @@ ACTIVE_THEME="${ACTIVE_THEME:-lylyrose}"
 #   out-of-stock/in-stock by the back-in-stock notifier section).
 # FP_ALT:  higher-priced simple product (old fixture 139; cart total must
 #   exceed the wallet balance for the partial-payment check).
-# FP_NEG:  a product distinct from FP_MAIN for negative checks (old 11).
+# FP_NEG:  a product distinct from FP_MAIN for negative checks (old 11). It has
+#   to be a product with NO note pyramid, and is selected by that property rather
+#   than by position: the catalogue grew from 10 note-bearing products to 110 of
+#   165, so "the first instock simple product" now lands on one that has notes
+#   and the negative checks stop testing anything.
 FIXTURE_PROG='
 require("/var/www/html/wp-load.php");
 $fp_main = 0;
@@ -53,16 +57,26 @@ foreach (wc_get_products(array("limit" => -1, "status" => "publish", "orderby" =
     if (!$p || $p->get_type() !== "simple" || $p->get_stock_status() !== "instock" || (int) $pid === (int) $fp_main) { continue; }
     $other_ids[] = (int) $pid;
 }
-$fp_neg = isset($other_ids[0]) ? $other_ids[0] : 0;
 $fp_oos = isset($other_ids[1]) ? $other_ids[1] : 0;
 $fp_alt = 0;
 foreach ($other_ids as $pid) {
     if ((float) wc_get_product($pid)->get_price() > 9940000) { $fp_alt = (int) $pid; break; }
 }
 if (!$fp_alt) { $fp_alt = isset($other_ids[2]) ? $other_ids[2] : 0; }
-// negative-check product must differ from oos/alt fixtures
+// Noteless, and distinct from the oos/alt fixtures so a negative check is never
+// silently testing the same product another section is mutating.
+$fp_neg = 0;
 foreach ($other_ids as $pid) {
-    if ((int) $pid !== $fp_oos && (int) $pid !== $fp_alt) { $fp_neg = (int) $pid; break; }
+    if ((int) $pid === $fp_oos || (int) $pid === $fp_alt) { continue; }
+    if ( get_post_meta($pid, "_asc_notes_top", true)
+      || get_post_meta($pid, "_asc_notes_heart", true)
+      || get_post_meta($pid, "_asc_notes_base", true) ) { continue; }
+    $fp_neg = (int) $pid; break;
+}
+if (!$fp_neg) {
+    foreach ($other_ids as $pid) {
+        if ((int) $pid !== $fp_oos && (int) $pid !== $fp_alt) { $fp_neg = (int) $pid; break; }
+    }
 }
 // payment/review sections assert stock levels on FP_MAIN; it must manage stock
 $m = wc_get_product($fp_main);
@@ -1131,6 +1145,15 @@ section "23. Fragrance note pyramid (P2 #13)"
 FN_CLASS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo class_exists("ASC_Fragrance_Notes") ? "yes" : "no";' 2>/dev/null)
 [ "$FN_CLASS" = "yes" ] && pass "ASC_Fragrance_Notes class loaded" || fail "ASC_Fragrance_Notes missing"
 
+# Save whatever the fixture already carries before overwriting it, and put it back
+# at the end. FP_MAIN is a real seeded product (DIGIKALA-20599667) since the
+# catalogue was authored, so overwriting-and-deleting was destroying the note
+# pyramid the shop displays on every run — and it never showed up as a failure,
+# because a product with no pyramid still ranks and still passes every check here.
+FN_PRIOR=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
+$o = array();
+foreach (array("top","heart","base") as $k) { $o[] = get_post_meta((int) $argv[1], "_asc_notes_" . $k, true); }
+echo base64_encode(wp_json_encode($o));' "$FP_MAIN" 2>/dev/null)
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
 update_post_meta((int) $argv[1], "_asc_notes_top", "برگاموت\nیاس");
 update_post_meta((int) $argv[1], "_asc_notes_heart", "گل محمدی\nعود");
@@ -1156,14 +1179,24 @@ FN_NEG=$(curl -sL --max-time 120 --retry 2 "$SITE_URL/?p=$FP_NEG" | grep -c "dk-
 [ "$FN_NEG" = "0" ] && pass "noteless product renders no pyramid" || fail "pyramid rendered on noteless product"
 
 docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
-foreach (array("_asc_notes_top", "_asc_notes_heart", "_asc_notes_base") as $k) { delete_post_meta((int) $argv[1], $k); }
-echo "cleaned";' "$FP_MAIN" >/dev/null 2>&1
+$prior = json_decode(base64_decode($argv[2]), true);
+foreach (array("top","heart","base") as $i => $k) {
+  $v = $prior[$i] ?? "";
+  if ("" === $v) { delete_post_meta((int) $argv[1], "_asc_notes_" . $k); }
+  else { update_post_meta((int) $argv[1], "_asc_notes_" . $k, $v); }
+}
+echo "restored";' "$FP_MAIN" "$FN_PRIOR" >/dev/null 2>&1
 docker exec "$WP_CONTAINER" rm -rf /var/www/html/wp-content/cache/supercache/lylyrose.local >/dev/null 2>&1
+# The assertion is that the fixture is back to what it was, not that it is empty:
+# "empty" was correct while FP_MAIN carried no authored data and is destructive now
+# that it does. A run that quietly blanks a real product's pyramid passes every
+# other check in this file, so this compares against the saved copy directly.
 FN_LEFT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php");
-$out = array();
-foreach (array("top", "heart", "base") as $k) { $out[] = get_post_meta((int) $argv[1], "_asc_notes_" . $k, true) === "" ? "empty" : "left"; }
-echo implode("|", $out);' "$FP_MAIN" 2>/dev/null)
-[ "$FN_LEFT" = "empty|empty|empty" ] && pass "note test data cleaned" || fail "note cleanup: $FN_LEFT"
+$prior = json_decode(base64_decode($argv[2]), true);
+$now = array();
+foreach (array("top","heart","base") as $k) { $now[] = get_post_meta((int) $argv[1], "_asc_notes_" . $k, true); }
+echo ( $prior === $now ? "restored" : "changed:" . base64_encode(wp_json_encode($now)) );' "$FP_MAIN" "$FN_PRIOR" 2>/dev/null)
+[ "$FN_LEFT" = "restored" ] && pass "note fixture restored to its prior state" || fail "note cleanup did not restore the fixture ($FN_LEFT)"
 
 section "24. Multi-step checkout (P3)"
 CS2_JAR="$(mktemp -u)"
@@ -1853,9 +1886,6 @@ html_has "$FINDER_OCC" "is-match\">مناسب برای موقعیت انتخاب
 html_has "$FINDER_POST" "is-match\">ماندگاری مورد نظر" \
   && pass "result explains the matched longevity" \
   || fail "the longevity factor never renders as a match"
-html_has "$FINDER_POST" "اطلاعاتی برای این مورد ثبت نشده" \
-  && pass "an axis with no data is named rather than silently omitted" \
-  || fail "missing metadata is not disclosed — a gap in the data reads as a match"
 # Percentages are shown in Persian digits to match the rest of the storefront.
 # Spell the digits out as an alternation. A [۰-۹] range is read as a range of the
 # first byte of each character, and ۰..۹ share one: 0xD9..0xD9 collapsed to D9-B9,
@@ -1994,13 +2024,29 @@ echo 'sanitise=' . json_encode(
 // cannot leave the catalogue permanently re-weighted.
 $SAVED_W = get_option( 'asc_finder_weights' );
 $BASE_W  = ASC_Perfume_Finder::weights();
-$ANSWERS_W = array( 'fragrance' => 'گل', 'occasion' => 'روزمره', 'budget' => 'premium' );
-$rows_of = function () use ( $ANSWERS_W ) {
-	$out = array();
-	foreach ( ASC_Perfume_Finder::recommend( $ANSWERS_W ) as $row ) {
-		$out[] = (int) $row['id'] . ':' . (int) $row['result']['percent'];
-	}
-	return implode( ',', $out );
+// Scored against a hand-built profile rather than recommend(), for the same
+// reason matched() is: a real product answers every axis the answer set names,
+// so the percentage saturates at 100 and a change of weighting moves only the
+// coverage, not the score. The weighting is then unobservable. This row HITS the
+// fragrance family and MISSES the budget tier, which leaves the percentage a real
+// ratio of weights — 75% at 30/10 and 100% at 60/0 — so an editor that saved but
+// never reached the filter could not pass.
+$PROFILE_W = array(
+	'fragrance'   => array( 'گل' ),
+	'notes'       => array(),
+	'longevity'   => array(),
+	'sillage'     => array(),
+	'season'      => array(),
+	'occasion'    => array(),
+	'personality' => array(),
+	'gender'      => array(),
+	'price_tier'  => 'luxury',
+	'brand'       => array(),
+	'_scorable'   => true,
+);
+$ANSWERS_W = array( 'fragrance' => 'گل', 'occasion' => 'روزمره', 'budget' => 'mid' );
+$rows_of = function () use ( $ANSWERS_W, $PROFILE_W ) {
+	return ASC_Perfume_Finder::score( $PROFILE_W, $ANSWERS_W )['percent'];
 };
 $BASE_ROWS = $rows_of();
 update_option( 'asc_finder_weights', array(
@@ -2027,9 +2073,17 @@ $SAVED = array();
 function asc_probe_restore() {
 	global $SAVED;
 	foreach ( $SAVED as $pid => $terms ) {
-		foreach ( $terms as $tax => $ids ) { wp_set_object_terms( $pid, $ids, $tax, false ); }
+		// postmeta first, and only keys a meta table can hold: wp_set_object_terms()
+		// silently no-ops on a key that is not a taxonomy, so routing every
+		// underscore-prefixed key through it left the note pyramid deleted rather
+		// than restored, and the seed had to be re-run to put it back.
 		foreach ( $terms as $meta => $val ) {
-			if ( '_' === substr( $meta, 0, 1 ) ) { update_post_meta( $pid, $meta, $val ); }
+			if ( '_asc_notes_' !== substr( $meta, 0, 11 ) ) { continue; }
+			update_post_meta( $pid, $meta, $val );
+		}
+		foreach ( $terms as $tax => $ids ) {
+			if ( ! taxonomy_exists( $tax ) ) { continue; }
+			wp_set_object_terms( $pid, $ids, $tax, false );
 		}
 	}
 	$SAVED = array();
@@ -2072,7 +2126,57 @@ if ( $TARGET ) {
 	echo 'mutated_in_results=' . ( in_array( $TARGET, $AFTER, true ) ? 'yes' : 'no' ) . "\n";
 	echo 'mutated_count=' . count( $AFTER ) . "\n";
 	asc_probe_restore();
+	// The gate probe deletes real data, so prove it put it all back. It did not:
+	// asc_probe_restore() routed every '_'-prefixed key through
+	// wp_set_object_terms(), which no-ops on a postmeta key, so the note pyramid
+	// stayed deleted and the next run started from a thinner catalogue than the
+	// last — silently, because a thinner catalogue still ranks.
+	$residue = 0;
+	foreach ( array( '_asc_notes_top', '_asc_notes_heart', '_asc_notes_base' ) as $meta ) {
+		if ( ! get_post_meta( $TARGET, $meta, true ) ) { $residue++; }
+	}
+	foreach ( array( 'pa_fragrance_family', 'pa_occasion', 'pa_season', 'pa_personality', 'pa_longevity' ) as $tax ) {
+		if ( taxonomy_exists( $tax ) && ! wp_get_post_terms( $TARGET, $tax, array( 'fields' => 'ids' ) ) ) { $residue++; }
+	}
+	echo 'gate_residue=' . $residue . "\n";
 }
+
+// Whether a gap in the data is disclosed has to be checked against a product that
+// actually has a gap. Asking the live catalogue cannot do it: all 110 seeded
+// perfumes are complete on every axis, so every returned row scores 100% with no
+// unscored factor and the disclosure never renders — the assertion used to pass
+// or fail on the catalogue's contents rather than on the code. Strip the axes
+// off one returned product while leaving its note pyramid in place, so the
+// scorable gate still lets it rank (strip the notes too and it drops out of the
+// results entirely, which tests the gate rather than the disclosure), and read
+// the rendered card. asc_probe_restore() is the same one registered above, and
+// has just proven itself by restoring TARGET before this runs.
+$DISCLOSE = 0;
+if ( $TARGET ) {
+	// Deliberately not $SAVED: asc_probe_restore() keys taxonomies and postmeta
+	// off the leading underscore, so it cannot round-trip a set that holds both,
+	// and the gate check above has already consumed $SAVED. Restored inline.
+	$GAP_SAVED = array();
+	foreach ( array( 'pa_fragrance_family', 'pa_occasion', 'pa_season', 'pa_personality', 'pa_longevity', 'pa_sillage' ) as $tax ) {
+		if ( ! taxonomy_exists( $tax ) ) { continue; }
+		$GAP_SAVED[ $tax ] = wp_get_post_terms( $TARGET, $tax, array( 'fields' => 'ids' ) );
+		wp_set_object_terms( $TARGET, array(), $tax, false );
+	}
+	$_SERVER['REQUEST_METHOD'] = 'POST';
+	$_POST = $ANSWERS;
+	ob_start();
+	ASC_Perfume_Finder::render();
+	$GAP_CARD = ob_get_clean();
+	unset( $_POST );
+	$DISCLOSE = substr_count( $GAP_CARD, 'اطلاعاتی برای این مورد ثبت نشده' );
+	echo 'gap_still_rankable=' . ( null === ASC_Perfume_Finder::profile( wc_get_product( $TARGET ) ) ? 'no' : 'yes' ) . "\n";
+	echo 'gap_results=' . substr_count( $GAP_CARD, 'class="asc-finder__result"' ) . "\n";
+	foreach ( $GAP_SAVED as $tax => $ids ) {
+		wp_set_object_terms( $TARGET, $ids, $tax, false );
+	}
+	echo 'restored_terms=' . count( wp_get_post_terms( $TARGET, 'pa_fragrance_family', array( 'fields' => 'ids' ) ) ) . "\n";
+}
+echo 'gap_disclosed=' . $DISCLOSE . "\n";
 
 // Every row the finder shows must earn something on at least one axis it could be
 // scored against, using the same gender-free answer set as the gate check above.
@@ -2172,6 +2276,27 @@ MUTATED_COUNT=$(probe mutated_count)
 [ "${MUTATED_COUNT:-3}" -le 3 ] \
   && pass "results are capped at 3 and never padded ($MUTATED_COUNT after mutation)" \
   || fail "results exceeded the 3-item cap ($MUTATED_COUNT)"
+
+# Whether a gap in the data is disclosed has to be checked against a product that
+# actually has one. Asking the live catalogue cannot answer it: all 110 seeded
+# perfumes are complete on every axis, so every returned row scores 100% with no
+# unscored factor, the disclosure never renders, and the assertion would be
+# measuring the catalogue's contents rather than the code. The probe strips the
+# scoring axes off one returned product while leaving its note pyramid in place,
+# so the scorable gate still lets it rank and the only thing left to report the
+# gap is the disclosure itself.
+[ "$(probe gap_still_rankable)" = "yes" ] \
+  && pass "a product with a gap stays rankable, so the disclosure is the only way to see it" \
+  || fail "stripping the axes took the product out of the results entirely — the gate hides the gap instead of disclosing it"
+[ "$(probe gap_disclosed)" -ge 1 ] \
+  && pass "an axis with no data is named rather than silently omitted ($(probe gap_disclosed) notes across $(probe gap_results) results)" \
+  || fail "missing metadata is not disclosed — a gap in the data reads as a match"
+[ "$(probe restored_terms)" -ge 1 ] \
+  && pass "the probe restored the terms it stripped" \
+  || fail "the probe left the catalogue mutated — the restored product lost its data"
+[ "$(probe gate_residue)" = "0" ] \
+  && pass "the gate probe left no residue on the product it mutated" \
+  || fail "the gate probe deleted $(probe gate_residue) field(s) it did not restore — the catalogue is thinner after every run"
 
 [ "$(probe gender_alone)" = "0" ] \
   && pass "gender alone does not rank anything" \
@@ -2533,6 +2658,30 @@ echo has_filter("woocommerce_get_image_size_thumbnail") ? "on" : "off";' 2>/dev/
 [ "$THUMB_FILTER" = "on" ] \
   && pass "the woocommerce_get_image_size_thumbnail filter is attached" \
   || fail "the woocommerce_get_image_size_thumbnail filter is not attached"
+
+section "37. Store branding (no upstream name in content)"
+
+# 37.1 this catalogue was imported from aroma_store, and 100 of the 165 products
+# arrived with "محصول موجود در آرومالند" written into post_content. It rendered in
+# the product-page description, so every shopper on lylyrose.ir reading a Zoro or
+# Evafiora product was told it was sold by the upstream store. Nothing asserted
+# this, so a re-import from aroma_store would put it straight back.
+# The check is a DB read across posts, titles and excerpts rather than a grep of
+# the theme, because the text lives in the database and never appears in any file.
+BRAND_LEAK=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+global $wpdb;
+$hits = 0;
+foreach ( array( "آرومالند", "Aromaland" ) as $needle ) {
+  foreach ( array( "post_title", "post_content", "post_excerpt" ) as $col ) {
+    $hits += (int) $wpdb->get_var( $wpdb->prepare(
+      "SELECT COUNT(*) FROM {$wpdb->posts} WHERE {$col} LIKE %s", "%{$needle}%" ) );
+  }
+}
+echo $hits;' 2>/dev/null | tr -dc '0-9')
+[ "${BRAND_LEAK:-1}" = "0" ] \
+  && pass "no post title, body or excerpt names the upstream store (آرومالند / Aromaland)" \
+  || fail "${BRAND_LEAK:-?} post field(s) still name the upstream store — a re-import brought the branding back"
 
 section ""
 echo "==========================================="
