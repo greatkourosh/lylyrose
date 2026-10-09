@@ -2719,3 +2719,62 @@ written earlier today by counting `^section ` in the file, which included the em
 trailer. Corrected to 35, with the gap noted. Deliberately **not** renumbered: closing
 the gap would renumber 34–36 and touch every cross-reference in four documents, for no
 change in coverage. The numbering is cosmetic; the count is not.
+
+---
+
+## 2026-10-09 — The Perfume Finder was answering on 8 of 165 products in production
+
+Picked up the handover doc's "both live DBs need their own pass" for the Perfume
+Finder and ran it. The pass was never a formality: **production has 8 rankable
+products where local has 110.**
+
+Measured, not inferred — a docroot probe uploaded to `lylyrose.ir`, calling the same
+`ASC_Perfume_Finder::profile()` the quiz itself calls, deleted immediately and
+confirmed gone by both an FTP listing and a 404. The 8 that do rank are IDs
+1296–1305, the hand-authored rows. Every one of the 102 imported `DIGIKALA-*`
+perfumes carries no fragrance axis and no note pyramid, so a visitor who answers
+the quiz with anything but one of those eight is told nothing matches, on a shop
+whose catalogue is almost entirely perfume.
+
+### The cause was a missing commit, not a failed deploy
+
+`docker/seed-finder-data.php` and `docker/finder-profiles.json` were **untracked**.
+The profiles had only ever existed in the local database they were written into, so
+production could not have been seeded even if it had been intended. Nothing in the
+docs recorded a decision to defer it — the entry only ever said a pass was pending.
+Both files are now committed (`1774268f`), which is what makes the seed possible at
+all.
+
+### Validated against the host before proposing anything
+
+- **110/110** profile SKUs resolve on `lylyrose.ir` (a separate SKU probe; 0 missing)
+- **0** terms fail that install's own `vocabularies()` / `longevity_levels()` gate
+- **110** products would become rankable
+
+The seeder asserts the vocabulary itself and refuses to write for a product that
+fails, so these are the same checks it would apply. It is keyed on SKU, so it is
+host-portable; it also had to be made *runnable* from a docroot, which it was not — it
+hardcoded `ABSPATH` and `/tmp/finder-profiles.json`, both of which exist only inside
+the container.
+
+**Not written.** The seed is additive over currently-empty axes, but it is 110 products
+on a live store, and it is a change no test here can make on its behalf.
+
+### Also this pass
+
+- **Backup:** the 2026-10-09 05:35 UTC run (`90bb68c3ee88`) had fired unpulled — the
+  sixth time. Pulled all 6 parts size-verified, archives integrity-checked, DB header
+  names `https://lylyrose.ir` with 101 `CREATE TABLE`, and the archived
+  `themes/lylyrose/style.css` reads `Version: 1.25.0`, equal to the repo and to what
+  production serves, so the set captures current state. `backup-check.py` is green
+  again.
+- **Suite:** 351/0. Three finder fixtures had gone vacuous as the catalogue grew from
+  10 note-bearing products to 110 — the negative fixture now lands on a product that
+  *has* notes, the pyramid section was deleting a real product's authored data, and
+  the gate probe's restore routine silently no-oped on postmeta keys. All three are
+  fixed and the assertions that replaced them were confirmed present in the run
+  (`6deae0fd`).
+- **Stray file on the host:** `_903f0dac981b4c26e39e.php` in the account home dir,
+  1268 bytes, dated 2026-10-08 — a leftover probe from the thumbnail-cache session.
+  It is outside the docroot and returns 404, so it is inert, but it is not ours to
+  delete without saying so.

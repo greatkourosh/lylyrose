@@ -159,7 +159,37 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    The other 55 are content authoring, not a code fix (they are St. Ives body care
    and other non-perfumes with no scent family to annotate). The finder, the note
    pyramid and the tiers all work; the other 55 need a human to decide they are not
-   perfumes at all. Both live DBs need their own pass and their IDs differ per host.
+   perfumes at all.
+
+   **⚠️ The live-host pass is DONE and it found a real gap, in the other
+   direction (2026-10-09).** The line above said "both live DBs need their own
+   pass" — reading production off the host shows **`lylyrose.ir` has 8 of 165
+   rankable, not 110.** Measured with a docroot probe calling the same
+   `ASC_Perfume_Finder::profile()` the quiz calls, not inferred from this repo:
+   the 8 are IDs 1296–1305, the hand-authored rows. **Every one of the 102
+   imported `DIGIKALA-*` perfumes is unannotated in production**, so a visitor
+   asking the finder for anything except one of those eight gets
+   "no match" on a shop whose catalogue is nearly all perfume.
+
+   **The cause is not a failed deploy — it is that the seeder was never in
+   git.** `docker/seed-finder-data.php` and `docker/finder-profiles.json` were
+   untracked; the only copy of the profiles was the local DB they had been
+   written into, so production could not have run them even if someone had
+   wanted to. Both are committed as of `1774268f`.
+
+   **Validated against production without writing anything**, so the seed is a
+   decision rather than an experiment: all **110** profile SKUs resolve on the
+   host (`0` missing), **0** terms fail that install's own
+   `vocabularies()`/`longevity_levels()` gate, and all **110** would become
+   rankable. The seeder is keyed on SKU and asserts the vocabulary itself, so it
+   is host-portable; it was also made runnable from a docroot, which it was not
+   before — it hardcoded `ABSPATH` and `/tmp/finder-profiles.json`, both of
+   which exist only in the container.
+
+   **The write itself is not done, and is a human decision.** It is additive
+   (`update_post_meta`, `wp_set_object_terms`) over products whose finder axes
+   are currently empty, but it is still 110 products on a live store. Pull the
+   pre-seed state first if it goes ahead: `docker/_pull-updraft.py <run-id>`.
 
 5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
    gift card "deferred" pending a latency fix. Measured: 4 published products carry
