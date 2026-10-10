@@ -1,9 +1,14 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Several Claude sessions share this one working tree. This file is the
-handover surface: who owns what, what is blocked, and what must not be committed
-until a decision lands.
+name. Last reconciled 2026-10-10 against git and the live host. Several Claude
+sessions share this one working tree. This file is the handover surface: who
+owns what, what is blocked, and what must not be committed until a decision lands.
+
+**Current state, in one line:** no code blocker remains. The only open items are
+human-blocked per-host credentials and content decisions. The live list is §6.
+Sections 0–5 are the record of how the work got here; where they disagree with §6,
+§6 wins.
 
 Keep it current. If you change something listed here, change it here in the same
 pass — a stale version of this file is worse than none.
@@ -350,6 +355,7 @@ by hand:
 
 `class-perfume-finder.php` is **not** this session's work and was left uncommitted —
 it is the tier/weights counterpart to the peer's `run-tests.sh` sections.
+*(Resolved: committed in `007a36e9`, and `lylyrose-core/` is clean in `git status`.)*
 
 Suite after all of it: **330 passed, 0 failed**.
 
@@ -450,6 +456,10 @@ at the top of §5 and the resolved row in §3.
 
 ## 1. The blocker: every WooCommerce archive returns 500
 
+> **RESOLVED.** The navy theme was merged and deleted (`50a8c651`), so the
+> lylyrose-navy mismatch below cannot recur. Both options in the table are
+> moot. Kept as the record of the diagnosis.
+
 `/shop/`, `/product-category/perfume/`, `/product-category/gift-cards/` and `/`
 all render the page header and then die with WordPress's generic
 «یک خطای مهم در این وب سایت رخ داده است» page. Zero product cards render.
@@ -511,8 +521,8 @@ Verified in the browser: all 10 rail cards carry a name, and the price row sits
 at an identical y across all 10 despite six of the titles clamping — uneven title
 lengths do not misalign the grid.
 
-**These fixes are in `lylyrose` only.** If production runs navy, they are not on
-the live site until navy is merged or the change is mirrored.
+**These fixes are in `lylyrose`, which is the only theme and the one production
+serves** (see [[production-now-runs-lylyrose]]).
 
 **Independently re-verified 2026-10-05 (later session), and `lylyrose` now has
 every product image linked — not just the one that was broken.** Enumerating
@@ -544,12 +554,11 @@ wanted, that is a build, not a missing label.
 | Path | Why |
 |---|---|
 | ~~`lylyrose/functions.php`~~ | **RESOLVED — no longer applies.** The `LRPROBE` shutdown block was removed in `8932318b`. Verified 2026-10-06: `grep -rn LRPROBE --include=*.php` matches nothing outside `docker/reveal-fatal.php`'s comment, and `git log -S LRPROBE` names that commit as the only one. It is gone from HEAD *and* from the working tree, so it was never lost by a later patch. |
-| `lylyrose-core/includes/class-finder-tiers.php` | Untracked, belongs to the peer session |
-| `lylyrose-core/includes/class-finder-weights.php` | Untracked, belongs to the peer session |
-| `lylyrose-core/lylyrose-core.php`, `class-perfume-finder.php` | Peer's in-flight work |
-| **`lylyrose-navy/` (31 files)** | **Staged as deleted, uncommitted, unowned.** Do not stage or unstage this casually — see §4. It is what unblocks the 500, but it also deletes the theme production runs, so it is the user's decision. |
+| ~~`lylyrose-core/includes/class-finder-tiers.php`~~, ~~`class-finder-weights.php`~~ | **RESOLVED** — tracked in `8f175393`; `git status` is clean for `lylyrose-core/`. |
+| ~~`lylyrose-navy/` (31 files)~~ | **RESOLVED** — deleted in `50a8c651`. |
 
-Nothing of mine is staged. `lylyrose-core.php` is byte-identical to HEAD.
+Stray scratch: `wordpress/wp-content/themes/lylyrose/header.php.fixed` is untracked
+and not a deliverable. Delete it before the next commit sweep.
 
 ---
 
@@ -559,7 +568,7 @@ Nothing of mine is staged. `lylyrose-core.php` is byte-identical to HEAD.
 |---|---|
 | needs pages seed + SKU keying (2026-10-10) | **done** — `docker/seed-needs-data.php` keyed by SKU; live tags written |
 | brand palette + mega menu (2026-10-10) | **done** — `style.css` `:root`, `class-palette.php`, `lylyrose_mega_menu()`, `header.php` catnav, `docker/seed-finder-data.php` |
-| New product rollout | idle — `class-finder-tiers.php`, `class-finder-weights.php`, the perfume-finder CSS layout are committed |
+| New product rollout | idle — `class-finder-tiers.php`, `class-finder-weights.php`, `class-perfume-finder.php`, and the perfume-finder CSS layout are committed (`8f175393`, `007a36e9`) |
 | عطرت رو انتخاب کن در صغحه | idle |
 | https://lylyrose.local/perfume-finder/ ... | idle |
 
@@ -619,18 +628,26 @@ Undo with:
 sudo chown -R kourosh:$(id -gn) /media/kourosh/DEVNVME/projects/lylyrose/wordpress/wp-content
 ```
 
-The same ownership also blocks the `lylyrose-navy` parity fixes: all 31 navy
-files are `nobody`-owned, so navy still carries both original bugs.
-*(Superseded: navy has since been deleted. The ownership problem itself
-outlived it — see the paragraph above.)*
+*(Superseded: navy has since been deleted, and `wp-content` ownership is
+`www-data` — see the 2026-10-06 correction at the top of this section.)*
 
-**No docker socket from the shell.** `docker` is denied in the bash sandbox, so
-container-side inspection (`docker exec`, `docker logs`) is unavailable here. The
-browser preview runs outside the sandbox and does work.
+**Docker socket: superseded.** The 2026-10-06 correction above is current — `docker`
+and `docker exec` work from the shell. The browser preview also works.
+
+**Write access to `wp-content` varies by session.** Check with `test -w <file>` before
+editing. If it fails, write through `docker exec -u root` or `-u www-data`, as in the
+correction above.
 
 ---
 
 ## 6. Roadmap
+
+> **Current, 2026-10-10.** Steps 1–5 below predate the navy merge and are kept as
+> history. Open items now: per-host credentials on `lylyrose.ir` (ZarinPal merchant,
+> PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); review of the 1.27.0 teal
+> palette on the live homepage by eye; the unreviewed product-need tags beyond the
+> 51 St. Ives products; `header.php.fixed` scratch file; and the untracked
+> `docker/_probe*` and `.txt` scratch files, which must not be committed.
 
 Immediate, in order. Steps 1–2 are new and supersede the old plan; 3–5 are the
 original sequence, trimmed to what still applies.

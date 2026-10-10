@@ -27,6 +27,11 @@
 > each other's names in transcription. Every title is now unique — section 31
 > asserts `every published product title is unique (165 products)`.
 >
+> **Superseded 2026-10-10:** the palette and theme merge below are both live. The
+> theme merge landed as `50a8c651` (2026-10-05), `lylyrose-navy/` is deleted, and
+> production serves `lylyrose` 1.27.0. The paragraphs describing the merge as open
+> are kept as history.
+>
 > **🎨 Editable colour palettes shipped locally, NOT yet deployed to
 > `lylyrose.ir` (`e3472026`, `07b28771`, 2026-10-04).** The owner asked to merge
 > `lylyrose` and `lylyrose-navy`, make the palette editable, let a visitor switch
@@ -2430,7 +2435,12 @@ their descriptions are import boilerplate rather than scent data, so there is
 nothing to derive and inventing a family for a hair mask would be worse than the
 gap. The perfume catalogue itself is fully annotated at 110/165.
 
-### 💰 Budget tiers are lopsided — 73% of the catalogue in one bucket
+### 💰 ~~Budget tiers are lopsided — 73% of the catalogue in one bucket~~ — RESOLVED 2026-10-10
+
+> Stale as written. Percentile tiers (`class-finder-tiers.php`, `8f175393`) now split
+> the 165 products 42 / 41 / 49 / 33 locally, and the live finder shows the same
+> boundaries. The section below is kept as the record of the problem.
+
 
 Price is the one axis fully populated, but its spread does not support four
 even tiers. Of 114 priced products:
@@ -2804,7 +2814,9 @@ content, the quiz has 11 and 9 options, and both menu links are present.
 **Seeded live 2026-10-10.** All 51 St. Ives products carry `_needs_types`, `_needs_concerns`
 and `_needs_usage` on `lylyrose.ir` (35 skin, 16 hair), written by SKU. Live `/skin-needs/`
 and `/hair-needs/` return 4 result cards for sample answers. The tags were inferred from
-product descriptions and have not been reviewed by the owner.
+product descriptions and have not been reviewed by the owner. Update 2026-10-10
+(`d3e3119e`): the seeder now keys by SKU, and the 51 St. Ives tags are live on
+`lylyrose.ir`. The rest of the tags remain unreviewed.
 
 `docker/seed-needs-data.php` is now keyed by SKU, not product ID. The IDs it used before
 exist only locally: none of the 51 matched on the live store, where the same products are
