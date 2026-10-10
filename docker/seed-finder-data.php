@@ -34,7 +34,9 @@ if ( ! file_exists( '/var/www/html/wp-load.php' ) ) {
 	require '/var/www/html/wp-load.php';
 }
 
-$dry_run  = in_array( 'dry-run', $_SERVER['argv'] ?? array(), true );
+$dry_run = PHP_SAPI === 'cli'
+	? count( preg_grep( '/^-*dry-run$/', $_SERVER['argv'] ?? array() ) ) > 0
+	: isset( $_GET['dry-run'] );
 $profiles = json_decode( file_get_contents( __DIR__ . '/finder-profiles.json' ), true );
 if ( ! is_array( $profiles ) ) {
 	fwrite( STDERR, "cannot read /tmp/finder-profiles.json\n" );
