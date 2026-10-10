@@ -49,10 +49,41 @@ class ASC_Palette {
 	 *  to stay dark in every palette, which --dk-ink does not do. */
 	const EXTRA = array( 'on-accent', 'on-gold', 'on-ink', 'white', 'bar', 'on-bar' );
 
-	/** The three palettes that ship. Values match the theme's :root. */
+	/** Palettes that ship. :root matches the default Lyly Rose preset. */
 	public static function defaults() {
 		return array(
-			'ivory' => array(
+			// Lyly Rose — the brand default (agreed 2026-10-10). Deep teal is the
+			// only strong colour: CTAs, footer and the announce bar. Everything
+			// else is white space and pastel mint/blush.
+			// Two values differ from the brief, both for WCAG AA: --dk-muted is
+			// #737373 not #8A8A8A (3.45:1 on white), and the brief's Soft Pink /
+			// Blush have no token to land in, so they stay available to CSS as
+			// literals rather than becoming two near-identical surfaces.
+			'lylyrose' => array(
+				'label'     => 'لی‌لی رز',
+				'red'       => '#064048',
+				'teal'      => '#0a5a63',
+				'ink'       => '#1a1a1a',
+				'text'      => '#5a5a5a',
+				'body-text' => '#1a1a1a',
+				'muted'     => '#737373',
+				'bg'        => '#ffffff',
+				'border'    => '#e8eeee',
+				'white'     => '#fafafa',
+				'badge-red' => '#064048',
+				'bar'       => '#064048',
+				'on-bar'    => '#ffffff',
+				// Derived steps. --dk-red-light is the tinted panel behind hovered
+				// links and the demo banner, so it takes the brief's Soft Mint.
+				'red-dark'  => '#052e34',
+				'red-light' => '#ebf6f5',
+				'on-accent' => '#ffffff',
+				'on-gold'   => '#ffffff',
+				'on-ink'    => '#ffffff',
+				'star'      => '#96610d',
+				'green'     => '#0f7a3e',
+				'orange'    => '#a06a00',
+			),			'ivory' => array(
 				'label' => 'عاجی',
 				'red'       => '#9c5c5f',
 				'teal'      => '#8a6848',

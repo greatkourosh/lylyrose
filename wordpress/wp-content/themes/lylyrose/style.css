@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.26.0
+Version: 1.27.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -13,33 +13,31 @@ Tags: e-commerce, rtl-language-support, custom-menu, custom-logo
 */
 
 /* ==========================================================================
-   Design tokens
+   Design tokens  —  Lyly Rose is the default (2026-10-10)
    ========================================================================== */
 :root {
-    /* ---- Lyly Rose brand palette (agreed 2026-09-29) -------------------
-       The brand hues are Ivory / Dusty Rose / Espresso / Rose Gold.
-       Values are darkened from the reference palette only where WCAG AA
-       demanded it: the reference Dusty Rose #C98F91 gives only 2.68:1
-       against white text, and 27 rules set white on --dk-red. #9c5c5f is
-       the same hue at 5.11:1. Rose Gold #C9A07C is 2.16:1 on Ivory, so it
-       is kept as a fill/hairline only and #8a6848 (4.58:1) is the text
-       form. --dk-red / --dk-teal keep their old names: 96 call sites, and
-       renaming a token this hot is pure churn for no visual gain. */
-    --dk-red: #9c5c5f;         /* Dusty Rose, darkened for white text      */
-    --dk-red-dark: #7f4a4d;
-    --dk-red-light: #f8f1f0;   /* soft Ivory-Rose panel, for --dk-red text  */
-    --dk-badge-red: #b5484d;   /* discount / sale badges                    */
-    --dk-teal: #8a6848;        /* Rose Gold, darkened                       */
-    --dk-teal-dark: #7a5b3e;
+    /* Lyly Rose — soft, feminine, clean beauty-store. Deep teal #064048 is the
+       only strong colour (CTAs, footer, bar); white space, pastel mint/blush
+       surfaces, near-black ink. Previous Ivory/Rose palettes live in
+       lylyrose-core/includes/class-palette.php and are still selectable.
+       --dk-red / --dk-teal keep their old names: ~96 call sites depend on them
+       and renaming them is churn. #737373 is the darkened --dk-muted: the
+       requested #8A8A8A gives 3.45:1 on white and fails AA. */
+    --dk-red: #064048;         /* Primary — deep teal, CTAs/footer/accent     */
+    --dk-red-dark: #052e34;
+    --dk-red-light: #ebf6f5;   /* Secondary — soft mint panel                 */
+    --dk-badge-red: #064048;
+    --dk-teal: #0a5a63;        /* Primary Hover accent                        */
+    --dk-teal-dark: #083e45;
     --dk-green: #0f7a3e;       /* darkened: #00c853 was 2.24:1 on white    */
     --dk-orange: #a06a00;
-    --dk-ink: #302522;         /* Espresso                                 */
-    --dk-text: #5a4f49;
-    --dk-body-text: #4a423e;
-    --dk-muted: #6e5f58;       /* 5.54:1 on Ivory, 6.10:1 on white         */
-    --dk-border: #e5dcd4;      /* warm Nude hairline                       */
-    --dk-bg: #f8f3ee;          /* Ivory                                    */
-    --dk-white: #ffffff;
+    --dk-ink: #1a1a1a;         /* Text primary                                */
+    --dk-text: #5a5a5a;
+    --dk-body-text: #1a1a1a;
+    --dk-muted: #737373;       /* 4.74:1 on white (AA). Requested #8A8A8A fails */
+    --dk-border: #e8eeee;
+    --dk-bg: #ffffff;
+    --dk-white: #fafafa;       /* Surface / card                              */
     /* Label colours for text sitting ON a filled accent. A dark palette has a
        light accent, so its label has to flip dark; these three carry that flip
        instead of every rule hardcoding #fff. Ivory is the light case. */
@@ -50,9 +48,9 @@ Tags: e-commerce, rtl-language-support, custom-menu, custom-logo
        palette, so it cannot be expressed through --dk-ink: that inverts, and in
        Night (#f2f4f8) it put a near-white bar across a dark page. A role token
        states the intent outright and each palette supplies its own value. */
-    --dk-bar: #302522;         /* the dark strip above the header           */
+    --dk-bar: #064048;         /* the dark strip above the header — Primary */
     --dk-on-bar: #ffffff;      /* its label                                 */
-    --dk-star: #96610d;        /* 4.75:1 on Ivory, was 1.79:1             */
+    --dk-star: #96610d;        /* 4.75:1 on white, was 1.79:1             */
     --dk-radius: 12px;
     --dk-radius-sm: 8px;
     --dk-shadow: 0 1px 4px rgba(0, 0, 0, .06), 0 4px 16px rgba(48, 37, 34, .04);
