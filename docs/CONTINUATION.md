@@ -191,18 +191,38 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    present in `finder-profiles.json`, so the answers come from our seed rather than
    from a plugin's own categorisation.
 
-   **The seeder's dry-run guard is still a footgun in this checkout.** It matches only
-   the bare word `dry-run`, so the conventional `--dry-run` **performs an actual
-   write** — a preview that silently mutates a live store. The peer session fixed this
-   to accept both forms, but that fix lives **only** in its worktree
-   (`.claude/worktrees/elegant-dirac-390e3b`, uncommitted) and never reached `master`:
-   `docker/seed-finder-data.php:53-55` here is still the bare-word test. Use `dry-run`
-   without dashes until it is ported, or port the peer's one-line fix and commit it.
+   **The seeder's dry-run guard is fixed (`4cb7dbe2`, 2026-10-10).** It matched only
+   the bare word `dry-run`, so the conventional `--dry-run` **performed an actual
+   write** — a preview that silently mutates a live store. It now matches
+   `dry-run`, `--dry-run` and `-dry-run` in any position, and still leaves
+   `--dry-run=false`, `--dryruntimes` and `no-dry-run` as real runs.
+   `docker/dry-run-guard-check.php` reads the guard expression out of the seeder
+   rather than restating it, so it cannot pass while the seeder still carries the
+   bug; it was proven **red first** against the committed `in_array` guard, failing
+   exactly the three dashed forms. See [[dry-run-flag-must-match-both-spellings]].
 
-   **Backup state moved again after the seed.** Run `63b07c7336e5` (2026-10-10 01:36
-   UTC) fired **unpulled** — `backup-check.py` is now red, exit 1, for the first time
-   since 2026-10-09. It is a *post*-seed backup, so `90bb68c3ee88` remains the rollback
-   point for the finder write. Pull it with `docker/_pull-updraft.py 63b07c7336e5`.
+   **Backup state closed again after the seed.** Run `63b07c7336e5` (2026-10-10
+   01:36 UTC) fired **unpulled** and made `backup-check.py` red — it was the only
+   red thing left, so it is pulled to `backups/updraft-63b07c7336e5/`:
+   6/6 parts size-equal to the host's FTP `SIZE`, `gzip -t` and `unzip -t` clean
+   for `db.gz`, `themes.zip` and `uploads.zip`.
+
+   **It captures the seeded finder, which is what makes it the current rollback
+   point.** Counted out of its own DB dump, joining `wp_term_taxonomy` on `term_id`
+   to `wp_term_relationships` on `term_id` (the other spelling is a silent 0 — see
+   [[term-ids-differ-across-wp-term-tables]]):
+
+   | Backup | finder terms | products linked |
+   |---|---|---|
+   | `90bb68c3ee88` (pre-seed) | 27 | **8** |
+   | `63b07c7336e5` (post-seed) | 28 | **110** |
+
+   110 is the rankable count the seed produced, so the archived state and the live
+   site agree. Its `themes/lylyrose/style.css` reads `Version: 1.25.0`, equal to
+   the tree. `backup-check.py` is green, exit 0. **The rollback point for the finder
+   write is therefore `63b07c7336e5`, not `90bb68c3ee88`** — the latter is the genuine
+   *pre*-seed point, which is what makes it the one to restore if the seed must be
+   undone.
 
 5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
    gift card "deferred" pending a latency fix. Measured: 4 published products carry
