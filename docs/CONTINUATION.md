@@ -162,9 +162,10 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
 
 4. **✅ Perfume Finder data is DONE and LIVE on `lylyrose.ir` (seeded 2026-10-09,
    re-verified 2026-10-10).** Production answers on **110 of 165**, up from 8. The
-   other 55 are content authoring, not a code fix (they are St. Ives body care and
-   other non-perfumes with no scent family to annotate); they need a human to decide
-   they are not perfumes at all.
+   other 55 are not perfumes, so the scent quiz cannot rank them: 51 are St. Ives
+   skin and hair care (tagged for the needs quizzes instead, see below) and 4 are gift
+   cards (`GC-500K`, `GC-1000K`, `GC-2000K`, `GC-5000K`), which are deliberately
+   untagged. No code fix is needed; there is nothing to annotate.
 
    **The gap and its cause (2026-10-09).** The live-host pass found `lylyrose.ir` had
    8 of 165 rankable, not 110 — measured with a docroot probe calling the same

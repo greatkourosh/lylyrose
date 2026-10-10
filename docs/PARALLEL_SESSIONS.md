@@ -642,34 +642,27 @@ correction above.
 
 ## 6. Roadmap
 
-> **Current, 2026-10-10.** Steps 1–5 below predate the navy merge and are kept as
-> history. Open items now: per-host credentials on `lylyrose.ir` (ZarinPal merchant,
-> PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); the unreviewed product-need
-> tags beyond the 51 St. Ives products; `header.php.fixed` scratch file; and the
-> untracked `docker/_probe*` and `.txt` scratch files, which must not be committed.
-> Done 2026-10-10: the 1.27.0 teal palette was checked on the live homepage by eye,
-> and the new products were confirmed.
+> **Current, 2026-10-10.** Open items: per-host credentials on `lylyrose.ir` (ZarinPal
+> merchant, PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); the owner's review
+> of the 51 St. Ives needs tags (applied, inferred from descriptions, not yet reviewed);
+> `header.php.fixed` scratch file; and the untracked `docker/_probe*` and `.txt` scratch
+> files, which must not be committed. Done 2026-10-10: the 1.27.0 teal palette was
+> checked on the live homepage by eye, the new products were confirmed, and local and
+> live match: 60 first-party files identical, 165 products on both.
 
-Immediate, in order. Steps 1–2 are new and supersede the old plan; 3–5 are the
-original sequence, trimmed to what still applies.
+Steps 1–5 are history. Navy is gone from production and from git; nothing is pending
+there.
 
-1. **Commit the navy deletion, or decide against it.** All 31 navy files are
-   staged as deleted and the directory is gone from disk, but nothing records
-   it. Until it is committed, `git checkout` resurrects a theme that is half
-   switched and is what made the 500 in §1. Committing it makes the 500
-   structurally impossible. This is the user's call, not this session's — it
-   destroys the theme production runs.
-2. ~~**Restore ownership** … then delete the `LRPROBE` block.~~ **DONE**
+1. ~~**Commit the navy deletion.**~~ **MOOT.** Navy was never tracked in git; merge
+   `50a8c651` removed it. Production serves `lylyrose` (checked 2026-10-10).
+2. ~~**Restore ownership** ... then delete the `LRPROBE` block.~~ **DONE**
    (`LRPROBE` removed in `8932318b`; ownership already restored to `www-data`).
    No `chown` needed — see the correction at the top of §5.
-3. **Production still runs navy.** `lylyrose`'s fixes reach the live site only
-   once navy is gone there too, or the two fixes are mirrored into it. Which of
-   those is right depends on step 1 and is a user decision.
+3. ~~**Production still runs navy.**~~ **FALSE NOW.** Live serves `lylyrose`.
 4. **Re-check the palette JS only after the 500 is gone**, then confirm with a
    fresh fetch rather than a cached body.
-5. **Re-verify the offers rail in the browser after the theme settles.** The
-   verification in §2 was done against `lylyrose`; if navy is what ends up
-   serving, both fixes need re-verifying there or they were never live.
+5. ~~**Re-verify the offers rail on navy.**~~ Offers rail is on `lylyrose`, the theme
+   production runs.
 
 Old step 4 from the previous list — *mirror both fixes into navy* — is dropped.
 There is no navy on disk to mirror into.
