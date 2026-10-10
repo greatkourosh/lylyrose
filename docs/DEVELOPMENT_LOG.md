@@ -2778,3 +2778,58 @@ on a live store, and it is a change no test here can make on its behalf.
   1268 bytes, dated 2026-10-08 — a leftover probe from the thumbnail-cache session.
   It is outside the docroot and returns 404, so it is inert, but it is not ours to
   delete without saying so.
+
+---
+
+## 2026-10-10 — The finder seed is LIVE on `lylyrose.ir`, and the docs were the only thing left
+
+Production now answers the Perfume Finder on **110 of 165** products, up from 8. The
+seed itself was run on 2026-10-09 by a peer session; what was missing was the
+write-up, so both docs still said "the write is not done, and is a human decision."
+Nothing here trusted that report — every number below was measured again.
+
+**The rollback point is real, and proved by reading the archive.** The pre-seed backup
+`90bb68c3ee88` (2026-10-09 05:34 UTC, 6 parts, size-verified) was pulled before the
+write. A correct size is not a current state, so the DB dump was parsed: exactly **8**
+products in `wp_term_relationships` are linked to any of the six finder taxonomies
+(IDs 1296–1299, 1302–1305) — the same 8 the live probe had found, confirmed from the
+archive rather than from the site. Getting that count took three wrong regexes first:
+`wp_term_taxonomy` keys terms on `term_id` while `wp_term_relationships` references
+`term_taxonomy_id`, so matching the first column to the second silently yields **zero**
+every time. A count of 0 here means "you parsed it wrong", not "the seed never ran".
+
+**Verified against the host, not against the seeder.** The seeder's own closing line
+reads the write loop it just performed; that is the report of a program grading its own
+homework. A separate probe re-read every value from the database and diffed it against
+`finder-profiles.json` field by field:
+
+| Check | Result |
+|---|---|
+| `profile()` rankable on the host | **110**, and all 110 carry a top note |
+| 5 axes + longevity + 3 note tiers vs the file | **110/110 SKUs, 0 missing, 0 mismatched** |
+| `POST /perfume-finder/` — گل / زنانه / روزمره / بهار | **200**, 3 real perfume cards |
+| Body care leaking into results | none |
+| Probe files on the host | gone — 404 and `still listed=no` |
+
+The three cards (`DIGIKALA-18726487`, `-20207295`, `-20599667`) are all in
+`finder-profiles.json`. That is the load-bearing part: **coverage alone cannot show the
+axes came from our seed** rather than from a plugin's own categorisation, so the values
+themselves had to be compared.
+
+**The finder form takes a plain POST with no nonce** (`render()` reads `$_POST`
+directly), so a `curl` submission exercises the same path a visitor takes.
+
+### The dry-run guard was a footgun, and the fix is still not on `master`
+
+The guard matched only the bare word `dry-run`, so the conventional **`--dry-run` ran a
+real write**. A preview that silently mutates a live store is worse than no preview.
+The peer session fixed it to accept both forms and proved the gate still refuses a bad
+term — but that fix never left its worktree. `docker/seed-finder-data.php:53-55` on
+`master` is still the bare-word test, and the docroot-runnable bootstrap is likewise
+still uncommitted. **Do not run `--dry-run` against a live host from this checkout.**
+
+Two lessons worth keeping. A preview switch that only matches one spelling of its own
+flag is a write switch wearing a label. And a peer session that seeds production and
+then dies mid-write-up leaves the docs asserting the opposite of the truth — the same
+class of drift as [[production-state-vs-docs]], and the reason to re-measure instead of
+trusting the handoff.

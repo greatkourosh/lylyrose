@@ -155,41 +155,54 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    AVIF, and fuzzy search.** (Fuzzy is not the same as the SKU/code lookup, which
    ships and works.)
 
-4. **Perfume Finder data is 110 of 165 products** — the full perfume catalogue.
-   The other 55 are content authoring, not a code fix (they are St. Ives body care
-   and other non-perfumes with no scent family to annotate). The finder, the note
-   pyramid and the tiers all work; the other 55 need a human to decide they are not
-   perfumes at all.
+4. **✅ Perfume Finder data is DONE and LIVE on `lylyrose.ir` (seeded 2026-10-09,
+   re-verified 2026-10-10).** Production answers on **110 of 165**, up from 8. The
+   other 55 are content authoring, not a code fix (they are St. Ives body care and
+   other non-perfumes with no scent family to annotate); they need a human to decide
+   they are not perfumes at all.
 
-   **⚠️ The live-host pass is DONE and it found a real gap, in the other
-   direction (2026-10-09).** The line above said "both live DBs need their own
-   pass" — reading production off the host shows **`lylyrose.ir` has 8 of 165
-   rankable, not 110.** Measured with a docroot probe calling the same
-   `ASC_Perfume_Finder::profile()` the quiz calls, not inferred from this repo:
-   the 8 are IDs 1296–1305, the hand-authored rows. **Every one of the 102
-   imported `DIGIKALA-*` perfumes is unannotated in production**, so a visitor
-   asking the finder for anything except one of those eight gets
-   "no match" on a shop whose catalogue is nearly all perfume.
+   **The gap and its cause (2026-10-09).** The live-host pass found `lylyrose.ir` had
+   8 of 165 rankable, not 110 — measured with a docroot probe calling the same
+   `ASC_Perfume_Finder::profile()` the quiz calls. Every one of the 102 imported
+   `DIGIKALA-*` perfumes was unannotated, so a visitor asking for anything but one of
+   those eight got "no match" on a shop that is nearly all perfume. The cause was not
+   a failed deploy: `docker/seed-finder-data.php` and `docker/finder-profiles.json` were
+   untracked, so the profiles only ever existed in the local DB they were written
+   into. Both committed as of `1774268f`.
 
-   **The cause is not a failed deploy — it is that the seeder was never in
-   git.** `docker/seed-finder-data.php` and `docker/finder-profiles.json` were
-   untracked; the only copy of the profiles was the local DB they had been
-   written into, so production could not have run them even if someone had
-   wanted to. Both are committed as of `1774268f`.
+   **Seeded, and the rollback point is genuine.** A pre-seed backup was pulled first —
+   **`90bb68c3ee88`** (2026-10-09 05:34 UTC, 6 parts, size-verified). That dump is a
+   real pre-seed state and not just an old backup: parsing
+   `backup_2026-10-09-0534_Lyly_Rose_90bb68c3ee88-db.gz` shows exactly **8** products
+   linked to any finder term (IDs 1296–1299, 1302–1305) — the same 8 the probe found,
+   read from the archive instead of from the live site.
 
-   **Validated against production without writing anything**, so the seed is a
-   decision rather than an experiment: all **110** profile SKUs resolve on the
-   host (`0` missing), **0** terms fail that install's own
-   `vocabularies()`/`longevity_levels()` gate, and all **110** would become
-   rankable. The seeder is keyed on SKU and asserts the vocabulary itself, so it
-   is host-portable; it was also made runnable from a docroot, which it was not
-   before — it hardcoded `ABSPATH` and `/tmp/finder-profiles.json`, both of
-   which exist only in the container.
+   **Re-verified 2026-10-10, independently of the seeder's own output** (its exit line
+   is not evidence — it reads the write loop, not the database):
 
-   **The write itself is not done, and is a human decision.** It is additive
-   (`update_post_meta`, `wp_set_object_terms`) over products whose finder axes
-   are currently empty, but it is still 110 products on a live store. Pull the
-   pre-seed state first if it goes ahead: `docker/_pull-updraft.py <run-id>`.
+   | Check | Result |
+   |---|---|
+   | `profile()` rankable on the host | **110**, all 110 with a top note |
+   | Field-by-field vs `finder-profiles.json` (5 axes, longevity, 3 note tiers) | **110/110 SKUs, 0 missing, 0 mismatched** |
+   | Front end, `POST /perfume-finder/` (گل / زنانه / روزمره / بهار) | **200**, 3 real perfume cards, no empty state, no body-care leak |
+   | Probe files on the host | deleted — HTTP 404 and `still listed=no` |
+
+   The three cards returned are `DIGIKALA-18726487`, `-20207295`, `-20599667`, all
+   present in `finder-profiles.json`, so the answers come from our seed rather than
+   from a plugin's own categorisation.
+
+   **The seeder's dry-run guard is still a footgun in this checkout.** It matches only
+   the bare word `dry-run`, so the conventional `--dry-run` **performs an actual
+   write** — a preview that silently mutates a live store. The peer session fixed this
+   to accept both forms, but that fix lives **only** in its worktree
+   (`.claude/worktrees/elegant-dirac-390e3b`, uncommitted) and never reached `master`:
+   `docker/seed-finder-data.php:53-55` here is still the bare-word test. Use `dry-run`
+   without dashes until it is ported, or port the peer's one-line fix and commit it.
+
+   **Backup state moved again after the seed.** Run `63b07c7336e5` (2026-10-10 01:36
+   UTC) fired **unpulled** — `backup-check.py` is now red, exit 1, for the first time
+   since 2026-10-09. It is a *post*-seed backup, so `90bb68c3ee88` remains the rollback
+   point for the finder write. Pull it with `docker/_pull-updraft.py 63b07c7336e5`.
 
 5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
    gift card "deferred" pending a latency fix. Measured: 4 published products carry
