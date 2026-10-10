@@ -88,6 +88,9 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-images.php';
         ASC_Images::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-fuzzy-search.php';
+        ASC_Fuzzy_Search::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-coupons.php';
         ASC_Coupons::init();
 

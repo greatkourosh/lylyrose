@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "23" ] \
-  && pass "core plugin exposes 23 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 23 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "24" ] \
+  && pass "core plugin exposes 24 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 24 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2683,6 +2683,20 @@ echo $hits;' 2>/dev/null | tr -dc '0-9')
 [ "${BRAND_LEAK:-1}" = "0" ] \
   && pass "no post title, body or excerpt names the upstream store (آرومالند / Aromaland)" \
   || fail "${BRAND_LEAK:-?} post field(s) still name the upstream store — a re-import brought the branding back"
+
+# 38. Typo-tolerant search. An exact search is never rewritten; only an empty
+# result falls back to matching each query word within a small edit distance.
+# A mutation that drops the fallback leaves the typo query returning nothing.
+section "38. Typo-tolerant product search"
+TYPO_URL="$SITE_URL/?s=%DA%98%D8%A7%D9%88%D9%88%D8%B1%D9%88&post_type=product"
+TYPO_HTML=$(curl -s --max-time 30 "$TYPO_URL")
+html_has "$TYPO_HTML" "dk-product-card" \
+  && pass "a one-letter typo in a product name still finds products" \
+  || fail "typo query returned no product cards"
+NONSENSE_HTML=$(curl -s --max-time 30 "$SITE_URL/?s=zzqqxxyy&post_type=product")
+html_has "$NONSENSE_HTML" "dk-product-card" \
+  && fail "nonsense query returned product cards — fuzzy match is too loose" \
+  || pass "a nonsense query still returns no products"
 
 section ""
 echo "==========================================="
