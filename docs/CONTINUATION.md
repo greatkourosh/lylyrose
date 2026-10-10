@@ -208,9 +208,11 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    for `db.gz`, `themes.zip` and `uploads.zip`.
 
    **It captures the seeded finder, which is what makes it the current rollback
-   point.** Counted out of its own DB dump, joining `wp_term_taxonomy` on `term_id`
-   to `wp_term_relationships` on `term_id` (the other spelling is a silent 0 — see
-   [[term-ids-differ-across-wp-term-tables]]):
+   point.** Counted out of its own DB dump, joining `wp_term_taxonomy.term_taxonomy_id`
+   to `wp_term_relationships.term_taxonomy_id` — the column both tables name, per the
+   dump's own `CREATE TABLE`. Joining on `term_id` instead also returns 110 **on this
+   dump only because the ids happen to coincide**; it is the wrong join and is not the
+   one to write down. See [[term-ids-differ-across-wp-term-tables]].
 
    | Backup | finder terms | products linked |
    |---|---|---|
@@ -223,6 +225,9 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    write is therefore `63b07c7336e5`, not `90bb68c3ee88`** — the latter is the genuine
    *pre*-seed point, which is what makes it the one to restore if the seed must be
    undone.
+
+   **The `--dry-run` guard in the same seeder is fixed too** (`4cb7dbe2`); it matched
+   only the bare word, so `--dry-run` wrote to production. Covered above.
 
 5. **Gift cards are DONE and verified, not deferred.** The roadmap still calls the
    gift card "deferred" pending a latency fix. Measured: 4 published products carry

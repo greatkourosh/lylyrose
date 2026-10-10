@@ -2798,6 +2798,14 @@ archive rather than from the site. Getting that count took three wrong regexes f
 `term_taxonomy_id`, so matching the first column to the second silently yields **zero**
 every time. A count of 0 here means "you parsed it wrong", not "the seed never ran".
 
+> **Corrected 2026-10-10 (later session), after re-reading the dump's DDL.** The
+> join to use is on **`term_taxonomy_id`** — the column *both* tables name.
+> `wp_term_taxonomy` has two ids and `term_id` is not the one the relationship
+> table stores. The statement above is not wrong about the two tables differing,
+> but it reads as "join on `term_id`", which is the wrong rule: on this dump
+> `term_id` happens to return the same 110 because the id spaces coincide, so it
+> looks verified. Join on `term_taxonomy_id`.
+
 **Verified against the host, not against the seeder.** The seeder's own closing line
 reads the write loop it just performed; that is the report of a program grading its own
 homework. A separate probe re-read every value from the database and diffed it against
@@ -2833,3 +2841,97 @@ flag is a write switch wearing a label. And a peer session that seeds production
 then dies mid-write-up leaves the docs asserting the opposite of the truth — the same
 class of drift as [[production-state-vs-docs]], and the reason to re-measure instead of
 trusting the handoff.
+
+---
+
+## 2026-10-10 — The last two reds: a preview that wrote, and a backup nobody pulled
+
+Both open items in `CONTINUATION.md` are closed, and both were the same shape of
+bug as the ones already in this log: something that reported success while doing
+the opposite of what its name promised.
+
+### The `--dry-run` flag was a write switch wearing a label
+
+`docker/seed-finder-data.php` gated its writes on
+`in_array( 'dry-run', $_SERVER['argv'], true )`. The bare word matched; the
+conventional `--dry-run` did not, so it fell through to `false` and **seeded for
+real**. This matters more than it looks: the tool that seeds 110 products onto a
+live store had a documented dry-run that was not one, and the operator's belief
+that nothing happened was the exact thing being wrong.
+
+Fixed in `4cb7dbe2` with `preg_grep('/^-*dry-run$/', ...)`, which accepts
+`dry-run`, `--dry-run` and `-dry-run` in any position while still treating
+`--dry-run=false`, `--dryruntimes` and `no-dry-run` as real runs.
+
+**The test reads the guard out of the seeder instead of restating it.** A test
+that restates a one-line predicate drifts from it and passes against the bug it
+exists to catch — the failure mode already recorded in
+[[assert-fails-on-broken-build]], one level down. `docker/dry-run-guard-check.php`
+extracts the guard expression with a regex and evaluates the predicate, so it
+cannot be green against a seeder that is still broken. It was **proven red
+first**: against the committed `in_array` guard it fails exactly the three dashed
+forms and passes the other five.
+
+Getting there took four wrong versions of the extractor, and each failure looked
+identical — "PASS" or "could not find the guard" rather than "your regex missed".
+The one that mattered: the first extractor matched `preg_grep` only, so against
+the committed file it printed `FAIL: could not find the guard expression`, which
+reads like a broken test rather than a broken seeder. A probe that reports a
+problem is usually reporting a problem with itself.
+
+### Backup `63b07c7336e5` is pulled, and it is the post-seed rollback point
+
+The newest run had fired unpulled for the seventh time, which was the only red
+thing left. Pulled to `backups/updraft-63b07c7336e5/`: 6/6 parts size-equal to the
+host's FTP `SIZE`, `gzip -t` and `unzip -t` clean, archived
+`themes/lylyrose/style.css` reading `Version: 1.25.0` equal to the tree.
+`backup-check.py` green, exit 0.
+
+**Size-equal is not current, so the rows were counted.** Out of the dump's own DB:
+
+| Backup | finder terms | products linked |
+|---|---|---|
+| `90bb68c3ee88` (pre-seed) | 27 | **8** |
+| `63b07c7336e5` (post-seed) | 28 | **110** |
+
+110 is the rankable count the seed produced, so archived state and live site agree,
+and `63b07c7336e5` becomes the rollback point while `90bb68c3ee88` stays the
+pre-seed restore.
+
+**A correction to what this log said yesterday.** It recorded that
+`wp_term_taxonomy` keys on `term_id` while `wp_term_relationships` references
+`term_taxonomy_id`. The direction of that is right, but the consequence was
+stated backwards — the trap is not that you must join on `term_id`, it is that the
+correct join is on **`term_taxonomy_id`**, the column both tables actually name.
+The dump's `CREATE TABLE` settles it, and joining correctly reproduces 110.
+Joining on `term_id` *also* returns 110 on this particular dump, because the two
+id spaces coincide for these rows — which is exactly what makes the wrong join
+dangerous: it agrees with the right answer and teaches the wrong rule. A count of
+0 means "you parsed it wrong"; a count that agrees too easily means check the DDL
+before you write the method down.
+
+Also note the dump has **no column list** (`INSERT INTO \`t\` VALUES (...)`), so a
+parser that assumes one silently parses zero rows and reports the data as absent.
+Related: [[term-ids-differ-across-wp-term-tables]], [[count-runs-by-id-not-mtime-group]].
+
+### Also this pass
+
+- **Probe files in the local docroot:** `_cd287794110ef48dd3495187.php`,
+  `_findimg.php` and `_setimg2.php`, dated 2026-09-28, left by the thumbnail
+  session. Local container only, not production, and they return 404 unless
+  fetched by URL — but `_setimg2.php` calls `set_post_thumbnail`, so it is a
+  write on fetch. Left in place and reported rather than deleted: they are not
+  this session's to remove.
+- **Peer's uncommitted work preserved.** `docker/seed-finder-data.php` also
+  carries the docroot-uploader support from another session. Only the guard line
+  was committed; the peer's 12 lines were left unstaged and working. Mid-task the
+  file was reset to stage a single hunk and the peer's work was rebuilt from the
+  diff captured beforehand — it was verified byte-identical afterwards, but it was
+  reconstructed rather than never disturbed.
+- **Tooling note:** `grep`, `sed` and `tail` returned empty or stale output three
+  times in this pass, on files read correctly moments earlier. Every one was
+  caught by re-reading or by a Python fallback. `python3` was reliable throughout.
+  This is the same class of problem as
+  [[run-tests-grep-hangs-on-homepage]] and
+  [[pipefail-sigpipe-breaks-big-payload-assertions]]: a shell tool that fails
+  quietly is worse than one that fails loudly.
