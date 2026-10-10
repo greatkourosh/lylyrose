@@ -201,6 +201,10 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                 <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
                     <li class="dk-catnav-item"><a class="dk-mega-featured" href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?> ⭐</a></li>
                 <?php endif; ?>
+                <?php if ( class_exists( 'ASC_Needs_Finder' ) ) : ?>
+                    <li class="dk-catnav-item"><a href="<?php echo esc_url( home_url( '/skin-needs/' ) ); ?>"><?php esc_html_e( 'پوستت چه نیازی داره', 'lylyrose' ); ?></a></li>
+                    <li class="dk-catnav-item"><a href="<?php echo esc_url( home_url( '/hair-needs/' ) ); ?>"><?php esc_html_e( 'موهات چه نیازی داره', 'lylyrose' ); ?></a></li>
+                <?php endif; ?>
                 <li class="dk-catnav-item"><a href="<?php echo esc_url( $dk_landing( 'sale', home_url( '/incredible-offers/' ) ) ); ?>"><?php esc_html_e( 'تخفیف‌ها', 'lylyrose' ); ?> 🔥</a></li>
                 <li class="dk-catnav-item"><a href="<?php echo esc_url( $dk_landing( 'magazine', home_url( '/about/' ) ) ); ?>"><?php esc_html_e( 'مجله زیبایی', 'lylyrose' ); ?></a></li>
             </ul>
@@ -219,6 +223,10 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
     <nav class="dk-drawer-nav">
         <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
             <a href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?></a>
+        <?php endif; ?>
+        <?php if ( class_exists( 'ASC_Needs_Finder' ) ) : ?>
+            <a href="<?php echo esc_url( home_url( '/skin-needs/' ) ); ?>"><?php esc_html_e( 'پوستت چه نیازی داره', 'lylyrose' ); ?></a>
+            <a href="<?php echo esc_url( home_url( '/hair-needs/' ) ); ?>"><?php esc_html_e( 'موهات چه نیازی داره', 'lylyrose' ); ?></a>
         <?php endif; ?>
         <a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'فروشگاه', 'lylyrose' ); ?></a>
         <?php if ( is_user_logged_in() ) : ?>

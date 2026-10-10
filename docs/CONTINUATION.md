@@ -2778,3 +2778,25 @@ fraction is invalid, the declaration is silently dropped, and the text falls bac
 the inherited colour at 1.86:1 — the suite stayed green through it), and
 `perfume-finder.css` was reading `--dk-rose`, a token **defined nowhere**, so every
 `var()` fell back to a hardcoded hex and the finder ignored all palettes.
+
+## 2026-10-10 — Skin and hair needs pages (`پوستت چه نیازی داره`, `موهات چه نیازی داره`)
+
+Two quiz pages, `/skin-needs/` and `/hair-needs/`, built as `ASC_Needs_Finder` in
+`lylyrose-core/includes/class-needs-finder.php`. They reuse the perfume finder's
+`asc-finder__*` markup and `perfume-finder.css`, which the needs class enqueues on its
+own pages. The perfume finder is not changed.
+
+- Quiz: two questions per page (skin: type + concern; hair: texture + concern).
+- Matching: one point per matching type, one per matching concern, top 4 with a score above 0.
+- Product data: `_needs_types`, `_needs_concerns`, `_needs_usage` set on the 51 skin-care
+  (35) and hair-care (16) products by `docker/seed-needs-data.php`. Dry run is the default;
+  `--write` stores. The tags were inferred from product descriptions and have not been
+  reviewed by the owner.
+- Main menu: both links sit after the finder link in `header.php` (desktop catnav and mobile drawer).
+- Category slugs are `skin-care` and `hair-care`, not `skincare`/`haircare`.
+- `run-tests.sh` class count raised 22 → 23 for the new class (downstream-only, no upstream mirror).
+
+Suite: **351 passed, 0 failed** on local. Not yet on the live host: `diff-host.py`
+shows `header.php` carries committed work the host has not received, and `functions.php`
+and `class-palette.php` differ from the host for reasons outside this change. Deploy scope
+needs deciding before anything is uploaded.

@@ -1804,12 +1804,13 @@ section "32. Upstream/downstream class parity"
 # and not mirrored fails on one host or the other.
 # 21 since ASC_Finder_Weights (the finder's weight editor) and ASC_Finder_Tiers
 # (its budget-tier editor) landed. Both are downstream-only: they configure the
-# finder rather than mirror an upstream feature.
+# finder rather than mirror an upstream feature. 22 with ASC_Needs_Finder (the
+# skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "22" ] \
-  && pass "core plugin exposes 22 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 22 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "23" ] \
+  && pass "core plugin exposes 23 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 23 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
