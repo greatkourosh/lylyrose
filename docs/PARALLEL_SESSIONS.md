@@ -557,8 +557,8 @@ wanted, that is a build, not a missing label.
 | ~~`lylyrose-core/includes/class-finder-tiers.php`~~, ~~`class-finder-weights.php`~~ | **RESOLVED** — tracked in `8f175393`; `git status` is clean for `lylyrose-core/`. |
 | ~~`lylyrose-navy/` (31 files)~~ | **RESOLVED** — deleted in `50a8c651`. |
 
-Stray scratch: `wordpress/wp-content/themes/lylyrose/header.php.fixed` is untracked
-and not a deliverable. Delete it before the next commit sweep.
+Stray scratch `header.php.fixed` removed 2026-10-10 (root-owned; deleted via
+`docker exec -u root lylyrose-wp`).
 
 ---
 
@@ -583,8 +583,8 @@ and not a deliverable. Delete it before the next commit sweep.
   session that staged it.** Check `git diff --cached` *before* staging as well as
   before committing. `BACKUP_CHECKLIST.md` sat staged for two sessions that way.
 
-The untracked `docker/_probe*.php`, `docker/check-*.py` and the `.txt` scratch
-files at the repo root are **scratch, not deliverables**. Do not commit them.
+The `docker/_probe*.php` and root `.txt` scratch files were removed 2026-10-10. The
+untracked `docker/check-*.py` helpers remain **scratch, not deliverables**. Do not commit them.
 
 ---
 
@@ -643,12 +643,11 @@ correction above.
 ## 6. Roadmap
 
 > **Current, 2026-10-10.** Open items: per-host credentials on `lylyrose.ir` (ZarinPal
-> merchant, PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); the owner's review
-> of the 51 St. Ives needs tags (applied, inferred from descriptions, not yet reviewed);
-> `header.php.fixed` scratch file; and the untracked `docker/_probe*` and `.txt` scratch
-> files, which must not be committed. Done 2026-10-10: the 1.27.0 teal palette was
-> checked on the live homepage by eye, the new products were confirmed, and local and
-> live match: 60 first-party files identical, 165 products on both.
+> merchant, PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence). Scratch files
+> (`header.php.fixed`, `docker/_probe*`, root `.txt`) were removed 2026-10-10. Done 2026-10-10: the 1.27.0 teal palette was checked on the live
+> homepage by eye, the new products were confirmed, the 51 St. Ives needs tags were
+> reviewed and marked done by the owner, and local and live match: 60 first-party files
+> identical, 165 products on both.
 
 Steps 1–5 are history. Navy is gone from production and from git; nothing is pending
 there.
