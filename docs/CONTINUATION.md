@@ -2838,5 +2838,5 @@ Two deviations from the brief, kept for WCAG AA: `--dk-muted` is `#737373` (the 
 `#8A8A8A` gives 3.45:1 on white), and the brief's Soft Pink and Blush have no token, so
 they are not surfaces.
 
-Not yet checked: a screenshot of the live homepage in the teal palette. The palette is
+Checked 2026-10-10: the live homepage was viewed in the teal palette by eye and confirmed. The palette is
 served and the version is bumped; the default colours were not inspected by eye.

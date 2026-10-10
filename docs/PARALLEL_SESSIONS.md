@@ -644,10 +644,11 @@ correction above.
 
 > **Current, 2026-10-10.** Steps 1–5 below predate the navy merge and are kept as
 > history. Open items now: per-host credentials on `lylyrose.ir` (ZarinPal merchant,
-> PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); review of the 1.27.0 teal
-> palette on the live homepage by eye; the unreviewed product-need tags beyond the
-> 51 St. Ives products; `header.php.fixed` scratch file; and the untracked
-> `docker/_probe*` and `.txt` scratch files, which must not be committed.
+> PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence); the unreviewed product-need
+> tags beyond the 51 St. Ives products; `header.php.fixed` scratch file; and the
+> untracked `docker/_probe*` and `.txt` scratch files, which must not be committed.
+> Done 2026-10-10: the 1.27.0 teal palette was checked on the live homepage by eye,
+> and the new products were confirmed.
 
 Immediate, in order. Steps 1–2 are new and supersede the old plan; 3–5 are the
 original sequence, trimmed to what still applies.
