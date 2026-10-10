@@ -2935,3 +2935,101 @@ Related: [[term-ids-differ-across-wp-term-tables]], [[count-runs-by-id-not-mtime
   [[run-tests-grep-hangs-on-homepage]] and
   [[pipefail-sigpipe-breaks-big-payload-assertions]]: a shell tool that fails
   quietly is worse than one that fails loudly.
+
+---
+
+## 2026-10-10 — A stale `🔴 OPEN` header survived a deploy the diff had already proven
+
+A verification pass, not a build. No code changed; the suite had been green and the
+docs' own open list was empty, so the work here was to find out whether that was
+still true and to correct the record where it was not.
+
+### The baseline, re-measured rather than recalled
+
+| Check | Result |
+|---|---|
+| `bash docker/run-tests.sh` | **351 passed, 0 failed** |
+| `python3 docker/backup-check.py` | green — newest run `63b07c7336e5`, 6/6 parts, pulled |
+| `python3 docker/diff-host.py` | **57 identical / 0 differing / 0 absent** |
+
+`diff-host` is the one that carries the argument below: a green suite says the code
+is right, and a pulled backup says the bytes exist off-host, but neither says the
+host is running *this* tree. That is a separate question and it had been asked
+before — see [[green-suite-is-not-deployed-diff-host-finds-it]].
+
+### The tenth doc drift, and the first one that was a header
+
+Nine previous cases ([[production-state-vs-docs]]) were all checklist rows whose
+wording outlived the work. This one is different in a way that makes it worth
+writing down: the stale text was the section's own title.
+
+`docs/CONTINUATION.md`'s `🔴 OPEN — the finder card is unreadable, and a duplicated
+CSS block caused it` still read **"Fixed locally, committed, NOT deployed"**,
+months after `c34c2f64` had been pushed and `diff-host.py` proved the CSS identical
+on the host. The sibling sections of the same file had each been corrected with an
+inline supersede note — which is exactly why this one survived: **the file looked
+maintained.**
+
+A header is the part of a document that gets *grepped* rather than read, so it is
+the part least likely to be revisited and most likely to be believed. Superseding
+notes get written near the fix, by whoever is already there; nobody returns to the
+place the claim was made. So the drift is not random — it collects in headers.
+
+`grep -n 'OPEN\|NOT deployed\|🚧' docs/*.md` is now a standing sweep rather than
+something to reach for after the docs are already suspect.
+
+The correction that landed in that section records all three of its claims, because
+correcting the body and leaving the title would have reproduced the exact bug being
+corrected. Two of the three were simply superseded — the data gap closed to 110 of
+165 with the 2026-10-09 seed, and the remaining 55 are body care, a human decision
+rather than missing annotations. The third, "ratings thin", is still true and was
+left standing, because it is not a code item.
+
+### The CSS warning was checked rather than assumed
+
+The section's technical claim — a duplicated block whose second copy beat the fix —
+is the shape of [[a-css-fix-that-lies]], so it was worth knowing whether the file
+still had that shape. It does not: there is no `asc-finder__grid`, and the two
+`.asc-finder__media` width rules are the base 132px and a 168px that sits **inside**
+a stacked-layout `@media` block. Deliberate, and it is what the block comment above
+it says it is. Reading the selector count alone would have called this a duplicate;
+only the media-query nesting distinguishes them.
+
+### The probes are gone
+
+The three docroot files from the 2026-09-28 thumbnail session
+(`_cd287794110ef48dd3495187.php`, `_findimg.php`, `_setimg2.php`) are deleted. Two
+of them call `set_post_thumbnail` on fetch, so they were a write behind a URL, and
+the previous session had deliberately left them in place on the grounds that they
+were not its own to remove.
+
+They were confirmed container-only first — absent from the host filesystem, so
+deleting them in the container could not touch production — and the file that
+looked most like a write, `_setimg2.php`, was read in full before anything was
+removed. It was also found to carry a guard that refuses to run unless the target
+attachment's file path contains `hermes`, so on this database it would have exited
+at `GUARD_FAIL` rather than writing. Not load-bearing, but not a file to leave
+lying around either.
+
+All five routes return 200 afterwards (`/`, `/shop/`, `/product-category/perfume/`,
+`/perfume-finder/`, `/incredible-offers/`) and the suite returned to **351/0**, so
+the deletion is verified rather than assumed harmless.
+
+### Two smaller traps, both in this pass
+
+**A "Modified" file can be a mode change and nothing else.** `docker/_pull-updraft.py`
+showed in `git status` and diffed as `1 file changed, 0 insertions(+), 0
+deletions(-)` — a chmod. Committing it would have been noise with a misleading
+stat line, so it was reverted rather than staged. `git diff --stat` showing all
+zeros is the tell.
+
+**Staging has to exclude the peer session's live work.** A peer on the
+`claude/elegant-dirac-390e3b` worktree has uncommitted changes in
+`docker/seed-finder-data.php` and `docker/host-dryrun.py` — docroot-uploader
+support, about 15 lines, still in progress. `git add docs/CONTINUATION.md` by name
+rather than `-A`; a sweep would have pulled both in, and neither is this session's
+to commit. See [[concurrent-sessions-share-one-worktree]].
+
+And the push was verified against `git ls-remote origin master` rather than trusted
+from the output, because of [[git-push-gnutls-tls-failure]] — `d4188765..3333e40e`
+on the message, `3333e40e` on the remote.
