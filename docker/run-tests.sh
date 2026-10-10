@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "24" ] \
-  && pass "core plugin exposes 24 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 24 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "25" ] \
+  && pass "core plugin exposes 25 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 25 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2697,6 +2697,23 @@ NONSENSE_HTML=$(curl -s --max-time 30 "$SITE_URL/?s=zzqqxxyy&post_type=product")
 html_has "$NONSENSE_HTML" "dk-product-card" \
   && fail "nonsense query returned product cards — fuzzy match is too loose" \
   || pass "a nonsense query still returns no products"
+
+# 39. AVIF delivery. Browsers that accept AVIF get it; everyone else keeps WebP.
+# The Vary header is what stops a shared cache from handing AVIF to a browser
+# that cannot read it, so it is asserted alongside the URL switch.
+section "39. AVIF delivery with WebP fallback"
+AVIF_HTML=$(curl -s --max-time 30 -H "Accept: image/avif,image/webp,*/*" "$SITE_URL/?s=%DA%98%D8%A7%D9%88%D8%B1&post_type=product")
+PLAIN_HTML=$(curl -s --max-time 30 -H "Accept: text/html" "$SITE_URL/?s=%DA%98%D8%A7%D9%88%D8%B1&post_type=product")
+html_has "$AVIF_HTML" ".avif" \
+  && pass "an AVIF-capable browser is sent .avif image URLs" \
+  || fail "AVIF-capable browser received no .avif image URLs"
+html_has "$PLAIN_HTML" ".avif" \
+  && fail "a non-AVIF browser was sent .avif image URLs — it cannot decode them" \
+  || pass "a non-AVIF browser still receives WebP only"
+VARY=$(curl -sI --max-time 30 "$SITE_URL/?s=x" | grep -i '^vary:' || true)
+html_has "$VARY" "Accept" \
+  && pass "front-end responses carry Vary: Accept" \
+  || fail "no Vary: Accept header — a shared cache could serve AVIF to every visitor"
 
 section ""
 echo "==========================================="

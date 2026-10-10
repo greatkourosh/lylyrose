@@ -91,6 +91,9 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-fuzzy-search.php';
         ASC_Fuzzy_Search::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-avif.php';
+        ASC_Avif::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-coupons.php';
         ASC_Coupons::init();
 
