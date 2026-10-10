@@ -557,6 +557,7 @@ Nothing of mine is staged. `lylyrose-core.php` is byte-identical to HEAD.
 
 | Session | Owns |
 |---|---|
+| needs pages seed + SKU keying (2026-10-10) | **done** — `docker/seed-needs-data.php` keyed by SKU; live tags written |
 | brand palette + mega menu (2026-10-10) | **done** — `style.css` `:root`, `class-palette.php`, `lylyrose_mega_menu()`, `header.php` catnav, `docker/seed-finder-data.php` |
 | New product rollout | idle — `class-finder-tiers.php`, `class-finder-weights.php`, the perfume-finder CSS layout are committed |
 | عطرت رو انتخاب کن در صغحه | idle |

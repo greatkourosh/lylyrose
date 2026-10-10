@@ -2801,9 +2801,14 @@ Deployed to `lylyrose.ir` in commit `2827066c`'s deploy: the five needs-page fil
 `diff-host.py` 60 identical, 0 differing. Live `/skin-needs/`, `/hair-needs/` return
 content, the quiz has 11 and 9 options, and both menu links are present.
 
-**Known gap:** the product tags exist only in the local database. Live result lists are
-empty until `docker/seed-needs-data.php --write` runs against the live database. The tags
-were inferred from product descriptions and have not been reviewed by the owner.
+**Seeded live 2026-10-10.** All 51 St. Ives products carry `_needs_types`, `_needs_concerns`
+and `_needs_usage` on `lylyrose.ir` (35 skin, 16 hair), written by SKU. Live `/skin-needs/`
+and `/hair-needs/` return 4 result cards for sample answers. The tags were inferred from
+product descriptions and have not been reviewed by the owner.
+
+`docker/seed-needs-data.php` is now keyed by SKU, not product ID. The IDs it used before
+exist only locally: none of the 51 matched on the live store, where the same products are
+1832–1931, so an ID-keyed `--write` there would have tagged nothing.
 
 Suite: **351 passed, 0 failed**.
 
