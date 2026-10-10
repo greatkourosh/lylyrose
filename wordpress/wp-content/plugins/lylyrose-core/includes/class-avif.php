@@ -92,13 +92,25 @@ class ASC_Avif {
 		if ( ! file_exists( $webp ) || file_exists( $avif ) ) {
 			return file_exists( $avif );
 		}
+		if ( function_exists( 'imageavif' ) ) {
+			$im = @imagecreatefromwebp( $webp );
+			if ( ! $im ) {
+				return false;
+			}
+			$ok = imageavif( $im, $avif, self::QUALITY );
+			imagedestroy( $im );
+			return $ok;
+		}
+		if ( ! class_exists( 'Imagick' ) ) {
+			return false;
+		}
 		try {
 			$image = new Imagick( $webp );
 			$image->setImageFormat( 'avif' );
 			$image->setImageCompressionQuality( self::QUALITY );
 			$ok = $image->writeImage( $avif );
 			$image->clear();
-		} catch ( ImagickException $e ) {
+		} catch ( Exception $e ) {
 			error_log( 'ASC_Avif: ' . $webp . ' -- ' . $e->getMessage() );
 			return false;
 		}
