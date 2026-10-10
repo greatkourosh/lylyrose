@@ -24,7 +24,8 @@
  *
  * The profile path is relative to this file so the same script runs from the
  * docroot on a live host, where nothing exists under /tmp and wp-load.php is a
- * sibling rather than at the container path.
+ * sibling rather than at the container path. The docroot uploader randomises
+ * the data file's name, so it is found by glob there.
  */
 if ( ! file_exists( '/var/www/html/wp-load.php' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
@@ -37,9 +38,16 @@ if ( ! file_exists( '/var/www/html/wp-load.php' ) ) {
 $dry_run = PHP_SAPI === 'cli'
 	? count( preg_grep( '/^-*dry-run$/', $_SERVER['argv'] ?? array() ) ) > 0
 	: isset( $_GET['dry-run'] );
-$profiles = json_decode( file_get_contents( __DIR__ . '/finder-profiles.json' ), true );
+// The docroot uploader stores the data file under a randomised name; CLI runs
+// have it beside this script under its real name.
+$data = glob( __DIR__ . '/finder-profiles.json' ) ?: glob( __DIR__ . '/_*_d_*.json' );
+if ( ! $data ) {
+	echo "cannot locate finder-profiles.json\n";
+	exit( 2 );
+}
+$profiles = json_decode( file_get_contents( $data[0] ), true );
 if ( ! is_array( $profiles ) ) {
-	fwrite( STDERR, "cannot read /tmp/finder-profiles.json\n" );
+	echo 'cannot parse ' . basename( $data[0] ) . "\n";
 	exit( 2 );
 }
 
@@ -68,7 +76,7 @@ function lr_set_terms( $product_id, $taxonomy, $names ) {
 		if ( ! $term ) {
 			$created = wp_insert_term( $name, $taxonomy );
 			if ( is_wp_error( $created ) ) {
-				fwrite( STDERR, "term \"{$name}\" in {$taxonomy}: " . $created->get_error_message() . "\n" );
+				echo "term \"{$name}\" in {$taxonomy}: " . $created->get_error_message() . "\n";
 				return false;
 			}
 			$term = get_term( $created['term_id'], $taxonomy );

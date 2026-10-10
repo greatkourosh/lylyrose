@@ -10,6 +10,73 @@ pass — a stale version of this file is worse than none.
 
 ---
 
+## 0f. Brand palette + mega menu session — committed here (2026-10-10)
+
+Suite **351 passed, 0 failed**. Theme `Version:` → **1.26.0**.
+
+| File | Change |
+|---|---|
+| `lylyrose/style.css` | `:root` recoloured to the new Lyly Rose brand (deep teal `#064048`); `.dk-mega-featured` rule added; `Version:` → **1.26.0** |
+| `lylyrose-core/includes/class-palette.php` | new first-shipped `lylyrose` preset, and `:root` now matches it |
+| `lylyrose/functions.php` | `lylyrose_mega_menu()` — the curated four-section tree; `lylyrose_old_cat_redirect()` — 301s the five categories that moved under عطر و ادکلن |
+| `lylyrose/header.php` | catnav renders the mega menu; drawer unchanged |
+| `docker/seed-finder-data.php` | locate the data file by glob (the docroot uploader randomises its name) |
+
+### The fatal that started this session, and what it cost
+
+**Every page 500'd with `PHP Parse error: syntax error, unexpected token "<",
+expecting end of file in header.php on line 250`.** `header.php` carried an
+orphaned `<?php` at line 247, and line 250 opened PHP again. PHP cannot re-open
+inside PHP, and `header.php` loads on **every** page, so the whole site was down
+rather than one template.
+
+**The lesson is the one that keeps recurring here: lint every PHP file after
+writing it.** `run-tests.sh` never went red for this — a parse error in
+`header.php` is a 500, and the suite's own fixtures read pages it controls. The
+suite is not a syntax check. `php -l` over the whole theme, plugin and
+mu-plugin trees is the check that catches it:
+
+```bash
+docker compose exec -T -u root wordpress sh -lc \
+  'for f in $(find /var/www/html/wp-content -name "*.php"); do php -l "$f" || echo "FAIL $f"; done'
+```
+
+Note the `-u root`. See §5 — the Edit tool cannot write under `wp-content` at
+all, so this session's one-line fix was applied from inside the container.
+Ownership is unaffected: a rewrite from root leaves the file `www-data`-owned
+(`php -r` writes in place, it does not recreate the inode), and
+`test -w` as `www-data` still passes afterwards.
+
+### Why the palette values differ from the brief in two places
+
+`--dk-muted` is **`#737373`, not the requested `#8A8A8A`** — `#8A8A8A` is
+**3.45:1** on white and fails AA; `#737373` is **4.74:1**. And the brief's Soft
+Pink / Blush have **no token to land in**: they would be a second near-identical
+surface next to `--dk-red-light`, so they stay available to CSS as literals
+rather than becoming two tokens that always render the same. Every other value is
+the brief's, and all clear AA — worst is the muted text on a `#fafafa` card at
+**4.54:1**.
+
+**`--dk-red` keeps its name while being a teal.** ~96 rules read it. Renaming it
+to `--dk-primary` is pure churn across three CSS files for no visual gain; the
+token map in `class-palette.php` is the one place that would have to change.
+
+### The mega menu resolves its slugs on every render, on purpose
+
+`lylyrose_mega_menu()` is a declared spec, not stored navigation. It is resolved
+against live terms each render, so **a slug this shop does not have is skipped
+rather than rendered as a dead link**, and a category the owner renames follows
+the rename. `hide_empty` is deliberately *not* set: this is the shop's
+navigation, not a report, and an empty آرایش still leads somewhere real. Dropping
+it would silently undo the agreed structure — which is exactly what `header.php`'s
+drawer already does, and must keep doing, because it groups by slug and its
+catch-all has to pick up whatever the rows did not claim.
+
+Verified against the served HTML: four sections, 23 rows, and one ⭐ featured row
+(عطرت رو پیدا کن → the finder page).
+
+---
+
 ## 0e. Announce-bar + demo-banner palette session — committed here (2026-10-07)
 
 The announce strip and the demo banner now have a real palette. Suite **347 passed, 0
@@ -490,18 +557,24 @@ Nothing of mine is staged. `lylyrose-core.php` is byte-identical to HEAD.
 
 | Session | Owns |
 |---|---|
-| this one | **done** — product-card photo links, offers-rail product name, `lylyrose` theme markup. All shipped in `2a9c2ee2`; nothing left staged |
-| New product rollout | `class-palette.php`, `class-finder-tiers.php`, `class-finder-weights.php`, `docker/run-tests.sh`, the perfume-finder CSS layout |
+| brand palette + mega menu (2026-10-10) | **done** — `style.css` `:root`, `class-palette.php`, `lylyrose_mega_menu()`, `header.php` catnav, `docker/seed-finder-data.php` |
+| New product rollout | idle — `class-finder-tiers.php`, `class-finder-weights.php`, the perfume-finder CSS layout are committed |
 | عطرت رو انتخاب کن در صغحه | idle |
 | https://lylyrose.local/perfume-finder/ ... | idle |
 
-The two finder classes are untracked, so they are invisible to `git status`
-review by anyone who has not seen them.
+**Two rules that a shared worktree makes necessary, both learned the hard way:**
 
-**The navy deletion has no owner.** It was not staged by any session listed
-here. Treat it as an orphaned change until someone claims it — it is 31 files
-and it is what unblocks the 500, so nobody should "clean up" the index and
-discover it was load-bearing.
+- **Read `git diff` before you take anything.** A peer edits the same files
+  live. Do not `git checkout` or `git restore` a path on the strength of a memory
+  of its last state — that is how work gets thrown away. If a peer's change is
+  entangled with yours, `git add -p` only your lines, or leave the file
+  uncommitted and say so in the session entry.
+- **The `index` is shared, so a staged-but-uncommitted change outlives the
+  session that staged it.** Check `git diff --cached` *before* staging as well as
+  before committing. `BACKUP_CHECKLIST.md` sat staged for two sessions that way.
+
+The untracked `docker/_probe*.php`, `docker/check-*.py` and the `.txt` scratch
+files at the repo root are **scratch, not deliverables**. Do not commit them.
 
 ---
 
