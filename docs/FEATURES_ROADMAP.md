@@ -46,9 +46,9 @@ Current-state facts this list is built on:
   return **200** on `lylyrose.ir`.
 
 **What is genuinely still absent** (verified 2026-09-30, **re-verified 2026-10-08** —
-still true, by absence of any reference in the theme or the suite): AVIF, fuzzy
-search (ranking only — a SKU/code lookup exists), and per-host credentials for SMS,
-payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
+still true at the time, by absence of any reference in the theme or the suite). AVIF
+and typo-tolerant search both shipped 2026-10-10 (see CONTINUATION.md). What remains
+absent: per-host credentials for SMS, payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
 
 **Perfume Finder content coverage: 10 of 165 products** (re-verified 2026-10-08 —
 `_asc_notes_*` on 10 products, 0 rows of finder-factor data). The remaining 155 are

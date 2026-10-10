@@ -156,9 +156,8 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    it is the single highest-impact item here, and no code change can unblock it.
    WP Super Cache is still not enabled.
 
-3. **Genuinely absent, confirmed by absence of any reference in theme or suite:**
-   AVIF, and fuzzy search.** (Fuzzy is not the same as the SKU/code lookup, which
-   ships and works.)
+3. **✅ DONE 2026-10-10 — AVIF and typo-tolerant search are both live.** See the
+   2026-10-10 entry at the end of this file. Neither is in any remaining open item.
 
 4. **✅ Perfume Finder data is DONE and LIVE on `lylyrose.ir` (seeded 2026-10-09,
    re-verified 2026-10-10).** Production answers on **110 of 165**, up from 8. The
@@ -2841,3 +2840,34 @@ they are not surfaces.
 
 Checked 2026-10-10: the live homepage was viewed in the teal palette by eye and confirmed. The palette is
 served and the version is bumped; the default colours were not inspected by eye.
+
+## 2026-10-10 — Typo-tolerant search and AVIF delivery
+
+Built in `aroma_store` first, mirrored to `lylyrose`, per `UPSTREAM_RELATIONSHIP.md`.
+
+- **Typo-tolerant search** (`ASC_Fuzzy_Search`). Runs only when an exact search returns
+  nothing, so a matching query is never rewritten. Each query word must be within a small
+  edit distance of some title word. Persian ي/ك/ى fold to the catalogue's forms. Live:
+  `ژاوورو` returns product cards, a nonsense query returns none. Commits `c7f139ee`
+  (lylyrose) and `332382fb` (aroma_store).
+- **AVIF delivery** (`ASC_Avif`). Each WebP upload gets an `.avif` sibling, about 68%
+  smaller on a sample. Image URLs switch to AVIF only when `Accept` offers `image/avif`
+  and the file exists; everything else keeps WebP. Front-end responses send
+  `Vary: Accept`. Commits `eea32ea7` / `3f5cc874`, then `9cb24580` / `07b8cc2a`.
+
+**The live host has GD but no Imagick.** The first encoder was Imagick-only and would
+have fataled on every upload there. It now prefers `imageavif()` and falls back to
+Imagick. All 2,099 live WebP uploads have an AVIF sibling, with 0 failures.
+
+**Verified on the live site:** the same URL returns 3 `.avif` refs for an AVIF-capable
+`Accept` and 12 `.webp` refs for a plain one, with `Vary: Accept` on both. A live `.avif`
+serves as `image/avif`.
+
+**Not verified:** AVIF rendering in a real browser. The check covered URLs and headers,
+not pixels. New uploads get AVIF through the metadata hook, which was tested on the
+local stack only.
+
+**Suites:** upstream 324/0, downstream 356/0. The downstream payment section (ZarinPal
+sandbox) failed once in a run, passed on rerun, and the sandbox was up. Treat that
+section as flaky, not as a regression.
+

@@ -1,7 +1,7 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-10 against git and the live host. Several Claude
+name. Last reconciled 2026-10-10 against git and the live host (typo search and AVIF added in §0g). Several Claude
 sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
@@ -14,6 +14,23 @@ Keep it current. If you change something listed here, change it here in the same
 pass — a stale version of this file is worse than none.
 
 ---
+
+## 0g. Typo search + AVIF session — committed and live (2026-10-10)
+
+Built in `aroma_store` first, then mirrored. Suites: upstream **324/0**, downstream
+**356/0**. Full record in `CONTINUATION.md` (2026-10-10 entry).
+
+| Commit | Repo | Change |
+|---|---|---|
+| `c7f139ee` / `332382fb` | lylyrose / aroma_store | `ASC_Fuzzy_Search` typo fallback |
+| `eea32ea7` / `3f5cc874` | lylyrose / aroma_store | `ASC_Avif` AVIF delivery + `Vary: Accept` |
+| `9cb24580` / `07b8cc2a` | lylyrose / aroma_store | AVIF encoder uses GD when Imagick is absent |
+
+**Trap worth keeping:** the live host has GD with AVIF but no Imagick. Any encoder
+written against the local Imagick stack would fatal on every upload there.
+
+**Still uncommitted and not this session's:** `docker/host-dryrun.py` in lylyrose.
+Leave it unstaged unless its owner says otherwise.
 
 ## 0f. Brand palette + mega menu session — committed here (2026-10-10)
 
