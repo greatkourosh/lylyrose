@@ -2615,7 +2615,21 @@ is unchanged for visitors.
 
 ---
 
-## 🔴 OPEN — the finder card is unreadable, and a duplicated CSS block caused it
+## 🔴 ~~OPEN~~ CLOSED — the finder card fix is deployed; the section header and both "Still open" claims below are stale (verified 2026-10-10)
+
+**2026-10-10 correction.** This section's "Still open" list is superseded on every
+line, and the header kept a "NOT deployed" state long after it was false:
+
+1. **Deployed — `diff-host.py` reads 57 identical / 0 differing / 0 absent**, which
+   covers `assets/css/perfume-finder.css` byte-for-byte. `c34c2f64` is in history
+   and the host serves it. The duplicate-block shape this section warned about was
+   also re-checked: the only two `.asc-finder__media` width rules are the base
+   132px and a 168px inside a stacked-layout `@media` block — deliberate, not a
+   repeat of the bug (see [[a-css-fix-that-lies]] for the failure mode).
+2. **The data gap is superseded** — 110 of 165 rankable since the 2026-10-09 seed
+   (see the coverage section above); the 55 left are body care, a human decision,
+   not missing annotations.
+3. **Ratings remain data-thin** — that line is still true and is not a code item.
 
 **2026-10-05.** `c34c2f64`. Fixed locally, **committed, NOT deployed**.
 Found by looking at `https://lylyrose.ir/perfume-finder/` — the check the
