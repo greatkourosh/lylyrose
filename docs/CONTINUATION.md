@@ -2796,7 +2796,30 @@ own pages. The perfume finder is not changed.
 - Category slugs are `skin-care` and `hair-care`, not `skincare`/`haircare`.
 - `run-tests.sh` class count raised 22 → 23 for the new class (downstream-only, no upstream mirror).
 
-Suite: **351 passed, 0 failed** on local. Not yet on the live host: `diff-host.py`
-shows `header.php` carries committed work the host has not received, and `functions.php`
-and `class-palette.php` differ from the host for reasons outside this change. Deploy scope
-needs deciding before anything is uploaded.
+Deployed to `lylyrose.ir` in commit `2827066c`'s deploy: the five needs-page files, then
+`header.php` (which also carried the approved mega-menu rebuild `e3178060`). Verified:
+`diff-host.py` 60 identical, 0 differing. Live `/skin-needs/`, `/hair-needs/` return
+content, the quiz has 11 and 9 options, and both menu links are present.
+
+**Known gap:** the product tags exist only in the local database. Live result lists are
+empty until `docker/seed-needs-data.php --write` runs against the live database. The tags
+were inferred from product descriptions and have not been reviewed by the owner.
+
+Suite: **351 passed, 0 failed**.
+
+## 2026-10-10 — Lyly Rose palette is the default, theme 1.27.0
+
+Commit `2827066c`. `class-palette.php` gains a `lylyrose` palette (deep teal `#064048` as
+the only strong colour; white and pastel mint/blush surfaces) and makes it the `:root`
+default in `style.css`. The earlier ivory, navy and night palettes stay selectable.
+
+Theme `Version:` → **1.27.0**. `style.css` Version is the cache-buster: the previous
+1.26.0 would keep browsers on the old colours. Deployed `class-palette.php`,
+`functions.php` and `style.css`; `diff-host.py` shows 60 identical, 0 differing.
+
+Two deviations from the brief, kept for WCAG AA: `--dk-muted` is `#737373` (the requested
+`#8A8A8A` gives 3.45:1 on white), and the brief's Soft Pink and Blush have no token, so
+they are not surfaces.
+
+Not yet checked: a screenshot of the live homepage in the teal palette. The palette is
+served and the version is bumped; the default colours were not inspected by eye.
