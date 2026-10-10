@@ -122,48 +122,57 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
             <div class="dk-catnav-scroll">
             <ul class="dk-catnav-list">
                 <?php
+                /* Fallback labels for the mobile drawer, keyed by the slugs the
+                   mega menu uses, and resolved to landing pages below. Only read
+                   when the shop has no product categories at all. */
                 $cat_menu = array(
                     'عطر و ادکلن'     => 'perfume',
-                    'مردانه'          => 'men',
-                    'زنانه'           => 'women',
-                    'یونیسکس'         => 'unisex',
-                    'ادو پرفیوم'      => 'eau-de-parfum',
-                    'ادو تویلت'       => 'eau-de-toilette',
-                    'عطر روغنی'       => 'perfume-oil',
-                    'بادی اسپلش'      => 'body-spray',
-                    'ست هدیه'         => 'gift-sets',
-                    'اکسسوری عطر'    => 'accessories',
+                    'آرایش'          => 'makeup',
+                    'مراقبت از پوست'  => 'skincare',
+                    'مراقبت از مو'   => 'haircare',
+                    'برندها'         => 'brands',
+                    'تخفیف‌ها'        => 'sale',
+                    'مجله زیبایی'    => 'magazine',
                 );
 
-                // If the shop has product categories (WooCommerce), prefer them.
-                // Uncapped: the drawer groups every category by slug, so truncating
-                // here would silently empty groups.
-                //
-                // Top-level only, biggest first, so the single "دسته‌بندی کالا"
-                // panel leads with the categories a visitor is most likely to want.
-                $product_cats = function_exists( 'get_terms' ) ? get_terms( array(
-                    'taxonomy'   => 'product_cat',
-                    'hide_empty' => true,
-                    'parent'     => 0,
-                    'exclude'    => array( get_option( 'default_product_cat' ) ),
-                    'orderby'    => 'count',
-                    'order'      => 'DESC',
-                ) ) : array();
-
-                if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) :
-                    $dk_cells = function_exists( 'lylyrose_mega_cats_menu' ) ? lylyrose_mega_cats_menu( $product_cats ) : array();
-                else :
-                    $dk_cells = array();
-                    foreach ( $cat_menu as $label => $slug ) {
-                        $dk_cells[] = array(
-                            'name'  => __( $label, 'lylyrose' ),
-                            'url'   => add_query_arg( 'product_cat', $slug, $shop_url ),
-                            'links' => array(),
-                        );
+                // The panel is the owner's agreed tree (lylyrose_mega_menu), not a
+                // dump of whatever product_cat happens to hold. The per-category
+                // fallback below only runs when that menu resolves to nothing —
+                // a shop whose categories were renamed away — so the trigger is
+                // never a dead end.
+                $dk_mega = function_exists( 'lylyrose_mega_menu' ) ? lylyrose_mega_menu() : array();
+                if ( empty( $dk_mega ) && function_exists( 'lylyrose_mega_cats_menu' ) ) {
+                    $product_cats = function_exists( 'get_terms' ) ? get_terms( array(
+                        'taxonomy'   => 'product_cat',
+                        'hide_empty' => true,
+                        'parent'     => 0,
+                        'exclude'    => array( get_option( 'default_product_cat' ) ),
+                        'orderby'    => 'count',
+                        'order'      => 'DESC',
+                    ) ) : array();
+                    if ( ! is_wp_error( $product_cats ) && ! empty( $product_cats ) ) {
+                        $dk_mega = array_map( function ( $cell ) {
+                            return array(
+                                'label' => $cell['name'],
+                                'url'   => $cell['url'],
+                                'links' => array_map( function ( $l ) {
+                                    return array( 'name' => $l['name'], 'url' => $l['url'], 'featured' => false );
+                                }, $cell['links'] ),
+                            );
+                        }, lylyrose_mega_cats_menu( $product_cats ) );
                     }
-                endif;
+                }
+
+                /* Landing pages back the nav items outside the panel. Each falls back
+                   to the closest real destination, so a page deleted by hand leaves
+                   a working link rather than a 404. */
+                $dk_landing = function ( $slug, $fallback ) {
+                    $page = get_page_by_path( $slug );
+                    return $page ? (string) get_permalink( $page ) : $fallback;
+                };
                 ?>
-                <?php if ( ! empty( $dk_cells ) ) : ?>
+                <li class="dk-catnav-item"><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'خانه', 'lylyrose' ); ?></a></li>
+                <?php if ( ! empty( $dk_mega ) ) : ?>
                     <li class="dk-catnav-item dk-mega">
                         <a href="<?php echo esc_url( $shop_url ); ?>" aria-haspopup="true" aria-expanded="false">
                             <?php esc_html_e( 'دسته‌بندی کالا', 'lylyrose' ); ?>
@@ -172,13 +181,13 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                         <div class="dk-mega-panel">
                             <div class="dk-mega-inner">
                                 <div class="dk-mega-cols">
-                                    <?php foreach ( $dk_cells as $dk_cell ) : ?>
+                                    <?php foreach ( $dk_mega as $dk_section ) : ?>
                                         <div class="dk-mega-col">
-                                            <h5><a href="<?php echo esc_url( $dk_cell['url'] ); ?>"><?php echo esc_html( $dk_cell['name'] ); ?></a></h5>
-                                            <?php if ( ! empty( $dk_cell['links'] ) ) : ?>
+                                            <h5><a href="<?php echo esc_url( $dk_section['url'] ); ?>"><?php echo esc_html( $dk_section['label'] ); ?></a></h5>
+                                            <?php if ( ! empty( $dk_section['links'] ) ) : ?>
                                                 <ul>
-                                                    <?php foreach ( $dk_cell['links'] as $dk_link ) : ?>
-                                                        <li><a href="<?php echo esc_url( $dk_link['url'] ); ?>"><?php echo esc_html( $dk_link['name'] ); ?></a></li>
+                                                    <?php foreach ( $dk_section['links'] as $dk_link ) : ?>
+                                                        <li><a class="<?php echo ! empty( $dk_link['featured'] ) ? 'dk-mega-featured' : ''; ?>" href="<?php echo esc_url( $dk_link['url'] ); ?>"><?php echo esc_html( $dk_link['name'] ); ?></a></li>
                                                     <?php endforeach; ?>
                                                 </ul>
                                             <?php endif; ?>
@@ -190,12 +199,10 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                     </li>
                 <?php endif; ?>
                 <?php if ( class_exists( 'ASC_Perfume_Finder' ) ) : ?>
-                    <li class="dk-catnav-item"><a href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?></a></li>
+                    <li class="dk-catnav-item"><a class="dk-mega-featured" href="<?php echo esc_url( get_permalink( get_page_by_path( ASC_Perfume_Finder::PAGE_SLUG ) ) ); ?>"><?php esc_html_e( 'عطرت رو پیدا کن', 'lylyrose' ); ?> ⭐</a></li>
                 <?php endif; ?>
-                <?php if ( function_exists( 'is_incredible_offers' ) ) : ?>
-                    <li class="dk-catnav-item"><a href="<?php echo esc_url( home_url( '/incredible-offers/' ) ); ?>"><?php esc_html_e( 'شگفت انگیزها', 'lylyrose' ); ?></a></li>
-                <?php endif; ?>
-                <li class="dk-catnav-item"><a href="<?php echo esc_url( add_query_arg( 'sort', 'popular', $shop_url ) ); ?>"><?php esc_html_e( 'پرفروش‌ترین‌ها', 'lylyrose' ); ?></a></li>
+                <li class="dk-catnav-item"><a href="<?php echo esc_url( $dk_landing( 'sale', home_url( '/incredible-offers/' ) ) ); ?>"><?php esc_html_e( 'تخفیف‌ها', 'lylyrose' ); ?> 🔥</a></li>
+                <li class="dk-catnav-item"><a href="<?php echo esc_url( $dk_landing( 'magazine', home_url( '/about/' ) ) ); ?>"><?php esc_html_e( 'مجله زیبایی', 'lylyrose' ); ?></a></li>
             </ul>
             </div>
         </div>
@@ -221,15 +228,24 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
         <?php endif; ?>
 
         <?php
-        /* Drawer category rows, mirroring the desktop mega-menu grouping. Each row
-           is keyed by slug, so a category this shop has not filled drops out of its
-           group instead of rendering a heading with nothing under it. A row with no
-           'group' key is a standalone link. */
+        /* Drawer rows mirror the desktop mega menu's grouping rather than the old
+           gender/concentration split, so the mobile menu teaches the same
+           structure the panel does. Each row is keyed by slug, so a category
+           this shop has not filled drops out of its group instead of rendering
+           a heading with nothing under it. A row with no 'group' key is a
+           standalone link. */
         $dk_drawer = array(
             array( 'cats' => array( 'perfume' ) ),
-            array( 'group' => __( 'بر اساس جنسیت', 'lylyrose' ), 'cats' => array( 'men', 'women', 'unisex' ) ),
+            array( 'group' => __( 'بر اساس جنسیت', 'lylyrose' ), 'cats' => array( 'women', 'men', 'unisex' ) ),
+            array( 'group' => __( 'بر اساس نوع', 'lylyrose' ),     'cats' => array( 'samples', 'body-spray' ) ),
             array( 'group' => __( 'بر اساس غلظت', 'lylyrose' ),   'cats' => array( 'eau-de-parfum', 'eau-de-toilette', 'perfume-oil' ) ),
-            array( 'group' => __( 'بر اساس نوع', 'lylyrose' ),     'cats' => array( 'body-spray', 'gift-sets', 'samples' ) ),
+            array( 'cats' => array( 'gift-sets' ) ),
+            array( 'cats' => array( 'makeup' ) ),
+            array( 'group' => __( 'آرایش', 'lylyrose' ),          'cats' => array( 'face', 'eyes', 'lips', 'brows', 'makeup-tools' ) ),
+            array( 'cats' => array( 'skin-care' ) ),
+            array( 'group' => __( 'پوست', 'lylyrose' ),           'cats' => array( 'facial-cleanser', 'serums', 'moisturizer', 'sunscreen', 'acne-care', 'dark-spot-care', 'anti-aging' ) ),
+            array( 'cats' => array( 'hair-care' ) ),
+            array( 'group' => __( 'مو', 'lylyrose' ),             'cats' => array( 'shampoo', 'hair-masks', 'hair-oil', 'anti-hair-loss', 'hair-repair', 'colored-hair' ) ),
             array( 'cats' => array( 'gift-cards' ) ),
         );
 
@@ -256,7 +272,8 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
             }
         } else {
             foreach ( $cat_menu as $label => $slug ) {
-                $dk_cats[ $slug ] = array( $label, add_query_arg( 'product_cat', $slug, $shop_url ) );
+                $page = get_page_by_path( $slug );
+                $dk_cats[ $slug ] = array( $label, $page ? (string) get_permalink( $page ) : home_url( '/' ) );
             }
         }
 

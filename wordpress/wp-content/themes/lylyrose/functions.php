@@ -1001,6 +1001,152 @@ function lylyrose_mega_cats_menu( $terms ) {
 }
 
 /**
+ * Curated mega menu matching the agreed tree: عطر و ادکلن / آرایش /
+ * مراقبت از پوست / مراقبت از مو / برندها, each section heading linking to its
+ * landing page.
+ *
+ * Declared as an ordered spec and resolved against live terms on each render,
+ * so a slug the shop does not have is skipped rather than rendered dead, and
+ * a term the owner renames follows the rename. A missing slug is skipped, not
+ * the section: this is the shop's navigation, not a report, and dropping a
+ * section would silently undo the agreed structure.
+ *
+ * Returns list of array( 'label', 'url', 'links' ); each link is
+ * array( 'name', 'url', 'featured' ), 'featured' marking the starred row
+ * (عطرت رو پیدا کن ⭐) the panel renders accented.
+ */
+function lylyrose_mega_menu() {
+	$page_url = function ( $slug ) {
+		$found = get_page_by_path( $slug );
+		return $found ? (string) get_permalink( $found ) : '';
+	};
+
+	$spec = array(
+		array(
+			'label' => __( 'عطر و ادکلن', 'lylyrose' ),
+			'page'  => 'perfume',
+			'links' => array(
+				array( 'women', 0 ),
+				array( 'men', 0 ),
+				array( 'unisex', 0 ),
+				array( 'samples', 0 ),
+				array( 'body-spray', 0 ),
+				array( '', 1, 'perfume-finder' ),
+			),
+		),
+		array(
+			'label' => __( 'آرایش', 'lylyrose' ),
+			'page'  => 'makeup',
+			'links' => array(
+				array( 'face', 0 ),
+				array( 'eyes', 0 ),
+				array( 'lips', 0 ),
+				array( 'brows', 0 ),
+				array( 'makeup-tools', 0 ),
+			),
+		),
+		array(
+			'label' => __( 'مراقبت از پوست', 'lylyrose' ),
+			'page'  => 'skincare',
+			'links' => array(
+				array( 'facial-cleanser', 0 ),
+				array( 'serums', 0 ),
+				array( 'moisturizer', 0 ),
+				array( 'sunscreen', 0 ),
+				array( 'acne-care', 0 ),
+				array( 'dark-spot-care', 0 ),
+				array( 'anti-aging', 0 ),
+			),
+		),
+		array(
+			'label' => __( 'مراقبت از مو', 'lylyrose' ),
+			'page'  => 'haircare',
+			'links' => array(
+				array( 'shampoo', 0 ),
+				array( 'hair-masks', 0 ),
+				array( 'hair-oil', 0 ),
+				array( 'anti-hair-loss', 0 ),
+				array( 'hair-repair', 0 ),
+				array( 'colored-hair', 0 ),
+			),
+		),
+		array(
+			// Brands are pa_brand attribute terms, not product_cat, so they are read
+			// live rather than declared here. A new brand appears without a deploy.
+			'label'  => __( 'برندها', 'lylyrose' ),
+			'page'   => 'brands',
+			'links'  => array(),
+			'brands' => true,
+		),
+	);
+
+	$sections = array();
+	foreach ( $spec as $section ) {
+		$links = array();
+		if ( ! empty( $section['brands'] ) ) {
+			$brands = get_terms( array(
+				'taxonomy'   => 'pa_brand',
+				'hide_empty' => true,
+				'orderby'    => 'count',
+				'order'      => 'DESC',
+				'number'     => 10,
+			) );
+			if ( ! is_wp_error( $brands ) ) {
+				foreach ( $brands as $brand ) {
+					$url = get_term_link( $brand );
+					if ( ! is_wp_error( $url ) ) {
+						$links[] = array( 'name' => $brand->name, 'url' => $url, 'featured' => false );
+					}
+				}
+			}
+		}
+		foreach ( $section['links'] as $row ) {
+			if ( $row[1] ) {
+				// Featured row: a page slug (the finder), not a product_cat.
+				$found = get_page_by_path( $row[2] );
+				if ( ! $found ) { continue; }
+				$label = 'perfume-finder' === $row[2] ? __( 'عطرت رو پیدا کن', 'lylyrose' ) : $row[2];
+				$links[] = array( 'name' => $label, 'url' => (string) get_permalink( $found ), 'featured' => true );
+				continue;
+			}
+			$term = get_term_by( 'slug', $row[0], 'product_cat' );
+			if ( ! $term || is_wp_error( $term ) ) { continue; }
+			$url = get_term_link( $term );
+			if ( is_wp_error( $url ) ) { continue; }
+			$links[] = array( 'name' => $term->name, 'url' => $url, 'featured' => false );
+		}
+		$sections[] = array(
+			'label' => $section['label'],
+			'url'   => $page_url( $section['page'] ),
+			'links' => $links,
+		);
+	}
+	return $sections;
+}
+
+/**
+ * 301s for the five category URLs that moved under عطر و ادکلن
+ * (/product-category/women/ → /product-category/perfume/women/).
+ * Fires only on 404 so it never shadows a live term.
+ */
+function lylyrose_old_cat_redirect() {
+	if ( ! is_404() ) { return; }
+	if ( ! isset( $_SERVER['REQUEST_URI'] ) ) { return; }
+	$path = trim( (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ), '/' );
+	if ( ! str_starts_with( $path, 'product-category/' ) ) { return; }
+	$slug = strtok( substr( $path, strlen( 'product-category/' ) ), '/' );
+	if ( ! in_array( $slug, array( 'women', 'men', 'unisex', 'samples', 'body-spray' ), true ) ) { return; }
+	$term = get_term_by( 'slug', $slug, 'product_cat' );
+	if ( ! $term ) { return; }
+	$url = get_term_link( $term );
+	if ( is_wp_error( $url ) ) { return; }
+	wp_redirect( $url, 301 );
+	exit;
+}
+add_action( 'template_redirect', 'lylyrose_old_cat_redirect' );
+
+
+/**
  * Convert Latin digits to Persian digits.
  */
 function lylyrose_to_persian_digits( $text ) {

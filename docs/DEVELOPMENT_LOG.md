@@ -3033,3 +3033,36 @@ to commit. See [[concurrent-sessions-share-one-worktree]].
 And the push was verified against `git ls-remote origin master` rather than trusted
 from the output, because of [[git-push-gnutls-tls-failure]] — `d4188765..3333e40e`
 on the message, `3333e40e` on the remote.
+
+## 2026-10-10 — Mega menu rebuilt to the agreed tree
+
+The top category nav was a flat dump of `product_cat`. It is now a curated mega
+menu: **Home → دسته‌بندی کالا (عطر و ادکلن / آرایش / مراقبت از پوست / مراقبت از مو /
+برندها) → عطرت رو پیدا کن ⭐ → تخفیف‌ها 🔥 → مجله زیبایی**.
+
+- **Taxonomy.** Added Makeup (آرایش) with five children and seven skincare/haircare
+  children. Reparented women, men, unisex, samples and body spray under
+  عطر و ادکلن (`perfume`, id 23). This changed their URLs, so
+  `lylyrose_old_cat_redirect()` 301s the five old `/product-category/<slug>/` paths
+  to `/product-category/perfume/<slug>/`.
+- **Landing pages.** `perfume`, `makeup`, `skincare`, `haircare`, `brands`, `sale`,
+  `magazine` now exist with seeded content. Several are placeholders: `magazine` says
+  articles are coming, and `sale` lists on-sale products.
+- **Menu source.** `lylyrose_mega_menu()` in `functions.php` declares the sections and
+  child slugs. A missing slug is skipped rather than rendered as a dead link. The
+  Brands column reads `pa_brand` live: the top 10 by product count, `hide_empty`.
+  `lylyrose_mega_cats_menu()` remains only as the fallback for a shop with no
+  categories.
+- **Header.** `header.php` renders the spec and the top-level nav. The mobile drawer
+  groups follow the same structure. `$cat_menu` is now a landing-page fallback, not a
+  list of product categories.
+- **Theme version.** `style.css` 1.26.0. The `.dk-mega-featured` rule is the only
+  addition from this work.
+
+**Known limits.** Labels are Persian; the English names in the request are their
+Persian equivalents. The Brands column is capped at 10, so the full list is only on
+`/brands/`. The panel was checked against served HTML and HTTP status, not a rendered
+screenshot: the browser preview was blocked, so hover and RTL layout are unverified.
+
+**Verification.** `bash docker/run-tests.sh` → **351 passed, 0 failed**. All 35 menu
+links return 200.

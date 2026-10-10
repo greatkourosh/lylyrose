@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.25.0
+Version: 1.26.0
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -475,6 +475,7 @@ button, input, select, textarea { font-family: inherit; }
 }
 .dk-mega-col ul li a:hover,
 .dk-mega-col ul li a:focus { color: var(--dk-red); }
+.dk-mega-featured { color: var(--dk-red) !important; font-weight: 700; }
 /* Panel placement: the trigger is inside a horizontally scrolling list, so
    anchoring a full-width panel to the item's own box would make it drift with
    the scroll offset. Centring it on the viewport instead keeps it put. */
