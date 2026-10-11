@@ -97,7 +97,7 @@ class Lylyrose_Core {
         require_once WP_PLUGIN_DIR . '/kstore/includes/class-coupons.php';
         ASC_Coupons::init();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-frequently-bought.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-frequently-bought.php';
         ASC_Frequently_Bought::init();
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-instagram.php';

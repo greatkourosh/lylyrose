@@ -103,6 +103,7 @@ Remaining brand-copy work before the split: `class-instagram.php` alt/aria strin
      - `kstore` must be active and deployed in the same step as `lylyrose-core`, or live fatals on the require.
      - Plugin dirs are `www-data`-owned, so `mkdir`, `Edit`, and `git restore` fail on `lylyrose-core`. Use `docker exec -u root` and re-sync the git index afterwards.
      - Suite showed 354/2 once on the reverted tree (callback redirect and order state), then 356/0 on rerun. Not diagnosed; treat as flaky until it recurs.
+   - **2026-10-11: `class-frequently-bought.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path, same as coupons. Pin in `docker/run-tests.sh` is now 23. Local suite 356/0. Not deployed; deploy with `kstore` in the same step.
 5. Run the local suite after each move. Expect the same pass count as before the split.
 6. Deploy both plugins in one step, then check live with `docker/diff-host.py` and a page render.
 7. Update CONTINUATION.md with the new layout and date.
