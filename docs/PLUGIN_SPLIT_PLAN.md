@@ -70,6 +70,17 @@ Grep hits were mostly noise. Real findings:
 
 Revised move list: the 0-hit and comment-only group above is ready now. The brand-copy group needs a settings change first, and each change is a deploy in its own right.
 
+## Step 1 re-check (2026-10-11, after `fb91b619`)
+
+- **Already filtered, not hard-coded:** SMS brand in `class-cart-abandonment.php`, `class-reviews.php`, `class-stock-notifier.php` now goes through `apply_filters('asc_sms_brand', 'لیلی رز')`. The default equals the old text, so output is unchanged. The list above is out of date for these three.
+- **Reports:** menu title and CSV prefix are filtered (`asc_reports_csv_prefix`, `61451ba5`). Check the menu title is also filtered before calling it done.
+- **Still hard-coded, `class-instagram.php`:** `aria-label` and `alt` use «اینستاگرام لیلی رز» and «پست اینستاگرام لیلی رز» (lines 59, 70, 83). The settings label (line 7 comment, 83) is brand too. Not yet filtered.
+- **Clean, no brand copy:** `class-emails.php`, `class-notifications.php`, `class-otp.php` (Digikala wording is in a comment only).
+- **`class-product-code.php`:** Digikala wording in comments only (grep, not yet read in full).
+- **`class-palette.php`:** brand only in the `lylyrose` preset and the fixed cookie and handle names. Those stay.
+
+Remaining brand-copy work before the split: `class-instagram.php` alt/aria strings, and confirm the reports menu title.
+
 ## Rules for the split (when it happens)
 
 0. Keep the text domain `'lylyrose-core'` (see Step 1). Changing it silently drops Persian translations.
