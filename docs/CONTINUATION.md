@@ -1,8 +1,9 @@
 # Continuation — Current Project State
 
 > **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
-> - Live: WP Super Cache in Simple mode; Expert blocked by the plugin's page check; LiteSpeed
->   Cache not installed (the host runs LiteSpeed server-side).
+> - Live: WP Super Cache in Simple mode (still active); Expert blocked by the plugin's page check;
+>   **LiteSpeed Cache installed and active 2026-10-11** (`/shop/` hits ~0.09 s; cart/checkout/search
+>   never cached; logged-in vs logged-out checked in a browser, no cross-user leak).
 > - Local: WP Super Cache in Simple mode; LiteSpeed Cache installed then deactivated, since the
 >   local stack has no LiteSpeed server and shows no cache hits.
 > - Container-only, not in git: `/etc/hosts` line for `lylyrose.local`, mkcert root CA trust.

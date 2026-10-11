@@ -4,8 +4,11 @@
 > - **Live (`lylyrose.ir`):** WP Super Cache active in Simple mode (`WP_CACHE`, `WPCACHEHOME`,
 >   `$wp_cache_no_cache_for_get = 1`). Expert (mod_rewrite) not enabled: the plugin's
 >   byte-for-byte page check fails on per-request nonces, so it always refuses to write rules.
->   LiteSpeed Cache is **not** installed on live; the host itself runs LiteSpeed server-side
->   (`x-turbo-charged-by: LiteSpeed`), which the WordPress plugin does not add to.
+>   **LiteSpeed Cache is installed and active on live (2026-10-11).** Anonymous `/shop/` and
+>   `/perfume-finder/` are cache hits (~0.09 s TTFB); cart, checkout and search are never cached.
+>   Logged-in vs logged-out was checked in a real browser: logged-out shows "ورود | ثبت نام",
+>   logged-in shows "حساب کاربری", so no cross-user leak. WP Super Cache is still also active
+>   (two cache layers) and is pending a decision to disable it.
 > - **Local (`lylyrose.local`):** WP Super Cache active in Simple mode. LiteSpeed Cache was
 >   installed and tested, then **deactivated** locally because the local stack is Apache-style
 >   with no LiteSpeed web server, so the plugin shows no cache hits and cannot be measured here.
