@@ -70,7 +70,7 @@ class ASC_Cart_Abandonment {
 
 		// Persian SMS message.
 		$message = sprintf(
-			__( "لیلی رز\nسبد خرید شما در انتظار تکمیل است. برای ادامه کلیک کنید: %s%s\nاعتبار: ۳۰ روز", 'lylyrose-core' ),
+			apply_filters( 'asc_sms_brand', 'لیلی رز' ) . __( "\nسبد خرید شما در انتظار تکمیل است. برای ادامه کلیک کنید: %s%s\nاعتبار: ۳۰ روز", 'lylyrose-core' ),
 			$recovery_url,
 			$coupon_text
 		);

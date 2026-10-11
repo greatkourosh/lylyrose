@@ -88,7 +88,7 @@ class ASC_Reviews {
 			PWSMS()->send_sms( array(
 				'mobile'  => $phone,
 				'message' => sprintf(
-					__( "لیلی رز\n%s عزیز، از خرید شما سپاسگزاریم. لطفاً نظر خود را درباره محصولات ثبت کنید: %s", 'lylyrose-core' ),
+					apply_filters( 'asc_sms_brand', 'لیلی رز' ) . __( "\n%s عزیز، از خرید شما سپاسگزاریم. لطفاً نظر خود را درباره محصولات ثبت کنید: %s", 'lylyrose-core' ),
 					$name ? $name : __( 'مشتری عزیز', 'lylyrose-core' ),
 					home_url( '/my-account/orders/' )
 				),

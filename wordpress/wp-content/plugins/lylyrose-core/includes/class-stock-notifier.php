@@ -20,7 +20,7 @@ class ASC_Stock_Notifier {
 	const COOLDOWN     = DAY_IN_SECONDS; // min seconds between re-subscribing.
 
 	private static function sms_template() {
-		return __( "لیلی رز\nکالای «%s» اکنون موجود است! برای خرید به این نشانی مراجعه کنید:\n%s", 'lylyrose-core' );
+		return apply_filters( 'asc_sms_brand', 'لیلی رز' ) . __( "\nکالای «%s» اکنون موجود است! برای خرید به این نشانی مراجعه کنید:\n%s", 'lylyrose-core' );
 	}
 
 	public static function init() {
