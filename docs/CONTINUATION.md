@@ -1,5 +1,20 @@
 # Continuation — Current Project State
 
+> **Deployed 2026-10-11: four `lylyrose-core` files (brand strings moved behind filters).**
+> `class-cart-abandonment.php`, `class-reviews.php`, `class-stock-notifier.php`,
+> `class-reports.php`, from commits `61451ba5` and `fb91b619`. Uploaded with
+> `deploy-targeted.py`, size-verified, and `diff-host.py` shows them identical to local.
+> `/`, `/shop/`, `/cart/`, `/checkout/` return 200. Output is unchanged because the filter
+> defaults equal the old text. **Not verified on live:** the SMS and report export code paths
+> have not run on live; only the local suite (356/0) covers them.
+>
+> **Still undeployed, on purpose:** `wp-content/themes/lylyrose/assets/css/perfume-finder.css`
+> from peer commit `0ff48c70` (night-palette finder fix). It is on master, not on the host, so
+> the live finder keeps the old styling. Deploy only after its owner confirms.
+>
+> **Brand copy still hard-coded:** `class-instagram.php` alt and aria text, and store-pages copy.
+> Left for a later pass. See `docs/PLUGIN_SPLIT_PLAN.md`.
+
 > **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
 > - Live: WP Super Cache **deactivated** 2026-10-11 (LiteSpeed is the only page cache; old files
 >   moved to `wp-content/cache/supercache-old-20261011/`). **Reminder set for 2026-10-18 11:17
