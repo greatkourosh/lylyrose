@@ -1,5 +1,7 @@
 # Continuation — Current Project State
 
+> **Deployed 2026-10-11: `class-images.php` moved to `kstore` (`9347701f`).** `ASC_Images` has no brand copy, so it left `lylyrose-core/includes/`. `lylyrose-core.php` now requires it from `WP_PLUGIN_DIR/kstore/includes/`. Only `kstore/includes/class-images.php` (new) and `lylyrose-core.php` went up, both size-verified from a committed copy. `diff-host.py` now also walks `kstore`: 64 identical, 0 differing, 0 absent. `/`, `/shop/`, `/cart/`, `/checkout/`, `/incredible-offers/`, `/perfume-finder/` return 200. Local suite **359/0** with the core class pin at 21. **Not checked:** the WebP upload path on live (`image-check.php` ran locally only).
+>
 > **Deployed 2026-10-11: plugin split step, palette moved to `kstore`.** `kstore` now holds
 > `class-palette.php`, `class-coupons.php`, `class-frequently-bought.php`. `lylyrose-core` keeps the
 > brand presets in `includes/palette-presets.php`, fed through the `asc_palette_presets` filter.
