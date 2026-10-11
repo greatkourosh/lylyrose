@@ -1,5 +1,19 @@
 # Production update runbook — `lylyrose.ir`
 
+> **Caching status, 2026-10-11 — local and live differ on purpose.**
+> - **Live (`lylyrose.ir`):** WP Super Cache active in Simple mode (`WP_CACHE`, `WPCACHEHOME`,
+>   `$wp_cache_no_cache_for_get = 1`). Expert (mod_rewrite) not enabled: the plugin's
+>   byte-for-byte page check fails on per-request nonces, so it always refuses to write rules.
+>   LiteSpeed Cache is **not** installed on live; the host itself runs LiteSpeed server-side
+>   (`x-turbo-charged-by: LiteSpeed`), which the WordPress plugin does not add to.
+> - **Local (`lylyrose.local`):** WP Super Cache active in Simple mode. LiteSpeed Cache was
+>   installed and tested, then **deactivated** locally because the local stack is Apache-style
+>   with no LiteSpeed web server, so the plugin shows no cache hits and cannot be measured here.
+> - Local-only container changes (not in git, lost on recreate): `/etc/hosts` entry for
+>   `lylyrose.local`, mkcert root CA trust. The HTTPS-behind-proxy fix is committed (`e279c90a`).
+> - Pre-change backups: `backups/production-2026-10-11/` (live config and verified run
+>   `570d45555172`), `backups/local-pre-scheme/` (local DB).
+
 **Status: ALL DONE as of 2026-09-28.** Steps 2–5 were completed outside this repo;
 step 1a/1b backup is done and verified; **1c (UpdraftPlus daily schedule) is set,
 its cron events are registered, and the first real fire has produced a verified

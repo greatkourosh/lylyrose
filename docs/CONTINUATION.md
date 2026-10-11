@@ -1,5 +1,13 @@
 # Continuation — Current Project State
 
+> **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
+> - Live: WP Super Cache in Simple mode; Expert blocked by the plugin's page check; LiteSpeed
+>   Cache not installed (the host runs LiteSpeed server-side).
+> - Local: WP Super Cache in Simple mode; LiteSpeed Cache installed then deactivated, since the
+>   local stack has no LiteSpeed server and shows no cache hits.
+> - Container-only, not in git: `/etc/hosts` line for `lylyrose.local`, mkcert root CA trust.
+> - Committed fix: `docker-compose.yml` sets `$_SERVER['HTTPS']` from `X-Forwarded-Proto` (`e279c90a`).
+
 > **Updated 2026-10-11: hero slideshow photo is live.** One banner
 > (`2026/10/hero-banner.webp`, attachment 1937 on production) is set on all five
 > hero slides via `lylyrose_hero_photo_{sale,newest,popular,finder,offers}`. Image
