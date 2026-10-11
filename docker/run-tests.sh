@@ -2715,6 +2715,30 @@ html_has "$VARY" "Accept" \
   && pass "front-end responses carry Vary: Accept" \
   || fail "no Vary: Accept header — a shared cache could serve AVIF to every visitor"
 
+section "40. Hidden palettes stay in admin, leave the visitor switcher"
+HIDE_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php");
+$orig = get_option(ASC_Palette::OPT, array());
+$san = ASC_Palette::sanitize(array("enabled"=>"1","active"=>"ivory","palette_night"=>array("label"=>"شب","hidden"=>"1")));
+update_option(ASC_Palette::OPT, $san);
+$c = ASC_Palette::get_config();
+$visible = array_keys(array_filter($c["presets"], fn($p)=>empty($p["hidden"])));
+$_COOKIE[ASC_Palette::COOKIE] = "night";
+$cookie = ASC_Palette::current_slug();
+unset($_COOKIE[ASC_Palette::COOKIE]);
+update_option(ASC_Palette::OPT, $orig);
+echo json_encode(array("visible"=>$visible, "cookie"=>$cookie, "active"=>$c["active"], "hiddenKept"=>!empty($c["presets"]["night"]["hidden"]))), PHP_EOL;
+' 2>/dev/null)
+echo "$HIDE_OUT" | grep -q '"visible":\["lylyrose","ivory","navy"\]' \
+  && pass "a hidden palette is left out of the visitor choices" \
+  || fail "hidden palette still offered to visitors: $HIDE_OUT"
+echo "$HIDE_OUT" | grep -q '"cookie":"ivory"' \
+  && pass "a visitor cookie naming a hidden palette falls back to the site default" \
+  || fail "hidden palette still applied from cookie: $HIDE_OUT"
+echo "$HIDE_OUT" | grep -q '"hiddenKept":true' \
+  && pass "the hidden palette is still saved, so it stays editable in admin" \
+  || fail "hidden flag not saved: $HIDE_OUT"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

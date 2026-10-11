@@ -138,7 +138,9 @@ class ASC_Palette {
 			return $config['active'];
 		}
 		$slug = sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE ] ) );
-		return isset( $config['presets'][ $slug ] ) ? $slug : $config['active'];
+		return isset( $config['presets'][ $slug ] ) && empty( $config['presets'][ $slug ]['hidden'] )
+			? $slug
+			: $config['active'];
 	}
 
 	/**
@@ -180,6 +182,9 @@ class ASC_Palette {
 		// early, and the buttons did nothing at all.
 		$choices = array();
 		foreach ( $config['presets'] as $slug => $cols ) {
+			if ( ! empty( $cols['hidden'] ) ) {
+				continue;
+			}
 			$choices[] = array(
 				'slug'   => $slug,
 				'label'  => isset( $cols['label'] ) ? $cols['label'] : $slug,
@@ -266,6 +271,7 @@ class ASC_Palette {
 			}
 			$row = $in[ $key ];
 			$cols['label'] = self::clean_label( $row['label'] ?? '', $cols['label'] ?? $slug );
+			$cols['hidden'] = ! empty( $row['hidden'] );
 			foreach ( array_keys( self::CSS_PROP ) as $token ) {
 				if ( 'white' === $token ) {
 					$cols['white'] = self::clean_hex( $row['white'] ?? '' ) ?: ( $cols['white'] ?? '#ffffff' );
@@ -383,6 +389,15 @@ class ASC_Palette {
 						<code><?php echo esc_html( $slug ); ?></code>
 					</h2>
 					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row"><?php esc_html_e( 'نمایش به بازدیدکننده', 'lylyrose-core' ); ?></th>
+							<td>
+								<label>
+									<input type="checkbox" name="<?php echo esc_attr( $key . '[hidden]' ); ?>" value="1" <?php checked( ! empty( $cols['hidden'] ) ); ?>>
+									<?php esc_html_e( 'پنهان کردن این پالت از کلید انتخاب بازدیدکننده (پالت پیشفرض سایت همچنان فعال است)', 'lylyrose-core' ); ?>
+								</label>
+							</td>
+						</tr>
 						<tr>
 							<th scope="row"><label for="<?php echo esc_attr( $key . '_label' ); ?>"><?php esc_html_e( 'نام نمایشی', 'lylyrose-core' ); ?></label></th>
 							<td>
