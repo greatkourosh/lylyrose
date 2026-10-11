@@ -659,6 +659,10 @@ correction above.
 
 ## 6. Roadmap
 
+> **2026-10-11 update.** Finder result panels (`.asc-finder__meta`, `.asc-finder__notes`) had a hardcoded `#fdfcfa` surface, so night palette rendered light text on a light panel. Fixed to `var(--dk-white)` in `perfume-finder.css` (3 lines), committed 2026-10-11. Verified by screenshot on night. Not checked: ivory palette, narrow viewports.
+>
+> **Decision 2026-10-11: no padding for the 29 narrow portrait photos.** The product card media box is already fixed at 170px with `object-fit: contain`, so narrow originals render small but sharp. Real fix is reshooting or sourcing wider images, which is a content task. Revisit only if the owner wants a uniform box as a design call.
+>
 > **Current, 2026-10-10.** Open items: per-host credentials on `lylyrose.ir` (ZarinPal
 > merchant, PWSMS gateway, WP Mail SMTP, WP Super Cache, Wordfence). Scratch files
 > (`header.php.fixed`, `docker/_probe*`, root `.txt`) were removed 2026-10-10. Done 2026-10-10: the 1.27.0 teal palette was checked on the live

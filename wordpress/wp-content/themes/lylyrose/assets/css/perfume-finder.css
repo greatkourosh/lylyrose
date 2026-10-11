@@ -52,7 +52,7 @@
     padding: 7px 14px;
     font-size: 14px;
     cursor: pointer;
-    background: #fdfcfa;
+    background: var(--dk-white);
     transition: border-color .15s, background .15s;
 }
 
@@ -312,7 +312,7 @@
     padding: 12px 14px;
     border: 1px solid var(--dk-line, #eeeae5);
     border-radius: 10px;
-    background: #fdfcfa;
+    background: var(--dk-white);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px 20px;
@@ -347,7 +347,7 @@
     padding: 12px 14px;
     border: 1px solid var(--dk-line, #eeeae5);
     border-radius: 10px;
-    background: #fdfcfa;
+    background: var(--dk-white);
 }
 
 .asc-finder__note-row {
