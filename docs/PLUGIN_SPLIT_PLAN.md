@@ -51,7 +51,28 @@ The theme and plugin are reusable only if a second store can run the generic par
 | `class-instagram.php` | 14 | Depends on whose handle is hard-coded |
 | `class-product-code.php` | 4 | Generic SKU codes; check the URL prefix |
 
+## Step 1 results (read 2026-10-11)
+
+Grep hits were mostly noise. Real findings:
+
+- **Every file uses the text domain `'lylyrose-core'`.** This is the biggest blocker, not the brand copy. Moving a class to a new plugin without keeping the text domain breaks translations. Keep `'lylyrose-core'` as the domain in the neutral plugin, or load the old `.mo` files under it.
+- **Only comments, no brand copy (move freely):** `class-avif.php` (`@package` line only), `class-fuzzy-search.php` (`@package` only), `class-gift-wrap.php`, `class-national-id.php`, `class-coupons.php` (comment), `class-frequently-bought.php` (comment), `class-images.php` (comment), `class-product-code.php` ("Digikala-style" comments only; the `asc_rewrite_version` option stays).
+- **Hard-coded «لیلی رز» in user-facing text (must become a setting before a second site can use the plugin):**
+  - `class-cart-abandonment.php` (SMS body)
+  - `class-reviews.php` (email body, subject uses `get_bloginfo`)
+  - `class-stock-notifier.php` (SMS body)
+  - `class-reports.php` (menu title «گزارش فروش لیلی رز» and CSV filename prefix `lylyrose-sales-`)
+  - `class-instagram.php` (alt and aria text «اینستاگرام لیلی رز»; the handle itself is already a setting, so the mechanism is generic)
+- **Mechanism generic, default data brand:**
+  - `class-palette.php`: the `lylyrose` preset is the default; the cookie `lylyrose_palette` and the `lylyrose-style` handle are fixed names that other code depends on. Keep them as they are, and make the preset list data, not code.
+  - `class-otp.php`: copy is neutral Persian; the "Digikala-style" wording is in comments only. Generic.
+- **Store-specific, stays:** the 4 finder classes, `class-needs-finder.php`, `class-store-pages.php`, `class-fragrance-notes.php`, `lylyrose-core.php` (as already listed).
+
+Revised move list: the 0-hit and comment-only group above is ready now. The brand-copy group needs a settings change first, and each change is a deploy in its own right.
+
 ## Rules for the split (when it happens)
+
+0. Keep the text domain `'lylyrose-core'` (see Step 1). Changing it silently drops Persian translations.
 
 1. Keep every option key, post meta key, and hook name exactly as is. Live data depends on them. Renaming silently breaks live settings.
 2. Keep the plugin class names unless renaming is needed. Renaming is a separate step.
