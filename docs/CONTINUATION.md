@@ -154,7 +154,14 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    ZarinPal (real merchant, `sandbox: no`), PWSMS, and WP Mail SMTP. Production SMS
    is still a no-op, which means **OTP login does not work on `lylyrose.ir` today**;
    it is the single highest-impact item here, and no code change can unblock it.
-   WP Super Cache is still not enabled.
+   **✅ PARTIALLY DONE 2026-10-11 — WP Super Cache is enabled on lylyrose.ir in Simple
+   mode.** `WP_CACHE` and `WPCACHEHOME` are in live `wp-config.php`, the plugin is active,
+   caching is on, and `$wp_cache_no_cache_for_get = 1`. Pages return 200 and the AVIF
+   search split holds. **Not yet effective:** Expert (mod_rewrite) mode is not set, so
+   every request still runs PHP ("Dynamic page generated"). Expert was blocked locally:
+   the plugin's rule writer returns `WordPress rules empty` and writes no `WPSuperCache`
+   block to `.htaccess`. Production stays in Simple mode until that is resolved. Rollback
+   copies: `backups/production-2026-10-11/config/`, backup run `570d45555172` (pulled and verified).
 
 3. **✅ DONE 2026-10-10 — AVIF and typo-tolerant search are both live.** See the
    2026-10-10 entry at the end of this file. Neither is in any remaining open item.
