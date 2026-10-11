@@ -17,6 +17,7 @@ SRC = ROOT / "wordpress"
 
 TREES = [
     "wp-content/plugins/lylyrose-core",
+    "wp-content/plugins/kstore",
     "wp-content/themes/lylyrose",
 ]
 SKIP_DIRS = {"__pycache__", ".git", "node_modules"}
