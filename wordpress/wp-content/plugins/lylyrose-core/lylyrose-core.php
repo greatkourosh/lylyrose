@@ -94,7 +94,7 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-avif.php';
         ASC_Avif::init();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-coupons.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-coupons.php';
         ASC_Coupons::init();
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-frequently-bought.php';
