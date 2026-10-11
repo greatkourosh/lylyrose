@@ -178,8 +178,13 @@ against a previous session's notes. Suite at time of writing: **351 passed, 0 fa
    it is the single highest-impact item here, and no code change can unblock it.
    **Superseded 2026-10-11 — WP Super Cache is deactivated on lylyrose.ir; LiteSpeed Cache
    is the sole page cache.** The Simple-mode setup described in earlier revisions of this
-   item is no longer live. The Expert-mode blocker (the plugin's rule writer returns
-   `WordPress rules empty`) still stands, but it no longer gates production. Rollback
+   item is no longer live. **Decision 2026-10-11: keep WP Super Cache off and Expert mode
+   unset.** LiteSpeed is the only page cache. Two cache rewrite sets in one `.htaccess`
+   (LSCACHE and WPSuperCache) are untested together, so do not enable Expert mode on live
+   without a plan that covers that. The local reproduction found the real
+   `wpsc_get_htaccess_info()` returns non-empty rules on a copy of the live `.htaccess`
+   (`wprules` 231 chars), so the earlier `WordPress rules empty` came from a past state,
+   not the current file. Rollback
    copies: `backups/production-2026-10-11/config/`, backup run `570d45555172` (pulled and verified).
 
 3. **✅ DONE 2026-10-10 — AVIF and typo-tolerant search are both live.** See the
