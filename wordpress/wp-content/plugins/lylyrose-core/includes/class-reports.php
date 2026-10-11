@@ -17,7 +17,8 @@ class ASC_Reports {
 	}
 
 	public static function admin_menu() {
-		add_menu_page( __( 'گزارش فروش لیلی رز', 'lylyrose-core' ), __( 'گزارش فروش', 'lylyrose-core' ), 'manage_options', self::PAGE_SLUG, array( __CLASS__, 'render_page' ), 'dashicons-chart-bar', 56 );
+		$title = apply_filters( 'asc_reports_menu_title', __( 'گزارش فروش لیلی رز', 'lylyrose-core' ) );
+		add_menu_page( $title, __( 'گزارش فروش', 'lylyrose-core' ), 'manage_options', self::PAGE_SLUG, array( __CLASS__, 'render_page' ), 'dashicons-chart-bar', 56 );
 	}
 
 	/**
@@ -100,7 +101,8 @@ class ASC_Reports {
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=lylyrose-sales-' . $range['from'] . '_' . $range['to'] . '.csv' );
+		$prefix = apply_filters( 'asc_reports_csv_prefix', 'lylyrose-sales' );
+		header( 'Content-Disposition: attachment; filename=' . $prefix . '-' . $range['from'] . '_' . $range['to'] . '.csv' );
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // UTF-8 BOM so Excel renders Persian.
 		fputcsv( $out, array( __( 'شماره سفارش', 'lylyrose-core' ), __( 'تاریخ', 'lylyrose-core' ), __( 'وضعیت', 'lylyrose-core' ), __( 'مشتری', 'lylyrose-core' ), __( 'موبایل', 'lylyrose-core' ), __( 'اقلام', 'lylyrose-core' ), __( 'مبلغ کل (تومان)', 'lylyrose-core' ) ) );
