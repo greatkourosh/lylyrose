@@ -80,7 +80,7 @@ Revised move list: the 0-hit and comment-only group above is ready now. The bran
 - **`class-product-code.php`:** Digikala wording in comments only (grep, not yet read in full).
 - **`class-palette.php`:** brand only in the `lylyrose` preset and the fixed cookie and handle names. Those stay.
 
-Remaining brand-copy work before the split: `class-instagram.php` alt/aria strings, and confirm the reports menu title.
+**Checked 2026-10-11, code-side brand-copy work is done:** `class-instagram.php` alt/aria/menu strings go through `asc_instagram_*` filters (`1dab3b72`), and the reports menu title goes through `asc_reports_menu_title`. Still hard-coded and admin-only: the Instagram settings page `<h1>` (`class-instagram.php:129`). Not storefront copy, so it does not block the split.
 
 ## Rules for the split (when it happens)
 
@@ -98,16 +98,13 @@ Remaining brand-copy work before the split: `class-instagram.php` alt/aria strin
 2. Pick a neutral name with the owner (`asc-core` is the working name in CONTINUATION.md). Do not invent one without asking. **Done 2026-10-11: owner chose `kstore`.**
 3. Create the neutral plugin skeleton with an empty bootstrap. Confirm it activates on local with no effect.
 4. Move the 0-hit classes first, then the low-hit ones, one commit per class.
-   - **2026-10-11: `class-coupons.php` tried and reverted.** Moved to `kstore/includes/`, `lylyrose-core` required it by absolute `WP_PLUGIN_DIR` path. Blockers, all must clear before retry:
-     - `docker/run-tests.sh:1812` pins 25 `class-*.php` files in `lylyrose-core/includes`. The move makes it 24. Change the pin in this repo and in `aroma_store`, since both suites assert the same count.
-     - `kstore` must be active and deployed in the same step as `lylyrose-core`, or live fatals on the require.
-     - Plugin dirs are `www-data`-owned, so `mkdir`, `Edit`, and `git restore` fail on `lylyrose-core`. Use `docker exec -u root` and re-sync the git index afterwards.
-     - Suite showed 354/2 once on the reverted tree (callback redirect and order state), then 356/0 on rerun. Not diagnosed; treat as flaky until it recurs.
-   - **2026-10-11: `class-images.php` moved to `kstore/includes/` (`9347701f`).** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path. Pin in `docker/run-tests.sh` is now 21. Local suite 359/0. **Deployed 2026-10-11** (2 files, size-verified; `diff-host.py` 64/0/0).
-   - **2026-10-11: `class-frequently-bought.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path, same as coupons. Pin in `docker/run-tests.sh` is now 23. Local suite 356/0. **Deployed 2026-10-11 with kstore (see below).**
-   - **Deployed 2026-10-11:** `kstore` (all 4 files) and all 23 `lylyrose-core/includes` classes plus bootstrap and `palette-presets.php`. 29 files, size-verified. `diff-host.py`: 60 identical, 0 differing. `/`, `/shop/`, `/cart/`, `/checkout/` return 200.
-   - **2026-10-11: palette hide option added.** Each preset has a `hidden` flag, set on `options-general.php?page=asc-palette`. Hidden presets drop out of the visitor switcher and fall back to the site default if a cookie names them. Suite 359/0 with section 40.
-   - **2026-10-11: `class-palette.php` moved to `kstore/includes/`.** Brand presets stay in `lylyrose-core/includes/palette-presets.php` and reach it through the `asc_palette_presets` filter. Pin in `docker/run-tests.sh` is now 22. Local suite 356/0. **Deployed 2026-10-11 with kstore (see below).**
+   - **2026-10-11: `class-coupons.php` moved to `kstore/includes/` (`c2f9eddf`).** Local suite 356/0 with the pin at 24 in `docker/run-tests.sh`. Not deployed.
+     - `kstore` is active on local. Deploy it together with `lylyrose-core` (the require fatals if `kstore` is missing on live).
+     - `aroma_store/docker/run-tests.sh:1777` still pins 21, not 25. Its pin is already out of step with this repo, so reconcile it when that repo is next committed.
+     - Plugin dirs are `www-data`-owned. Use `docker exec -u root` for writes. Bind mount means the host files change too.
+     - Suite showed 354/2 once on an earlier tree (callback redirect and order state), then 356/0 on rerun. Not diagnosed; treat as flaky until it recurs.
+   - **2026-10-11: `class-frequently-bought.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path, same as coupons. Pin in `docker/run-tests.sh` is now 23. Local suite 356/0. Not deployed; deploy with `kstore` in the same step.
+   - **2026-10-11: `class-flash-sales.php` and `class-gift-cards.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path. Both were self-contained (no plugin path refs). Class-count pin in `docker/run-tests.sh` is now 19. Local suite 359/0. Not deployed; deploy with `kstore` and `lylyrose-core` in one step. Plugin dirs need `docker exec -u root` to write.
 5. Run the local suite after each move. Expect the same pass count as before the split.
 6. Deploy both plugins in one step, then check live with `docker/diff-host.py` and a page render.
 7. Update CONTINUATION.md with the new layout and date.
