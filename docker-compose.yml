@@ -41,6 +41,7 @@ services:
       # proxy and vice versa, and every CLI process -- which has no HTTP_HOST at
       # all -- would compute yet another name and never authenticate.
       WORDPRESS_CONFIG_EXTRA: |
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($$_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) { $$_SERVER['HTTPS'] = 'on'; }
         $$lr_host = isset($$_SERVER['HTTP_HOST']) ? strtolower($$_SERVER['HTTP_HOST']) : '';
         $$lr_name = '';
         if (preg_match('/^\[([^\]]+)\](:[0-9]{1,5})?$$/', $$lr_host, $$m)) {
