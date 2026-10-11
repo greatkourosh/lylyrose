@@ -67,7 +67,7 @@ class Lylyrose_Core {
         // Palette serves CSS to the front end as well as the settings page, so it
         // is wired here rather than in includes_admin() (which is empty) or in
         // the WooCommerce block it does not depend on.
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-palette.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-palette.php';
         add_filter( 'asc_palette_presets', static function () {
             return require LYLYROSE_CORE_PLUGIN_DIR . 'includes/palette-presets.php';
         } );
