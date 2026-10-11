@@ -2863,9 +2863,10 @@ Imagick. All 2,099 live WebP uploads have an AVIF sibling, with 0 failures.
 `Accept` and 12 `.webp` refs for a plain one, with `Vary: Accept` on both. A live `.avif`
 serves as `image/avif`.
 
-**Not verified:** AVIF rendering in a real browser. The check covered URLs and headers,
-not pixels. New uploads get AVIF through the metadata hook, which was tested on the
-local stack only.
+**Verified in a real browser (2026-10-11):** on `https://lylyrose.ir/shop/` all 12 product
+images loaded as `.avif` (200, decoded at 300px), and the page's rendered photos match the
+WebP fallback. The homepage still requests WebP for its small thumbnails. New uploads get
+AVIF through the metadata hook, which was tested on the local stack only.
 
 **Suites:** upstream 324/0, downstream 356/0. The downstream payment section (ZarinPal
 sandbox) failed once in a run, passed on rerun, and the sandbox was up. Treat that
