@@ -97,6 +97,11 @@ Remaining brand-copy work before the split: `class-instagram.php` alt/aria strin
 2. Pick a neutral name with the owner (`asc-core` is the working name in CONTINUATION.md). Do not invent one without asking. **Done 2026-10-11: owner chose `kstore`.**
 3. Create the neutral plugin skeleton with an empty bootstrap. Confirm it activates on local with no effect.
 4. Move the 0-hit classes first, then the low-hit ones, one commit per class.
+   - **2026-10-11: `class-coupons.php` tried and reverted.** Moved to `kstore/includes/`, `lylyrose-core` required it by absolute `WP_PLUGIN_DIR` path. Blockers, all must clear before retry:
+     - `docker/run-tests.sh:1812` pins 25 `class-*.php` files in `lylyrose-core/includes`. The move makes it 24. Change the pin in this repo and in `aroma_store`, since both suites assert the same count.
+     - `kstore` must be active and deployed in the same step as `lylyrose-core`, or live fatals on the require.
+     - Plugin dirs are `www-data`-owned, so `mkdir`, `Edit`, and `git restore` fail on `lylyrose-core`. Use `docker exec -u root` and re-sync the git index afterwards.
+     - Suite showed 354/2 once on the reverted tree (callback redirect and order state), then 356/0 on rerun. Not diagnosed; treat as flaky until it recurs.
 5. Run the local suite after each move. Expect the same pass count as before the split.
 6. Deploy both plugins in one step, then check live with `docker/diff-host.py` and a page render.
 7. Update CONTINUATION.md with the new layout and date.
