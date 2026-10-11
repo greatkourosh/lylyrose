@@ -65,6 +65,7 @@ Grep hits were mostly noise. Real findings:
   - `class-instagram.php` (alt and aria text «اینستاگرام لیلی رز»; the handle itself is already a setting, so the mechanism is generic)
 - **Mechanism generic, default data brand:**
   - `class-palette.php`: the `lylyrose` preset is the default; the cookie `lylyrose_palette` and the `lylyrose-style` handle are fixed names that other code depends on. Keep them as they are, and make the preset list data, not code.
+  - Palette editor location (decided 2026-10-11): a Settings page (`Settings → پالت رنگی`, slug `asc-palette`) in the plugin, not the Customizer. The Customizer holds only hero photos, and a theme switch would orphan palette settings there. The page moves with the plugin on split.
   - `class-otp.php`: copy is neutral Persian; the "Digikala-style" wording is in comments only. Generic.
 - **Store-specific, stays:** the 4 finder classes, `class-needs-finder.php`, `class-store-pages.php`, `class-fragrance-notes.php`, `lylyrose-core.php` (as already listed).
 
