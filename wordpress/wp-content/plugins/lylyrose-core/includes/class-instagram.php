@@ -56,7 +56,7 @@ class ASC_Instagram {
 		}
 		?>
 		<div class="dk-container">
-			<section class="dk-insta" aria-label="<?php echo esc_attr__( 'اینستاگرام لیلی رز', 'lylyrose-core' ); ?>">
+			<section class="dk-insta" aria-label="<?php echo esc_attr( apply_filters( 'asc_instagram_section_label', __( 'اینستاگرام لیلی رز', 'lylyrose-core' ) ) ); ?>">
 				<div class="dk-section-head">
 					<h2><?php esc_html_e( 'اینستاگرام ما', 'lylyrose-core' ); ?></h2>
 					<?php if ( $feed['handle'] ) : ?>
@@ -67,7 +67,7 @@ class ASC_Instagram {
 				<div class="dk-insta-grid">
 					<?php foreach ( $feed['items'] as $it ) : ?>
 						<a class="dk-insta-cell" href="<?php echo esc_url( $it['post_url'] ? $it['post_url'] : '#' ); ?>" target="_blank" rel="noopener nofollow">
-							<img src="<?php echo esc_url( $it['image_url'] ); ?>" alt="<?php echo esc_attr__( 'پست اینستاگرام لیلی رز', 'lylyrose-core' ); ?>" loading="lazy" decoding="async">
+							<img src="<?php echo esc_url( $it['image_url'] ); ?>" alt="<?php echo esc_attr( apply_filters( 'asc_instagram_image_alt', __( 'پست اینستاگرام لیلی رز', 'lylyrose-core' ) ) ); ?>" loading="lazy" decoding="async">
 						</a>
 					<?php endforeach; ?>
 				</div>
@@ -80,8 +80,8 @@ class ASC_Instagram {
 
 	public static function admin_menu() {
 		add_options_page(
-			__( 'اینستاگرام لیلی رز', 'lylyrose-core' ),
-			__( 'اینستاگرام لیلی رز', 'lylyrose-core' ),
+			apply_filters( 'asc_instagram_menu_title', __( 'اینستاگرام لیلی رز', 'lylyrose-core' ) ),
+			apply_filters( 'asc_instagram_menu_title', __( 'اینستاگرام لیلی رز', 'lylyrose-core' ) ),
 			'manage_options',
 			'asc-instagram',
 			array( __CLASS__, 'render_admin' )
