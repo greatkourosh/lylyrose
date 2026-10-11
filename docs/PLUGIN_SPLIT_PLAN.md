@@ -94,7 +94,7 @@ Remaining brand-copy work before the split: `class-instagram.php` alt/aria strin
 ## Steps
 
 1. Read each "need a read" file's copy, and each low-hit file's brand hits, and confirm the classification. Record the result in this doc.
-2. Pick a neutral name with the owner (`asc-core` is the working name in CONTINUATION.md). Do not invent one without asking.
+2. Pick a neutral name with the owner (`asc-core` is the working name in CONTINUATION.md). Do not invent one without asking. **Done 2026-10-11: owner chose `kstore`.**
 3. Create the neutral plugin skeleton with an empty bootstrap. Confirm it activates on local with no effect.
 4. Move the 0-hit classes first, then the low-hit ones, one commit per class.
 5. Run the local suite after each move. Expect the same pass count as before the split.
