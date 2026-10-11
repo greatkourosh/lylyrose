@@ -7,8 +7,9 @@
 >   **LiteSpeed Cache is installed and active on live (2026-10-11).** Anonymous `/shop/` and
 >   `/perfume-finder/` are cache hits (~0.09 s TTFB); cart, checkout and search are never cached.
 >   Logged-in vs logged-out was checked in a real browser: logged-out shows "ورود | ثبت نام",
->   logged-in shows "حساب کاربری", so no cross-user leak. WP Super Cache is still also active
->   (two cache layers) and is pending a decision to disable it.
+>   logged-in shows "حساب کاربری", so no cross-user leak. **WP Super Cache is deactivated on
+>   live** (plugin files kept). LiteSpeed is the only page cache. Its old cache files were moved
+>   to `wp-content/cache/supercache-old-20261011/`, not deleted. The homepage is a LiteSpeed hit.
 > - **Local (`lylyrose.local`):** WP Super Cache active in Simple mode. LiteSpeed Cache was
 >   installed and tested, then **deactivated** locally because the local stack is Apache-style
 >   with no LiteSpeed web server, so the plugin shows no cache hits and cannot be measured here.

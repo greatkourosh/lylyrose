@@ -1,7 +1,8 @@
 # Continuation — Current Project State
 
 > **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
-> - Live: WP Super Cache in Simple mode (still active); Expert blocked by the plugin's page check;
+> - Live: WP Super Cache **deactivated** 2026-10-11 (LiteSpeed is the only page cache; old files
+>   moved to `wp-content/cache/supercache-old-20261011/`). Expert blocked by the plugin's page check;
 >   **LiteSpeed Cache installed and active 2026-10-11** (`/shop/` hits ~0.09 s; cart/checkout/search
 >   never cached; logged-in vs logged-out checked in a browser, no cross-user leak).
 > - Local: WP Super Cache in Simple mode; LiteSpeed Cache installed then deactivated, since the
