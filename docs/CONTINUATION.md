@@ -1,5 +1,16 @@
 # Continuation — Current Project State
 
+> **Updated 2026-10-11: hero slideshow photo is live.** One banner
+> (`2026/10/hero-banner.webp`, attachment 1937 on production) is set on all five
+> hero slides via `lylyrose_hero_photo_{sale,newest,popular,finder,offers}`. Image
+> uploaded with `deploy-targeted.py`; mods set by a one-shot probe that was then
+> deleted. Local attachment is 6943.
+>
+> **Live site is PHP.** `docker-compose.yml` was briefly uploaded to the docroot
+> by mistake and is now deleted (404). Only the image and the PHP theme are on
+> host. Do not upload non-PHP config to the docroot. `deploy-targeted.py` has no
+> guard against it yet.
+>
 > **✅ 51 St. Ives body-care products are LIVE on both stores (2026-10-04,
 > `5bbe33c5`).** Verified by reading each site's own database, not from the
 > uploader's report: **51/51 present, 50/51 fully wired**, catalogue 114 → **165**
