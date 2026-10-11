@@ -663,8 +663,8 @@ correction above.
 >
 > **Decision 2026-10-11: no padding for the 29 narrow portrait photos.** The product card media box is already fixed at 170px with `object-fit: contain`, so narrow originals render small but sharp. Real fix is reshooting or sourcing wider images, which is a content task. Revisit only if the owner wants a uniform box as a design call.
 >
-> **Current, 2026-10-11.** WP Super Cache is enabled on `lylyrose.ir` in Simple mode (see
-> CONTINUATION.md); Expert mode is blocked by the plugin's rule writer. Open items: per-host
+> **Current, 2026-10-11.** WP Super Cache is deactivated on `lylyrose.ir`; LiteSpeed Cache is
+> the sole page cache (see CONTINUATION.md). Expert mode for WP Super Cache is moot on live. Open items: per-host
 > credentials on `lylyrose.ir` (ZarinPal merchant, PWSMS gateway, WP Mail SMTP, Wordfence). Scratch files
 > (`header.php.fixed`, `docker/_probe*`, root `.txt`) were removed 2026-10-10. Done 2026-10-10: the 1.27.0 teal palette was checked on the live
 > homepage by eye, the new products were confirmed, the 51 St. Ives needs tags were
