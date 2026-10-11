@@ -1,5 +1,13 @@
 # Continuation — Current Project State
 
+> **Deployed 2026-10-11: plugin split step, palette moved to `kstore`.** `kstore` now holds
+> `class-palette.php`, `class-coupons.php`, `class-frequently-bought.php`. `lylyrose-core` keeps the
+> brand presets in `includes/palette-presets.php`, fed through the `asc_palette_presets` filter.
+> Also added a per-palette **hide from visitor switcher** option on `options-general.php?page=asc-palette`.
+> Hidden palettes stay editable and can still be the site default. 29 files uploaded, size-verified.
+> `diff-host.py`: 60 identical, 0 differing. `/`, `/shop/`, `/cart/`, `/checkout/` return 200.
+> Local suite **359/0**. **Not checked:** the hide checkbox and storefront switcher in a browser on live.
+>
 > **Deployed 2026-10-11: four `lylyrose-core` files (brand strings moved behind filters).**
 > `class-cart-abandonment.php`, `class-reviews.php`, `class-stock-notifier.php`,
 > `class-reports.php`, from commits `61451ba5` and `fb91b619`. Uploaded with

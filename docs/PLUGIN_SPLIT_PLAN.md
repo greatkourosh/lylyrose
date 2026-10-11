@@ -103,8 +103,10 @@ Remaining brand-copy work before the split: `class-instagram.php` alt/aria strin
      - `kstore` must be active and deployed in the same step as `lylyrose-core`, or live fatals on the require.
      - Plugin dirs are `www-data`-owned, so `mkdir`, `Edit`, and `git restore` fail on `lylyrose-core`. Use `docker exec -u root` and re-sync the git index afterwards.
      - Suite showed 354/2 once on the reverted tree (callback redirect and order state), then 356/0 on rerun. Not diagnosed; treat as flaky until it recurs.
-   - **2026-10-11: `class-frequently-bought.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path, same as coupons. Pin in `docker/run-tests.sh` is now 23. Local suite 356/0. Not deployed; deploy with `kstore` in the same step.
-   - **2026-10-11: `class-palette.php` moved to `kstore/includes/`.** Brand presets stay in `lylyrose-core/includes/palette-presets.php` and reach it through the `asc_palette_presets` filter. Pin in `docker/run-tests.sh` is now 22. Local suite 356/0. Not deployed; deploy kstore, lylyrose-core, and the theme in one step.
+   - **2026-10-11: `class-frequently-bought.php` moved to `kstore/includes/`.** Required from `lylyrose-core.php` by `WP_PLUGIN_DIR` path, same as coupons. Pin in `docker/run-tests.sh` is now 23. Local suite 356/0. **Deployed 2026-10-11 with kstore (see below).**
+   - **Deployed 2026-10-11:** `kstore` (all 4 files) and all 23 `lylyrose-core/includes` classes plus bootstrap and `palette-presets.php`. 29 files, size-verified. `diff-host.py`: 60 identical, 0 differing. `/`, `/shop/`, `/cart/`, `/checkout/` return 200.
+   - **2026-10-11: palette hide option added.** Each preset has a `hidden` flag, set on `options-general.php?page=asc-palette`. Hidden presets drop out of the visitor switcher and fall back to the site default if a cookie names them. Suite 359/0 with section 40.
+   - **2026-10-11: `class-palette.php` moved to `kstore/includes/`.** Brand presets stay in `lylyrose-core/includes/palette-presets.php` and reach it through the `asc_palette_presets` filter. Pin in `docker/run-tests.sh` is now 22. Local suite 356/0. **Deployed 2026-10-11 with kstore (see below).**
 5. Run the local suite after each move. Expect the same pass count as before the split.
 6. Deploy both plugins in one step, then check live with `docker/diff-host.py` and a page render.
 7. Update CONTINUATION.md with the new layout and date.
