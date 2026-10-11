@@ -13,6 +13,7 @@ from dotenv import dotenv_values
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cfg = dotenv_values(os.path.join(ROOT, '.env'))
 ENTRY, DATA = sys.argv[1], sys.argv[2]
+QUERY = sys.argv[3] if len(sys.argv) > 3 else ''
 
 def fetch(url):
     ctx = ssl.create_default_context()
@@ -44,7 +45,7 @@ try:
         with open(src, 'rb') as fh:
             c.storbinary('STOR ' + name, fh)
 
-    print(fetch('https://lylyrose.ir/' + names[ENTRY]))
+    print(fetch('https://lylyrose.ir/' + names[ENTRY] + QUERY))
 
     for name in names.values():
         c.delete(name)
