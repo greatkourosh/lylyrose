@@ -8,9 +8,11 @@
 > defaults equal the old text. **Not verified on live:** the SMS and report export code paths
 > have not run on live; only the local suite (356/0) covers them.
 >
-> **Still undeployed, on purpose:** `wp-content/themes/lylyrose/assets/css/perfume-finder.css`
-> from peer commit `0ff48c70` (night-palette finder fix). It is on master, not on the host, so
-> the live finder keeps the old styling. Deploy only after its owner confirms.
+> **Deployed 2026-10-11: night-palette finder fix is live.** `perfume-finder.css` from
+> `0ff48c70` uploaded, and theme `Version:` bumped 1.27.0 → **1.27.1** in `style.css` so
+> Autoptimize serves a fresh asset. Served `.asc-finder__meta` now reads `var(--dk-white)`,
+> not `#fdfcfa`. `diff-host.py`: 62 identical / 0 differing. Not checked: ivory palette,
+> narrow viewports. **Uncommitted:** the one-line `style.css` version bump.
 >
 > **Brand copy still hard-coded:** `class-instagram.php` alt and aria text, and store-pages copy.
 > Left for a later pass. See `docs/PLUGIN_SPLIT_PLAN.md`.
