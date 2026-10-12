@@ -85,7 +85,7 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-store-pages.php';
         ASC_Store_Pages::init();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-emails.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-emails.php';
         ASC_Emails::init();
 
         require_once WP_PLUGIN_DIR . '/kstore/includes/class-images.php';
