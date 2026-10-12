@@ -659,6 +659,8 @@ correction above.
 
 ## 6. Roadmap
 
+> **2026-10-12 update.** Hero slide desktop padding `40px` → `48px` (top and bottom) in `lylyrose/style.css`, which removes the empty brown bar under the hero photo. Theme `Version:` → **1.27.2**. Uploaded and verified on lylyrose.ir (served CSS carries `padding:48px 56px`). Not checked in a browser on live.
+>
 > **2026-10-11 update.** Finder result panels (`.asc-finder__meta`, `.asc-finder__notes`) had a hardcoded `#fdfcfa` surface, so night palette rendered light text on a light panel. Fixed to `var(--dk-white)` in `perfume-finder.css` (3 lines), committed 2026-10-11, and **deployed to lylyrose.ir 2026-10-11** with theme `Version:` 1.27.1. Verified on the served asset. Not checked: ivory palette, narrow viewports.
 >
 > **Decision 2026-10-11: no padding for the 29 narrow portrait photos.** The product card media box is already fixed at 170px with `object-fit: contain`, so narrow originals render small but sharp. Real fix is reshooting or sourcing wider images, which is a content task. Revisit only if the owner wants a uniform box as a design call.
