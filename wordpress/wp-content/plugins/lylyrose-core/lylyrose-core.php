@@ -52,7 +52,7 @@ class Lylyrose_Core {
     }
 
     protected function includes_frontend() {
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-otp.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-otp.php';
         new ASC_OTP();
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-cart-abandonment.php';
