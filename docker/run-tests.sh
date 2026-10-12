@@ -2753,6 +2753,15 @@ QM_SANITIZE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load
   && pass "sanitize drops empty-label rows and keeps enabled as a bool" \
   || fail "sanitize output was '$QM_SANITIZE', expected '1|1'"
 
+QM_ADMIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); ob_start(); ASC_Quiz_Menu::render_admin(); echo ob_get_clean();' 2>/dev/null)
+html_has "$QM_ADMIN" "نمایش داده میشود" \
+  && pass "settings page status column reports the shown finder rows" \
+  || fail "settings page does not show a status for finder rows"
+QM_NEG=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Quiz_Menu::sanitize(array("items"=>array(array("label"=>"A","url"=>"/y/","enabled"=>"1","order"=>"-5"))))[0]["order"];' 2>/dev/null)
+[ "$QM_NEG" = "0" ] \
+  && pass "a negative order is clamped to 0" \
+  || fail "negative order stored as '$QM_NEG', expected 0"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"
