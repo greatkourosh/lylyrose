@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "13" ] \
-  && pass "core plugin exposes 13 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 13 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "14" ] \
+  && pass "core plugin exposes 14 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 14 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2738,6 +2738,20 @@ echo "$HIDE_OUT" | grep -q '"cookie":"ivory"' \
 echo "$HIDE_OUT" | grep -q '"hiddenKept":true' \
   && pass "the hidden palette is still saved, so it stays editable in admin" \
   || fail "hidden flag not saved: $HIDE_OUT"
+
+section "41. Quiz menu (منوی کوییز)"
+QM_DEFAULTS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo count(ASC_Quiz_Menu::items());' 2>/dev/null)
+[ "$QM_DEFAULTS" = "3" ] \
+  && pass "quiz menu lists all 3 finder rows when their pages exist (3)" \
+  || fail "quiz menu returned $QM_DEFAULTS items, expected 3"
+QM_NAV=$(curl -s --max-time 30 "$SITE_URL/")
+html_has "$QM_NAV" "موهات چه نیازی داره" \
+  && pass "header renders the stored quiz menu label" \
+  || fail "header does not render the quiz menu label"
+QM_SANITIZE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo count(ASC_Quiz_Menu::sanitize(array("items"=>array(array("label"=>"","url"=>"/x/"),array("label"=>"A","url"=>"/y/","enabled"=>"1","order"=>"2"))))) . "|" . ASC_Quiz_Menu::sanitize(array("items"=>array(array("label"=>"A","url"=>"/y/","enabled"=>"1","order"=>"2"))))[0]["enabled"];' 2>/dev/null)
+[ "$QM_SANITIZE" = "1|1" ] \
+  && pass "sanitize drops empty-label rows and keeps enabled as a bool" \
+  || fail "sanitize output was '$QM_SANITIZE', expected '1|1'"
 
 section ""
 echo "==========================================="

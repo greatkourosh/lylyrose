@@ -11,6 +11,12 @@
 
 ---
 
+## 2026-10-12 — Quiz menu admin page (منوی کوییز)
+
+Built upstream first per [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md): `ASC_Quiz_Menu` in `aroma-store-core`, commit `891fa26c` in `aroma_store`, aroma_store suite 327/0. Mirrored to `lylyrose-core` with the rename map. Settings → منوی کوییز controls the label, URL, order and visibility of the finder links in the header and drawer. Rows whose page does not exist are skipped. Lylyrose suite 362/0 (section 41); parity count 13 → 14. Design in [QUIZ_MENU_PLAN.md](QUIZ_MENU_PLAN.md).
+
+---
+
 ## ✅ Completed Implementation
 
 ### Phase 0: Foundation

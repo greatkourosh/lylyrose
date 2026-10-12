@@ -275,6 +275,13 @@ content authoring, not code. See `CONTINUATION.md` §"Open items, re-verified".
 
 ---
 
+## Done — quiz menu
+
+- ✅ DONE 2026-10-12 — **Quiz menu admin page** (منوی کوییز): Settings page that controls the
+  label, URL, order and visibility of the finder links in the header and drawer. Built upstream
+  first as `ASC_Quiz_Menu` in `aroma_store` (`891fa26c`), then mirrored to `lylyrose-core`.
+  Design in [QUIZ_MENU_PLAN.md](QUIZ_MENU_PLAN.md). Test sections: aroma_store 40, lylyrose 41.
+
 ## P3 — Later / optional
 
 - **Vendors onboarding docs**: if Dokan vendors become real, seller FAQ + commission policy.
