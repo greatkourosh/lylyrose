@@ -141,6 +141,9 @@ class Lylyrose_Core {
 
         require_once WP_PLUGIN_DIR . '/kstore/includes/class-gift-cards.php';
         ASC_Gift_Cards::init();
+
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-accounting.php';
+        ASC_Accounting::init();
     }
 
     /**

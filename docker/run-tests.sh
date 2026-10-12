@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "15" ] \
-  && pass "core plugin exposes 15 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 15 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "16" ] \
+  && pass "core plugin exposes 16 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 16 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2804,6 +2804,40 @@ FS_SAN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"
 [ "$FS_SAN" = '{"pa_occasion":["روزمره","سفر"]}|{"a":1,"c":4}' ] \
   && pass "vocabulary dedupes and blank lines drop; longevity drops bad levels" \
   || fail "sanitizer output '$FS_SAN'"
+
+section "43. Accounting REST API (حسابداری)"
+ACCT_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php"); wp_set_current_user(1);
+$p = new WC_Product_Simple(); $p->set_name("acct-test"); $p->set_regular_price(1100); $p->save();
+$p->update_meta_data("_asc_unit_cost", 400); $p->save_meta_data();
+$o = wc_create_order(); $item = new WC_Order_Item_Product(); $item->set_product($p); $item->set_quantity(2); $item->add_meta_data("_asc_line_unit_cost", 400, true); $o->add_item($item); $o->set_total(2200); $o->set_status("completed"); $o->save();
+$p->update_meta_data("_asc_unit_cost", 900); $p->save_meta_data();
+$r = new WP_REST_Request("GET", "/aroma/v1/summary");
+$r->set_param("from", gmdate("Y-m-d", strtotime("-1 day"))); $r->set_param("to", gmdate("Y-m-d", strtotime("+1 day")));
+$s = rest_do_request($r)->get_data();
+$i = rest_do_request(new WP_REST_Request("GET", "/aroma/v1/invoices/".$o->get_id()))->get_data();
+$c = new WP_REST_Request("POST", "/aroma/v1/products/".$p->get_id()."/cost"); $c->set_param("cost", -1);
+$bad = rest_do_request($c)->get_status();
+$anon = wp_set_current_user(0); $u = new WP_REST_Request("GET", "/aroma/v1/summary");
+$denied = rest_do_request($u)->get_status();
+echo json_encode(array("cogs"=>$s["cogs"], "profit"=>$s["gross_profit"], "vat"=>$s["vat"], "net"=>$i["net"], "bad"=>$bad, "denied"=>$denied));
+$o->delete(true); $p->delete(true);
+' 2>/dev/null)
+echo "$ACCT_OUT" | grep -q '"cogs":800' \
+  && pass "COGS uses the snapshot cost (800), not the later edited cost" \
+  || fail "COGS wrong: $ACCT_OUT"
+echo "$ACCT_OUT" | grep -q '"profit":1218' \
+  && pass "gross profit = net sales minus COGS (1218)" \
+  || fail "gross profit wrong: $ACCT_OUT"
+echo "$ACCT_OUT" | grep -q '"vat":182' && echo "$ACCT_OUT" | grep -q '"net":2018' \
+  && pass "VAT backed out of gross at 9% (182 / net 2018)" \
+  || fail "VAT split wrong: $ACCT_OUT"
+echo "$ACCT_OUT" | grep -q '"bad":400' \
+  && pass "negative unit cost rejected" \
+  || fail "negative cost not rejected: $ACCT_OUT"
+echo "$ACCT_OUT" | grep -q '"denied":401\|"denied":403' \
+  && pass "accounting endpoints refuse anonymous callers" \
+  || fail "anonymous access not refused: $ACCT_OUT"
 
 section ""
 echo "==========================================="
