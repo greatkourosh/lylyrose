@@ -3,7 +3,7 @@ Theme Name: Lyly Rose
 Theme URI: https://www.lylyrose.com
 Author: Lyly Rose Dev
 Description: قالب فروشگاهی وردپرس/ووکامرس با طراحی — راست‌چین، فارسی، صفحه اول و صفحات فروشگاه.
-Version: 1.27.2
+Version: 1.27.3
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -2204,7 +2204,7 @@ button, input, select, textarea { font-family: inherit; }
        collapse into something the drawer already does better. */
     .dk-mega-panel { display: none !important; }
     .dk-catnav-item > a svg { display: none; }
-    .dk-hero-slide { grid-template-columns: 1fr; padding: 28px 22px; text-align: center; }
+    .dk-hero-slide { grid-template-columns: 1fr; padding: 56px 22px; text-align: center; }
     .dk-hero-copy h1, .dk-hero-copy h2 { font-size: 22px; }
     .dk-hero-art { display: none; }
     .dk-service-row { grid-template-columns: repeat(2, 1fr); }
