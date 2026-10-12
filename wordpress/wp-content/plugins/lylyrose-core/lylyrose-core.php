@@ -124,8 +124,8 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-quiz-menu.php';
         ASC_Quiz_Menu::init();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-needs-finder.php';
-        ASC_Needs_Finder::init();
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-needs-quiz.php';
+        ASC_Needs_Quiz::init();
 
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-finder-tiers.php';
         ASC_Finder_Tiers::init();

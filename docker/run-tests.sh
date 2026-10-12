@@ -2839,6 +2839,59 @@ echo "$ACCT_OUT" | grep -q '"denied":401\|"denied":403' \
   && pass "accounting endpoints refuse anonymous callers" \
   || fail "anonymous access not refused: $ACCT_OUT"
 
+section "44. Needs quizzes (پوستت / موهات چه نیازی داره)"
+NQ_LIVE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Needs_Quiz::is_live(ASC_Needs_Quiz::kinds()["skin"]) ? "yes" : "no";' 2>/dev/null)
+[ "$NQ_LIVE" = "yes" ] \
+  && pass "skin quiz is live while its category tree has products" \
+  || fail "skin quiz reports live=$NQ_LIVE with products in its tree"
+NQ_HAIR_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$SITE_URL/hair-needs/")
+[ "$NQ_HAIR_CODE" = "200" ] \
+  && pass "hair-needs page answers 200 while its tree has products" \
+  || fail "hair-needs returned $NQ_HAIR_CODE with products in its tree"
+docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); $ids = ASC_Needs_Quiz::tree_product_ids(ASC_Needs_Quiz::kinds()["hair"]); foreach ($ids as $id) { wp_update_post(array("ID"=>$id,"post_status"=>"draft")); } update_option("asc_nq_test_hidden", $ids, false);' >/dev/null 2>&1
+NQ_EMPTY_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$SITE_URL/hair-needs/")
+docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); foreach (get_option("asc_nq_test_hidden", array()) as $id) { wp_update_post(array("ID"=>$id,"post_status"=>"publish")); } delete_option("asc_nq_test_hidden");' >/dev/null 2>&1
+[ "$NQ_EMPTY_CODE" = "404" ] \
+  && pass "hair-needs answers 404 when its category tree has no published products" \
+  || fail "hair-needs returned $NQ_EMPTY_CODE with an empty tree, expected 404"
+NQ_BACK_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$SITE_URL/hair-needs/")
+[ "$NQ_BACK_CODE" = "200" ] \
+  && pass "hair-needs comes back by itself once products return" \
+  || fail "hair-needs stayed $NQ_BACK_CODE after its products were restored"
+NQ_RESULTS=$(curl -s --max-time 30 -X POST -d "type=dry&concern=acne" "$SITE_URL/skin-needs/" | grep -o 'class="asc-finder__result"' | wc -l | tr -dc '0-9')
+[ "${NQ_RESULTS:-0}" -ge 1 ] \
+  && pass "skin quiz returns products for a real submission ($NQ_RESULTS)" \
+  || fail "skin quiz returned no products for a real submission"
+
+EXP_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php"); wp_set_current_user(1);
+$p = new WC_Product_Simple(); $p->set_name("exp-test"); $p->set_regular_price(1100); $p->save();
+$p->update_meta_data("_asc_unit_cost", 400); $p->save_meta_data();
+$o = wc_create_order(); $item = new WC_Order_Item_Product(); $item->set_product($p); $item->set_quantity(2); $item->add_meta_data("_asc_line_unit_cost", 400, true); $o->add_item($item); $o->set_total(2200); $o->set_status("completed"); $o->save();
+$today = gmdate("Y-m-d");
+$c = new WP_REST_Request("POST", "/aroma/v1/expenses");
+$c->set_param("amount", 300); $c->set_param("date", $today); $c->set_param("category", "بسته بندی"); $c->set_param("note", "test");
+$created = rest_do_request($c)->get_data();
+$r = new WP_REST_Request("GET", "/aroma/v1/summary");
+$r->set_param("from", gmdate("Y-m-d", strtotime("-1 day"))); $r->set_param("to", gmdate("Y-m-d", strtotime("+1 day")));
+$s = rest_do_request($r)->get_data();
+$l = rest_do_request(new WP_REST_Request("GET", "/aroma/v1/expenses"));
+$bad = new WP_REST_Request("POST", "/aroma/v1/expenses"); $bad->set_param("amount", -5); $bad->set_param("date", $today); $bad->set_param("category", "x");
+$badStatus = rest_do_request($bad)->get_status();
+echo json_encode(array("expenses"=>$s["expenses"], "op"=>$s["operating_profit"], "gross"=>$s["gross_profit"], "listed"=>count($l->get_data()), "badStatus"=>$badStatus, "id"=>$created["id"] ?? 0));
+if (!empty($created["id"])) { wp_delete_post((int) $created["id"], true); }
+$o->delete(true); $p->delete(true);
+' 2>/dev/null)
+echo "$EXP_OUT" | grep -q '"expenses":300' \
+  && pass "expenses in range reach the summary (300)" \
+  || fail "expense not in summary: $EXP_OUT"
+echo "$EXP_OUT" | grep -q '"op":918' \
+  && pass "operating profit = gross profit minus expenses (1218 - 300 = 918)" \
+  || fail "operating profit wrong: $EXP_OUT"
+echo "$EXP_OUT" | grep -q '"badStatus":400' \
+  && pass "negative expense amount rejected" \
+  || fail "negative expense accepted: $EXP_OUT"
+section ""
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

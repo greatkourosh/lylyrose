@@ -1,13 +1,17 @@
 <?php
 /**
- * Skin and hair needs quizzes. Each quiz answers a type and a concern and
- * returns the care products whose generated needs metadata matches them.
- * Separate from the perfume finder, which it does not touch.
+ * Skin and hair needs quizzes (پوستت / موهات چه نیازی داره).
+ *
+ * Each quiz searches a category tree: the root term and every descendant. The
+ * quiz is only live while that tree holds at least one published product. When
+ * it empties or its root is removed, the page answers 404, the menu row hides,
+ * and ensure_pages() does not recreate it, so a catalogue change cannot leave a
+ * half-working quiz behind.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class ASC_Needs_Finder {
+class ASC_Needs_Quiz {
 
 	const RESULT_LIMIT = 4;
 
@@ -21,8 +25,8 @@ class ASC_Needs_Finder {
 					'type'    => array( 'label' => 'نوع پوستت چطوری است؟', 'options' => array(
 						'dry' => 'خشک', 'oily' => 'چرب', 'combination' => 'مختلط', 'sensitive' => 'حساس', 'normal' => 'نرمال',
 					) ),
-					'concern' => array( 'label' => 'مهم‌ترین مشکلت چیست؟', 'options' => array(
-						'acne' => 'جوش و آکنه', 'dehydration' => 'کم‌آبی', 'dullness' => 'کدری و بی‌رونقی',
+					'concern' => array( 'label' => 'مهمترین مشکلت چیست؟', 'options' => array(
+						'acne' => 'جوش و آکنه', 'dehydration' => 'کمآبی', 'dullness' => 'کدری و بیرونقی',
 						'aging' => 'چین و چروک', 'dark_spots' => 'لک و تیرگی', 'redness' => 'قرمزی',
 					) ),
 				),
@@ -33,9 +37,9 @@ class ASC_Needs_Finder {
 				'category'  => 'hair-care',
 				'questions' => array(
 					'type'    => array( 'label' => 'بافت موهات چطوری است؟', 'options' => array(
-						'straight' => 'صاف', 'wavy' => 'موج‌دار', 'curly' => 'فر', 'coily' => 'خیلی فر',
+						'straight' => 'صاف', 'wavy' => 'موجدار', 'curly' => 'فر', 'coily' => 'خیلی فر',
 					) ),
-					'concern' => array( 'label' => 'مهم‌ترین مشکلت چیست؟', 'options' => array(
+					'concern' => array( 'label' => 'مهمترین مشکلت چیست؟', 'options' => array(
 						'frizz' => 'وز و پریشی', 'hair_fall' => 'ریزش', 'damage' => 'آسیب و شکنندگی',
 						'dandruff' => 'شوره', 'dryness' => 'خشکی',
 					) ),
@@ -46,21 +50,106 @@ class ASC_Needs_Finder {
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'ensure_pages' ), 30 );
+		add_action( 'template_redirect', array( __CLASS__, 'guard' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
+		add_filter( 'the_content', array( __CLASS__, 'filter_content' ) );
+	}
+
+	/**
+	 * Published product IDs in the quiz's category tree (root plus descendants).
+	 *
+	 * @return int[]
+	 */
+	public static function tree_product_ids( $kind ) {
+		$root = get_term_by( 'slug', $kind['category'], 'product_cat' );
+		if ( ! $root ) {
+			return array();
+		}
+		$terms = array_merge( array( (int) $root->term_id ), array_map( 'intval', get_term_children( $root->term_id, 'product_cat' ) ) );
+		$ids = get_posts( array(
+			'post_type'      => 'product',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+			'tax_query'      => array( array(
+				'taxonomy'         => 'product_cat',
+				'field'            => 'term_id',
+				'terms'            => $terms,
+				'include_children' => false,
+			) ),
+		) );
+		return array_map( 'intval', $ids );
+	}
+
+	public static function is_live( $kind ) {
+		return count( self::tree_product_ids( $kind ) ) > 0;
+	}
+
+	/**
+	 * The quiz that owns the current request's page, or null.
+	 */
+	public static function current_kind() {
+		if ( ! is_page() ) {
+			return null;
+		}
+		$slug = get_queried_object()->post_name ?? '';
+		foreach ( self::kinds() as $kind ) {
+			if ( $kind['slug'] === $slug ) {
+				return $kind;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Empty tree: 404 instead of an empty quiz. The page stays in the database so
+	 * it comes back by itself when products return.
+	 */
+	public static function guard() {
+		$kind = self::current_kind();
+		if ( $kind && ! self::is_live( $kind ) ) {
+			global $wp_query;
+			$wp_query->set_404();
+			status_header( 404 );
+			nocache_headers();
+			if ( $template = get_404_template() ) {
+				include $template;
+				exit;
+			}
+		}
+	}
+
+	/**
+	 * Show the quiz in the page body, so the page works under any theme's default template.
+	 */
+	public static function filter_content( $content ) {
+		$kind = self::current_kind();
+		if ( ! $kind || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+		ob_start();
+		self::render( self::key_for( $kind ) );
+		return ob_get_clean();
+	}
+
+	private static function key_for( $kind ) {
+		foreach ( self::kinds() as $key => $k ) {
+			if ( $k === $kind ) {
+				return $key;
+			}
+		}
+		return '';
 	}
 
 	public static function enqueue() {
-		if ( ! function_exists( 'get_queried_object' ) || ! is_page() ) {
-			return;
-		}
-		$slugs = wp_list_pluck( self::kinds(), 'slug' );
-		if ( ! in_array( get_queried_object()->post_name ?? '', $slugs, true ) ) {
+		if ( ! self::current_kind() ) {
 			return;
 		}
 		wp_enqueue_style(
-			'lylyrose-perfume-finder',
-			get_theme_file_uri( 'assets/css/perfume-finder.css' ),
-			array( 'lylyrose-style' ),
+			'asc-needs-quiz',
+			plugins_url( 'assets/needs-quiz.css', dirname( __FILE__ ) ),
+			array(),
 			LYLYROSE_CORE_VERSION
 		);
 	}
@@ -85,8 +174,7 @@ class ASC_Needs_Finder {
 	}
 
 	/**
-	 * A product scores one point per matching type and one per matching concern,
-	 * so 2 is a full match.
+	 * One point per matching type and one per matching concern; 2 is a full match.
 	 */
 	public static function score( array $needs, array $answers ) {
 		$score = 0;
@@ -101,7 +189,7 @@ class ASC_Needs_Finder {
 
 	/**
 	 * @param array<int,array{id:int,types:array,concerns:array}> $products
-	 * @return array<int,array{id:int,score:int}> best matches first, no zero scores
+	 * @return array<int,array{id:int,score:int}>
 	 */
 	public static function rank( array $products, array $answers ) {
 		$ranked = array();
@@ -131,7 +219,7 @@ class ASC_Needs_Finder {
 			self::render_results( $kind, $valid );
 		} else {
 			if ( $submitted ) {
-				echo '<p class="asc-finder__empty">' . esc_html__( 'لطفاً همه سوال‌ها را پاسخ دهید.', 'lylyrose-core' ) . '</p>';
+				echo '<p class="asc-finder__empty">' . esc_html__( 'لطفاً همه سوالها را پاسخ دهید.', 'lylyrose-core' ) . '</p>';
 			}
 			self::render_quiz( $kind );
 		}
@@ -150,7 +238,6 @@ class ASC_Needs_Finder {
 	}
 
 	private static function render_quiz( array $kind ) {
-		echo '<h2 class="asc-finder__title">' . esc_html( $kind['title'] ) . '</h2>';
 		echo '<form method="post" class="asc-finder__quiz">';
 		foreach ( $kind['questions'] as $name => $question ) {
 			echo '<fieldset class="asc-finder__step">';
@@ -166,11 +253,10 @@ class ASC_Needs_Finder {
 		}
 		echo '<p class="asc-finder__actions"><button type="submit" class="asc-finder__submit">' . esc_html__( 'پیشنهاد بده', 'lylyrose-core' ) . '</button></p>';
 		echo '</form>';
-		echo '<p class="asc-finder__alt"><a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '">' . esc_html__( 'یا مستقیم از فروشگاه خرید کنید', 'lylyrose-core' ) . '</a></p>';
 	}
 
 	private static function render_results( array $kind, array $answers ) {
-		$ranked = self::rank( self::products_for( $kind['category'] ), $answers );
+		$ranked = self::rank( self::products_for( $kind ), $answers );
 
 		echo '<h2 class="asc-finder__title">' . esc_html__( 'پیشنهادهای شما', 'lylyrose-core' ) . '</h2>';
 		if ( empty( $ranked ) ) {
@@ -185,36 +271,16 @@ class ASC_Needs_Finder {
 			if ( ! $product ) {
 				continue;
 			}
-			$url   = get_permalink( $product->get_id() );
-			$usage = (string) get_post_meta( $product->get_id(), '_needs_usage', true );
+			$url = get_permalink( $product->get_id() );
 			?>
 			<li class="asc-finder__result">
 				<a class="asc-finder__media" href="<?php echo esc_url( $url ); ?>">
 					<?php echo wp_kses_post( $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ) ); ?>
 				</a>
 				<div class="asc-finder__body">
-					<div class="asc-finder__stack">
-						<div class="asc-finder__head">
-							<h3 class="asc-finder__name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
-						</div>
-						<div class="asc-finder__buy">
-							<span class="asc-finder__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
-							<span class="asc-finder__stock <?php echo $product->is_in_stock() ? 'is-in' : 'is-out'; ?>">
-								<?php echo esc_html( $product->is_in_stock() ? __( 'موجود', 'lylyrose-core' ) : __( 'ناموجود', 'lylyrose-core' ) ); ?>
-							</span>
-						</div>
-						<?php if ( '' !== $usage ) : ?>
-							<dl class="asc-finder__meta">
-								<div class="asc-finder__meta-row">
-									<dt><?php esc_html_e( 'روش استفاده', 'lylyrose-core' ); ?></dt>
-									<dd><?php echo esc_html( $usage ); ?></dd>
-								</div>
-							</dl>
-						<?php endif; ?>
-					</div>
-					<p class="asc-finder__actions">
-						<a class="asc-finder__view" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'مشاهده و خرید', 'lylyrose-core' ); ?></a>
-					</p>
+					<h3 class="asc-finder__name"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $product->get_name() ); ?></a></h3>
+					<span class="asc-finder__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
+					<a class="asc-finder__view" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'مشاهده و خرید', 'lylyrose-core' ); ?></a>
 				</div>
 			</li>
 			<?php
@@ -223,22 +289,14 @@ class ASC_Needs_Finder {
 		echo '<p class="asc-finder__alt"><a href="' . esc_url( get_permalink( get_page_by_path( $kind['slug'] ) ) ) . '">' . esc_html__( 'شروع دوباره', 'lylyrose-core' ) . '</a></p>';
 	}
 
-	private static function products_for( $category ) {
-		$ids = get_posts( array(
-			'post_type'      => 'product',
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
-			'tax_query'      => array( array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => $category,
-			) ),
-		) );
+	/**
+	 * Products in the category tree, with their needs meta.
+	 */
+	private static function products_for( array $kind ) {
 		$products = array();
-		foreach ( $ids as $id ) {
+		foreach ( self::tree_product_ids( $kind ) as $id ) {
 			$products[] = array(
-				'id'       => (int) $id,
+				'id'       => $id,
 				'types'    => (array) get_post_meta( $id, '_needs_types', true ),
 				'concerns' => (array) get_post_meta( $id, '_needs_concerns', true ),
 			);
