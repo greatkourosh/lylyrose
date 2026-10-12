@@ -160,7 +160,7 @@ class ASC_OTP {
 	}
 
 	protected function send_code( $mobile, $code ) {
-		$message = sprintf( __( "لیلی رز\nکد ورود شما: %s\nاعتبار: ۲ دقیقه", 'lylyrose-core' ), $code );
+		$message = apply_filters( 'asc_sms_brand', 'لیلی رز' ) . sprintf( __( "\nکد ورود شما: %s\nاعتبار: ۲ دقیقه", 'lylyrose-core' ), $code );
 
 		if ( function_exists( 'PWSMS' ) ) {
 			$result = PWSMS()->send_sms( array(
@@ -185,7 +185,7 @@ class ASC_OTP {
 		$user_id = wp_insert_user( array(
 			'user_login'   => $username,
 			'user_pass'    => wp_generate_password( 20 ),
-			'display_name' => __( 'کاربر لیلی رز', 'lylyrose-core' ),
+			'display_name' => apply_filters( 'asc_display_name_prefix', 'کاربر لیلی رز' ),
 			'role'         => 'customer',
 		) );
 		if ( is_wp_error( $user_id ) ) {
