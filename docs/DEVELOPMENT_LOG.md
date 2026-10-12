@@ -3072,3 +3072,50 @@ screenshot: the browser preview was blocked, so hover and RTL layout are unverif
 
 **Verification.** `bash docker/run-tests.sh` → **351 passed, 0 failed**. All 35 menu
 links return 200.
+
+## Update — 2026-10-12: Accounting REST API (حسابداری)
+
+Read views and ledger over WooCommerce orders, in `lylyrose-core/includes/class-accounting.php`,
+under `/wp-json/aroma/v1/`. All routes require `manage_woocommerce`; anonymous callers get 401.
+
+| Route | Purpose |
+| --- | --- |
+| `GET /sales?from&to` | Orders in range with total, VAT, net, refunds, COGS |
+| `GET /summary?from&to` | Totals: gross, refunds, VAT, net sales, COGS, gross profit, expenses, operating profit |
+| `GET /invoices/{id}` | Invoice for one order, with VAT split |
+| `POST /products/{id}/cost` | Set unit cost (rejects negative values) |
+| `GET /expenses?from&to` | Expense ledger in range |
+| `POST /expenses` | Record an expense (amount, date, category, note) |
+
+Design decisions:
+
+- **Cost snapshot at checkout.** Each order line stores `_asc_line_unit_cost` when created. A
+  later cost edit does not rewrite past profit. Orders created in admin have no snapshot and fall
+  back to the product's current cost.
+- **VAT is backed out of totals at 9%** (`VAT_RATE`), on the assumption that prices include VAT.
+  Prices are exclusive in WooCommerce tax settings, so confirm before relying on VAT figures.
+- **Refunded orders:** the refunded amount is subtracted from revenue (`$kept`). A fully refunded
+  order (`refunded` status) carries no COGS, so its cost is not counted.
+- **Expenses** are a non-public `asc_expense` post type with date, amount and category in meta.
+
+Verified: suite section 42 (COGS snapshot 800 not 1200, gross profit 1218, VAT 182, negative
+cost rejected, anonymous refused) and section 43 (expense in summary, operating profit 918,
+negative expense rejected).
+
+### Traps hit
+
+- **The plugin `includes/` directory is owned by `www-data`.** Host-side writes fail with EACCES.
+  Write through `docker exec -i -u www-data aroma-wp sh -c 'cat > ...'`.
+- **WooCommerce SKU lookup reads `wc_product_meta_lookup`,** not `postmeta`. Rows went missing, so
+  `ensure_products()` re-seeded gift cards on each run. Fix: `wc_update_product_lookup_tables()`.
+- **`set_stock_status("outofstock")` does nothing on a managed-stock product** with quantity > 0;
+  WooCommerce recomputes it to `instock` on save. Turn managed stock off for the flip, then restore.
+- **Creating an order with `add_product()` skips the checkout hook,** so the line cost snapshot is
+  not written. Test fixtures must set `_asc_line_unit_cost` on the item explicitly.
+
+### Result
+
+lylyrose suite **387 passed / 0 failed**, mirroring aroma_store `493c324c`.
+Accounting is not deployed to lylyrose.ir yet.
+
+Digikala: no public seller API found, and no sample files yet. Adapter deferred until formats are known.
