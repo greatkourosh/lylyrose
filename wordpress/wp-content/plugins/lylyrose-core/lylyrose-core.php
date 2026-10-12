@@ -61,7 +61,7 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-notifications.php';
         ASC_Notifications::instance();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-gift-wrap.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-gift-wrap.php';
         new ASC_Gift_Wrap();
 
         // Palette serves CSS to the front end as well as the settings page, so it
@@ -75,7 +75,7 @@ class Lylyrose_Core {
     }
 
     protected function includes_woocommerce() {
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-national-id.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-national-id.php';
         new ASC_National_ID();
         add_action( 'woocommerce_after_checkout_validation', array( $this, 'validate_national_id' ), 10, 2 );
 
@@ -94,7 +94,7 @@ class Lylyrose_Core {
         require_once WP_PLUGIN_DIR . '/kstore/includes/class-fuzzy-search.php';
         ASC_Fuzzy_Search::init();
 
-        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-avif.php';
+        require_once WP_PLUGIN_DIR . '/kstore/includes/class-avif.php';
         ASC_Avif::init();
 
         require_once WP_PLUGIN_DIR . '/kstore/includes/class-coupons.php';

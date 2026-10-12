@@ -335,7 +335,7 @@ echo isset($fields["billing"]["billing_national_id"]["label"]) ? trim($fields["b
 # checksum validator unit tests
 NI_VALID=$(docker exec "$WP_CONTAINER" php -r '
 require("/var/www/html/wp-load.php");
-require_once("/var/www/html/wp-content/plugins/lylyrose-core/includes/class-national-id.php");
+require_once("/var/www/html/wp-content/plugins/kstore/includes/class-national-id.php");
 echo ASC_National_ID::is_valid("0499370899") ? "ok" : "bad";
 echo "|";
 echo ASC_National_ID::is_valid("1234567890") ? "bad" : "ok";
@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "18" ] \
-  && pass "core plugin exposes 18 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 18 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "15" ] \
+  && pass "core plugin exposes 15 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 15 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
