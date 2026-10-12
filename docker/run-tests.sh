@@ -2762,6 +2762,23 @@ QM_NEG=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"
   && pass "a negative order is clamped to 0" \
   || fail "negative order stored as '$QM_NEG', expected 0"
 
+QM_RULE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Quiz_Menu::resolve(array("label"=>"X","url"=>"https://example.com/a","enabled"=>true,"order"=>1), array_merge(ASC_Quiz_Menu::rules(), array("allow_external"=>false)))["show"] ? "shown" : "hidden";' 2>/dev/null)
+[ "$QM_RULE" = "hidden" ] \
+  && pass "allow_external off hides an external link" \
+  || fail "external link shown with allow_external off ($QM_RULE)"
+QM_RULE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Quiz_Menu::resolve(array("label"=>"X","url"=>"/no-such-page-xyz/","enabled"=>true,"order"=>1), array_merge(ASC_Quiz_Menu::rules(), array("require_page"=>false)))["show"] ? "shown" : "hidden";' 2>/dev/null)
+[ "$QM_RULE" = "shown" ] \
+  && pass "require_page off shows a row whose page is missing" \
+  || fail "missing page still hidden with require_page off ($QM_RULE)"
+QM_RULE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); update_option("asc_quiz_menu_rules", array_merge(ASC_Quiz_Menu::rule_defaults(), array("show_drawer"=>false))); echo count(ASC_Quiz_Menu::items("drawer")); delete_option("asc_quiz_menu_rules");' 2>/dev/null)
+[ "$QM_RULE" = "0" ] \
+  && pass "show_drawer off empties the drawer list" \
+  || fail "drawer list has $QM_RULE items with show_drawer off"
+QM_RULE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Quiz_Menu::sanitize_rules(array("max_items"=>"99"))["max_items"];' 2>/dev/null)
+[ "$QM_RULE" = "10" ] \
+  && pass "max_items is capped at 10 on save" \
+  || fail "max_items saved as $QM_RULE, expected 10"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

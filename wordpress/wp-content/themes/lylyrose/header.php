@@ -199,7 +199,7 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
                     </li>
                 <?php endif; ?>
                 <?php if ( class_exists( 'ASC_Quiz_Menu' ) ) : ?>
-                    <?php foreach ( ASC_Quiz_Menu::items() as $dk_quiz ) : ?>
+                    <?php foreach ( ASC_Quiz_Menu::items( 'header' ) as $dk_quiz ) : ?>
                         <li class="dk-catnav-item"><a href="<?php echo esc_url( $dk_quiz['url'] ); ?>"><?php echo esc_html( $dk_quiz['label'] ); ?></a></li>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -220,7 +220,7 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
     </div>
     <nav class="dk-drawer-nav">
         <?php if ( class_exists( 'ASC_Quiz_Menu' ) ) : ?>
-            <?php foreach ( ASC_Quiz_Menu::items() as $dk_quiz ) : ?>
+            <?php foreach ( ASC_Quiz_Menu::items( 'drawer' ) as $dk_quiz ) : ?>
                 <a href="<?php echo esc_url( $dk_quiz['url'] ); ?>"><?php echo esc_html( $dk_quiz['label'] ); ?></a>
             <?php endforeach; ?>
         <?php endif; ?>

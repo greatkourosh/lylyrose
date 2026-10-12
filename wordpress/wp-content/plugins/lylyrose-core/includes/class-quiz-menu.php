@@ -2,18 +2,21 @@
 /**
  * Quiz menu (منوی کوییز).
  *
- * Editable header and drawer links to the finder pages, under Settings. resolve()
- * is the one place that decides whether a row shows, so the settings page status
- * column and the menu itself cannot disagree.
+ * Editable header and drawer links to the finder pages, under Settings. Two
+ * options: the rows (asc_quiz_menu) and the rules that decide which rows render
+ * (asc_quiz_menu_rules). resolve() is the only place a row's visibility is
+ * decided, so the status column and the rendered menu cannot disagree.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 class ASC_Quiz_Menu {
 
-	const OPT  = 'asc_quiz_menu';
-	const MAX  = 10;
-	const PAGE = 'asc-quiz-menu';
+	const OPT   = 'asc_quiz_menu';
+	const RULES = 'asc_quiz_menu_rules';
+	const GROUP = 'asc_quiz_menu';
+	const MAX   = 10;
+	const PAGE  = 'asc-quiz-menu';
 
 	public static function defaults() {
 		return array(
@@ -23,46 +26,81 @@ class ASC_Quiz_Menu {
 		);
 	}
 
+	public static function rule_defaults() {
+		return array(
+			'require_page'   => true,
+			'allow_external' => true,
+			'show_header'    => true,
+			'show_drawer'    => true,
+			'max_items'      => self::MAX,
+		);
+	}
+
+	public static function rules() {
+		return wp_parse_args( get_option( self::RULES, array() ), self::rule_defaults() );
+	}
+
+	public static function bool_rules() {
+		return array(
+			'require_page'   => __( 'صفحه موجود الزامی باشد', 'lylyrose-core' ),
+			'allow_external' => __( 'لینک بیرونی (https) مجاز باشد', 'lylyrose-core' ),
+			'show_header'    => __( 'نمایش در نوار دستهبندی بالای سایت', 'lylyrose-core' ),
+			'show_drawer'    => __( 'نمایش در منوی موبایل', 'lylyrose-core' ),
+		);
+	}
+
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
 	}
 
 	/**
-	 * Whether one stored row is shown, and why not if it is not.
+	 * Whether one stored row is shown under the given rules, and why not if it is not.
 	 *
 	 * @return array{show: bool, url: string, note: string}
 	 */
-	public static function resolve( $row ) {
+	public static function resolve( $row, $rules = null ) {
+		$rules = $rules ?? self::rules();
+		$hide  = function ( $note ) {
+			return array( 'show' => false, 'url' => '', 'note' => $note );
+		};
+
 		if ( empty( $row['enabled'] ) ) {
-			return array( 'show' => false, 'url' => '', 'note' => __( 'غیرفعال', 'lylyrose-core' ) );
+			return $hide( __( 'غیرفعال', 'lylyrose-core' ) );
 		}
 		if ( '' === trim( (string) $row['label'] ) ) {
-			return array( 'show' => false, 'url' => '', 'note' => __( 'برچسب خالی است؛ ردیف نادیده گرفته میشود', 'lylyrose-core' ) );
+			return $hide( __( 'برچسب خالی است', 'lylyrose-core' ) );
 		}
 		$url = trim( (string) $row['url'] );
 		if ( preg_match( '#^https?://#', $url ) ) {
+			if ( empty( $rules['allow_external'] ) ) {
+				return $hide( __( 'لینک بیرونی مجاز نیست (قانون «لینک بیرونی»)', 'lylyrose-core' ) );
+			}
 			return array( 'show' => true, 'url' => $url, 'note' => __( 'نمایش داده میشود (لینک بیرونی)', 'lylyrose-core' ) );
 		}
 		$path = trim( $url, '/' );
 		if ( '' === $path ) {
-			return array( 'show' => false, 'url' => '', 'note' => __( 'آدرسی وارد نشده است', 'lylyrose-core' ) );
+			return $hide( __( 'آدرسی وارد نشده است', 'lylyrose-core' ) );
 		}
-		if ( ! get_page_by_path( $path ) ) {
-			return array( 'show' => false, 'url' => '', 'note' => __( 'صفحهای با این آدرس وجود ندارد', 'lylyrose-core' ) );
+		if ( ! empty( $rules['require_page'] ) && ! get_page_by_path( $path ) ) {
+			return $hide( __( 'صفحهای با این آدرس وجود ندارد (قانون «صفحه موجود»)', 'lylyrose-core' ) );
 		}
 		return array( 'show' => true, 'url' => home_url( '/' . $path . '/' ), 'note' => __( 'نمایش داده میشود', 'lylyrose-core' ) );
 	}
 
 	/**
-	 * Rows that will render, in display order.
+	 * Rows that render in one place ('header' or 'drawer'), in display order.
 	 *
 	 * @return array<int, array{label: string, url: string, order: int}>
 	 */
-	public static function items() {
+	public static function items( $place = 'header' ) {
+		$rules = self::rules();
+		if ( empty( $rules[ 'show_' . $place ] ) ) {
+			return array();
+		}
 		$out = array();
 		foreach ( get_option( self::OPT, self::defaults() ) as $row ) {
-			$state = self::resolve( $row );
+			$state = self::resolve( $row, $rules );
 			if ( $state['show'] ) {
 				$out[] = array( 'label' => $row['label'], 'url' => $state['url'], 'order' => (int) $row['order'] );
 			}
@@ -70,7 +108,7 @@ class ASC_Quiz_Menu {
 		usort( $out, function ( $a, $b ) {
 			return $a['order'] <=> $b['order'];
 		} );
-		return $out;
+		return array_slice( $out, 0, (int) $rules['max_items'] );
 	}
 
 	public static function sanitize( $in ) {
@@ -90,6 +128,17 @@ class ASC_Quiz_Menu {
 		return $out;
 	}
 
+	public static function sanitize_rules( $in ) {
+		$in = (array) $in;
+		return array(
+			'require_page'   => ! empty( $in['require_page'] ),
+			'allow_external' => ! empty( $in['allow_external'] ),
+			'show_header'    => ! empty( $in['show_header'] ),
+			'show_drawer'    => ! empty( $in['show_drawer'] ),
+			'max_items'      => min( self::MAX, max( 1, (int) ( $in['max_items'] ?? self::MAX ) ) ),
+		);
+	}
+
 	public static function admin_menu() {
 		add_options_page(
 			__( 'منوی کوییز', 'lylyrose-core' ),
@@ -102,7 +151,7 @@ class ASC_Quiz_Menu {
 
 	public static function admin_init() {
 		register_setting(
-			self::OPT,
+			self::GROUP,
 			self::OPT,
 			array(
 				'type'              => 'array',
@@ -110,27 +159,59 @@ class ASC_Quiz_Menu {
 				'default'           => self::defaults(),
 			)
 		);
+		register_setting(
+			self::GROUP,
+			self::RULES,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_rules' ),
+				'default'           => self::rule_defaults(),
+			)
+		);
 	}
 
 	public static function render_admin() {
-		$rows = array_slice( get_option( self::OPT, self::defaults() ), 0, self::MAX );
+		$rules = self::rules();
+		$rows  = array_slice( get_option( self::OPT, self::defaults() ), 0, self::MAX );
 		while ( count( $rows ) < self::MAX ) {
 			$rows[] = array( 'label' => '', 'url' => '', 'enabled' => false, 'order' => count( $rows ) + 1 );
 		}
-		$name = esc_attr( self::OPT );
+		$opt  = esc_attr( self::OPT );
+		$rule = esc_attr( self::RULES );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'منوی کوییز', 'lylyrose-core' ); ?></h1>
-			<ul style="list-style:disc;padding-right:20px">
-				<li><?php esc_html_e( 'یک ردیف فقط وقتی نمایش داده میشود که فعال باشد، برچسب داشته باشد، و آدرسش به یک صفحه موجود یا یک لینک کامل https اشاره کند.', 'lylyrose-core' ); ?></li>
-				<li><?php esc_html_e( 'آدرس محلی را با / شروع و تمام کنید، مثل /skin-needs/. آدرس کامل هم پذیرفته میشود، مثل https://example.com/page.', 'lylyrose-core' ); ?></li>
-				<li><?php esc_html_e( 'ترتیب: عدد کوچکتر بالاتر میآید. مقدار منفی مجاز نیست.', 'lylyrose-core' ); ?></li>
-				<li><?php esc_html_e( 'حداکثر ۱۰ ردیف. برای حذف یک ردیف، برچسبش را خالی بگذارید.', 'lylyrose-core' ); ?></li>
-				<li><?php esc_html_e( 'این ردیفها هم در نوار دستهبندی بالای سایت و هم در منوی موبایل نمایش داده میشوند.', 'lylyrose-core' ); ?></li>
-				<li><?php esc_html_e( 'ستون وضعیت بر اساس مقدار ذخیرهشده است؛ بعد از ذخیره، دوباره بررسی میشود.', 'lylyrose-core' ); ?></li>
-			</ul>
+			<p>
+				<?php
+				printf(
+					esc_html__( 'الان در نوار بالا %1$d ردیف و در منوی موبایل %2$d ردیف نمایش داده میشود.', 'lylyrose-core' ),
+					count( self::items( 'header' ) ),
+					count( self::items( 'drawer' ) )
+				);
+				?>
+			</p>
 			<form method="post" action="options.php">
-				<?php settings_fields( self::OPT ); ?>
+				<?php settings_fields( self::GROUP ); ?>
+
+				<h2><?php esc_html_e( 'قوانین', 'lylyrose-core' ); ?></h2>
+				<table class="form-table" role="presentation">
+					<?php foreach ( self::bool_rules() as $key => $label ) : ?>
+						<tr>
+							<th scope="row"><?php echo esc_html( $label ); ?></th>
+							<td><label><input type="checkbox" name="<?php echo $rule; ?>[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $rules[ $key ] ) ); ?>> <?php esc_html_e( 'روشن', 'lylyrose-core' ); ?></label></td>
+						</tr>
+					<?php endforeach; ?>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'حداکثر تعداد ردیف نمایش داده شده', 'lylyrose-core' ); ?></th>
+						<td>
+							<input type="number" min="1" max="<?php echo (int) self::MAX; ?>" class="small-text" name="<?php echo $rule; ?>[max_items]" value="<?php echo (int) $rules['max_items']; ?>">
+							<span class="description"><?php printf( esc_html__( 'بین ۱ تا %d', 'lylyrose-core' ), (int) self::MAX ); ?></span>
+						</td>
+					</tr>
+				</table>
+
+				<h2><?php esc_html_e( 'ردیفها', 'lylyrose-core' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'آدرس محلی را با / شروع و تمام کنید، مثل /skin-needs/. ترتیب: عدد کوچکتر بالاتر میآید. برای حذف یک ردیف، برچسبش را خالی بگذارید.', 'lylyrose-core' ); ?></p>
 				<table class="widefat striped">
 					<thead><tr>
 						<th><?php esc_html_e( 'برچسب', 'lylyrose-core' ); ?></th>
@@ -142,14 +223,14 @@ class ASC_Quiz_Menu {
 					<tbody>
 					<?php foreach ( $rows as $i => $row ) : ?>
 						<?php
-						$state = self::resolve( $row );
+						$state = self::resolve( $row, $rules );
 						$empty = '' === trim( (string) $row['label'] ) && '' === trim( (string) $row['url'] );
 						?>
 						<tr>
-							<td><input type="text" class="regular-text" name="<?php echo $name; ?>[items][<?php echo (int) $i; ?>][label]" value="<?php echo esc_attr( $row['label'] ); ?>"></td>
-							<td><input type="text" class="regular-text" dir="ltr" placeholder="/skin-needs/" name="<?php echo $name; ?>[items][<?php echo (int) $i; ?>][url]" value="<?php echo esc_attr( $row['url'] ); ?>"></td>
-							<td><input type="number" min="0" class="small-text" name="<?php echo $name; ?>[items][<?php echo (int) $i; ?>][order]" value="<?php echo (int) $row['order']; ?>"></td>
-							<td><input type="checkbox" name="<?php echo $name; ?>[items][<?php echo (int) $i; ?>][enabled]" value="1" <?php checked( ! empty( $row['enabled'] ) ); ?>></td>
+							<td><input type="text" class="regular-text" name="<?php echo $opt; ?>[items][<?php echo (int) $i; ?>][label]" value="<?php echo esc_attr( $row['label'] ); ?>"></td>
+							<td><input type="text" class="regular-text" dir="ltr" placeholder="/skin-needs/" name="<?php echo $opt; ?>[items][<?php echo (int) $i; ?>][url]" value="<?php echo esc_attr( $row['url'] ); ?>"></td>
+							<td><input type="number" min="0" class="small-text" name="<?php echo $opt; ?>[items][<?php echo (int) $i; ?>][order]" value="<?php echo (int) $row['order']; ?>"></td>
+							<td><input type="checkbox" name="<?php echo $opt; ?>[items][<?php echo (int) $i; ?>][enabled]" value="1" <?php checked( ! empty( $row['enabled'] ) ); ?>></td>
 							<td>
 								<?php if ( $empty ) : ?>
 									&mdash;
