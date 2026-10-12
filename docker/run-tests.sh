@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "14" ] \
-  && pass "core plugin exposes 14 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 14 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "15" ] \
+  && pass "core plugin exposes 15 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 15 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2778,6 +2778,32 @@ QM_RULE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php
 [ "$QM_RULE" = "10" ] \
   && pass "max_items is capped at 10 on save" \
   || fail "max_items saved as $QM_RULE, expected 10"
+
+section "42. Finder quiz options and weights"
+FW_SAVED=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); update_option("asc_finder_weights", array("fragrance"=>50,"occasion"=>10,"season"=>10,"personality"=>10,"longevity"=>10,"budget"=>10)); echo ASC_Perfume_Finder::weights()["fragrance"]; delete_option("asc_finder_weights");' 2>/dev/null)
+[ "$FW_SAVED" = "50" ] \
+  && pass "a saved weight changes the finder's live weighting" \
+  || fail "fragrance weight is '$FW_SAVED' after save, expected 50"
+FW_ZERO=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo json_encode(ASC_Finder_Weights::sanitize(array("fragrance"=>0,"occasion"=>0,"season"=>0,"personality"=>0,"longevity"=>0,"budget"=>0)));' 2>/dev/null)
+[ "$FW_ZERO" = "[]" ] \
+  && pass "an all-zero weighting is rejected, not saved" \
+  || fail "all-zero weighting saved as '$FW_ZERO'"
+FS_OCC=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); update_option("asc_finder_vocab", array("pa_occasion"=>array("روزمره","سفر"))); echo implode(",", ASC_Perfume_Finder::answer_vocabulary()["occasion"]); delete_option("asc_finder_vocab");' 2>/dev/null)
+[ "$FS_OCC" = "روزمره,سفر" ] \
+  && pass "a saved occasion list replaces the quiz choices" \
+  || fail "quiz occasions were '$FS_OCC', expected the saved two"
+FS_LONG=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); update_option("asc_finder_longevity", array("ضعیف"=>1,"قوی"=>3)); echo implode(",", array_keys(ASC_Perfume_Finder::longevity_levels())); delete_option("asc_finder_longevity");' 2>/dev/null)
+[ "$FS_LONG" = "ضعیف,قوی" ] \
+  && pass "a saved longevity scale replaces the code scale" \
+  || fail "longevity scale was '$FS_LONG'"
+FS_MAX=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); update_option("asc_finder_max_results", 2); echo apply_filters("asc_perfume_finder_max_results", ASC_Perfume_Finder::MAX_RESULTS); delete_option("asc_finder_max_results");' 2>/dev/null)
+[ "$FS_MAX" = "2" ] \
+  && pass "saved result count overrides the default" \
+  || fail "result count was '$FS_MAX', expected 2"
+FS_SAN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo json_encode(ASC_Finder_Settings::sanitize_vocab(array("pa_occasion"=>"روزمره\r\n\r\nروزمره\nسفر")), JSON_UNESCAPED_UNICODE) . "|" . json_encode(ASC_Finder_Settings::sanitize_longevity("a|1\nbad\nb|11\nc|4"));' 2>/dev/null)
+[ "$FS_SAN" = '{"pa_occasion":["روزمره","سفر"]}|{"a":1,"c":4}' ] \
+  && pass "vocabulary dedupes and blank lines drop; longevity drops bad levels" \
+  || fail "sanitizer output '$FS_SAN'"
 
 section ""
 echo "==========================================="

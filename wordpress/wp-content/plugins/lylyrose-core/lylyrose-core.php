@@ -118,6 +118,9 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-perfume-finder.php';
         ASC_Perfume_Finder::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-finder-settings.php';
+        ASC_Finder_Settings::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-quiz-menu.php';
         ASC_Quiz_Menu::init();
 

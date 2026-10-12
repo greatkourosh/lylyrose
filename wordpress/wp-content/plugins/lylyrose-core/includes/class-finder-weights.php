@@ -149,6 +149,12 @@ class ASC_Finder_Weights {
 		$saved   = self::renormalise( (array) get_option( self::OPT, array() ) );
 		$default = ASC_Perfume_Finder::weights();
 		$labels  = self::labels();
+		$active  = $saved ? $saved : self::renormalise( $default );
+		$total   = array_sum( $active );
+		$shares  = array();
+		foreach ( $active as $axis => $value ) {
+			$shares[ $axis ] = $total > 0 ? (int) round( $value * 100 / $total ) : 0;
+		}
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'وزن‌دهی عطرت رو پیدا کن', 'lylyrose-core' ); ?></h1>
@@ -175,8 +181,9 @@ class ASC_Finder_Weights {
 								<p class="description">
 									<?php
 									printf(
-										/* translators: %d: the weight this axis has in the code defaults. */
-										esc_html__( 'پیش‌فرض کد: %d', 'lylyrose-core' ),
+										/* translators: 1: axis share of total weight, 2: code default weight. */
+										esc_html__( 'سهم در نتیجه: %1$d%% — پیشفرض کد: %2$d', 'lylyrose-core' ),
+										(int) $shares[ $axis ],
 										(int) $default[ $axis ]
 									);
 									?>
