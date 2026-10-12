@@ -659,7 +659,7 @@ correction above.
 
 ## 6. Roadmap
 
-> **2026-10-12 update.** Hero empty strip fixed in `lylyrose/style.css` with `min-height: 300px` on `.dk-hero-slide` (the padding edits were reverted; they only masked it). Theme `Version:` → **1.27.4**. Uploaded and verified on lylyrose.ir, and browser-checked at 1440px and 375px.
+> **2026-10-12 update.** Hero empty strip fixed in `lylyrose/style.css` with `min-height: 300px` on `.dk-hero-slide` (the padding edits were reverted; they only masked it). Theme `Version:` → **1.27.4**. Uploaded and verified on lylyrose.ir. Render checked at 1440px and 375px via `?nocache=` URLs. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all` on 2026-10-12; it now serves `ver=1.27.4`.
 >
 > **2026-10-11 update.** Finder result panels (`.asc-finder__meta`, `.asc-finder__notes`) had a hardcoded `#fdfcfa` surface, so night palette rendered light text on a light panel. Fixed to `var(--dk-white)` in `perfume-finder.css` (3 lines), committed 2026-10-11, and **deployed to lylyrose.ir 2026-10-11** with theme `Version:` 1.27.1. Verified on the served asset. Not checked: ivory palette, narrow viewports.
 >
