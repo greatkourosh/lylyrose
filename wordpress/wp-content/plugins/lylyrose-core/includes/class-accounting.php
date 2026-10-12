@@ -1,11 +1,11 @@
 <?php
 /**
- * Accounting REST API (حسابداری): sales, summary, invoices and unit costs.
+ * Accounting REST API (حسابداری): sales, summary, invoices, unit costs and expenses.
  *
- * Read views over WooCommerce orders plus a per-product unit cost. Each order
- * line snapshots the cost in force at checkout, so a later cost edit never
- * rewrites past profit. Routes live under /wp-json/aroma/v1/ and need
- * manage_woocommerce.
+ * Read views over WooCommerce orders, a per-product unit cost, and a ledger of
+ * operating expenses. Each order line snapshots the cost in force at checkout,
+ * so a later cost edit never rewrites past profit. Routes live under
+ * /wp-json/aroma/v1/ and need manage_woocommerce.
  *
  * Assumption: order totals include VAT (ارزش افزوده), so VAT is backed out of
  * the total at VAT_RATE. Confirm before relying on the VAT figures.
@@ -25,9 +25,29 @@ class ASC_Accounting {
 
 	const LINE_COST_META = '_asc_line_unit_cost';
 
+	const EXPENSE_POST = 'asc_expense';
+
+	const EXPENSE_AMOUNT = '_asc_expense_amount';
+
+	const EXPENSE_DATE = '_asc_expense_date';
+
+	const EXPENSE_CATEGORY = '_asc_expense_category';
+
 	public static function init() {
+		add_action( 'init', array( __CLASS__, 'register_expense_type' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( __CLASS__, 'snapshot_cost' ), 10, 4 );
+	}
+
+	public static function register_expense_type() {
+		register_post_type(
+			self::EXPENSE_POST,
+			array(
+				'public'   => false,
+				'show_ui'  => false,
+				'supports' => array( 'title', 'editor' ),
+			)
+		);
 	}
 
 	public static function routes() {
@@ -83,6 +103,41 @@ class ASC_Accounting {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/expenses',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'list_expenses' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => $range,
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'create_expense' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => array(
+						'amount'   => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_cost' ),
+						),
+						'date'     => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_date' ),
+						),
+						'category' => array(
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'note'     => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	public static function can_manage() {
@@ -114,13 +169,15 @@ class ASC_Accounting {
 
 	public static function get_summary( WP_REST_Request $request ) {
 		$sum = array(
-			'orders'       => 0,
-			'gross'        => 0.0,
-			'refunds'      => 0.0,
-			'vat'          => 0.0,
-			'net_sales'    => 0.0,
-			'cogs'         => 0.0,
-			'gross_profit' => 0.0,
+			'orders'           => 0,
+			'gross'            => 0.0,
+			'refunds'          => 0.0,
+			'vat'              => 0.0,
+			'net_sales'        => 0.0,
+			'cogs'             => 0.0,
+			'gross_profit'     => 0.0,
+			'expenses'         => 0.0,
+			'operating_profit' => 0.0,
 		);
 
 		foreach ( self::orders_in( $request['from'], $request['to'] ) as $order ) {
@@ -133,6 +190,11 @@ class ASC_Accounting {
 			$sum['cogs']         += $row['cogs'];
 			$sum['gross_profit'] += $row['net'] - $row['cogs'];
 		}
+
+		foreach ( self::expense_rows( $request['from'], $request['to'] ) as $expense ) {
+			$sum['expenses'] += $expense['amount'];
+		}
+		$sum['operating_profit'] = $sum['gross_profit'] - $sum['expenses'];
 
 		return rest_ensure_response( array_map( 'round', $sum ) );
 	}
@@ -184,6 +246,65 @@ class ASC_Accounting {
 				'product_id' => $product->get_id(),
 				'unit_cost'  => (float) $product->get_meta( self::COST_META, true ),
 			)
+		);
+	}
+
+	public static function list_expenses( WP_REST_Request $request ) {
+		return rest_ensure_response( self::expense_rows( $request['from'], $request['to'] ) );
+	}
+
+	public static function create_expense( WP_REST_Request $request ) {
+		$id = wp_insert_post(
+			array(
+				'post_type'    => self::EXPENSE_POST,
+				'post_status'  => 'publish',
+				'post_title'   => $request['category'],
+				'post_content' => (string) $request['note'],
+			),
+			true
+		);
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		update_post_meta( $id, self::EXPENSE_AMOUNT, (float) $request['amount'] );
+		update_post_meta( $id, self::EXPENSE_DATE, $request['date'] );
+		update_post_meta( $id, self::EXPENSE_CATEGORY, $request['category'] );
+
+		return rest_ensure_response( self::expense_row( get_post( $id ) ) );
+	}
+
+	private static function expense_rows( $from, $to ) {
+		$posts = get_posts(
+			array(
+				'post_type'      => self::EXPENSE_POST,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+				'meta_key'       => self::EXPENSE_DATE,
+				'orderby'        => 'meta_value',
+				'order'          => 'ASC',
+				'meta_query'     => array(
+					array(
+						'key'     => self::EXPENSE_DATE,
+						'value'   => array( $from, $to ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DATE',
+					),
+				),
+			)
+		);
+
+		return array_map( array( __CLASS__, 'expense_row' ), $posts );
+	}
+
+	private static function expense_row( $post ) {
+		return array(
+			'id'       => $post->ID,
+			'date'     => get_post_meta( $post->ID, self::EXPENSE_DATE, true ),
+			'category' => get_post_meta( $post->ID, self::EXPENSE_CATEGORY, true ),
+			'note'     => $post->post_content,
+			'amount'   => (float) get_post_meta( $post->ID, self::EXPENSE_AMOUNT, true ),
 		);
 	}
 
