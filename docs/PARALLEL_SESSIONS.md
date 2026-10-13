@@ -49,8 +49,10 @@ cache-busted by plugin `LYLYROSE_CORE_VERSION` 2.4.0 and the live copy matches l
 Deployed 2026-10-13: accounting mirror `62ce02b7` (`class-accounting.php` = upstream
 `991704a2`) uploaded via `deploy-targeted.py`, size-verified 10,734 → 24,327 B. `diff-host.py`
 **67 identical / 0 differing / 0 absent**. `/wp-json/aroma/v1/balance-sheet` answers 401 (auth
-gate). Downstream suite **412/0** on the second run; the first run had one flake, `orders leaked: 1`
-(a stray order left by an earlier test, DB clean on the next run).
+gate). Downstream suite **412/0** on the next two runs. The first run had one flake, `orders leaked: 1`.
+Likely cause: a second `run-tests.sh` was running against the same `lylyrose-wp` DB (PID 94493, started by
+another session), so one run's orders showed up in the other's cleanup count. Not proven; the suite has
+no lock against concurrent runs.
 
 ---
 
