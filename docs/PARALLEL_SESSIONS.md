@@ -15,6 +15,33 @@ pass — a stale version of this file is worse than none.
 
 ---
 
+## 0h. Finder admin, quiz menu, needs quizzes — committed in both repos (2026-10-12)
+
+Built in `aroma_store` first, then mirrored. Upstream suite **357/0** (`e6b7f592`).
+Downstream suite **390/0** (`d724794b`). Not pushed; not deployed to the live host.
+
+- **Quiz menu** (`ASC_Quiz_Menu`): header and drawer links to the finder pages, with
+  editable rows and five rules. Dead rows are dropped.
+- **Finder settings** (`ASC_Finder_Settings`, `ASC_Finder_Weights`): quiz options,
+  longevity scale, result count, and axis weights with a live share column.
+- **Needs quizzes** (`ASC_Needs_Quiz`): skin and hair, searching each category tree
+  (root plus children). An empty tree answers 404 and is not recreated, so the quiz
+  comes back by itself when products return. The theme templates `page-skin-needs.php`
+  and `page-hair-needs.php` are removed; the plugin renders via `the_content`.
+- **Admin hub** (`ASC_Admin_Hub`): one Settings page with perfume, skin and hair tabs.
+  The skin and hair tabs are read-only status for now. Old standalone finder URLs are
+  hidden from the menu and redirect to the perfume tab.
+- **Catalogue:** aroma_store's product catalogue was replaced with lylyrose's (165
+  published + 1 private, 39 categories, 500 media files reused). Gift-card and wallet
+  products on aroma are kept by decision. Category parents were restored after the
+  copy flattened them (19 reparented).
+- **Theme:** `page.php` article background is `var(--dk-white)`, not `#fff`, so pages are
+  readable in night palette.
+
+Open: the skin and hair tabs are not editable; no push; no live deploy.
+
+---
+
 ## 0g. Typo search + AVIF session — committed and live (2026-10-10)
 
 Built in `aroma_store` first, then mirrored. Suites: upstream **324/0**, downstream

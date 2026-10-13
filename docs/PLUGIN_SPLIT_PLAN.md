@@ -18,7 +18,7 @@ The theme and plugin are reusable only if a second store can run the generic par
 | `class-finder-tiers.php` | 31 | Finder price tiers |
 | `class-finder-weights.php` | 25 | Finder scoring editor |
 | `class-fragrance-notes.php` | 11 | Perfume note pyramid |
-| `class-needs-finder.php` | 37 | Skin/hair quiz tied to this catalogue |
+| `class-needs-quiz.php` | — | Skin/hair quiz tied to this catalogue (replaced `class-needs-finder.php`, 2026-10-12) |
 | `class-store-pages.php` | 20 | This store's about/contact copy |
 | `lylyrose-core.php` | 75 | Plugin header and bootstrap |
 
@@ -67,7 +67,7 @@ Grep hits were mostly noise. Real findings:
   - `class-palette.php`: the `lylyrose` preset is the default; the cookie `lylyrose_palette` and the `lylyrose-style` handle are fixed names that other code depends on. Keep them as they are, and make the preset list data, not code.
   - Palette editor location (decided 2026-10-11): a Settings page (`Settings → پالت رنگی`, slug `asc-palette`) in the plugin, not the Customizer. The Customizer holds only hero photos, and a theme switch would orphan palette settings there. The page moves with the plugin on split.
   - `class-otp.php`: copy is neutral Persian; the "Digikala-style" wording is in comments only. Generic.
-- **Store-specific, stays:** the 4 finder classes, `class-needs-finder.php`, `class-store-pages.php`, `class-fragrance-notes.php`, `lylyrose-core.php` (as already listed).
+- **Store-specific, stays:** the finder classes, `class-needs-quiz.php`, `class-admin-hub.php`, `class-store-pages.php`, `class-fragrance-notes.php`, `lylyrose-core.php` (as already listed).
 
 Revised move list: the 0-hit and comment-only group above is ready now. The brand-copy group needs a settings change first, and each change is a deploy in its own right.
 

@@ -11,6 +11,17 @@
 
 ---
 
+## 2026-10-12 — Finder admin hub, needs quizzes, catalogue sync
+
+- **Admin hub** (`ASC_Admin_Hub`): one Settings page with perfume, skin and hair tabs. Old finder URLs redirect to the perfume tab. Skin and hair tabs show status only.
+- **Needs quizzes** (`ASC_Needs_Quiz`) replace `ASC_Needs_Finder`. Each searches its category tree; an empty tree answers 404. Theme templates `page-skin-needs.php` and `page-hair-needs.php` removed.
+- **Theme:** `page.php` article background uses `var(--dk-white)`, so pages are readable in night palette.
+- **Quiz menu and finder settings:** editable rows, rules, quiz choices, weights with share column (see entries below).
+- Built upstream in `aroma_store` first (`e6b7f592`); mirrored here as `d724794b`. Suites: aroma 357/0, lylyrose 390/0.
+- Open: skin and hair tabs are read-only; not pushed; not deployed to the live host.
+
+---
+
 ## 2026-10-12 — Quiz menu admin page (منوی کوییز)
 
 Built upstream first per [FEATURE_REQUEST_POLICY.md](FEATURE_REQUEST_POLICY.md): `ASC_Quiz_Menu` in `aroma-store-core`, commit `891fa26c` in `aroma_store`, aroma_store suite 327/0. Mirrored to `lylyrose-core` with the rename map. Settings → منوی کوییز controls the label, URL, order and visibility of the finder links in the header and drawer. Rows whose page does not exist are skipped. Lylyrose suite 362/0 (section 41); parity count 13 → 14. Design in [QUIZ_MENU_PLAN.md](QUIZ_MENU_PLAN.md).

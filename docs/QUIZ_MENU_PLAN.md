@@ -67,7 +67,7 @@ array(
 
 `ASC_Quiz_Menu::items()` returns enabled items sorted by `order`, with `url` already resolved. `header.php` and the drawer loop over it instead of the hardcoded links.
 
-The existing `class_exists( 'ASC_Perfume_Finder' )` and `class_exists( 'ASC_Needs_Finder' )` guards stay. If the class is absent, no quiz links show.
+The existing `class_exists( 'ASC_Perfume_Finder' )` and `class_exists( 'ASC_Needs_Quiz' )` guards stay. If the class is absent, no quiz links show.
 
 The header's `get_page_by_path` fallback for `perfume-finder` is kept, so a deleted page still gives a working link.
 
