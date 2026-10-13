@@ -15,10 +15,12 @@ pass — a stale version of this file is worse than none.
 
 ---
 
-## 0h. Finder admin, quiz menu, needs quizzes — committed in both repos (2026-10-12)
+## 0h. Finder admin, quiz menu, needs quizzes — committed in both repos, deployed (2026-10-12/13)
 
-Built in `aroma_store` first, then mirrored. Upstream suite **357/0** (`e6b7f592`).
-Downstream suite **390/0** (`d724794b`). Not pushed; not deployed to the live host.
+Built in `aroma_store` first, then mirrored. Upstream suite **357/0 + 1 new assertion**
+(`8e1821ae`). Downstream suite **391/0** (`1129f40c`). Deployed to lylyrose.ir on
+2026-10-13: 10 files uploaded, `diff-host.py` 67 identical / 0 differing / 0 absent,
+LiteSpeed and Autoptimize purged. Not pushed to either remote.
 
 - **Quiz menu** (`ASC_Quiz_Menu`): header and drawer links to the finder pages, with
   editable rows and five rules. Dead rows are dropped.
@@ -29,7 +31,9 @@ Downstream suite **390/0** (`d724794b`). Not pushed; not deployed to the live ho
   comes back by itself when products return. The theme templates `page-skin-needs.php`
   and `page-hair-needs.php` are removed; the plugin renders via `the_content`.
 - **Admin hub** (`ASC_Admin_Hub`): one Settings page with perfume, skin and hair tabs.
-  The skin and hair tabs are read-only status for now. Old standalone finder URLs are
+  The skin and hair tabs are editable: root category, per-question weights (type and
+  concern, 0–10, default 1) and question/option labels. Option keys stay fixed because
+  they are stored in product meta. Old standalone finder URLs are
   hidden from the menu and redirect to the perfume tab.
 - **Catalogue:** aroma_store's product catalogue was replaced with lylyrose's (165
   published + 1 private, 39 categories, 500 media files reused). Gift-card and wallet
@@ -38,7 +42,10 @@ Downstream suite **390/0** (`d724794b`). Not pushed; not deployed to the live ho
 - **Theme:** `page.php` article background is `var(--dk-white)`, not `#fff`, so pages are
   readable in night palette.
 
-Open: the skin and hair tabs are not editable; no push; no live deploy.
+Open: no push to either remote. Upstream suite has 11 failing accounting assertions
+(receivables, cash-in, reviews) from the uncommitted accounting section in
+`aroma_store/docker/run-tests.sh`; that section is not this session's, and
+`class-accounting.php` is live on the host with that code.
 
 ---
 
