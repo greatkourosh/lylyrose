@@ -21,8 +21,10 @@ Built in `aroma_store` first, then mirrored. Upstream suite **357/0 + 1 new asse
 (`8e1821ae`). Downstream suite **391/0** (`1129f40c`). Deployed to lylyrose.ir on
 2026-10-13: 10 files uploaded, `diff-host.py` 67 identical / 0 differing / 0 absent,
 LiteSpeed and Autoptimize purged. Pushed: downstream `78d5b674` and upstream
-`cf361e0d`, which includes the accounting commits `3f14a96c` and `cf361e0d`. The upstream
-suite on origin is **red** (11 accounting assertions) until the accounting owner fixes it.
+`cf361e0d`, which includes the accounting commits `3f14a96c` and `cf361e0d`. Re-checked
+2026-10-13: upstream HEAD `991704a2` (balance sheet and VAT, local, not pushed) passes
+**373/0**, so the 11 accounting assertions are no longer red. Quiz CSS needs no bump: it is
+cache-busted by plugin `LYLYROSE_CORE_VERSION` 2.4.0 and the live copy matches local by md5.
 
 - **Quiz menu** (`ASC_Quiz_Menu`): header and drawer links to the finder pages, with
   editable rows and five rules. Dead rows are dropped.
