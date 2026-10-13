@@ -46,10 +46,10 @@ cache-busted by plugin `LYLYROSE_CORE_VERSION` 2.4.0 and the live copy matches l
 - **Theme:** `page.php` article background is `var(--dk-white)`, not `#fff`, so pages are
   readable in night palette.
 
-Open: no push to either remote. Upstream suite has 11 failing accounting assertions
-(receivables, cash-in, reviews) from the uncommitted accounting section in
-`aroma_store/docker/run-tests.sh`; that section is not this session's, and
-`class-accounting.php` is live on the host with that code.
+Open: accounting mirror `62ce02b7` (lylyrose, `class-accounting.php` = upstream `991704a2`) is
+committed locally and not yet pushed or deployed. The live host still runs the older accounting
+class from `373b1bb0`, so the new routes (purchases, payments, balance sheet, VAT, Jalali dates)
+are not on lylyrose.ir. Downstream suite is **412/0** with the mirror.
 
 ---
 
