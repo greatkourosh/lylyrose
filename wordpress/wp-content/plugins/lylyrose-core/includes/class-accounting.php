@@ -33,6 +33,26 @@ class ASC_Accounting {
 
 	const EXPENSE_CATEGORY = '_asc_expense_category';
 
+	const PURCHASE_POST = 'asc_purchase';
+
+	const PURCHASE_LINES = '_asc_purchase_lines';
+
+	const PURCHASE_DATE = '_asc_purchase_date';
+
+	const PURCHASE_PAID = '_asc_purchase_paid';
+
+	const PAYMENT_POST = 'asc_payment';
+
+	const PAYMENT_AMOUNT = '_asc_payment_amount';
+
+	const PAYMENT_DATE = '_asc_payment_date';
+
+	const PAYMENT_ACCOUNT = '_asc_payment_account';
+
+	const PAYMENT_ORDER = '_asc_payment_order';
+
+	const ACCOUNTS = array( 'bank', 'cash' );
+
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_expense_type' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
@@ -46,6 +66,24 @@ class ASC_Accounting {
 				'public'   => false,
 				'show_ui'  => false,
 				'supports' => array( 'title', 'editor' ),
+			)
+		);
+
+		register_post_type(
+			self::PURCHASE_POST,
+			array(
+				'public'   => false,
+				'show_ui'  => false,
+				'supports' => array( 'title' ),
+			)
+		);
+
+		register_post_type(
+			self::PAYMENT_POST,
+			array(
+				'public'   => false,
+				'show_ui'  => false,
+				'supports' => array( 'title' ),
 			)
 		);
 	}
@@ -138,6 +176,100 @@ class ASC_Accounting {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/balance-sheet',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_balance_sheet' ),
+				'permission_callback' => array( __CLASS__, 'can_manage' ),
+				'args'                => array(
+					'as_of' => array( 'validate_callback' => array( __CLASS__, 'is_date' ), 'default' => gmdate( 'Y-m-d' ) ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/vat',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( __CLASS__, 'get_vat' ),
+				'permission_callback' => array( __CLASS__, 'can_manage' ),
+				'args'                => $range,
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/payments',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'list_payments' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => $range,
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'create_payment' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => array(
+						'amount'  => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_cost' ),
+						),
+						'date'    => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_date' ),
+						),
+						'account' => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_account' ),
+						),
+						'order_id' => array(
+							'validate_callback' => array( __CLASS__, 'is_order_id' ),
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/purchases',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( __CLASS__, 'list_purchases' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => $range,
+				),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( __CLASS__, 'create_purchase' ),
+					'permission_callback' => array( __CLASS__, 'can_manage' ),
+					'args'                => array(
+						'supplier' => array(
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'date'     => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_date' ),
+						),
+						'paid'     => array(
+							'default' => false,
+						),
+						'lines'    => array(
+							'required'          => true,
+							'validate_callback' => array( __CLASS__, 'is_lines' ),
+						),
+					),
+				),
+			)
+		);
 	}
 
 	public static function can_manage() {
@@ -150,6 +282,65 @@ class ASC_Accounting {
 
 	public static function is_cost( $value ) {
 		return is_numeric( $value ) && (float) $value >= 0;
+	}
+
+	public static function is_account( $value ) {
+		return in_array( $value, self::ACCOUNTS, true );
+	}
+
+	public static function is_order_id( $value ) {
+		return is_numeric( $value ) && wc_get_order( (int) $value ) instanceof WC_Order;
+	}
+
+	public static function is_lines( $value ) {
+		if ( ! is_array( $value ) || ! $value ) {
+			return false;
+		}
+		foreach ( $value as $line ) {
+			if ( ! is_array( $line ) || ! isset( $line['product_id'] ) || ! isset( $line['qty'] ) || ! isset( $line['cost'] ) ) {
+				return false;
+			}
+			if ( ! is_numeric( $line['qty'] ) || (int) $line['qty'] < 1 || ! self::is_cost( $line['cost'] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Gregorian Y-m-d to Jalali Y-m-d, arithmetic conversion (no plugin).
+	 */
+	public static function to_jalali( $date ) {
+		$parts = array_map( 'intval', explode( '-', (string) $date ) );
+		if ( 3 !== count( $parts ) || $parts[1] < 1 || $parts[1] > 12 || $parts[2] < 1 || $parts[2] > 31 ) {
+			return '';
+		}
+		list( $gy, $gm, $gd ) = $parts;
+		$days_before = array( 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 );
+
+		$gy -= 1600;
+		$jy  = 979;
+		$gy2 = $gm > 2 ? $gy + 1 : $gy;
+		$days = 365 * $gy + intdiv( $gy2 + 3, 4 ) - intdiv( $gy2 + 99, 100 ) + intdiv( $gy2 + 399, 400 ) - 80 + $gd + $days_before[ $gm - 1 ];
+
+		$jy   += 33 * intdiv( $days, 12053 );
+		$days %= 12053;
+		$jy   += 4 * intdiv( $days, 1461 );
+		$days %= 1461;
+		if ( $days > 365 ) {
+			$jy  += intdiv( $days - 1, 365 );
+			$days = ( $days - 1 ) % 365;
+		}
+
+		if ( $days < 186 ) {
+			$jm = 1 + intdiv( $days, 31 );
+			$jd = 1 + $days % 31;
+		} else {
+			$jm = 7 + intdiv( $days - 186, 30 );
+			$jd = 1 + ( $days - 186 ) % 30;
+		}
+
+		return sprintf( '%04d-%02d-%02d', $jy, $jm, $jd );
 	}
 
 	public static function snapshot_cost( $item, $cart_item_key, $values, $order ) {
@@ -178,7 +369,24 @@ class ASC_Accounting {
 			'gross_profit'     => 0.0,
 			'expenses'         => 0.0,
 			'operating_profit' => 0.0,
+			'purchases'        => 0.0,
+			'payables'         => 0.0,
+			'receivables'      => 0.0,
+			'cash_in'          => 0.0,
 		);
+
+		$paid_on = array();
+		foreach ( self::payment_rows( '1970-01-01', '2999-12-31' ) as $payment ) {
+			$paid_on[ $payment['order_id'] ] = ( $paid_on[ $payment['order_id'] ] ?? 0.0 ) + $payment['amount'];
+		}
+		foreach ( self::unpaid_orders_in( $request['from'], $request['to'] ) as $order ) {
+			$owed = (float) $order->get_total() - ( $paid_on[ $order->get_id() ] ?? 0.0 );
+			$sum['receivables'] += max( 0.0, $owed );
+		}
+
+		foreach ( self::payment_rows( $request['from'], $request['to'] ) as $payment ) {
+			$sum['cash_in'] += $payment['amount'];
+		}
 
 		foreach ( self::orders_in( $request['from'], $request['to'] ) as $order ) {
 			$row = self::order_row( $order );
@@ -195,6 +403,11 @@ class ASC_Accounting {
 			$sum['expenses'] += $expense['amount'];
 		}
 		$sum['operating_profit'] = $sum['gross_profit'] - $sum['expenses'];
+
+		foreach ( self::purchase_rows( $request['from'], $request['to'] ) as $purchase ) {
+			$sum['purchases'] += $purchase['total'];
+			$sum['payables']  += $purchase['total'] - $purchase['paid'];
+		}
 
 		return rest_ensure_response( array_map( 'round', $sum ) );
 	}
@@ -222,6 +435,7 @@ class ASC_Accounting {
 				'invoice_number' => 'INV-' . $order->get_id(),
 				'order_number'   => $order->get_order_number(),
 				'date'           => $order->get_date_created()->date( 'Y-m-d' ),
+				'date_jalali'    => self::to_jalali( $order->get_date_created()->date( 'Y-m-d' ) ),
 				'status'         => $order->get_status(),
 				'customer'       => trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ),
 				'lines'          => $lines,
@@ -274,6 +488,223 @@ class ASC_Accounting {
 		return rest_ensure_response( self::expense_row( get_post( $id ) ) );
 	}
 
+	public static function get_balance_sheet( WP_REST_Request $request ) {
+		$as_of = $request['as_of'];
+		$cash  = 0.0;
+		foreach ( self::payment_rows( '1970-01-01', $as_of ) as $payment ) {
+			$cash += $payment['amount'];
+		}
+		foreach ( self::purchase_rows( '1970-01-01', $as_of ) as $purchase ) {
+			$cash -= $purchase['paid'];
+		}
+
+		$receivables = 0.0;
+		$paid_on     = array();
+		foreach ( self::payment_rows( '1970-01-01', $as_of ) as $payment ) {
+			$paid_on[ $payment['order_id'] ] = ( $paid_on[ $payment['order_id'] ] ?? 0.0 ) + $payment['amount'];
+		}
+		foreach ( self::unpaid_orders_in( '1970-01-01', $as_of ) as $order ) {
+			$receivables += max( 0.0, (float) $order->get_total() - ( $paid_on[ $order->get_id() ] ?? 0.0 ) );
+		}
+
+		$inventory = 0.0;
+		foreach ( wc_get_products( array( 'limit' => -1, 'manage_stock' => true ) ) as $product ) {
+			$inventory += max( 0, (int) $product->get_stock_quantity() ) * (float) $product->get_meta( self::COST_META, true );
+		}
+
+		$payables = 0.0;
+		foreach ( self::purchase_rows( '1970-01-01', $as_of ) as $purchase ) {
+			$payables += $purchase['total'] - $purchase['paid'];
+		}
+
+		$assets = $cash + $receivables + $inventory;
+		return rest_ensure_response(
+			array(
+				'as_of'       => $as_of,
+				'cash'        => round( $cash ),
+				'receivables' => round( $receivables ),
+				'inventory'   => round( $inventory ),
+				'assets'      => round( $assets ),
+				'payables'    => round( $payables ),
+				'equity'      => round( $assets - $payables ),
+			)
+		);
+	}
+
+	public static function get_vat( WP_REST_Request $request ) {
+		$output = 0.0;
+		foreach ( self::orders_in( $request['from'], $request['to'] ) as $order ) {
+			$row     = self::order_row( $order );
+			$output += $row['vat'];
+		}
+
+		$input = 0.0;
+		foreach ( self::purchase_rows( $request['from'], $request['to'] ) as $purchase ) {
+			$input += self::vat_of( $purchase['total'] );
+		}
+
+		return rest_ensure_response(
+			array(
+				'output_vat' => round( $output ),
+				'input_vat'  => round( $input ),
+				'net_vat'    => round( $output - $input ),
+			)
+		);
+	}
+
+	public static function list_payments( WP_REST_Request $request ) {
+		return rest_ensure_response( self::payment_rows( $request['from'], $request['to'] ) );
+	}
+
+	public static function create_payment( WP_REST_Request $request ) {
+		$id = wp_insert_post(
+			array(
+				'post_type'   => self::PAYMENT_POST,
+				'post_status' => 'publish',
+				'post_title'  => $request['account'] . ' ' . $request['date'],
+			),
+			true
+		);
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		update_post_meta( $id, self::PAYMENT_AMOUNT, (float) $request['amount'] );
+		update_post_meta( $id, self::PAYMENT_DATE, $request['date'] );
+		update_post_meta( $id, self::PAYMENT_ACCOUNT, $request['account'] );
+		update_post_meta( $id, self::PAYMENT_ORDER, (int) $request['order_id'] );
+
+		return rest_ensure_response( self::payment_row( get_post( $id ) ) );
+	}
+
+	private static function payment_rows( $from, $to ) {
+		$posts = get_posts(
+			array(
+				'post_type'      => self::PAYMENT_POST,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+				'meta_key'       => self::PAYMENT_DATE,
+				'orderby'        => 'meta_value',
+				'order'          => 'ASC',
+				'meta_query'     => array(
+					array(
+						'key'     => self::PAYMENT_DATE,
+						'value'   => array( $from, $to ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DATE',
+					),
+				),
+			)
+		);
+
+		return array_map( array( __CLASS__, 'payment_row' ), $posts );
+	}
+
+	private static function payment_row( $post ) {
+		$date = get_post_meta( $post->ID, self::PAYMENT_DATE, true );
+		return array(
+			'id'          => $post->ID,
+			'date'        => $date,
+			'date_jalali' => self::to_jalali( $date ),
+			'account'     => get_post_meta( $post->ID, self::PAYMENT_ACCOUNT, true ),
+			'order_id'    => (int) get_post_meta( $post->ID, self::PAYMENT_ORDER, true ),
+			'amount'      => (float) get_post_meta( $post->ID, self::PAYMENT_AMOUNT, true ),
+		);
+	}
+
+	public static function list_purchases( WP_REST_Request $request ) {
+		return rest_ensure_response( self::purchase_rows( $request['from'], $request['to'] ) );
+	}
+
+	public static function create_purchase( WP_REST_Request $request ) {
+		$lines = array();
+		foreach ( (array) $request['lines'] as $line ) {
+			if ( ! wc_get_product( (int) $line['product_id'] ) ) {
+				return new WP_Error( 'asc_no_product', __( 'محصول پیدا نشد', 'aroma-store-core' ), array( 'status' => 400 ) );
+			}
+		}
+		foreach ( (array) $request['lines'] as $line ) {
+			$product = wc_get_product( (int) $line['product_id'] );
+			$qty  = (int) $line['qty'];
+			$cost = (float) $line['cost'];
+			$lines[] = array(
+				'product_id' => $product->get_id(),
+				'name'       => $product->get_name(),
+				'qty'        => $qty,
+				'cost'       => $cost,
+			);
+			$product->update_meta_data( self::COST_META, $cost );
+			$product->set_stock_quantity( (int) $product->get_stock_quantity() + $qty );
+			$product->set_stock_status( 'instock' );
+			$product->save();
+		}
+
+		$id = wp_insert_post(
+			array(
+				'post_type'   => self::PURCHASE_POST,
+				'post_status' => 'publish',
+				'post_title'  => $request['supplier'] . ' ' . $request['date'],
+			),
+			true
+		);
+		if ( is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		update_post_meta( $id, self::PURCHASE_LINES, $lines );
+		update_post_meta( $id, self::PURCHASE_DATE, $request['date'] );
+		update_post_meta( $id, self::PURCHASE_PAID, $request['paid'] ? (float) self::purchase_total( $lines ) : 0.0 );
+
+		return rest_ensure_response( self::purchase_row( get_post( $id ) ) );
+	}
+
+	private static function purchase_rows( $from, $to ) {
+		$posts = get_posts(
+			array(
+				'post_type'      => self::PURCHASE_POST,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+				'meta_key'       => self::PURCHASE_DATE,
+				'orderby'        => 'meta_value',
+				'order'          => 'ASC',
+				'meta_query'     => array(
+					array(
+						'key'     => self::PURCHASE_DATE,
+						'value'   => array( $from, $to ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DATE',
+					),
+				),
+			)
+		);
+
+		return array_map( array( __CLASS__, 'purchase_row' ), $posts );
+	}
+
+	private static function purchase_row( $post ) {
+		$lines = (array) get_post_meta( $post->ID, self::PURCHASE_LINES, true );
+		$date  = get_post_meta( $post->ID, self::PURCHASE_DATE, true );
+		return array(
+			'id'          => $post->ID,
+			'supplier'    => $post->post_title,
+			'date'        => $date,
+			'date_jalali' => self::to_jalali( $date ),
+			'lines'       => $lines,
+			'total'       => self::purchase_total( $lines ),
+			'paid'        => (float) get_post_meta( $post->ID, self::PURCHASE_PAID, true ),
+		);
+	}
+
+	private static function purchase_total( $lines ) {
+		$total = 0.0;
+		foreach ( $lines as $line ) {
+			$total += (float) $line['cost'] * (int) $line['qty'];
+		}
+		return $total;
+	}
+
 	private static function expense_rows( $from, $to ) {
 		$posts = get_posts(
 			array(
@@ -300,8 +731,9 @@ class ASC_Accounting {
 
 	private static function expense_row( $post ) {
 		return array(
-			'id'       => $post->ID,
-			'date'     => get_post_meta( $post->ID, self::EXPENSE_DATE, true ),
+			'id'          => $post->ID,
+			'date'        => get_post_meta( $post->ID, self::EXPENSE_DATE, true ),
+			'date_jalali' => self::to_jalali( get_post_meta( $post->ID, self::EXPENSE_DATE, true ) ),
 			'category' => get_post_meta( $post->ID, self::EXPENSE_CATEGORY, true ),
 			'note'     => $post->post_content,
 			'amount'   => (float) get_post_meta( $post->ID, self::EXPENSE_AMOUNT, true ),
@@ -312,6 +744,17 @@ class ASC_Accounting {
 		return wc_get_orders(
 			array(
 				'status'       => array( 'wc-processing', 'wc-completed', 'wc-refunded' ),
+				'limit'        => -1,
+				'date_created' => $from . '...' . $to . ' 23:59:59',
+				'return'       => 'objects',
+			)
+		);
+	}
+
+	private static function unpaid_orders_in( $from, $to ) {
+		return wc_get_orders(
+			array(
+				'status'       => array( 'wc-on-hold', 'wc-pending' ),
 				'limit'        => -1,
 				'date_created' => $from . '...' . $to . ' 23:59:59',
 				'return'       => 'objects',
@@ -333,10 +776,11 @@ class ASC_Accounting {
 		}
 
 		return array(
-			'id'       => $order->get_id(),
-			'number'   => $order->get_order_number(),
-			'date'     => $order->get_date_created()->date( 'Y-m-d' ),
-			'status'   => $order->get_status(),
+			'id'          => $order->get_id(),
+			'number'      => $order->get_order_number(),
+			'date'        => $order->get_date_created()->date( 'Y-m-d' ),
+			'date_jalali' => self::to_jalali( $order->get_date_created()->date( 'Y-m-d' ) ),
+			'status'      => $order->get_status(),
 			'total'    => $total,
 			'refunded' => $refunded,
 			'vat'      => self::vat_of( $kept ),

@@ -2816,11 +2816,15 @@ $r = new WP_REST_Request("GET", "/aroma/v1/summary");
 $r->set_param("from", gmdate("Y-m-d", strtotime("-1 day"))); $r->set_param("to", gmdate("Y-m-d", strtotime("+1 day")));
 $s = rest_do_request($r)->get_data();
 $i = rest_do_request(new WP_REST_Request("GET", "/aroma/v1/invoices/".$o->get_id()))->get_data();
+$sr = new WP_REST_Request("GET", "/aroma/v1/sales");
+$sr->set_param("from", gmdate("Y-m-d", strtotime("-1 day"))); $sr->set_param("to", gmdate("Y-m-d", strtotime("+1 day")));
+$sales = rest_do_request($sr)->get_data();
+$jalali = ASC_Accounting::to_jalali("2024-03-20") . "|" . ASC_Accounting::to_jalali("2000-01-01") . "|" . ASC_Accounting::to_jalali("1979-02-11") . "|" . ($sales[0]["date_jalali"] ?? "");
 $c = new WP_REST_Request("POST", "/aroma/v1/products/".$p->get_id()."/cost"); $c->set_param("cost", -1);
 $bad = rest_do_request($c)->get_status();
 $anon = wp_set_current_user(0); $u = new WP_REST_Request("GET", "/aroma/v1/summary");
 $denied = rest_do_request($u)->get_status();
-echo json_encode(array("cogs"=>$s["cogs"], "profit"=>$s["gross_profit"], "vat"=>$s["vat"], "net"=>$i["net"], "bad"=>$bad, "denied"=>$denied));
+echo json_encode(array("cogs"=>$s["cogs"], "profit"=>$s["gross_profit"], "vat"=>$s["vat"], "net"=>$i["net"], "bad"=>$bad, "denied"=>$denied, "jalali"=>$jalali, "rowj"=>$i["date_jalali"] ?? ""));
 $o->delete(true); $p->delete(true);
 ' 2>/dev/null)
 echo "$ACCT_OUT" | grep -q '"cogs":800' \
@@ -2838,6 +2842,13 @@ echo "$ACCT_OUT" | grep -q '"bad":400' \
 echo "$ACCT_OUT" | grep -q '"denied":401\|"denied":403' \
   && pass "accounting endpoints refuse anonymous callers" \
   || fail "anonymous access not refused: $ACCT_OUT"
+echo "$ACCT_OUT" | grep -q '"jalali":"1403-01-01|1378-10-11|1357-11-22|1405-' \
+  && pass "Jalali conversion: Nowruz, 2000-01-01, 22 Bahman, and a live row" \
+  || fail "Jalali conversion wrong: $ACCT_OUT"
+JDATE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Accounting::to_jalali(gmdate("Y-m-d"));' 2>/dev/null)
+echo "$ACCT_OUT" | grep -q "\"rowj\":\"$JDATE\"" \
+  && pass "a sale row and its invoice agree on the Jalali date ($JDATE)" \
+  || fail "sale row Jalali date missing: $ACCT_OUT"
 
 section "44. Needs quizzes (پوستت / موهات چه نیازی داره)"
 NQ_LIVE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); echo ASC_Needs_Quiz::is_live(ASC_Needs_Quiz::kinds()["skin"]) ? "yes" : "no";' 2>/dev/null)
@@ -2891,6 +2902,132 @@ echo "$EXP_OUT" | grep -q '"op":918' \
 echo "$EXP_OUT" | grep -q '"badStatus":400' \
   && pass "negative expense amount rejected" \
   || fail "negative expense accepted: $EXP_OUT"
+section "44. Admin hub (گزینههای کوییزها)"
+HUB_TABS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"perfume"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo preg_match_all("/<a [^>]*class=\"nav-tab/",$h);' 2>/dev/null | tr -dc '0-9')
+[ "$HUB_TABS" = "3" ] \
+  && pass "admin hub renders three tabs" \
+  || fail "admin hub rendered '$HUB_TABS' tab links, expected 3"
+HUB_MENU=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); do_action("admin_menu"); global $submenu; $s=array_map(fn($x)=>$x[2], $submenu["options-general.php"] ?? array()); echo (in_array("asc-finder-hub",$s,true)?"1":"0").(in_array("asc-quiz-menu",$s,true)?"1":"0");' 2>/dev/null)
+[ "$HUB_MENU" = "10" ] \
+  && pass "menu lists the hub and hides the old standalone pages" \
+  || fail "menu state was '$HUB_MENU', expected '10' (hub listed, old hidden)"
+HUB_SKIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"skin"); ob_start(); ASC_Admin_Hub::render(); echo preg_match("/وضعیت/u",ob_get_clean())?"yes":"no";' 2>/dev/null)
+[ "$HUB_SKIN" = "yes" ] \
+  && pass "the skin tab shows the quiz status" \
+  || fail "the skin tab did not render a status table"
+HUB_EDIT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"hair"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo (strpos($h,"name=\"asc_needs_hair[weights][type]\"")!==false && strpos($h,"action=\"options.php\"")!==false)?"yes":"no";' 2>/dev/null)
+[ "$HUB_EDIT" = "yes" ] \
+  && pass "the hair tab renders an editable form posting to options.php" \
+  || fail "the hair tab has no editable weight form (got '$HUB_EDIT')"
+
+section "45. Purchases and stock in (خرید و ورود کالا)"
+PUR_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php"); wp_set_current_user(1);
+$p = new WC_Product_Simple(); $p->set_name("pur-test"); $p->set_regular_price(1100); $p->set_manage_stock(true); $p->set_stock_quantity(5); $p->save();
+$today = gmdate("Y-m-d");
+$before = rest_do_request(new WP_REST_Request("GET", "/aroma/v1/summary"))->get_data();
+$req = new WP_REST_Request("POST", "/aroma/v1/purchases");
+$req->set_param("supplier", "sup-a"); $req->set_param("date", $today); $req->set_param("paid", false);
+$req->set_param("lines", array(array("product_id"=>$p->get_id(), "qty"=>4, "cost"=>700)));
+$r = rest_do_request($req)->get_data();
+$after = wc_get_product($p->get_id());
+$stock = $after->get_stock_quantity(); $cost = $after->get_meta("_asc_unit_cost", true);
+$s = rest_do_request(new WP_REST_Request("GET", "/aroma/v1/summary"))->get_data();
+$bad = new WP_REST_Request("POST", "/aroma/v1/purchases"); $bad->set_param("supplier","x"); $bad->set_param("date",$today);
+$bad->set_param("lines", array(array("product_id"=>$p->get_id(),"qty"=>2,"cost"=>5), array("product_id"=>999999,"qty"=>2,"cost"=>5)));
+$badStatus = rest_do_request($bad)->get_status();
+$stockAfterBad = wc_get_product($p->get_id())->get_stock_quantity();
+echo json_encode(array("stock"=>$stock, "cost"=>(float)$cost, "total"=>$r["total"], "payDelta"=>$s["payables"]-$before["payables"], "purDelta"=>$s["purchases"]-$before["purchases"], "badStatus"=>$badStatus, "stockAfterBad"=>$stockAfterBad, "jalali"=>$r["date_jalali"], "jalaliExpect"=>ASC_Accounting::to_jalali($today), "id"=>$r["id"]));
+wp_delete_post($r["id"], true);
+$p->delete(true);
+' 2>/dev/null)
+echo "$PUR_OUT" | grep -q '"stock":9' \
+  && pass "purchase adds received qty to stock (5 + 4 = 9)" \
+  || fail "stock not increased: $PUR_OUT"
+echo "$PUR_OUT" | grep -q '"cost":700' \
+  && pass "purchase price becomes the product unit cost (700)" \
+  || fail "unit cost not set from purchase: $PUR_OUT"
+echo "$PUR_OUT" | grep -q '"total":2800' \
+  && pass "purchase total = qty x unit price (2800)" \
+  || fail "purchase total wrong: $PUR_OUT"
+echo "$PUR_OUT" | grep -q '"payDelta":2800' \
+  && pass "unpaid purchase counts as payable (2800)" \
+  || fail "payables wrong: $PUR_OUT"
+echo "$PUR_OUT" | grep -q '"badStatus":400' && echo "$PUR_OUT" | grep -q '"stockAfterBad":9' \
+  && pass "unknown product rejects the whole purchase and changes no stock" \
+  || fail "bad purchase not atomic: $PUR_OUT"
+echo "$PUR_OUT" | python3 -c 'import json,sys; d=json.loads(sys.stdin.read() or "{}"); sys.exit(0 if d.get("jalali")==d.get("jalaliExpect") and d.get("jalali") else 1)' \
+  && pass "purchase row carries the Jalali date of its Gregorian date" \
+  || fail "purchase Jalali date wrong: $PUR_OUT"
+
+section "46. Payments and receivables (پرداخت و مطالبات)"
+PAY_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php"); wp_set_current_user(1);
+$today = gmdate("Y-m-d");
+$p = new WC_Product_Simple(); $p->set_name("pay-suite"); $p->set_regular_price(1000); $p->save();
+$o = wc_create_order(); $it = new WC_Order_Item_Product(); $it->set_product($p); $it->set_quantity(1); $o->add_item($it); $o->set_total(1000); $o->set_status("on-hold"); $o->save();
+$r0 = rest_do_request(new WP_REST_Request("GET","/aroma/v1/summary"))->get_data();
+$req = new WP_REST_Request("POST","/aroma/v1/payments"); $req->set_param("amount",400); $req->set_param("date",$today); $req->set_param("account","bank"); $req->set_param("order_id",$o->get_id());
+$pay = rest_do_request($req)->get_data();
+$r1 = rest_do_request(new WP_REST_Request("GET","/aroma/v1/summary"))->get_data();
+$badAcct = new WP_REST_Request("POST","/aroma/v1/payments"); $badAcct->set_param("amount",1); $badAcct->set_param("date",$today); $badAcct->set_param("account","crypto");
+$badOrder = new WP_REST_Request("POST","/aroma/v1/payments"); $badOrder->set_param("amount",1); $badOrder->set_param("date",$today); $badOrder->set_param("account","cash"); $badOrder->set_param("order_id",999999);
+echo json_encode(array(
+  "recvDrop"=>$r0["receivables"]-$r1["receivables"], "cashIn"=>$r1["cash_in"]-$r0["cash_in"],
+  "badAcct"=>rest_do_request($badAcct)->get_status(), "badOrder"=>rest_do_request($badOrder)->get_status(),
+  "account"=>$pay["account"], "orderId"=>$pay["order_id"] === $o->get_id(), "id"=>$pay["id"]
+));
+wp_delete_post($pay["id"], true); $o->delete(true); $p->delete(true);
+' 2>/dev/null)
+echo "$PAY_OUT" | grep -q '"recvDrop":400' \
+  && pass "a 400 payment on an unpaid order cuts receivables by 400" \
+  || fail "receivables not reduced: $PAY_OUT"
+echo "$PAY_OUT" | grep -q '"cashIn":400' \
+  && pass "payment adds 400 to cash in" \
+  || fail "cash in wrong: $PAY_OUT"
+echo "$PAY_OUT" | grep -q '"badAcct":400' \
+  && pass "unknown account (crypto) refused" \
+  || fail "unknown account accepted: $PAY_OUT"
+echo "$PAY_OUT" | grep -q '"badOrder":400' \
+  && pass "payment for a missing order refused" \
+  || fail "missing order accepted: $PAY_OUT"
+echo "$PAY_OUT" | grep -q '"orderId":true' \
+  && pass "payment stays linked to its order" \
+  || fail "order link lost: $PAY_OUT"
+
+section "47. Balance sheet and VAT (ترازنامه و ارزش افزوده)"
+BS_OUT=$(docker exec "$WP_CONTAINER" php -r '
+require("/var/www/html/wp-load.php"); wp_set_current_user(1);
+$t = gmdate("Y-m-d");
+$bs = function() use ($t) { $r = new WP_REST_Request("GET","/aroma/v1/balance-sheet"); $r->set_param("as_of",$t); return rest_do_request($r)->get_data(); };
+$vat = function() use ($t) { $r = new WP_REST_Request("GET","/aroma/v1/vat"); $r->set_param("from",$t); $r->set_param("to",$t); return rest_do_request($r)->get_data(); };
+$b0 = $bs(); $v0 = $vat();
+$p = new WC_Product_Simple(); $p->set_name("bs-suite"); $p->set_regular_price(1100); $p->set_manage_stock(true); $p->set_stock_quantity(10); $p->update_meta_data("_asc_unit_cost", 300); $p->save_meta_data(); $p->save();
+$pr = new WP_REST_Request("POST","/aroma/v1/purchases"); $pr->set_param("supplier","s"); $pr->set_param("date",$t); $pr->set_param("paid",true);
+$pr->set_param("lines", array(array("product_id"=>$p->get_id(),"qty"=>2,"cost"=>300))); $pur1 = rest_do_request($pr)->get_data();
+$pr2 = new WP_REST_Request("POST","/aroma/v1/purchases"); $pr2->set_param("supplier","s2"); $pr2->set_param("date",$t); $pr2->set_param("paid",false);
+$pr2->set_param("lines", array(array("product_id"=>$p->get_id(),"qty"=>1,"cost"=>500))); $pur2 = rest_do_request($pr2)->get_data();
+$req = new WP_REST_Request("POST","/aroma/v1/payments"); $req->set_param("amount",200); $req->set_param("date",$t); $req->set_param("account","cash");
+$pay = rest_do_request($req)->get_data();
+$b1 = $bs(); $v1 = $vat();
+echo json_encode(array(
+  "cashD"=>$b1["cash"]-$b0["cash"], "payD"=>$b1["payables"]-$b0["payables"], "invD"=>$b1["inventory"]-$b0["inventory"],
+  "inputVatD"=>$v1["input_vat"]-$v0["input_vat"]
+));
+wp_delete_post($pur1["id"],true); wp_delete_post($pur2["id"],true); wp_delete_post($pay["id"],true); $p->delete(true);
+' 2>/dev/null)
+echo "$BS_OUT" | grep -q '"cashD":-400' \
+  && pass "paid purchase is cash out, cash payment is cash in (net -400)" \
+  || fail "cash wrong: $BS_OUT"
+echo "$BS_OUT" | grep -q '"payD":500' \
+  && pass "unpaid purchase is a payable (500)" \
+  || fail "payables wrong: $BS_OUT"
+echo "$BS_OUT" | grep -q '"invD":6500' \
+  && pass "inventory valued at each unit cost: 13 units at 500 (6500), opening stock included" \
+  || fail "inventory wrong: $BS_OUT"
+echo "$BS_OUT" | grep -q '"inputVatD":91' \
+  && pass "input VAT on purchases is 9% included (1100 gross = 91)" \
+  || fail "input VAT wrong: $BS_OUT"
 section ""
 section "45. Admin hub (گزینههای کوییزها)"
 HUB_TABS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"perfume"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo preg_match_all("/<a [^>]*class=\"nav-tab/",$h);' 2>/dev/null | tr -dc '0-9')
