@@ -142,6 +142,33 @@ class ASC_Needs_Quiz {
 		return '';
 	}
 
+	/**
+	 * Read-only status for the admin tab: whether the quiz is live and what it searches.
+	 */
+	public static function render_settings( $key ) {
+		$kinds = self::kinds();
+		if ( ! isset( $kinds[ $key ] ) ) {
+			return;
+		}
+		$kind  = $kinds[ $key ];
+		$ids   = self::tree_product_ids( $kind );
+		$root  = get_term_by( 'slug', $kind['category'], 'product_cat' );
+		$kids  = $root ? get_term_children( $root->term_id, 'product_cat' ) : array();
+		?>
+		<h2><?php echo esc_html( $kind['title'] ); ?></h2>
+		<table class="form-table" role="presentation">
+			<tr><th scope="row"><?php esc_html_e( 'وضعیت', 'lylyrose-core' ); ?></th>
+				<td><strong style="color:<?php echo $ids ? '#1e7e34' : '#b32d2e'; ?>"><?php echo esc_html( $ids ? __( 'فعال', 'lylyrose-core' ) : __( 'غیرفعال (محصولی در دسته نیست؛ صفحه ۴۰۴ میدهد)', 'lylyrose-core' ) ); ?></strong></td></tr>
+			<tr><th scope="row"><?php esc_html_e( 'دسته ریشه', 'lylyrose-core' ); ?></th>
+				<td><code dir="ltr"><?php echo esc_html( $kind['category'] ); ?></code><?php echo $root ? '' : ' — ' . esc_html__( 'یافت نشد', 'lylyrose-core' ); ?></td></tr>
+			<tr><th scope="row"><?php esc_html_e( 'زیردسته‌ها', 'lylyrose-core' ); ?></th>
+				<td><?php echo esc_html( implode( '، ', array_map( function ( $id ) { $t = get_term( $id, 'product_cat' ); return $t ? $t->slug : ''; }, $kids ) ) ); ?></td></tr>
+			<tr><th scope="row"><?php esc_html_e( 'محصولات منتشرشده در دسته', 'lylyrose-core' ); ?></th>
+				<td><?php echo (int) count( $ids ); ?></td></tr>
+		</table>
+		<?php
+	}
+
 	public static function enqueue() {
 		if ( ! self::current_kind() ) {
 			return;

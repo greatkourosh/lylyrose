@@ -1808,9 +1808,9 @@ section "32. Upstream/downstream class parity"
 # skin and hair needs quizzes), also downstream-only.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "16" ] \
-  && pass "core plugin exposes 16 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 16 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "17" ] \
+  && pass "core plugin exposes 17 ASC_ classes ($CLASS_COUNT)" \
+  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 17 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2892,6 +2892,20 @@ echo "$EXP_OUT" | grep -q '"badStatus":400' \
   && pass "negative expense amount rejected" \
   || fail "negative expense accepted: $EXP_OUT"
 section ""
+section "45. Admin hub (گزینههای کوییزها)"
+HUB_TABS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"perfume"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo preg_match_all("/<a [^>]*class=\"nav-tab/",$h);' 2>/dev/null | tr -dc '0-9')
+[ "$HUB_TABS" = "3" ] \
+  && pass "admin hub renders three tabs" \
+  || fail "admin hub rendered '$HUB_TABS' tab links, expected 3"
+HUB_MENU=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); do_action("admin_menu"); global $submenu; $s=array_map(fn($x)=>$x[2], $submenu["options-general.php"] ?? array()); echo (in_array("asc-finder-hub",$s,true)?"1":"0").(in_array("asc-quiz-menu",$s,true)?"1":"0");' 2>/dev/null)
+[ "$HUB_MENU" = "10" ] \
+  && pass "menu lists the hub and hides the old standalone pages" \
+  || fail "menu state was '$HUB_MENU', expected '10' (hub listed, old hidden)"
+HUB_SKIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"skin"); ob_start(); ASC_Admin_Hub::render(); echo preg_match("/وضعیت/u",ob_get_clean())?"yes":"no";' 2>/dev/null)
+[ "$HUB_SKIN" = "yes" ] \
+  && pass "the skin tab shows the quiz status" \
+  || fail "the skin tab did not render a status table"
+
 section ""
 echo "==========================================="
 echo "RESULTS: $PASS passed, $FAIL failed"

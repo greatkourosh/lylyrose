@@ -127,6 +127,9 @@ class Lylyrose_Core {
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-needs-quiz.php';
         ASC_Needs_Quiz::init();
 
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-admin-hub.php';
+        ASC_Admin_Hub::init();
+
         require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-finder-tiers.php';
         ASC_Finder_Tiers::init();
 
