@@ -20,9 +20,9 @@ pass — a stale version of this file is worse than none.
 Built in `aroma_store` first, then mirrored. Upstream suite **357/0 + 1 new assertion**
 (`8e1821ae`). Downstream suite **391/0** (`1129f40c`). Deployed to lylyrose.ir on
 2026-10-13: 10 files uploaded, `diff-host.py` 67 identical / 0 differing / 0 absent,
-LiteSpeed and Autoptimize purged. Downstream pushed to origin. Upstream held back: its
-unpushed commits include `3f14a96c` and `cf361e0d` (accounting, 11 failing assertions),
-and `8e1821ae` sits on top of them.
+LiteSpeed and Autoptimize purged. Pushed: downstream `78d5b674` and upstream
+`cf361e0d`, which includes the accounting commits `3f14a96c` and `cf361e0d`. The upstream
+suite on origin is **red** (11 accounting assertions) until the accounting owner fixes it.
 
 - **Quiz menu** (`ASC_Quiz_Menu`): header and drawer links to the finder pages, with
   editable rows and five rules. Dead rows are dropped.
