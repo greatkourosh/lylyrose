@@ -15,12 +15,49 @@ class ASC_Needs_Quiz {
 
 	const RESULT_LIMIT = 4;
 
+	const OPT_PREFIX = 'asc_needs_';
+
+	/**
+	 * Code defaults with saved admin overrides applied. Option keys are fixed: they
+	 * are the values stored in product meta, so the admin edits labels only.
+	 */
 	public static function kinds() {
+		$kinds = self::defaults();
+		foreach ( $kinds as $key => $kind ) {
+			$saved = get_option( self::OPT_PREFIX . $key, array() );
+			if ( ! is_array( $saved ) || ! $saved ) {
+				continue;
+			}
+			if ( ! empty( $saved['category'] ) ) {
+				$kind['category'] = $saved['category'];
+			}
+			if ( ! empty( $saved['weights'] ) ) {
+				$kind['weights'] = array_merge( $kind['weights'], array_intersect_key( $saved['weights'], $kind['weights'] ) );
+			}
+			foreach ( $kind['questions'] as $field => $question ) {
+				$names = $saved['labels'][ $field ] ?? array();
+				if ( ! empty( $names['label'] ) ) {
+					$question['label'] = $names['label'];
+				}
+				foreach ( $question['options'] as $value => $label ) {
+					if ( ! empty( $names['options'][ $value ] ) ) {
+						$question['options'][ $value ] = $names['options'][ $value ];
+					}
+				}
+				$kind['questions'][ $field ] = $question;
+			}
+			$kinds[ $key ] = $kind;
+		}
+		return $kinds;
+	}
+
+	public static function defaults() {
 		return array(
 			'skin' => array(
 				'slug'      => 'skin-needs',
 				'title'     => 'پوستت چه نیازی داره',
 				'category'  => 'skin-care',
+				'weights'   => array( 'type' => 1, 'concern' => 1 ),
 				'questions' => array(
 					'type'    => array( 'label' => 'نوع پوستت چطوری است؟', 'options' => array(
 						'dry' => 'خشک', 'oily' => 'چرب', 'combination' => 'مختلط', 'sensitive' => 'حساس', 'normal' => 'نرمال',
@@ -35,6 +72,7 @@ class ASC_Needs_Quiz {
 				'slug'      => 'hair-needs',
 				'title'     => 'موهات چه نیازی داره',
 				'category'  => 'hair-care',
+				'weights'   => array( 'type' => 1, 'concern' => 1 ),
 				'questions' => array(
 					'type'    => array( 'label' => 'بافت موهات چطوری است؟', 'options' => array(
 						'straight' => 'صاف', 'wavy' => 'موجدار', 'curly' => 'فر', 'coily' => 'خیلی فر',
@@ -49,6 +87,7 @@ class ASC_Needs_Quiz {
 	}
 
 	public static function init() {
+		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'init', array( __CLASS__, 'ensure_pages' ), 30 );
 		add_action( 'template_redirect', array( __CLASS__, 'guard' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
@@ -142,30 +181,126 @@ class ASC_Needs_Quiz {
 		return '';
 	}
 
+	public static function register_settings() {
+		foreach ( array_keys( self::defaults() ) as $key ) {
+			register_setting(
+				self::OPT_PREFIX . $key,
+				self::OPT_PREFIX . $key,
+				array(
+					'type'              => 'array',
+					'sanitize_callback' => function ( $in ) use ( $key ) {
+						return self::sanitize_settings( $key, (array) $in );
+					},
+					'default'           => array(),
+				)
+			);
+		}
+	}
+
 	/**
-	 * Read-only status for the admin tab: whether the quiz is live and what it searches.
+	 * An unusable field keeps its saved value, so a bad save never drops the quiz's
+	 * category or zeroes its weights.
+	 */
+	public static function sanitize_settings( $key, $in ) {
+		$option  = self::OPT_PREFIX . $key;
+		$current = get_option( $option, array() );
+		$out     = array();
+
+		$category = isset( $in['category'] ) ? sanitize_title( wp_unslash( $in['category'] ) ) : '';
+		if ( $category && get_term_by( 'slug', $category, 'product_cat' ) ) {
+			$out['category'] = $category;
+		} else {
+			add_settings_error( $option, 'asc_needs_category', __( 'دسته انتخابی پیدا نشد؛ دسته قبلی حفظ شد.', 'lylyrose-core' ) );
+			$out['category'] = $current['category'] ?? self::defaults()[ $key ]['category'];
+		}
+
+		$weights = array();
+		foreach ( array( 'type', 'concern' ) as $field ) {
+			$weights[ $field ] = isset( $in['weights'][ $field ] ) ? min( 10, max( 0, (int) $in['weights'][ $field ] ) ) : 1;
+		}
+		if ( array_sum( $weights ) > 0 ) {
+			$out['weights'] = $weights;
+		} else {
+			add_settings_error( $option, 'asc_needs_weights', __( 'حداقل یک معیار باید وزنی بیشتر از صفر داشته باشد؛ وزنها ذخیره نشد.', 'lylyrose-core' ) );
+			$out['weights'] = $current['weights'] ?? self::defaults()[ $key ]['weights'];
+		}
+
+		$labels = array();
+		foreach ( self::defaults()[ $key ]['questions'] as $field => $question ) {
+			$in_field = $in['labels'][ $field ] ?? array();
+			$names    = array_filter( array(
+				'label'   => sanitize_text_field( wp_unslash( $in_field['label'] ?? '' ) ),
+				'options' => array_filter( array_map(
+					static function ( $text ) { return sanitize_text_field( wp_unslash( (string) $text ) ); },
+					array_intersect_key( (array) ( $in_field['options'] ?? array() ), $question['options'] )
+				) ),
+			) );
+			if ( $names ) {
+				$labels[ $field ] = $names;
+			}
+		}
+		$out['labels'] = $labels;
+
+		return $out;
+	}
+
+	/**
+	 * Live status, then the editable form. The form posts to options.php through its
+	 * own settings group, so saving it touches only this quiz.
 	 */
 	public static function render_settings( $key ) {
 		$kinds = self::kinds();
 		if ( ! isset( $kinds[ $key ] ) ) {
 			return;
 		}
-		$kind  = $kinds[ $key ];
-		$ids   = self::tree_product_ids( $kind );
-		$root  = get_term_by( 'slug', $kind['category'], 'product_cat' );
-		$kids  = $root ? get_term_children( $root->term_id, 'product_cat' ) : array();
+		$kind   = $kinds[ $key ];
+		$option = self::OPT_PREFIX . $key;
+		$ids    = self::tree_product_ids( $kind );
+		$root   = get_term_by( 'slug', $kind['category'], 'product_cat' );
+		$kids   = $root ? get_term_children( $root->term_id, 'product_cat' ) : array();
+		$cats   = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false ) );
 		?>
 		<h2><?php echo esc_html( $kind['title'] ); ?></h2>
 		<table class="form-table" role="presentation">
 			<tr><th scope="row"><?php esc_html_e( 'وضعیت', 'lylyrose-core' ); ?></th>
 				<td><strong style="color:<?php echo $ids ? '#1e7e34' : '#b32d2e'; ?>"><?php echo esc_html( $ids ? __( 'فعال', 'lylyrose-core' ) : __( 'غیرفعال (محصولی در دسته نیست؛ صفحه ۴۰۴ میدهد)', 'lylyrose-core' ) ); ?></strong></td></tr>
-			<tr><th scope="row"><?php esc_html_e( 'دسته ریشه', 'lylyrose-core' ); ?></th>
-				<td><code dir="ltr"><?php echo esc_html( $kind['category'] ); ?></code><?php echo $root ? '' : ' — ' . esc_html__( 'یافت نشد', 'lylyrose-core' ); ?></td></tr>
-			<tr><th scope="row"><?php esc_html_e( 'زیردسته‌ها', 'lylyrose-core' ); ?></th>
-				<td><?php echo esc_html( implode( '، ', array_map( function ( $id ) { $t = get_term( $id, 'product_cat' ); return $t ? $t->slug : ''; }, $kids ) ) ); ?></td></tr>
 			<tr><th scope="row"><?php esc_html_e( 'محصولات منتشرشده در دسته', 'lylyrose-core' ); ?></th>
 				<td><?php echo (int) count( $ids ); ?></td></tr>
 		</table>
+
+		<form method="post" action="options.php">
+			<?php settings_fields( $option ); ?>
+			<table class="form-table" role="presentation">
+				<tr><th scope="row"><label for="<?php echo esc_attr( $option ); ?>_category"><?php esc_html_e( 'دسته ریشه', 'lylyrose-core' ); ?></label></th>
+					<td><select id="<?php echo esc_attr( $option ); ?>_category" name="<?php echo esc_attr( $option ); ?>[category]">
+						<?php foreach ( is_array( $cats ) ? $cats : array() as $cat ) : ?>
+							<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php selected( $kind['category'], $cat->slug ); ?>><?php echo esc_html( $cat->name ); ?></option>
+						<?php endforeach; ?>
+					</select></td></tr>
+				<?php foreach ( array( 'type' => __( 'وزن نوع', 'lylyrose-core' ), 'concern' => __( 'وزن مشکل', 'lylyrose-core' ) ) as $field => $title ) : ?>
+					<tr><th scope="row"><label for="<?php echo esc_attr( $option . '_w_' . $field ); ?>"><?php echo esc_html( $title ); ?></label></th>
+						<td><input type="number" min="0" max="10" step="1" class="small-text" dir="ltr"
+							id="<?php echo esc_attr( $option . '_w_' . $field ); ?>"
+							name="<?php echo esc_attr( $option ); ?>[weights][<?php echo esc_attr( $field ); ?>]"
+							value="<?php echo (int) $kind['weights'][ $field ]; ?>">
+						<p class="description"><?php esc_html_e( 'امتیاز پاسخ مطابق با این معیار. صفر یعنی این پرسش در امتیاز حساب نمیشود.', 'lylyrose-core' ); ?></p></td></tr>
+				<?php endforeach; ?>
+			</table>
+
+			<?php foreach ( $kind['questions'] as $field => $question ) : ?>
+				<h3><?php echo esc_html( $question['label'] ); ?></h3>
+				<table class="form-table" role="presentation">
+					<tr><th scope="row"><?php esc_html_e( 'متن پرسش', 'lylyrose-core' ); ?></th>
+						<td><input type="text" class="regular-text" name="<?php echo esc_attr( $option ); ?>[labels][<?php echo esc_attr( $field ); ?>][label]" value="<?php echo esc_attr( $question['label'] ); ?>"></td></tr>
+					<?php foreach ( $question['options'] as $value => $label ) : ?>
+						<tr><th scope="row"><code dir="ltr"><?php echo esc_html( $value ); ?></code></th>
+							<td><input type="text" class="regular-text" name="<?php echo esc_attr( $option ); ?>[labels][<?php echo esc_attr( $field ); ?>][options][<?php echo esc_attr( $value ); ?>]" value="<?php echo esc_attr( $label ); ?>"></td></tr>
+					<?php endforeach; ?>
+				</table>
+			<?php endforeach; ?>
+
+			<?php submit_button( __( 'ذخیره', 'lylyrose-core' ) ); ?>
+		</form>
 		<?php
 	}
 
@@ -203,13 +338,13 @@ class ASC_Needs_Quiz {
 	/**
 	 * One point per matching type and one per matching concern; 2 is a full match.
 	 */
-	public static function score( array $needs, array $answers ) {
+	public static function score( array $needs, array $answers, array $weights = array( 'type' => 1, 'concern' => 1 ) ) {
 		$score = 0;
 		if ( isset( $answers['type'], $needs['types'] ) && in_array( $answers['type'], $needs['types'], true ) ) {
-			$score++;
+			$score += (int) $weights['type'];
 		}
 		if ( isset( $answers['concern'], $needs['concerns'] ) && in_array( $answers['concern'], $needs['concerns'], true ) ) {
-			$score++;
+			$score += (int) $weights['concern'];
 		}
 		return $score;
 	}
@@ -218,10 +353,10 @@ class ASC_Needs_Quiz {
 	 * @param array<int,array{id:int,types:array,concerns:array}> $products
 	 * @return array<int,array{id:int,score:int}>
 	 */
-	public static function rank( array $products, array $answers ) {
+	public static function rank( array $products, array $answers, array $weights = array( 'type' => 1, 'concern' => 1 ) ) {
 		$ranked = array();
 		foreach ( $products as $product ) {
-			$score = self::score( $product, $answers );
+			$score = self::score( $product, $answers, $weights );
 			if ( $score > 0 ) {
 				$ranked[] = array( 'id' => $product['id'], 'score' => $score );
 			}
@@ -283,7 +418,7 @@ class ASC_Needs_Quiz {
 	}
 
 	private static function render_results( array $kind, array $answers ) {
-		$ranked = self::rank( self::products_for( $kind ), $answers );
+		$ranked = self::rank( self::products_for( $kind ), $answers, $kind['weights'] );
 
 		echo '<h2 class="asc-finder__title">' . esc_html__( 'پیشنهادهای شما', 'lylyrose-core' ) . '</h2>';
 		if ( empty( $ranked ) ) {

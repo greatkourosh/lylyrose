@@ -2905,6 +2905,10 @@ HUB_SKIN=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.ph
 [ "$HUB_SKIN" = "yes" ] \
   && pass "the skin tab shows the quiz status" \
   || fail "the skin tab did not render a status table"
+HUB_EDIT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"hair"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo (strpos($h,"name=\"asc_needs_hair[weights][type]\"")!==false && strpos($h,"action=\"options.php\"")!==false)?"yes":"no";' 2>/dev/null)
+[ "$HUB_EDIT" = "yes" ] \
+  && pass "the hair tab renders an editable form posting to options.php" \
+  || fail "the hair tab has no editable weight form (got '$HUB_EDIT')"
 
 section ""
 echo "==========================================="
