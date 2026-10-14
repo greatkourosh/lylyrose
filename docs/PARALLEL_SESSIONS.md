@@ -22,8 +22,8 @@ Built in `aroma_store` first, then mirrored. Upstream suite **357/0 + 1 new asse
 2026-10-13: 10 files uploaded, `diff-host.py` 67 identical / 0 differing / 0 absent,
 LiteSpeed and Autoptimize purged. Pushed: downstream `78d5b674` and upstream
 `cf361e0d`, which includes the accounting commits `3f14a96c` and `cf361e0d`. Re-checked
-2026-10-13: upstream HEAD `991704a2` (balance sheet and VAT, local, not pushed) passes
-**373/0**, so the 11 accounting assertions are no longer red. Quiz CSS needs no bump: it is
+2026-10-13: upstream HEAD `991704a2` (balance sheet and VAT, pushed 2026-10-13) passes
+**373/0**, so the 11 accounting assertions are no longer red. Re-run 2026-10-14: still 373/0. Quiz CSS needs no bump: it is
 cache-busted by plugin `LYLYROSE_CORE_VERSION` 2.4.0 and the live copy matches local by md5.
 
 - **Quiz menu** (`ASC_Quiz_Menu`): header and drawer links to the finder pages, with
@@ -49,7 +49,7 @@ cache-busted by plugin `LYLYROSE_CORE_VERSION` 2.4.0 and the live copy matches l
 Deployed 2026-10-13: accounting mirror `62ce02b7` (`class-accounting.php` = upstream
 `991704a2`) uploaded via `deploy-targeted.py`, size-verified 10,734 → 24,327 B. `diff-host.py`
 **67 identical / 0 differing / 0 absent**. `/wp-json/aroma/v1/balance-sheet` answers 401 (auth
-gate). Downstream suite **412/0** on the next two runs. The first run had one flake, `orders leaked: 1`.
+gate). Downstream suite **412/0** on the next two runs and again 2026-10-14. The first run had one flake, `orders leaked: 1`.
 Likely cause: a second `run-tests.sh` was running against the same `lylyrose-wp` DB (PID 94493, started by
 another session), so one run's orders showed up in the other's cleanup count. Not proven; the suite has
 no lock against concurrent runs.
