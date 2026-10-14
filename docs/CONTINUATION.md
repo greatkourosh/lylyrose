@@ -2018,7 +2018,7 @@ browser on the live domain, not a `curl`.
 `git status` rather than trusting either figure. Production state is still read
 off the host rather than inferred from either.
 
-## 🚧 The offers-page carousel rewrite is committed locally and NOT deployed — 2026-09-30
+## ~~🚧~~ The offers-page carousel rewrite — DEPLOYED 2026-09-30 (stale header, see "The offers carousel is live" below)
 
 **The doc above says item 2 is the only open item. It was not.** A peer session
 left a large feature in the working tree — uncommitted, ~19:30–20:55 on

@@ -700,7 +700,7 @@ correction above.
 
 ## 6. Roadmap
 
-> **2026-10-12 update (accounting).** Accounting REST API (`ASC_Accounting`, `/wp-json/aroma/v1/`) is in `lylyrose-core` at `f85af88f`/`adaf57e6`, mirrored from aroma_store `493c324c`. Covers sales, summary, invoices, unit cost, and expenses with operating profit. Local only: not deployed to lylyrose.ir. Digikala adapter is blocked until seller file formats or an API are available. Full notes in `docs/DEVELOPMENT_LOG.md`.
+> **2026-10-12 update (accounting).** Accounting REST API (`ASC_Accounting`, `/wp-json/aroma/v1/`) is in `lylyrose-core` at `f85af88f`/`adaf57e6`, mirrored from aroma_store `493c324c`. Covers sales, summary, invoices, unit cost, and expenses with operating profit. Deployed to lylyrose.ir 2026-10-13 (`diff-host.py` 67/0/0 on 2026-10-14). Digikala adapter is blocked until seller file formats or an API are available. Full notes in `docs/DEVELOPMENT_LOG.md`.
 
 > **2026-10-12 update.** Hero empty strip fixed in `lylyrose/style.css` with `min-height: 300px` on `.dk-hero-slide` (the padding edits were reverted; they only masked it). Theme `Version:` → **1.27.4**. Uploaded and verified on lylyrose.ir. Render checked at 1440px and 375px via `?nocache=` URLs. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all` on 2026-10-12; it now serves `ver=1.27.4`.
 >
