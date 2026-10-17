@@ -11,6 +11,22 @@
 
 ---
 
+## 2026-10-17 — St. Ives range: brand name, Digikala galleries, live sync
+
+All 51 St. Ives products (local IDs 4684–4783, live IDs 1894–1907) updated on both hosts.
+
+- **Brand term** `St. Ives` (`product_brand`, slug `st-ives`) created — local term 134, live term 119. All 51 products assigned.
+- **Title style** per owner decision: brand moved *after the product-type phrase*, not first — e.g. `فوم شستشو صورت سنت ایوز حاوی بابونه`. Previously `سنت ایوز فوم شستشو صورت حاوی بابونه`. Four curl-family and two spray titles were botched by the automated rewrite and fixed by hand (`fix-four-stives-titles.php`).
+- **Size suffixes restored** on the 6 moisturizing-cream SKUs (`۹۰ میل`, `۶۲۱ گرم`, `۱۷۰ میل/گرم`) — the first revisit dropped them.
+- **Slugs rebuilt** canonically: `post_name = strtolower(rawurlencode(title, spaces→hyphens, parens stripped))`; the `sku-{ID}` path segment comes from the permalink structure, NOT `post_name` — putting it in the slug double-prefixed every URL.
+- **Digikala enrichment (22 of 51):** gallery images re-imported fresh into the media library from Digikala CDN (old attachments deleted locally), plus `_digikala_id` / `_digikala_url` / `_digikala_title` meta.
+- **New mu-plugin** `wp-content/mu-plugins/digikala-product-link.php`: blue "محصول در دیجی‌کالا" box on every linked product edit page (title + کد + view button) and an icon column in the product list. §7 of PARALLEL_SESSIONS.md said mu-plugins aren't loaded — that is **outdated**, it loads now.
+- **Live deploy** via one-shot FTP probe (`docker/stives-sync-probe.php` + JSON payload, random-named, php -l'd locally, deleted after, 404-confirmed). Titles, slugs, brand and metas sync; no image downloads needed — live already had its galleries. Probe deleted, payload deleted.
+
+Open: 29 of 51 have no Digikala counterpart (no gallery fetched); prices still unset per owner decision; English descriptions missing on several SKUs (see `new_products/stives-products.json` `_data_issue` notes).
+
+---
+
 ## 2026-10-12 — Finder admin hub, needs quizzes, catalogue sync
 
 - **Admin hub** (`ASC_Admin_Hub`): one Settings page with perfume, skin and hair tabs. Old finder URLs redirect to the perfume tab. Skin and hair tabs show status only.

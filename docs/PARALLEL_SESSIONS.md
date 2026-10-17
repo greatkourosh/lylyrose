@@ -1,7 +1,7 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-10 against git and the live host (typo search and AVIF added in §0g). Several Claude
+name. Last reconciled 2026-10-17 against git and the live host (St. Ives title/digikala sync added in §0i). Several Claude
 sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
@@ -9,6 +9,21 @@ owns what, what is blocked, and what must not be committed until a decision land
 human-blocked per-host credentials and content decisions. The live list is §6.
 Sections 0–5 are the record of how the work got here; where they disagree with §6,
 §6 wins.
+
+---
+
+## 0i. St. Ives range: brand-name titles, Digikala galleries, live sync — deployed (2026-10-17)
+
+51 St. Ives products (local 4684–4783 / live 1894–1907) synced on both hosts.
+Owner decisions embedded here so the next session does not re-do them:
+
+- **Title order:** brand comes AFTER the product type, not first. `فوم شستشو صورت سنت ایوز حاوی بابونه` — not `سنت ایوز فوم شستشو صورت ...`. A previous pass that prefixed the brand was wrong.
+- **Size suffixes are part of the title** on the moisturizing-cream SKUs (`... ۹۰ میل`, `... ۶۲۱ گرم`, `... ۱۷۰ گرم`). Do not strip them.
+- **Slug convention:** `post_name = strtolower(rawurlencode(title with spaces→hyphens and parens removed))`. The `sku-{ID}` segment comes from the permalink structure — never put it into `post_name` (double-prefixes every URL).
+- **Digikala link field** lives in `wp-content/mu-plugins/digikala-product-link.php` (blue box on product edit page + icon column in product list), fed by `_digikala_id` / `_digikala_url` / `_digikala_title` meta. 22 of 51 products have Digikala data; the other 29 have no counterpart there.
+- **Live deploy used the standard probe route** (§7 below): FTTP probe + JSON payload, php -l local first, random name, deleted after, 404-confirmed. Live already had its galleries, so zero images were downloaded.
+- §7's "mu-plugins not loaded" trap is **outdated** — mu-plugins load fine in the container now. Leave that wording alone in §7? No: the trap text is historical; this note supersedes it.
+
 
 Keep it current. If you change something listed here, change it here in the same
 pass — a stale version of this file is worse than none.
@@ -745,7 +760,11 @@ Standing rules for anyone working here:
 
 ---
 
-## 7. Dead ends, so nobody repeats them
+## 7. Dead ends, so nobody repeats them (most are superseded; read §0i before relying on the mu-plugins entry)
+
+> **2026-10-17:** §7's mu-plugins claim is outdated — mu-plugins load fine in the container now.
+> `digikala-product-link.php` in mu-plugins is the proof. All §7 traps below are historical;
+> treat them as "was true, may not be now." §0i and the live state are authoritative.
 
 - **A mu-plugin probe writes nothing.** `mu-plugins` is not loaded by this
   container's config; a file placed there is silently ignored.

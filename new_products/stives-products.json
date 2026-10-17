@@ -1,0 +1,857 @@
+{
+  "_meta": {
+    "source": "new_products/stives catalouge.pdf (33 pages, St. Ives body care)",
+    "note": "PDF has no text layer; every field below was read visually from the extracted assets in new_products/photos/. Layout per product page: photo-03/04 = name blocks, photo-05/06 = bottle packshots, photo-07+ = EN+FA description blocks.",
+    "price": "NOT SET. Deliberately left blank per owner decision (2026-10-03) — decide against live margin data before publishing."
+  },
+  "products": [
+    {
+      "page": 5,
+      "sku": "STIVES-FC-TEATREE-ACNE",
+      "name_en": "TEA TREE FACIAL CLEANSER",
+      "name_fa": "ژل فیس واش حاوی درخت چای (مناسب پوست چرب)",
+      "variant_en": "Acne Control",
+      "variant_fa": "مناسب پوست چرب",
+      "packshot": "page-05-photo-05.jpg",
+      "desc_en": "This mild, antibacterial cleansing gel effectively removes impurities and excess oil. Tea tree extract helps reduce acne-causing bacteria and soothes inflammation, while aloe vera hydrates the skin, leaving it soft and refreshed. The result is clean, balanced, and revitalized skin after every wash.",
+      "desc_fa": "این ژل شستشو با فرمولی ملایم و ضدباکتری، آلودگی‌ها و چربی اضافه را به طور مؤثر پاک می‌کند. عصاره درخت چای با کاهش باکتری‌های مولد جوش، التهاب را تسکین می‌دهد و آلوئه ورا پوست را آبرسانی کرده و نرم و شاداب نگه می‌دارد."
+    },
+    {
+      "page": 5,
+      "sku": "STIVES-FC-COLLAGEN-RENEWING",
+      "name_en": "COLLAGEN FACIAL CLEANSER",
+      "name_fa": "ژل فیس واش حاوی کلاژن",
+      "variant_en": "Renewing",
+      "variant_fa": null,
+      "packshot": "page-05-photo-06.jpg",
+      "desc_en": "This mild, restorative cleansing gel removes impurities and excess oil without drying the skin. Enriched with collagen, it helps strengthen the skin's firmness and elasticity, promoting a smooth, youthful texture and a radiant, glowing complexion. It also supports the skin's natural renewal process, enhancing softness.",
+      "desc_fa": "این ژل شستشو با فرمولی ترمیم‌کننده و ملایم، آلودگی‌ها و چربی اضافه را بدون خشک کردن پوست پاک می‌کند. غنی از کلاژن، به استحکام و جوانی پوست کمک کرده و بافت را درخشان و شفاف می‌کند. این ژل از روند طبیعی بازسازی پوست نیز پشتیبانی می‌کند."
+    },
+    {
+      "page": 6,
+      "sku": "STIVES-FC-ARGANCUC-HYDRATING",
+      "name_en": "ARGAN CUCUMBER FACIAL CLEANSER",
+      "name_fa": "ژل فیس واش حاوی عصاره خیار و روغن آرگان (مناسب پوست خشک)",
+      "variant_en": "Hydrating",
+      "variant_fa": "مناسب پوست خشک",
+      "packshot": "page-06-photo-05.jpg",
+      "desc_en": "This mild, nourishing cleansing gel removes excess oil without drying the skin. Argan oil, rich in fatty acids and vitamin E, helps strengthen and protect the skin, while cucumber extract soothes and hydrates, leaving the skin soft and refreshed after every wash.",
+      "desc_fa": "این ژل شستشو با فرمولی مغذی و ملایم، چربی اضافه را بدون ایجاد خشکی از بین می‌برد. روغن آرگان سرشار از اسیدهای چرب و ویتامین E، به تقویت و محافظت از پوست کمک می‌کند و عصاره خیار پوست را تسکین داده و پس از شستشو، پوست را نرم و لطیف باقی می‌گذارد."
+    },
+    {
+      "page": 6,
+      "sku": "STIVES-FC-ALOEHYAL-LIGHTENING",
+      "name_en": "ALOEVERA HYALURONIC FACIAL CLEANSER",
+      "name_fa": "ژل فیس واش حاوی آلوئه ورا و هیالورونیک اسید (مناسب پوست حساس)",
+      "variant_en": "Lightening",
+      "variant_fa": "مناسب پوست حساس",
+      "packshot": "page-06-photo-06.jpg",
+      "desc_en": "This mild, hydrating cleansing gel effectively removes makeup and impurities from the skin. Aloe vera soothes the skin and helps reduce irritation, while hyaluronic acid locks in moisture, keeping the skin soft, smooth, and refreshed. After use, the skin feels clean, hydrated, and revitalized.",
+      "desc_fa": "این ژل شستشو با فرمولی ملایم و آبرسان، آرایش و آلودگی‌های پوست را به‌طور مؤثر پاک می‌کند. آلوئه ورا پوست را تسکین داده و التهاب را کاهش می‌دهد، هیالورونیک اسید رطوبت را حفظ کرده و آن را نرم و شاداب نگه می‌دارد. پس از استفاده، پوست تمیز، نرم و مرطوب باقی می‌ماند."
+    },
+    {
+      "page": 11,
+      "sku": "STIVES-FFW-CHAMOMILE-CALMSOOTHE",
+      "name_en": "CHAMOMILE FOAMING FACEWASH",
+      "name_fa": "فوم شستشو صورت حاوی بابونه (مناسب پوست حساس)",
+      "variant_en": "Calm & Soothing",
+      "variant_fa": "مناسب پوست حساس",
+      "packshot": "page-11-photo-05.jpg",
+      "desc_en": "This facial cleansing foam gently removes impurities and excess oil from the skin. Chamomile flower extract provides soothing and anti-inflammatory benefits, helping to reduce redness, while rose flower extract delivers moisturizing properties that preserve the skin's softness and freshness.",
+      "desc_fa": "فوم شستشوی صورت به طور ملایم آلودگی‌ها و چربی اضافه پوست را پاک می‌کند. عصاره گل بابونه خاصیت ضدالتهابی و آرام‌بخش داشته و قرمزی پوست را کاهش می‌دهد. عصاره گل رز ویژگی‌های مرطوب‌کننده دارد و نرمی و شادابی پوست را حفظ می‌کند."
+    },
+    {
+      "page": 7,
+      "sku": "STIVES-MW-TEATREE-ACNE",
+      "name_en": "TEA TREE MICELLAR WATER",
+      "name_fa": "محلول میسلارواتر حاوی کلاژن",
+      "variant_en": "Acne Control",
+      "variant_fa": null,
+      "packshot": "page-07-photo-05.jpg",
+      "desc_en": "Tea tree extract helps reduce bacteria and inflammation, while aloe vera hydrates and soothes the skin. With its mild yet effective formula, this solution removes impurities without causing dryness, leaving the skin clean, soft, and balanced after use.",
+      "desc_fa": "عصاره درخت چای به کاهش باکتری‌ها و التهاب کمک می‌کند، در حالی که آلوئه ورا پوست را آبرسانی و تسکین می‌دهد. با فرمول ملایم و مؤثر، این محلول آلودگی‌ها را بدون ایجاد خشکی پاک می‌کند و پوست را تمیز، نرم و متعادل نگه می‌دارد.",
+      "digikala": {
+        "id": 14870800,
+        "url": "https://www.digikala.com/product/dkp-14870800/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-چای-حجم-400-میلی-لیتر",
+        "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل چای حجم 400 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/264761b43e95dedecf43d15e3804baf2f8c1d4ca_1710760371.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/b9659233343ac80f41f837eb756d53fc5f02aff6_1710760372.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "بدون پارابن\r\nبدون سولفات\r\nبدون الکل و ایجاد حساسیت\r\nحاوی عصاره چای سبز\r\nاز بین برنده جای لک و آکنه\r\nاز بین برنده جوش های سر سیاه\r\nپاک کننده سریع آرایش از سطح پوست\r\nمناسب استفاده روزانه\r\nمناسب پوست چرب"
+      }
+    },
+    {
+      "page": 7,
+      "sku": "STIVES-MW-COLLAGEN-RENEWING",
+      "name_en": "COLLAGEN MICELLAR WATER",
+      "name_fa": "محلول میسلارواتر حاوی کلاژن (مناسب پوست نرمال)",
+      "variant_en": "Renewing",
+      "variant_fa": "مناسب پوست نرمال",
+      "packshot": "page-07-photo-06.jpg",
+      "desc_en": "With its mild, restorative formula, it effectively removes makeup and surface impurities without leaving the skin feeling tight or dry. Collagen helps improve skin firmness, while vitamin E, with its powerful antioxidant properties, protects the skin against environmental stressors.",
+      "desc_fa": "با فرمولی ملایم و بازسازی‌کننده، آرایش و آلودگی‌های سطح پوست را به‌طور مؤثر پاک می‌کند و پوست را احساس کشیدگی نمی‌دهد. کلاژن موجود در فرمول باعث تقویت، سفتی و جوانی پوست شده و ویتامین E با خاصیت آنتی‌اکسیدانی قوی از پوست در برابر عوامل مخرب محیطی محافظت می‌کند.",
+      "digikala": {
+        "id": 14870772,
+        "url": "https://www.digikala.com/product/dkp-14870772/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-کلاژن-حجم-400-میلی-لیتر",
+        "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل کلاژن حجم 400 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/d6e823b67892fdf3d7b045d87dd8e42911a9ed79_1710760083.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/1e16ea98b2101d49c684d4713c712fabfea43a44_1710760084.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 8,
+      "sku": "STIVES-MW-ARGANCUC-HYDRATING",
+      "name_en": "ARGAN CUCUMBER MICELLAR WATER",
+      "name_fa": "محلول میسلارواتر حاوی عصاره خیار و روغن آرگان (مناسب پوست خشک)",
+      "variant_en": "Hydrating",
+      "variant_fa": "مناسب پوست خشک",
+      "packshot": "page-08-photo-05.jpg",
+      "desc_en": null,
+      "desc_fa": "عصاره خیار خاصیت آبرسانی و تسکین‌دهندگی طبیعی دارد که می‌تواند قرمزی و تحریک پوست را کاهش دهد. نیاسینامید و اسیدهای چرب ضروری به بهبود سلامت پوست، افزایش نرمی لطافت و رطوبت آن کمک می‌کنند. این محلول با فرمول ملایم و مغذی، بدون ایجاد خشکی پوست را باکسایی می‌کند.",
+      "_data_issue": "The ENGLISH description block on this page is about an Argan & Macadamia hair conditioning spray and does not match the micellar-water product. The Persian block in the same asset DOES match this product. Imported with the Persian copy and no English copy; the English is missing rather than wrong.",
+      "digikala": {
+        "id": 14870742,
+        "url": "https://www.digikala.com/product/dkp-14870742/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-آرگان-و-خیار-حجم-400-میلی-لیتر",
+        "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل آرگان و خیار حجم 400 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/f7ea76f5c302f4031fbe7ba0a98a3e878f5d3c7f_1710759849.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/5791568ff4fe744751d2de4a638d57b3a9bcb498_1710759850.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 8,
+      "sku": "STIVES-MW-ALOEHYAL-LIGHTENING",
+      "name_en": "ALOEVERA HYALURONIC MICELLAR WATER",
+      "name_fa": "محلول میسلارواتر حاوی آلوئه ورا و هیالورونیک اسید (مناسب پوست حساس)",
+      "variant_en": "Lightening",
+      "variant_fa": "مناسب پوست حساس",
+      "packshot": "page-08-photo-06.jpg",
+      "desc_en": null,
+      "desc_fa": "این محلول با فرمول ملایم و مؤثر طراحی شده تا آرایش و ناخالصی‌ها را از سطح پوست بدون ایجاد خشکی پاک کند. آلوئه ورا موجود در عصاره طبیعی خود، خواص ضدالتهاب، آبرسانی و تسکین‌دهنده داشته و به بازسازی و حفظ رطوبت طبیعی کمک می‌کند.",
+      "_data_issue": "The ENGLISH description block on this page is about a Post-Shower Hair Cream with Argan & Macadamia Oils and does not match the micellar-water product. The Persian block in the same asset DOES match this product. Imported with the Persian copy and no English copy; the English is missing rather than wrong.",
+      "digikala": {
+        "id": 14870785,
+        "url": "https://www.digikala.com/product/dkp-14870785/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-آلوئه-ورا-و-هیالورونیک-حجم-400-میلی-لیتر",
+        "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل آلوئه ورا و هیالورونیک حجم 400 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/80351d3509ff80ebf09e52d9cd9ae2a35fbece59_1710760229.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/e22899d35575710c9f0860e6ea103fd3348e1086_1710760230.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 9,
+      "sku": "STIVES-ET-BHA-2SALICYLIC",
+      "name_en": "BHA EXFOLIANT TONER",
+      "name_fa": "تونر لایه بردار پوست مناسب پوست چرب (حاوی 2 درصد سالیسیلیک اسید)",
+      "variant_en": "2% Salicylic Acid",
+      "variant_fa": "مناسب پوست چرب",
+      "packshot": "page-09-photo-06.jpg",
+      "desc_en": "This facial cleansing solution, formulated with salicylic acid and tea tree extract, penetrates deep into the pores to effectively remove excess oil. Its gentle yet powerful formula helps reduce acne, control sebum production, and maintain the skin's natural balance.",
+      "desc_fa": null
+    },
+    {
+      "page": 9,
+      "sku": "STIVES-ET-AHA-5LACTIC-ROSE",
+      "name_en": "AHA EXFOLIANT TONER",
+      "name_fa": "تونر لایه بردار پوست مناسب پوست خشک (حاوی 5 درصد لاکتیک اسید و عصاره گل رز)",
+      "variant_en": "5% Lactic Acid | Rose",
+      "variant_fa": "مناسب پوست خشک",
+      "packshot": "page-09-photo-07.jpg",
+      "desc_en": "This facial cleansing solution, enriched with lactic acid and rose extract, helps remove dead skin cells and supports cellular renewal. Its nourishing formula preserves the skin's natural moisture, leaving the complexion smooth, radiant, and soft.",
+      "desc_fa": null
+    },
+    {
+      "page": 9,
+      "sku": "STIVES-ET-AHA-5GLYCOLIC-APRICOT",
+      "name_en": "AHA EXFOLIANT TONER",
+      "name_fa": "تونر لایه بردار پوست مناسب پوست متوسط (حاوی 5 درصد گلیکولیک اسید و عصاره زردآلو)",
+      "variant_en": "5% Glycolic Acid | Apricot",
+      "variant_fa": "مناسب پوست متوسط",
+      "packshot": "page-09-photo-08.jpg",
+      "desc_en": "This facial cleansing solution gently exfoliates dead skin cells, helping to renew and smooth the skin's surface. Its nourishing formula preserves the skin's natural moisture and supports skin balance, resulting in a clear, soft, and healthy-looking complexion.",
+      "desc_fa": null
+    },
+    {
+      "page": 10,
+      "sku": "STIVES-FFW-TEATREE-ACNE",
+      "name_en": "TEA TREE FOAMING FACEWASH",
+      "name_fa": null,
+      "variant_en": "Acne Control",
+      "variant_fa": null,
+      "packshot": "page-10-photo-05.jpg",
+      "desc_en": "Formulated with tea tree extract and niacinamide, it effectively reduces excess oil and helps regulate sebum production. Its anti-inflammatory combination refines the appearance of pores, leaving the skin clear, balanced, and refreshed.",
+      "desc_fa": null
+    },
+    {
+      "page": 10,
+      "sku": "STIVES-FFW-WATERMELON-HYDRATEGLOW",
+      "name_en": "WATERMELON FOAMING FACEWASH",
+      "name_fa": "فوم شستشو صورت حاوی عصاره هندوانه (مناسب پوست خشک)",
+      "variant_en": "Hydrate & Glow",
+      "variant_fa": "مناسب پوست خشک",
+      "packshot": "page-10-photo-06.jpg",
+      "desc_en": "Enriched with watermelon extract and aloe vera, this formula gently cleanses the skin of impurities and excess oil. Its hydrating properties help soothe the skin, maintain natural moisture levels, and prevent excessive dryness.",
+      "desc_fa": null
+    },
+    {
+      "page": 11,
+      "sku": "STIVES-FFW-APRICOT-GLOWMOIST",
+      "name_en": "APRICOT FOAMING FACEWASH",
+      "name_fa": "فوم شستشو صورت حاوی زردآلو",
+      "variant_en": "Glow & Moisture",
+      "variant_fa": null,
+      "packshot": "page-11-photo-06.jpg",
+      "desc_en": "Its lightweight, gentle formula combines natural apricot extract with hyaluronic acid to deliver clean, clear, and well-hydrated skin. Rich in antioxidants, apricot extract supports deep cleansing, improves skin texture, and helps reduce signs of fatigue.",
+      "desc_fa": "فرمول سبک و ملایم ترکیبی از عصاره طبیعی زردآلو و هیالورونیک اسید را برای پاکسازی و آبرسانی به پوست ارائه می‌دهد. غنی از آنتی‌اکسیدان‌ها، عصاره زردآلو به پاکسازی عمیق کمک کرده و آثار خستگی را کاهش می‌دهد.",
+      "digikala": {
+        "id": 15649176,
+        "url": "https://www.digikala.com/product/dkp-15649176/ژل-شستشو-صورت-اس-تی-ایوز-مدل-glow-plus-حجم-200-میلی-لیتر",
+        "title_fa": "ژل شستشو صورت اس تی ایوز مدل GLOW plus حجم 200 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/24961d25bb95217d385f609d80ad929bb62da20d_1717454940.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/24961d25bb95217d385f609d80ad929bb62da20d_1717454954.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 12,
+      "sku": "STIVES-BW-SEASALTKELP-EXFOLIATING",
+      "name_en": "SEA SALT & PACIFIC KELP BODY WASH",
+      "name_fa": "شامپو اسکراب بدن حاوی عصاره جلبک و نمک دریایی (لایه بردار)",
+      "variant_en": "Exfoliating",
+      "variant_fa": "لایه بردار",
+      "packshot": "page-12-photo-05.jpg",
+      "desc_en": "A body scrub shampoo enriched with sea salt and seaweed extract deeply cleanses the skin, effectively removing dead skin cells and impurities while leaving the skin soft and refreshed. The blend of sea salt minerals and seaweed helps soothe the skin, improve blood circulation, and enhance its natural softness and clarity.",
+      "desc_fa": "شامپو اسکراب بدن حاوی نمک دریا و عصاره جلبک دریایی، به‌طور عمیق پوست را پاکسازی کرده و سلول‌های مرده و آلودگی‌ها را به‌طور مؤثر از بین می‌برد، در حالی که پوست را نرم و تازه رها می‌کند. ترکیب مواد معدنی نمک دریا و جلبک دریایی به تسکین پوست، بهبود گردش خون و افزایش شفافیت و نرمی طبیعی آن کمک می‌کند.",
+      "digikala": {
+        "id": 4896103,
+        "url": "https://www.digikala.com/product/dkp-4896103/شامپو-بدن-اس-تیایوز-مدل-نمک-دریا-و-جلبک-دریایی-حجم-650-میلی-لیتر",
+        "title_fa": "شامپو بدن اس تی.ایوز مدل نمک دریا و جلبک دریایی حجم 650 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/cd9541f744af63e171c2e5c6bcc7e59cf57d9df0_1790077303.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/dce8628d5d67251ae53299a13c67d9a3520b0ee6_1788955666.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/5b206b8d934c79d8d955dbfea086d97ce9dfe754_1618307152.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 12,
+      "sku": "STIVES-BW-PEACHJASMINE-EXFOLIATING",
+      "name_en": "PEACH & JASMINE BODY WASH",
+      "name_fa": "شامپو اسکراب بدن حاوی عصاره هلو و گل یاس (لایه بردار)",
+      "variant_en": "Exfoliating",
+      "variant_fa": "لایه بردار",
+      "packshot": "page-12-photo-06.jpg",
+      "desc_en": "This exfoliating body scrub wash, infused with peach extract and jasmine flower, gently removes dead skin cells to reveal softer, brighter skin. The hydrating properties of peach combined with the soothing effects of jasmine deliver deep moisture, leaving the skin smooth, refreshed, and naturally radiant.",
+      "desc_fa": "شامپو اسکراب بدن حاوی عصاره هلو و گل یاس، به‌طور ملایم سلول‌های مرده پوست را از بین می‌برد تا پوستی نرم‌تر و درخشان‌تر نمایان شود. ویژگی‌های آبرسان هلو به همراه اثرات آرام‌بخش یاس، رطوبت عمیق را به پوست رسانده و آن را نرم، تازه و درخشان نگه می‌دارد.",
+      "digikala": {
+        "id": 12525087,
+        "url": "https://www.digikala.com/product/dkp-12525087/شامپو-بدن-اس-تیایوز-مدل-fresh-peach-and-jasmine-حجم-650-میلی-لیتر",
+        "title_fa": "شامپو بدن اس تی.ایوز مدل Fresh peach and jasmine حجم 650 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/2ff83cac866a63293311c1b127fd975a9bd8f290_1693286799.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/2ff83cac866a63293311c1b127fd975a9bd8f290_1693286801.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 13,
+      "sku": "STIVES-BW-ROSEWATERALOE-REFRESHING",
+      "name_en": "ROSE WATER & ALOEVERA BODY WASH",
+      "name_fa": "شامپو بدن حاوی عصاره گل رز و آلوئه ورا (آرامش بخش)",
+      "variant_en": "Refreshing",
+      "variant_fa": "آرامش بخش",
+      "packshot": "page-13-photo-06.jpg",
+      "desc_en": "This body wash, enriched with aloe vera and rose extracts, features a soothing and hydrating formula that gently cleanses the skin while preserving its natural moisture. Aloe vera provides calming and soothing benefits, while rose extract helps soften, revitalize, and enhance the skin's smoothness, freshness, and vitality.",
+      "desc_fa": "شامپو بدن حاوی عصاره آلوئه ورا و گل رز با فرمول آرام‌بخش و آبرسان، پوست را به‌طور ملایم پاکسازی کرده و رطوبت طبیعی آن را حفظ می‌کند. آلوئه ورا مزایای آرام‌بخش و تسکین‌دهنده دارد و عصاره گل رز به نرمی و تجدید و افزایش طراوت پوست کمک می‌کند.",
+      "digikala": {
+        "id": 4896806,
+        "url": "https://www.digikala.com/product/dkp-4896806/شامپو-بدن-اس-تیایوز-مدل-رز-و-آلوئه-ورا-حجم-650-میلی-لیتر",
+        "title_fa": "شامپو بدن اس تی.ایوز\r\nمدل رز و آلوئه‌ ورا حجم 650 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/9b03169c0173bc03b3b7e980b5335807285a0366_1618310056.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/9b03169c0173bc03b3b7e980b5335807285a0366_1618310061.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 13,
+      "sku": "STIVES-BW-COCONUTORCHID-HYDRATING",
+      "name_en": "COCONUT WATER & ORCHID BODY WASH",
+      "name_fa": "شامپو بدن حاوی عصاره نارگیل و گل ارکیده (آبرسان)",
+      "variant_en": "Hydrating",
+      "variant_fa": "آبرسان",
+      "packshot": "page-13-photo-07.jpg",
+      "desc_en": "The combination of coconut oil, with its hydrating and repairing properties, helps strengthen the skin's protective barrier and prevent dryness. Coconut extract supports skin renewal, soothing comfort, clarity, and freshness while delivering long-lasting softness and a smooth feel.",
+      "desc_fa": "ترکیب روغن نارگیل با ویژگی‌های آبرسان و ترمیم‌کننده، به تقویت سد دفاعی پوست و جلوگیری از خشکی کمک می‌کند. عصاره نارگیل از نوسازی پوست حمایت کرده و آسایش، شفافیت و تازگی را به همراه نرمی طولانی‌مدت و حس ابریشمی فراهم می‌کند.",
+      "digikala": {
+        "id": 4896633,
+        "url": "https://www.digikala.com/product/dkp-4896633/شامپو-بدن-اس-تیایوز-مدل-نارگیل-و-ارکیده-حجم-650-میلی-لیتر",
+        "title_fa": "شامپو بدن اس تی.ایوز مدل نارگیل و ارکیده حجم 650 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/3b1a73dd8c6342d3bf32d866119a05874d72d9a1_1618309239.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/3b1a73dd8c6342d3bf32d866119a05874d72d9a1_1618309252.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 13,
+      "sku": "STIVES-BW-OATMEALSHEA-SOOTHING",
+      "name_en": "OATMEAL & SHEA BUTTER BODY WASH",
+      "name_fa": "شامپو بدن حاوی عصاره جو دو سر و شی باتر (تسکین دهنده)",
+      "variant_en": "Soothing",
+      "variant_fa": "تسکین دهنده",
+      "packshot": "page-13-photo-08.jpg",
+      "desc_en": "A soothing formula enriched with oat extract and shea butter gently cleanses the skin while delivering deep hydration and reducing dryness and sensitivity. This nourishing blend helps strengthen the skin's natural barrier, leaving the skin soft, smooth, and comforted with a lasting sense of freshness after every shower.",
+      "desc_fa": "فرمول تسکین‌دهنده غنی از عصاره جو دوسر و شی باتر، پوست را به‌طور ملایم پاکسازی کرده و آبرسانی عمیق فراهم می‌کند و خشکی و حساسیت را کاهش می‌دهد. این ترکیب مغذی به تقویت سد طبیعی پوست کمک کرده و پوست را نرم، صاف و آرام با حس تازگی طولانی‌مدت پس از هر دوش باقی می‌گذارد.",
+      "digikala": {
+        "id": 4897848,
+        "url": "https://www.digikala.com/product/dkp-4897848/شامپو-بدن-اس-تیایوز-مدل-جو-دو-سر-و-شی-باتر-حجم-650-میلی-لیتر",
+        "title_fa": "شامپو بدن اس تی.ایوز مدل جو دو سر و شی باتر حجم 650 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/73935577d92e0319617d70fb70532c0e30b1b01b_1618314398.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/73935577d92e0319617d70fb70532c0e30b1b01b_1618314403.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 14,
+      "sku": "STIVES-BL-ROSEARGAN-SMOOTHING",
+      "name_en": "ROSE & ARGAN OIL BODY LOTION",
+      "name_fa": "لوسیون بدن حاوی روغن آرگان و گل رز (نرمی و یکدستی پوست)",
+      "variant_en": "Smoothing",
+      "variant_fa": "نرمی و یکدستی پوست",
+      "packshot": "page-14-photo-05.jpg",
+      "desc_en": "A nutrient-rich formula enriched with rose extract and natural oils deeply nourishes and softens the skin while strengthening its structure, promoting a smooth, even texture and a radiant, healthy-looking glow.",
+      "desc_fa": null,
+      "digikala": {
+        "id": 17919284,
+        "url": "https://www.digikala.com/product/dkp-17919284/لوسیون-بدن-ضد-خشکی-اس-تیایوز-مدل-رز-و-روغن-آرگان-حجم-621-میلیلیتر-مناسب-انواع-پوست-مرطوبکننده-و-نرمکننده-قوی-پوست",
+        "title_fa": "لوسیون بدن ضد خشکی اس تی.ایوز مدل رز و روغن آرگان حجم 621 میلی‌لیتر مناسب انواع پوست، مرطوب‌کننده و نرم‌کننده قوی پوست",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/f573755d032d5d5d67ff4dc4f02a75b13ac9cd65_1788947578.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/f2d7139277e211a006af4bf08aa721b20471da17_1784211954.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/5ccea3dc19c5e8af3d26f12a95875b577dc0783b_1736067916.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 14,
+      "sku": "STIVES-BL-COCONUTORCHID-SOFTENING",
+      "name_en": "COCONUT & ORCHID BODY LOTION",
+      "name_fa": "لوسیون بدن حاوی عصاره نارگیل و گل ارکیده (نرم کننده)",
+      "variant_en": "Softening",
+      "variant_fa": "نرم کننده",
+      "packshot": "page-14-photo-06.jpg",
+      "desc_en": "A moisturizing formula enriched with coconut and orchid extracts penetrates deep into the skin layers, strengthening the skin's protective barrier and delivering long-lasting softness, smoothness, and vitality. It provides deep nourishment while enhancing the skin's natural radiance.",
+      "desc_fa": "فرمول مرطوب‌رسان غنی‌شده با عصاره نارگیل و ارکیده به عمق لایه‌های پوست نفوذ کرده و با تقویت سد محافظتی پوست، نرمی، لطافت و سلامت پوست را به همراه درخشش طبیعی و تغذیه عمیق پوست فراهم می‌کند.",
+      "digikala": {
+        "id": 17785348,
+        "url": "https://www.digikala.com/product/dkp-17785348/لوسیون-بدن-اس-تیایوز-مدل-نارگیل-و-ارکیده-حجم-621-میلیلیتر-ضد-خشکی-مناسب-پوست-خشک-و-حساس",
+        "title_fa": "لوسیون بدن اس تی.ایوز مدل نارگیل و ارکیده حجم 621 میلی‌لیتر ضد خشکی مناسب پوست خشک و حساس",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/8ad48749593b72e9dab3746805fe6f8427e196a3_1788947574.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/9c1026883b9edaa03e0601afb0d316ffeb484266_1788955474.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/ba808ecd4b66dcf4100c0cff4f4f658f538a65c5_1784211954.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/501f7eafef7aabfa2edc330599797f2f89a19650_1734852573.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 15,
+      "sku": "STIVES-BL-OATMEALSHEA-SOOTHING",
+      "name_en": "OATMEAL & SHEA BUTTER BODY LOTION",
+      "name_fa": "لوسیون بدن حاوی عصاره جو دو سر و شی باتر (تسکین دهنده)",
+      "variant_en": "Soothing",
+      "variant_fa": "تسکین دهنده",
+      "packshot": "page-15-photo-05.jpg",
+      "desc_en": "Body lotion enriched with oat extract and shea butter features a rich formula that deeply moisturizes and softens the skin while helping protect it from dryness and surface irritation. The soothing properties of oat extract combined with the nourishing benefits of shea butter support skin renewal, improve elasticity, and promote a healthy, revitalized appearance.",
+      "desc_fa": "لوسیون بدن حاوی جو دو سر و شی باتر، فرمولی غنی دارد که به عمق پوست رطوبت رسانده و نرم می‌کند و از خشکی و تحریک سطحی پوست محافظت می‌نماید. خواص تسکین‌دهنده عصاره جو با فواید مغذی شی باتر ترکیب شده و از نو شدن پوست، بهبود انعطاف‌پذیری و شادابی آن پشتیبانی می‌کند."
+    },
+    {
+      "page": 15,
+      "sku": "STIVES-BL-COLLAGENELASTIN-RENEWING",
+      "name_en": "COLLAGEN & ELASTIN BODY LOTION",
+      "name_fa": "لوسیون بدن حاوی کلاژن و الاستین (احیاکننده)",
+      "variant_en": "Renewing",
+      "variant_fa": "احیاکننده",
+      "packshot": "page-15-photo-06.jpg",
+      "desc_en": "Body Lotion enriched with collagen and elastin features a specialized formula that helps strengthen and restore the skin's structure while improving firmness and elasticity. Its deep moisturizing action keeps the skin soft, smooth, and youthful, maintaining a healthy and refreshed appearance.",
+      "desc_fa": "لوسیون بدن حاوی کلاژن و الاستین با فرمولی تخصصی و اثربخش، ساختار پوست را بازسازی کرده و به افزایش سفتی و کشسانی آن کمک می‌کند و در عین حال اثر عمیق مرطوب‌کننده، پوست را نرم و صاف و جوان نگه می‌دارد.",
+      "digikala": {
+        "id": 17785215,
+        "url": "https://www.digikala.com/product/dkp-17785215/لوسیون-بدن-اس-تیایوز-مدل-کلاژن-و-الاستین-حجم-621-میلیلیتر-ضد-خشکی-مخصوص-پوست-خشک-و-بازسازیکننده",
+        "title_fa": "لوسیون بدن اس تی.ایوز مدل کلاژن و الاستین حجم 621 میلی‌لیتر ضد خشکی مخصوص پوست خشک و بازسازی‌کننده",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/f1aae85d5180a107a96c836fe4757ae57c9fcc61_1788947573.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/2dc90f0e1c927fca4199a3e5579602e9bb74c1fd_1788955474.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/c314797c7ef0f401f1be39f5adedbeb4c826d682_1784211954.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/5f030da45c6ae1a1730797316221e48fabd080f9_1734852021.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 16,
+      "sku": "STIVES-SCRUB-BHA1-GREENTEA-BAMBOO",
+      "name_en": "BHA (1% SALICYLIC ACID) EXFOLIANT",
+      "name_fa": "اسکراب لایه بردار پوست (حاوی 1 درصد سالیسیلیک اسید و عصاره زردآلو)",
+      "variant_en": "Green tea & Bamboo",
+      "variant_fa": null,
+      "packshot": "page-16-photo-05.jpg",
+      "desc_en": "This exfoliating scrub deeply cleanses pores, helping to remove dead skin cells and control excess sebum. Salicylic acid, combined with the antioxidant and soothing properties of green tea, helps reduce skin imperfections while improving clarity and overall skin texture.",
+      "desc_fa": "اسکراب لایه بردار با عملکرد دوگانه فیزیکی و شیمیایی، سلول‌های مرده و آلودگی‌های عمقی پوست را به طور موثر پاک می‌کند. اسید سالیسیلیک با نفوذ به منافذ پوست، چربی اضافه و ترشحات را کاهش می‌دهد و خاصیت آنتی‌اکسیدان و ضدالتهاب چای سبز، به تعادل پوست کمک می‌کند.",
+      "digikala": {
+        "id": 18479245,
+        "url": "https://www.digikala.com/product/dkp-18479245/اسکراب-لایه-بردار-پوست-اس-تیایوز-مدل-چای-سبز-و-بامبو-وزن-170-گرم",
+        "title_fa": "اسکراب لایه بردار پوست اس تی.ایوز مدل چای سبز و بامبو وزن 170 گرم",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/38ed416d27e0b6db817c4dd0256e470739b74a5d_1740778290.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/c4f1f38aa8511a0cd18e30be330e1b6251ea4e34_1748076651.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/38ed416d27e0b6db817c4dd0256e470739b74a5d_1740778297.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "اسکراب و لایه بردار سینت ایوز مدل چای سبز و بامبو مناسب برای انواع پوست بوده و یک لایه بردار قوی برای کنترل منافذ پوست و از بین برنده جوشهای سرسیاه صورت می باشد"
+      }
+    },
+    {
+      "page": 16,
+      "sku": "STIVES-SCRUB-BHA2-APRICOT",
+      "name_en": "BHA (2% SALICYLIC ACID) EXFOLIANT",
+      "name_fa": null,
+      "variant_en": "Apricot",
+      "variant_fa": null,
+      "packshot": "page-16-photo-06.jpg",
+      "desc_en": "A dual-action exfoliating scrub with both physical and chemical performance effectively removes dead skin cells and deep-seated impurities. Salicylic acid penetrates pores to reduce excess oil and sebum, while apricot extract leaves the skin soft, radiant, and smooth in texture.",
+      "desc_fa": "اسکراب لایه بردار با عملکرد دوگانه فیزیکی و شیمیایی، سلول‌های مرده و آلودگی‌های عمقی پوست را به طور موثر پاک می‌کند. اسید سالیسیلیک با نفوذ به منافذ پوست، چربی اضافه و ترشحات را کاهش می‌دهد و خاصیت آنتی‌اکسیدان و ضدالتهاب چای سبز، به تعادل پوست کمک می‌کند."
+    },
+    {
+      "page": 17,
+      "sku": "STIVES-SCRUB-TEATREEAPRICOT-ACNE",
+      "name_en": "ACNE CONTROL SCRUB",
+      "name_fa": "اسکراب پوست (حاوی عصاره درخت چای و زردآلو)",
+      "variant_en": "Tea tree & Apricot Extract",
+      "variant_fa": null,
+      "packshot": "page-17-photo-03.jpg",
+      "desc_en": "A body scrub with apricot extract that removes dead skin cells and enhances surface circulation, leaving the skin smooth and even. By supporting cellular renewal and boosting hydration, it makes the skin softer, brighter and healthier-looking.",
+      "desc_fa": "اسکراب بدن حاوی عصاره زردآلو که سلول‌های مرده را بومی‌سازی و گردش سطحی پوست را صاف و یکنواخت می‌کند. این محصول با تقویت نوسازی سلولی و افزایش رطوبت، پوست را نرم‌تر، روشن‌تر و سالم‌تر می‌سازد.",
+      "_data_issue": "Page 17 pairs ONE name block ('ACNE CONTROL SCRUB / Tea tree & Apricot Extract') with TWO different jars (a 'Fresh Skin Scrub' apricot jar and an 'Acne Control Scrub' tea-tree jar) and TWO descriptions, neither of which names green tea as the scrub's own hero. The packshot above is ambiguous between the two jars. This product needs a human decision before it can be imported.",
+      "digikala": {
+        "id": 14871563,
+        "url": "https://www.digikala.com/product/dkp-14871563/اسکراب-لایه-بردار-صورت-و-بدن-اس-تیایوز-مدل-درخت-چای-حجم-300-میلی-لیتر",
+        "title_fa": "اسکراب لایه بردار صورت و بدن اس تی.ایوز مدل درخت چای حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/8c37690c3cddc6493ecd1507d65697149b955667_1788944883.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/7c111fd4e978a87433925510c068aedd679454ed_1788955311.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/7310329bdab82074149f03196f4a058165868a59_1710764205.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/1c2e19703b821bca149b273431d672aa813569cd_1711972361.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": ""
+      }
+    },
+    {
+      "page": 17,
+      "sku": "STIVES-SCRUB-FRESHSKIN-APRICOT",
+      "name_en": "FRESH SKIN SCRUB",
+      "name_fa": null,
+      "variant_en": "Apricot Extract",
+      "variant_fa": null,
+      "packshot": "page-17-photo-04.jpg",
+      "desc_en": "A body scrub with apricot extract that removes dead skin cells and enhances surface circulation, leaving the skin smooth and even. By supporting cellular renewal and boosting hydration, it makes the skin softer, brighter and healthier-looking.",
+      "desc_fa": "اسکراب بدن حاوی عصاره زردآلو که سلول‌های مرده را بومی‌سازی و گردش سطحی پوست را صاف و یکنواخت می‌کند. این محصول با تقویت نوسازی سلولی و افزایش رطوبت، پوست را نرم‌تر، روشن‌تر و سالم‌تر می‌سازد.",
+      "_data_issue": "This product's name and variant were read off the jar's own printed label ('FRESH SKIN SCRUB / APRICOT EXTRACT') because the page has no separate name block for it. Name is lower confidence than the rest of the set.",
+      "digikala": {
+        "id": 10482456,
+        "url": "https://www.digikala.com/product/dkp-10482456/اسکراب-لایه-بردار-پوست-اس-تی-ایوز-مدل-fresh-skin-حجم-170-میلی-لیتر",
+        "title_fa": "اسکراب لایه بردار  پوست اس تی ایوز مدل FRESH SKIN حجم 170 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/4351f544016cbef3f3cda812a7535fd6aef70b07_1674241626.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/4351f544016cbef3f3cda812a7535fd6aef70b07_1674241636.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "سکراب لایه بردار پوست مدل FRESH SKIN  می‌تواند به روشنی و درخشندگی پوست کمک کند.\r\n\r\nاین کرم به سرعت پس از استفاده درخشندگی و لطافت طبیعی را برای پوست به ارمغان می‌آورد.\r\nاین اسکراب لایه بردار پوست 100 درصد طبیعی بوده و بدون آلرژی و پارابن تولید شده است.\r\n\r\nاسکراب لایه بردار ریدینت اسکین توسط متخصصان پوست مورد آزمایش قرار گرفته و کیفیت و سلامت آن مورد تایید واقع شده است.\r\n\r\nاین اسکراب لایه بردار منجر به مسدود شدن منافذ پوست نمی‌شود و می‌تواند عمل لایه برداری را به سرعت انجام دهد.\r\n\r\nدرون این اسکراب لایه بردار از لیمو صورتی و پرتقال ماندارین استفاده شده و در کنار این مرکبات از ماده معدنی به جهت لایه برداری پوست نیز استفاده شده است."
+      }
+    },
+    {
+      "page": 18,
+      "sku": "STIVES-MC-COLLAGENELASTIN-RENEWING-90",
+      "name_en": "COLLAGEN & ELASTIN MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی کلاژن و الاستین",
+      "variant_en": "Renewing",
+      "variant_fa": null,
+      "packshot": "page-18-photo-05.jpg",
+      "size": "90ML",
+      "tag_en": "PARABEN FREE",
+      "desc_en": null,
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی کلاژن و الاستین با فرمولی غنی، آبرسانی عمیقی را برای پوست فراهم می‌کند و همزمان از پوست در برابر خشکی و آسیب‌های محیطی محافظت می‌کند. کلاژن و الاستین به تقویت ساختار پوست و حفظ سفتی و انعطاف‌پذیری آن کمک می‌کنند و در نرمی طبیعی پوست حفظ می‌کنند."
+    },
+    {
+      "page": 18,
+      "sku": "STIVES-MC-ARGANGRAPE-NOURISHING-621",
+      "name_en": "ARGAN & GRAPE SEED OIL MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی روغن آرگان و هسته انگور",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-18-photo-06.jpg",
+      "size": "621ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Moisturizing Cream enriched with Argan Oil and Grape Seed Oil features a rich formula that provides deep hydration while protecting the skin against environmental damage. Argan oil nourishes the skin and helps improve elasticity, while grape seed oil, with its antioxidant properties, enhances the skin's protective defense.",
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی روغن آرگان و هسته انگور با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و آن را در برابر آسیب‌های محیطی محافظت می‌کند. روغن آرگان پوست را تغذیه کرده و به بهبود کشسانی آن کمک می‌کند، در حالی که روغن هسته انگور با خواص آنتی‌اکسیدانی، دفاع طبیعی پوست را تقویت می‌کند."
+    },
+    {
+      "page": 18,
+      "sku": "STIVES-MC-ALOEVERA-LIGHTENING-621",
+      "name_en": "ALOEVERA MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی آلوئه ورا و ویتامین سی",
+      "variant_en": "Lightening",
+      "variant_fa": null,
+      "packshot": "page-18-photo-07.jpg",
+      "size": "621ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Moisturizing Cream enriched with Aloe Vera and Vitamin C provides deep hydration while protecting the skin from dryness and environmental damage. Aloe vera enhances the skin's soothing and restorative properties, while vitamin C, with its antioxidant action, helps improve skin clarity and promote a youthful appearance.",
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی آلوئه ورا و ویتامین سی با فرمولی غنی، آبرسانی عمیقی برای پوست فراهم می‌کند. آلوئه ورا خواص آرام‌بخش و ترمیم‌کننده پوست را افزایش می‌دهد و ویتامین سی به دلیل خاصیت آنتی‌اکسیدانی، به روشنی و جوانی پوست را تقویت می‌کند."
+    },
+    {
+      "page": 19,
+      "sku": "STIVES-MC-COLLAGENELASTIN-RENEWING-170",
+      "name_en": "COLLAGEN & ELASTIN MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی کلاژن و الاستین",
+      "variant_en": "Renewing",
+      "variant_fa": null,
+      "packshot": "page-19-photo-06.jpg",
+      "size": "170G",
+      "tag_en": "PARABEN FREE",
+      "desc_en": "Moisturizing Cream enriched with collagen and elastin features a rich formula that delivers deep hydration while protecting the skin from dryness and environmental damage. Collagen helps strengthen the skin's structure and maintain firmness, supporting improved elasticity, flexibility and the skin's natural softness and smoothness.",
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی کلاژن و الاستین با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و همزمان از آن در برابر خشکی و آسیب‌های محیطی محافظت می‌کند. کلاژن و الاستین به تقویت ساختار پوست و حفظ سفتی آن کمک می‌کنند، انعطاف‌پذیری، نرمی و لطافت طبیعی پوست را تقویت می‌کنند.",
+      "_data_issue": "Same product name as page 18's 90ML tube. These are two different pack sizes (90ML tube vs 170G jar). Kept as separate SKUs; decide whether to list one as a size variant."
+    },
+    {
+      "page": 19,
+      "sku": "STIVES-MC-ARGANGRAPE-NOURISHING-170",
+      "name_en": "ARGAN & GRAPE SEED OIL MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی روغن آرگان و هسته انگور",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-19-photo-07.jpg",
+      "size": "170G",
+      "tag_en": "PARABEN FREE",
+      "desc_en": "Moisturizing Cream enriched with Argan Oil and Grape Seed Oil features a rich formula that provides deep hydration while protecting the skin against environmental damage. Argan oil nourishes the skin and helps improve elasticity, while grape seed oil, with its antioxidant properties, enhances the skin's protective defense.",
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی روغن آرگان و هسته انگور با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و آن را در برابر آسیب‌های محیطی محافظت می‌کند. روغن آرگان پوست را تغذیه کرده و به بهبود کشسانی آن کمک می‌کند، در حالی که روغن هسته انگور با خواص آنتی‌اکسیدانی، دفاع طبیعی پوست را تقویت می‌کند.",
+      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant."
+    },
+    {
+      "page": 19,
+      "sku": "STIVES-MC-ALOEVERA-LIGHTENING-170",
+      "name_en": "ALOEVERA MOISTURIZING CREAM",
+      "name_fa": "کرم مرطوب کننده پوست حاوی آلوئه ورا و ویتامین سی",
+      "variant_en": "Lightening",
+      "variant_fa": null,
+      "packshot": "page-19-photo-08.jpg",
+      "size": "170G",
+      "tag_en": "PARABEN FREE",
+      "desc_en": "Moisturizing Cream enriched with Aloe Vera and Vitamin C provides deep hydration while protecting the skin from dryness and environmental damage. Aloe vera enhances the skin's soothing and restorative properties, while vitamin C, with its antioxidant action, helps improve skin clarity and promote a youthful appearance.",
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی آلوئه ورا و ویتامین سی با فرمولی غنی، آبرسانی عمیقی برای پوست فراهم می‌کند. آلوئه ورا خواص آرام‌بخش و ترمیم‌کننده پوست را افزایش می‌دهد و ویتامین سی به دلیل خاصیت آنتی‌اکسیدانی، به روشنی و جوانی پوست را تقویت می‌کند.",
+      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant."
+    },
+    {
+      "page": 22,
+      "sku": "STIVES-SPF50-COLLAGENELASTIN",
+      "name_en": "SUNSCREEN SPF 50",
+      "name_fa": "کرم ضد آفتاب بدون رنگ SPF 50 (حاوی کلاژن و الاستین)",
+      "variant_en": "Collagen & Elastin",
+      "variant_fa": null,
+      "packshot": "page-22-photo-03.jpg",
+      "size": "50ML",
+      "tag_en": "PARABEN FREE / CRUELTY FREE",
+      "desc_en": "A sunscreen cream enriched with collagen and elastin, featuring an advanced formula provides effective protection against harmful UVA and UVB rays while helping maintain the skin's firmness and elasticity. Collagen and elastin strengthen the skin's structure, improve elasticity, help prevent premature aging, and leave the skin soft and smooth.",
+      "desc_fa": "کرم ضدآفتاب حاوی کلاژن و الاستین با فرمولی پیشرفته، محافظت مؤثر در برابر اشعه‌های مضر، به حفظ استحکام و انعطاف‌پذیری پوست کمک می‌کند. کلاژن و الاستین ساختار پوست را تقویت، کشسانی آن را افزایش و از پیری زودرس جلوگیری می‌کنند و در نهایت پوست را نرم، صاف و شاداب برای پوست به ارمغان می‌آورند."
+    },
+    {
+      "page": 23,
+      "sku": "STIVES-HM-CURLREVIVE-SOFTSHINY",
+      "name_en": "CURL REVIVE HAIR SHAMPOO",
+      "name_fa": "شامپو مخصوص موهای فر",
+      "variant_en": "Soft & Shiny",
+      "variant_fa": null,
+      "packshot": "page-23-photo-04.jpg",
+      "desc_en": "Specialized shampoo for curly hair enriched with coconut oil is specifically formulated to gently cleanse while preserving the natural moisture of curly and wavy hair. Coconut oil is rich in nourishing fatty acids that penetrate deep into the hair shaft helping to strengthen the hair structure and enhance the softness, elasticity, and definition of curls.",
+      "desc_fa": "شامپو تخصصی موهای فر حاوی روغن نارگیل، فرمولی ملایم دارد که به پاکسازی موها بدون آسیب رساندن طراوت طبیعی آن‌ها چربی اضافه را از بین می‌برد. روغن نارگیل سرشار از اسیدهای چرب مغذی است که عمق ساقه مو نفوذ کرده، موجب تقویت ساختار مو، افزایش نرمی و انعطاف‌پذیری فر موها می‌شود."
+    },
+    {
+      "page": 24,
+      "sku": "STIVES-HP-CURLCOMPLEX-BOUNCY",
+      "name_en": "CURL COMPLEX PRIMER",
+      "name_fa": "پرایمر محافظت کننده مخصوص موهای فر",
+      "variant_en": "Bouncy & Radiant",
+      "variant_fa": null,
+      "packshot": "page-24-photo-05.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Specialized curly hair primer features a lightweight hydrating formula that helps protect the hair while reducing frizz and enhancing curl definition. Without weighing the hair down, it improves flexibility, softness, and the natural shine of curly hair. Regular use helps strengthen the hair structure and maintain the natural moisture of curls.",
+      "desc_fa": "پرایمر مخصوص موهای فر با فرمولی سبک و آبرسان، از مو محافظت کرده و با کاهش وز مو و افزایش حالت موج‌دار، انعطاف‌پذیری، نرمی و درخشش طبیعی موهای فر را بهبود می‌بخشد. استفاده منظم به تقویت ساختار مو و حفظ رطوبت طبیعی فرها کمک می‌کند."
+    },
+    {
+      "page": 24,
+      "sku": "STIVES-HL-CURLREVITALIZE-ELASTIC",
+      "name_en": "CURL REVITALIZE LEAVE IN CREAM",
+      "name_fa": "کرم مو بعد از حمام مخصوص موهای فر (بدون آبکشی)",
+      "variant_en": "Elastic & Shiny",
+      "variant_fa": null,
+      "packshot": "page-24-photo-06.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Leave-in cream for curly hair is an advanced targeted treatment that penetrates the hair fiber to maintain the optimal balance of moisture and protein while restoring the hair's natural curl pattern. By forming a protective layer, it helps shield the hair from dryness, frizz, and environmental stressors, resulting in flexible, well-defined, and long-lasting curls.",
+      "desc_fa": "کرم موی بدون آبکشش مخصوص موهای فر یک درمان هدفمند و پیشرفته است که به نفوذ در تار موها کمک می‌کند تا تعادل بهینه رطوبت و پروتئین حفظ شود و الگوی طبیعی موج موها بازیابی شود. این کرم با تشکیل لایه‌ای محافظتی، از موها در برابر خشکی، وز شدن و عوامل محیطی محافظت می‌کند."
+    },
+    {
+      "page": 25,
+      "sku": "STIVES-HM-BOTOXMASK-NOURISHING",
+      "name_en": "BOTOX HAIR MASK",
+      "name_fa": "ماسک موی داخل حمایت بوتاکس",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-25-photo-05.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Hair Botox Mask is an advanced nourishing and restorative formula that penetrates deep into the hair shaft to repair damaged cells and restore the optimal balance of moisture and protein. By forming a protective layer on the hair, it helps reduce erosion, frizz, and breakage, leaving the hair smooth, shiny, and fully manageable.",
+      "desc_fa": "ماسک موی بوتاکس یک فرمول پیشرفته مغذی و احیاکننده است که به عمق ساقه مو نفوذ می‌کند تا سلول‌های آسیب‌دیده را ترمیم کرده و تعادل رطوبت و پروتئین را برقرار کند. با تشکیل یک لایه محافظ روی مو، از فرسایش، وز شدن و شکستگی مو جلوگیری می‌کند.",
+      "digikala": {
+        "id": 11380405,
+        "url": "https://www.digikala.com/product/dkp-11380405/ماسک-مو-اس-تیایوز-مدل-nourishing-سری-botox-حجم-500-میلی-لیتر",
+        "title_fa": "ماسک مو اس تی.ایوز مدل NOURISHING سری BOTOX حجم 500 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/7c634f31a889f130fea8ca10cd82dcca553a9669_1685296531.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/fb6ee7af824293625b2ca3050daaf38cbf8f2205_1685296546.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/7038dfef29a7593cd86773ef964420ba459fecda_1685296506.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول ماسک مو داخل حمام( با آبکشی)، فری سولفات و پارابن از برند ST.Ives   در سری نورشینگ(تغذیه کننده) بوده که از مواد بوتاکس  استفاده شده است. \r\nمواد بوتاکس مو حاوی روغن خاویار، ویتامین B5، ویتامین E و کلاژن است. وظیفه اصلی بوتاکسِ مو، مرطوب کردن، تغذیه کردن، ترمیم و احیای مو و بازگردانی آن به حالت اول است. علاوه بر آن، استفاده از این محصول، مو ها را براق می کند و باعث صافی مو و از بین بردن وز آن می شود. مزیت اصلی استفاده از بوتاکس این است که به وسیله ان می توان موخوره را تا حد زیادی درمان کرد. منظور از درمان موخوره، جلوگیری از ایجاد مجدد موخوره در نوک موهاست. می‌دانید که دلیل اصلی به وجود آمدن موخوره کم آبی مو و عدم رسیدگی به آن است. این محصولات سلامت را به موهای شما بازمی‌گردانند."
+      }
+    },
+    {
+      "page": 25,
+      "sku": "STIVES-HM-BOTOXSHAMPOO-NOURISHING",
+      "name_en": "BOTOX HAIR SHAMPOO",
+      "name_fa": "شامپو موی بوتاکس",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-25-photo-06.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Botox Shampoo is a specialized cleaner formulated with nourishing and repairing ingredients to help restore damaged and weakened hair. Through deep hydration and structural strengthening, it reduces frizz and dryness, leaving the hair soft, smooth, and shiny while providing a healthy, well-prepared foundation for restorative treatments such as hair botox.",
+      "desc_fa": "شامپو بوتاکس یک شامپوی تخصصی است که با فرمولی مغذی و ترمیم‌کننده، موهای آسیب‌دیده و ضعیف‌شده را بازسازی می‌کند. با آبرسانی عمیق و تقویت ساختاری، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند و زمینه‌ای سالم برای درمان‌های ترمیمی مانند بوتاکس مو فراهم می‌آورد."
+    },
+    {
+      "page": 26,
+      "sku": "STIVES-HS-BOTOXCONDITIONING-NOURISHING",
+      "name_en": "BOTOX CONDITIONING SPRAY",
+      "name_fa": "اسپری نرم کننده مو بوتاکس",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-26-photo-05.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Botox Hair Detangling Spray is an advanced nourishing and restorative formula that penetrates deep into the hair shaft to repair damaged cells and restore the optimal balance of moisture and protein. By forming a protective layer, it leaves the hair soft, manageable, and easy to style.",
+      "desc_fa": "اسپری نرم کننده مو بوتاکس یک فرمول پیشرفته مغذی و احیاکننده است که به عمق ساقه مو نفوذ می‌کند تا سلول‌های آسیب‌دیده را ترمیم کرده و تعادل رطوبت و پروتئین را برقرار کند. با تشکیل یک لایه محافظ روی مو، آن را نرم و قابل کنترل می‌سازد.",
+      "digikala": {
+        "id": 11381013,
+        "url": "https://www.digikala.com/product/dkp-11381013/اسپری-مو-سنت-ایوز-مدل-nourishing-سری-botox-حجم-300-میلی-لیتر",
+        "title_fa": "اسپری مو اس تی ایوز مدل NOURISHING سری BOTOX حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/b9fec6430e1d2c672e6197bc82939d2b6b8f9263_1685295632.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/d8012cee708dce23c51a6f99066651b5e41a9bec_1685295643.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/b8890df112aff36adac5463b0dcbc9388bcba170_1685295607.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول اسپری 10 کاره (محلول نرم کننده موی سر-افشانه)، فری سولفات و پارابن از برند ST.Ives   در سری نورشینگ      (تغذیه کننده) بوده که از مواد بوتاکس  استفاده شده است. \r\nمواد بوتاکس مو حاوی روغن خاویار، ویتامین B5، ویتامین E و کلاژن است. وظیفه اصلی بوتاکسِ مو، مرطوب کردن، تغذیه کردن، ترمیم و احیای مو و بازگردانی آن به حالت اول است. علاوه بر آن، استفاده از این محصول، مو ها را براق می کند و باعث صافی مو و از بین بردن وز آن می شود. مزیت اصلی استفاده از بوتاکس این است که به وسیله ان می توان موخوره را تا حد زیادی درمان کرد. منظور از درمان موخوره، جلوگیری از ایجاد مجدد موخوره در نوک موهاست. می‌دانید که دلیل اصلی به وجود آمدن موخوره کم آبی مو و عدم رسیدگی به آن است. این محصولات سلامت را به موهای شما بازمی‌گردانند.\r\nیکی از بزرگترین مزایای استفاده از اسپری 10 کاره  بوتاکس برای موها این است که یک روش کاملاً ارگانیک برای احیای مو های آسیب دیده است و حتی می تواند برای جلوگیری از ریزش مو یک راه مناسب باشد."
+      }
+    },
+    {
+      "page": 26,
+      "sku": "STIVES-HL-BOTOXLEAVEIN-NOURISHING",
+      "name_en": "BOTOX LEAVE IN CREAM",
+      "name_fa": "کرم مو بعد از حمام بوتاکس (بدون آبکشی)",
+      "variant_en": "Nourishing",
+      "variant_fa": null,
+      "packshot": "page-26-photo-06.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Leave-in Hair Botox Cream is a lightweight professional treatment for damaged hair that continuously provides moisture and nutrients. By forming a protective layer on the hair shaft, it helps prevent heat and environmental damage while enhancing the hair's longevity, softness, and shine.",
+      "desc_fa": "کرم موی بوتاکس بدون آبکشش یک درمان حرفه‌ای سبک برای موهای آسیب‌دیده است که به طور مداوم رطوبت و مواد مغذی را تأمین می‌کند. با ایجاد لایه‌ای محافظ روی ساقه مو، از آسیب‌های حرارتی و محیطی جلوگیری کرده و ماندگاری، نرمی و درخشش مو را افزایش می‌دهد."
+    },
+    {
+      "page": 27,
+      "sku": "STIVES-HM-COLLAGENKERATINMASK-REPAIRING",
+      "name_en": "COLLAGEN KERATIN HAIR MASK",
+      "name_fa": "ماسک موی داخل حام کلاژن کراتین",
+      "variant_en": "Repairing",
+      "variant_fa": null,
+      "packshot": "page-27-photo-05.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Keratin & Collagen Hair Mask restores natural softness, shine, and strength by repairing hair fibers and reinforcing the hair shaft. This mask reduces frizz, split ends, and heat damage, providing long-lasting manageability, silkiness, and protection for the hair. Regular use ensures visible results and healthy, resilient hair.",
+      "desc_fa": "ماسک موی کراتین و کلاژن با ترمیم فیبرهای مو و تقویت ساقه مو، نرمی و درخشش و استحکام طبیعی را بازمی‌گرداند. سپس کاهش وز، پیچیدگی مو و آسیب‌های حرارتی، مدیریت‌پذیری طولانی‌مدت، سادگی و حفاظت از مو را به ارمغان می‌آورد. استفاده منظم، نتایج قابل مشاهده و موهایی سالم و مقاوم را تضمین می‌کند.",
+      "digikala": {
+        "id": 11380735,
+        "url": "https://www.digikala.com/product/dkp-11380735/ماسک-مو-اس-تیایوز-مدل-repairing-سری-keratin-collagen-حجم-300-میلی-لیتر",
+        "title_fa": "ماسک مو اس تی.ایوز مدل REPAIRING سری KERATIN COLLAGEN حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/5521bc885154c55f19157b79dbe3f8cd6d3132cc_1685296071.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/cb26ac68078617548abb02eff33cf97e7396ee74_1685296090.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/5a659f44c52c5c66fe7432442929176708f79692_1685296128.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول ماسک مو بعد از حمام (بدون آبکشی)، فری سولفات و پارابن از برند ST.Ives   در سری ریپیرینگ (ترمیم کننده) بوده که از پروتئین هیرولیز شده کلاژن و کراتین  استفاده شده است. \r\nپروتئین موجود در موهای شما در برابر صدمات ناشی از پاک‌کننده‌های ناملایم، فرآیندهای شیمیایی پی در پی و حالت دادن به مو با وسایل حرارتی آسیب می‌بیند. این صدمات می‌تواند باعث خشکی، کاهش خاصیت ارتجاعی و ریزش بیش از حد موهای‌تان شود. ماسک مو برند  سنت ایوز ضمن بهبود نرمی، درخشش و شادابی مو به بهبود بقا رطوبت و قابلیت ارتجاعی آن کمک می‌کنند. \r\nکراتین هیدرولیزشده در ماسک مو سنت ایوز نه تنها به عنوان روکشی برای موهای شما عمل کرده بلکه با نفوذ به بدنه مو، کراتین از دست‌رفته آن را در شکاف‌های میکروسکوپی ساقه مو جایگزین می‌کند. در نتیجه، موهای شما صاف و براق می‌شود کراتین هیدرولیزشده قطر تارهای موی‌تان را افزایش می‌دهد و ظاهر پرتری به موهای ریز و نازک می‌بخشد. همچنین توانایی موی شما را در حفظ رطوبت افزایش می‌دهد و سبب کاهش وزشدگی و فرار بودن مو در اثر خشکی می‌شود."
+      }
+    },
+    {
+      "page": 27,
+      "sku": "STIVES-HM-COLLAGENKERATINSHAMPOO-REPAIRING",
+      "name_en": "COLLAGEN KERATIN HAIR SHAMPOO",
+      "name_fa": "شامپو موی کلاژن کراتین",
+      "variant_en": "Repairing",
+      "variant_fa": null,
+      "packshot": "page-27-photo-06.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Keratin & Collagen Shampoo is a specialized strengthening cleanser that helps restore the structure of damaged hair while enhancing its strength and flexibility. By deeply penetrating with keratin and collagen, it reduces frizz and dryness leaving the hair soft, smooth, and shiny, and provides a healthy foundation for styling and daily care.",
+      "desc_fa": "شامپو کراتین و کلاژن یک شامپوی تخصصی تقویتی است که به بازسازی ساختار موهای آسیب‌دیده و افزایش استحکام و انعطاف‌پذیری آن‌ها کمک می‌کند. با نفوذ عمیق کراتین و کلاژن، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند."
+    },
+    {
+      "page": 28,
+      "sku": "STIVES-HS-COLLAGENKERATINCOND-REPAIRING",
+      "name_en": "COLLAGEN KERATIN CONDITIONING SPRAY",
+      "name_fa": "پرایمر محافظت کننده مخصوص موهای فر",
+      "variant_en": "Repairing",
+      "variant_fa": null,
+      "packshot": "page-28-photo-07.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Keratin & Collagen Hair Detangling Spray, with its lightweight formula, nourishes and strengthens the hair while restoring natural softness and shine. This spray reduces frizz and tangling, providing silky manageability and protection against heat and environmental damage.",
+      "desc_fa": "اسپری نرم کننده کراتین و کلاژن با فرمولی سبک، موها را تغذیه و تقویت کرده و نرمی و درخشش طبیعی را بازمی‌گرداند. این اسپری وز و گره خوردن مو را کاهش داده و حالتی ابریشمی، حفاظت در برابر آسیب‌های حرارتی و محیطی را فراهم می‌کند.",
+      "digikala": {
+        "id": 11381065,
+        "url": "https://www.digikala.com/product/dkp-11381065/اسپری-مو-اس-تی-ایوز-مدل-repairing-سری-keratin-collagen-حجم-300-میلی-لیتر",
+        "title_fa": "اسپری مو اس تی ایوز مدل REPAIRING سری KERATIN COLLAGEN حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/3cad8c9b2345bd6f0e2d2c562fa973875e1aca9d_1685295018.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/aa3cab5bbd2fca8c7705d89c1204d2d2318dca1b_1685295094.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/2c5c444bda17bb33989a19084ad69abce66413a5_1685295185.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول اسپری 10 کاره (محلول نرم کننده موی سر-افشانه)، فری سولفات و پارابن از برند ST.Ives   در سری ریپیرینگ      (ترمیم کننده) بوده که از پروتئین هیرولیز شده کلاژن و کراتین  استفاده شده است. \r\nپروتئین موجود در موهای شما در برابر صدمات ناشی از پاک‌کننده‌های ناملایم، فرآیندهای شیمیایی پی در پی و حالت دادن به مو با وسایل حرارتی آسیب می‌بیند. این صدمات می‌تواند باعث خشکی، کاهش خاصیت ارتجاعی و ریزش بیش از حد موهای‌تان شود. اسپری 10 کاره  برند  سنت ایوز ضمن بهبود نرمی، درخشش و شادابی مو به بهبود بقا رطوبت و قابلیت ارتجاعی آن کمک می‌کنند. \r\nکراتین هیدرولیزشده در اسپری 10 کاره سنت ایوز نه تنها به عنوان روکشی برای موهای شما عمل کرده بلکه با نفوذ به بدنه مو، کراتین از دست‌رفته آن را در شکاف‌های میکروسکوپی ساقه مو جایگزین می‌کند. در نتیجه، موهای شما صاف و براق می‌شود کراتین هیدرولیزشده قطر تارهای موی‌تان را افزایش می‌دهد و ظاهر پرتری به موهای ریز و نازک می‌بخشد. همچنین توانایی موی شما را در حفظ رطوبت افزایش می‌دهد و سبب کاهش وزشدگی و فرار بودن مو در اثر خشکی می‌شود.\r\nبا توجه به وجود کلاژن در اسپری 10 کاره سنت ایوز از آسیب ها و بیماری هایی که فولیکول موها را تحت تاثیر قرار می دهد جلوگیری می کند. یکی از دلایلی که به مرور زمان موها نازک تر شده و دیگر قدرت قبل را ندارند کاهش این پروتئین در سطح پوست (جایگاه قرارگیری فولیکول ها) است. بنابراین با ترمیم پوست سر، ریزش مو نیز متوقف می شود. در موارد اندکی مشاهده شده که افزایش کلاژن روند سفید شدن موها را کند کرده باشد و این موضوع به دلیل خاصیت آنتی اکسیدانی در اسپری 10 کاره اتفاق می افتد."
+      }
+    },
+    {
+      "page": 28,
+      "sku": "STIVES-HL-COLLAGENKERATINLEAVEIN-REPAIRING",
+      "name_en": "COLLAGEN KERATIN LEAVE IN CREAM",
+      "name_fa": "کرم مو بعد از حمام مخصوص موهای فر (بدون آبکشی)",
+      "variant_en": "Repairing",
+      "variant_fa": null,
+      "packshot": "page-28-photo-08.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Leave-in Keratin & Collagen Cream penetrates the hair shaft quickly to repair and strengthen each strand while enhancing natural shine. Its specialized formula controls frizz and improves manageability, leaving the hair soft, silky, and ready for effortless styling.",
+      "desc_fa": "اسپری نرم کننده کراتین و کلاژن به سرعت در عمق ساقه مو نفوذ کرده و هر تار مو را ترمیم و تقویت می‌کند. این فرمول تخصصی وز مو را کنترل کرده و مدیریت‌پذیری را بهبود می‌بخشد و مو را نرم و ابریشمی می‌کند.",
+      "_data_issue": "The Persian copy on this page is the SAME text as the English description of the product above it (the spray). The Persian paragraph for the leave-in cream appears to be missing or duplicated in the source PDF. Recorded verbatim as printed; needs a Persian translation written by a human before this product can be published."
+    },
+    {
+      "page": 29,
+      "sku": "STIVES-HM-ARGANMACADAMIA-BOOSTER",
+      "name_en": "ARGAN MACADAMIA HAIR MASK",
+      "name_fa": null,
+      "variant_en": "Booster",
+      "variant_fa": null,
+      "packshot": "page-29-photo-06.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Argan & Macadamia Hair Mask, with its rich and nourishing formula, helps strengthen and reinforce hair strands while enhancing natural softness and shine. By fortifying the hair shaft and reducing frizz and tangling, this mask provides silky manageability and protects the hair against environmental and heat damage.",
+      "desc_fa": "ماسک موی آرگان و ماکادمیا با فرمولی غنی و مغذی به تقویت و استحکام تارهای مو کمک کرده و درخشش طبیعی و نرمی مو را بهبود می‌بخشد. با تقویت ساقه مو و کاهش وز و گره‌خوردگی، حالتی ابریشمی و محافظت از مو در برابر آسیب‌های محیطی و حرارتی را ارائه می‌کند.",
+      "digikala": {
+        "id": 11380806,
+        "url": "https://www.digikala.com/product/dkp-11380806/ماسک-مو-اس-تیایوز-مدل-booster-سری-ragan-macadamia-حجم-300-میلی-لیتر",
+        "title_fa": "ماسک مو اس تی.ایوز مدل BOOSTER سری RAGAN MACADAMIA حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/25d30b589a56d0da3f2aa8167cca59e5ec4a4f25_1685295935.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/c859f3cac88d800ed9b83bbb2aed11feeecfb524_1685295949.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/4545b27818d9941fd46d9820034fb1f4fb512e29_1685295910.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول ماسک مو داخل حمام(بدون آبکشی) ، فری سولفات و پارابن از برند ST.Ives   در سری بوستر(تقویت کننده) بوده که از روغن آرگان و ماکادمیا  استفاده شده است. \r\nبا توجه به وجود روغن آرگان در ماسک مو بعد از حمام سنت ایوز در سری بوستر باعث شده که برای مو و پوست سر بسیار مفید و خاصیت نرم کنندگی بالایی ایجاد کند. این ماسک مو می تواند نقش مرطوب کننده پوست برای مقابله با شوره و خشکی پوست سر را داشته باشد. همچنین مناسب برای موهای نازک و شکننده و قادر به برطرف کردن آسیب های ناشی از درمان های شیمیایی و رنگ ها است. درمان مو خوره از دیگر معجزه های ماسک مو، فری سولفات و پارابن برند سنت ایوز تلقی میشود. \r\nهمچنین با توجه به وجود روغن ماکادمیا در این ماسک مو یک لایه اضافه روی مو اضافه کرده و قابلیت شانه پذیری آن را افزایش داده و در عین حال مانع شکسته شده مو در حین استفاده از دستگاههای حرارتی می شود. ماکادمیا سرشار از ویتامین ها، پروتئین ها و مواد معدنی خواص ترمیمی، مغذی و مرطوب کنندگی است که به دلیل وجود این نوع ترکیبات از جمله بهتریت روغن های گیاهی شناخته شده که در این محصول استفاده شده است."
+      }
+    },
+    {
+      "page": 29,
+      "sku": "STIVES-HM-ARGANMACADAMIASHAMPOO-BOOSTER",
+      "name_en": "ARGAN MACADAMIA HAIR SHAMPOO",
+      "name_fa": "شامپو مو حاوی روغن آرگان و ماکادمیا",
+      "variant_en": "Booster",
+      "variant_fa": null,
+      "packshot": "page-29-photo-07.jpg",
+      "size": "500ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Argan & Macadamia Shampoo features a rich formula that gently cleanses the hair while strengthening and reinforcing each strand. By nourishing the hair shaft and controlling dryness and frizz, it leaves the hair healthy-looking, soft and beautifully manageable.",
+      "desc_fa": "شامپو آرگان و ماکادمیا با فرمولی غنی، موها را به طور ملایم پاکسازی کرده و باعث تقویت و استحکام تارهای مو می‌شود. این محصول با تغذیه ساقه مو و کنترل خشکی و وز، موها را سالم، نرم و خوش‌حالت به موها می‌بخشد."
+    },
+    {
+      "page": 30,
+      "sku": "STIVES-HS-ARGANMACADAMIACOND-BOOSTER",
+      "name_en": "ARGAN MACADAMIA CONDITIONING SPRAY",
+      "name_fa": "اسپری نرم کننده مو حاوی روغن آرگان و ماکادمیا",
+      "variant_en": "Booster",
+      "variant_fa": null,
+      "packshot": "page-30-photo-06.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Argan & Macadamia Conditioning Spray delivers essential nutrients that help strengthen and maintain healthy hair. It detangles, reduces frizz and improves combability, leaving the hair soft, smooth, and radiant while offering effective protection against environmental and heat-related stress without adding weight.",
+      "desc_fa": "اسپری نرم‌کننده حاوی روغن آرگان و ماکادمیا، با تأمین مواد مغذی به تقویت و حفظ سلامت مو کمک می‌کند. این محصول گره‌های مو را باز کرده، وز را کاهش می‌دهد و شانه‌پذیری را بهبود می‌بخشد و در عین حال بدون افزودن وزن، محافظ مؤثری در برابر عوامل محیطی و حرارتی فراهم می‌کند.",
+      "digikala": {
+        "id": 11380944,
+        "url": "https://www.digikala.com/product/dkp-11380944/اسپری-مو-سنت-ایوزمدل-booster-سری-argan-macadamia-حجم-300-میلی-لیتر",
+        "title_fa": "اسپری مو اس تی.ایوز مدل BOOSTER سری ARGAN MACADAMIA حجم 300 میلی لیتر",
+        "gallery": [
+          "https://dkstatics-public.digikala.com/digikala-products/868e518dee1d0142499e6962d1c69375152362a9_1685295756.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/723454ec15c35994d6d5f3493199c2b2c0333732_1685295766.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
+          "https://dkstatics-public.digikala.com/digikala-products/a952823a855ea0ec07ebc6e379da2805b3ad9e45_1685295842.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
+        ],
+        "description_fa": "این محصول اسپری 10 کاره (محلول نرم کننده موی سر – افشانه) ، فری سولفات و پارابن از برند ST.Ives   در سری بوستر(تقویت کننده) بوده که از روغن آرگان و ماکادمیا  استفاده شده است. \r\nبا توجه به وجود روغن آرگان در اسپری 10 کاره سنت ایوز در سری بوستر باعث شده که برای مو و پوست سر بسیار مفید و خاصیت نرم کنندگی بالایی ایجاد کند. این اسپری 10 کاره می تواند نقش مرطوب کننده پوست برای مقابله با شوره و خشکی پوست سر را داشته باشد. همچنین مناسب برای موهای نازک و شکننده و قادر به برطرف کردن آسیب های ناشی از درمان های شیمیایی و رنگ ها است. درمان مو خوره از دیگر معجزه های اسپری 10 کاره، فری سولفات و پارابن برند سنت ایوز تلقی میشود. \r\nهمچنین با توجه به وجود روغن ماکادمیا در این اسپری 10 کاره یک لایه اضافه روی مو اضافه کرده و قابلیت شانه پذیری آن را افزایش داده و در عین حال مانع شکسته شده مو در حین استفاده از دستگاههای حرارتی می شود. ماکادمیا سرشار از ویتامین ها، پروتئین ها و مواد معدنی خواص ترمیمی، مغذی و مرطوب کنندگی است که به دلیل وجود این نوع ترکیبات از جمله بهتریت روغن های گیاهی شناخته شده که در این محصول استفاده شده است."
+      }
+    },
+    {
+      "page": 30,
+      "sku": "STIVES-HL-ARGANMACADAMIALEAVEIN-BOOSTER",
+      "name_en": "ARGAN MACADAMIA LEAVE IN CREAM",
+      "name_fa": null,
+      "variant_en": "Booster",
+      "variant_fa": null,
+      "packshot": "page-30-photo-07.jpg",
+      "size": "300ML",
+      "tag_en": "SULFATE FREE",
+      "desc_en": "Post-Shower Hair Cream with Argan & Macadamia Oils is an ideal daily care solution designed to support hair strength and overall hair health. With fast absorption, it helps lock in moisture and essential nutrients, protects against dryness and frizz, and delivers a smooth, radiant, and polished finish without weighing the hair down.",
+      "desc_fa": "کرم مو بعد از حمام حاوی روغن آرگان و ماکادمیا، یک راه‌حل ایده‌آل برای مراقبت روزانه است. این محصول با جذب سریع، رطوبت و مواد مغذی را در ساقه مو حفظ کرده و از خشکی و وز مو جلوگیری می‌کند و جلوه‌ای صاف، درخشان و مرتب به مو می‌بخشد، بدون آن‌که حس سنگینی ایجاد کند."
+    },
+    {
+      "page": 31,
+      "sku": "STIVES-HO-ARGANOIL-100",
+      "name_en": "NOURISHING ARGAN OIL",
+      "name_fa": "روغن آرگان (مناسب مو، ناخن و پوست)",
+      "variant_en": "For Hair, Nail & Skin",
+      "variant_fa": null,
+      "packshot": "page-31-photo-03.jpg",
+      "size": "100ML",
+      "tag_en": "PARABEN FREE / SULFATE FREE",
+      "desc_en": "Argan Oil deeply nourishes the skin, hair, and nails, leaving them soft, healthy, and radiant. This lightweight oil helps repair and protect tissues, preventing dryness, brittleness, and environmental damage while enhancing flexibility and resilience.",
+      "desc_fa": "روغن آرگان با تغذیه عمیق پوست، مو و ناخن‌ها، آنها را نرم، سالم و درخشان می‌کند. این روغن سبک با بازسازی و محافظت از بافت‌ها، از خشکی، شکنندگی و آسیب‌های محیطی جلوگیری می‌کند و انعطاف‌پذیری را افزایش می‌دهد."
+    }
+  ]
+}
