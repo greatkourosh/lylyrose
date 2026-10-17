@@ -52,4 +52,4 @@ if ($query->have_posts()) {
 
 echo str_repeat('=', 60) . "\n";
 echo "Published $published St. Ives products\n";
-echo "\nView all at: " . home_url('/product-brand/st-ives/') . "\n";
+echo "\nView all at: " . home_url('/برند/st-ives/') . "\n";

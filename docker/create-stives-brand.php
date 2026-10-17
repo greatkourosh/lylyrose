@@ -69,4 +69,4 @@ foreach ($products as $product) {
 
 echo "\n" . str_repeat('=', 60) . "\n";
 echo "Assigned $updated products to St. Ives brand\n";
-echo "Brand URL: http://lylyrose.local/product-brand/st-ives/\n";
+echo "Brand URL: http://lylyrose.local/برند/st-ives/\n";

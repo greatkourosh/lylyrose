@@ -31,5 +31,5 @@ if ($query->have_posts()) {
     wp_reset_postdata();
 }
 
-echo "\nBrand page: " . home_url('/product-brand/st-ives/') . "\n";
+echo "\nBrand page: " . home_url('/برند/st-ives/') . "\n";
 echo "Shop page: " . home_url('/shop/') . "\n";

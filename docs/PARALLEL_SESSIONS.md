@@ -22,7 +22,8 @@ Owner decisions embedded here so the next session does not re-do them:
 - **Slug convention:** `post_name = strtolower(rawurlencode(title with spaces→hyphens and parens removed))`. The `sku-{ID}` segment comes from the permalink structure — never put it into `post_name` (double-prefixes every URL).
 - **Digikala link field** lives in `wp-content/mu-plugins/digikala-product-link.php` (blue box on product edit page + icon column in product list), fed by `_digikala_id` / `_digikala_url` / `_digikala_title` meta. 22 of 51 products have Digikala data; the other 29 have no counterpart there.
 - **Live deploy used the standard probe route** (§7 below): FTTP probe + JSON payload, php -l local first, random name, deleted after, 404-confirmed. Live already had its galleries, so zero images were downloaded.
-- §7's "mu-plugins not loaded" trap is **outdated** — mu-plugins load fine in the container now. Leave that wording alone in §7? No: the trap text is historical; this note supersedes it.
+- §7's "mu-plugins not loaded" trap is **outdated** — mu-plugins load fine in the container now. The §7 text stays as history; this note supersedes it.
+- Brand archive URL is `/{برند}/st-ives/` (taxonomy slug is `برند`, not `product-brand`). Verified: local 200, live 200 (2026-10-17).
 
 
 Keep it current. If you change something listed here, change it here in the same
