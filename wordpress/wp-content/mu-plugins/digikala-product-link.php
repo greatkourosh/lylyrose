@@ -5,15 +5,23 @@
  * Version: 1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // Add custom field to product general tab
 add_action('woocommerce_product_options_general_product_data', 'digikala_product_link_field');
 
 function digikala_product_link_field() {
-    global $post;
+    if ( ! is_admin() ) {
+        return;
+    }
 
-    $digikala_url = get_post_meta($post->ID, '_digikala_url', true);
-    $digikala_id = get_post_meta($post->ID, '_digikala_id', true);
-    $digikala_title = get_post_meta($post->ID, '_digikala_title', true);
+    $post_id = get_the_ID();
+
+    $digikala_url = get_post_meta($post_id, '_digikala_url', true);
+    $digikala_id = get_post_meta($post_id, '_digikala_id', true);
+    $digikala_title = get_post_meta($post_id, '_digikala_title', true);
 
     if (empty($digikala_url)) {
         return;
