@@ -1,13 +1,8 @@
 <?php
-/* Export local St. Ives state for the live sync probe.
-   Prints JSON to stdout: sku, title, slug, digikala block. */
+/* Export local St. Ives state for the live sync probe, reading _digikala_* meta
+   from the DB (not the source JSON, which predates the enrichment).
+   Prints JSON to stdout. */
 require_once '/var/www/html/wp-load.php';
-
-$json = json_decode(file_get_contents('/var/www/html/wp-content/stives-products.json'), true);
-$by_sku = [];
-foreach ($json['products'] as $p) {
-    $by_sku[$p['sku']] = $p['digikala'] ?? null;
-}
 
 $args = [
     'post_type'      => 'product',
@@ -18,12 +13,21 @@ $args = [
 
 $out = [];
 foreach (get_posts($args) as $p) {
-    $sku = get_post_meta($p->ID, '_sku', true);
+    $dkid = get_post_meta($p->ID, '_digikala_id', true);
+    $dg = null;
+    if ($dkid) {
+        $dg = [
+            'id'    => (int) $dkid,
+            'url'   => get_post_meta($p->ID, '_digikala_url', true),
+            'title_fa' => get_post_meta($p->ID, '_digikala_title', true),
+            'gallery'  => (array) get_post_meta($p->ID, '_digikala_image_urls', true),
+        ];
+    }
     $out[] = [
-        'sku'   => $sku,
+        'sku'   => get_post_meta($p->ID, '_sku', true),
         'title' => $p->post_title,
         'slug'  => $p->post_name,
-        'digikala' => $by_sku[$sku] ?? null,
+        'digikala' => $dg,
     ];
 }
 

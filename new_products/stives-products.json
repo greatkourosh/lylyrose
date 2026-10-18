@@ -2,7 +2,8 @@
   "_meta": {
     "source": "new_products/stives catalouge.pdf (33 pages, St. Ives body care)",
     "note": "PDF has no text layer; every field below was read visually from the extracted assets in new_products/photos/. Layout per product page: photo-03/04 = name blocks, photo-05/06 = bottle packshots, photo-07+ = EN+FA description blocks.",
-    "price": "NOT SET. Deliberately left blank per owner decision (2026-10-03) — decide against live margin data before publishing."
+    "price": "NOT SET. Deliberately left blank per owner decision (2026-10-03) — decide against live margin data before publishing.",
+    "digikala_match_note": "44 of 51 SKUs now have a Digikala counterpart (2 more than the original 22), matched via api.digikala.com search + /v2/product/{id}. Matching is best-effort by product type and hero ingredient: some SKUs map to a neighbouring formula or pack size, and the exfoliant toners map to Digikala's scrubs because Digikala carries no toner in this line. The remaining 7 SKUs (curl range, SPF50, argan oil) have no St. Ives match on Digikala."
   },
   "products": [
     {
@@ -14,7 +15,14 @@
       "variant_fa": "مناسب پوست چرب",
       "packshot": "page-05-photo-05.jpg",
       "desc_en": "This mild, antibacterial cleansing gel effectively removes impurities and excess oil. Tea tree extract helps reduce acne-causing bacteria and soothes inflammation, while aloe vera hydrates the skin, leaving it soft and refreshed. The result is clean, balanced, and revitalized skin after every wash.",
-      "desc_fa": "این ژل شستشو با فرمولی ملایم و ضدباکتری، آلودگی‌ها و چربی اضافه را به طور مؤثر پاک می‌کند. عصاره درخت چای با کاهش باکتری‌های مولد جوش، التهاب را تسکین می‌دهد و آلوئه ورا پوست را آبرسانی کرده و نرم و شاداب نگه می‌دارد."
+      "desc_fa": "این ژل شستشو با فرمولی ملایم و ضدباکتری، آلودگی‌ها و چربی اضافه را به طور مؤثر پاک می‌کند. عصاره درخت چای با کاهش باکتری‌های مولد جوش، التهاب را تسکین می‌دهد و آلوئه ورا پوست را آبرسانی کرده و نرم و شاداب نگه می‌دارد.",
+      "digikala": {
+        "id": 15649048,
+        "url": "https://www.digikala.com/product/dkp-15649048/",
+        "title_fa": "ژل شستشو صورت اس تی ایوز مدل TEA TREE حجم 200 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 5,
@@ -25,7 +33,14 @@
       "variant_fa": null,
       "packshot": "page-05-photo-06.jpg",
       "desc_en": "This mild, restorative cleansing gel removes impurities and excess oil without drying the skin. Enriched with collagen, it helps strengthen the skin's firmness and elasticity, promoting a smooth, youthful texture and a radiant, glowing complexion. It also supports the skin's natural renewal process, enhancing softness.",
-      "desc_fa": "این ژل شستشو با فرمولی ترمیم‌کننده و ملایم، آلودگی‌ها و چربی اضافه را بدون خشک کردن پوست پاک می‌کند. غنی از کلاژن، به استحکام و جوانی پوست کمک کرده و بافت را درخشان و شفاف می‌کند. این ژل از روند طبیعی بازسازی پوست نیز پشتیبانی می‌کند."
+      "desc_fa": "این ژل شستشو با فرمولی ترمیم‌کننده و ملایم، آلودگی‌ها و چربی اضافه را بدون خشک کردن پوست پاک می‌کند. غنی از کلاژن، به استحکام و جوانی پوست کمک کرده و بافت را درخشان و شفاف می‌کند. این ژل از روند طبیعی بازسازی پوست نیز پشتیبانی می‌کند.",
+      "digikala": {
+        "id": 14870859,
+        "url": "https://www.digikala.com/product/dkp-14870859/",
+        "title_fa": "ژل شسشتو صورت اس تی.ایوز مدل احیا کننده حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 6,
@@ -36,7 +51,14 @@
       "variant_fa": "مناسب پوست خشک",
       "packshot": "page-06-photo-05.jpg",
       "desc_en": "This mild, nourishing cleansing gel removes excess oil without drying the skin. Argan oil, rich in fatty acids and vitamin E, helps strengthen and protect the skin, while cucumber extract soothes and hydrates, leaving the skin soft and refreshed after every wash.",
-      "desc_fa": "این ژل شستشو با فرمولی مغذی و ملایم، چربی اضافه را بدون ایجاد خشکی از بین می‌برد. روغن آرگان سرشار از اسیدهای چرب و ویتامین E، به تقویت و محافظت از پوست کمک می‌کند و عصاره خیار پوست را تسکین داده و پس از شستشو، پوست را نرم و لطیف باقی می‌گذارد."
+      "desc_fa": "این ژل شستشو با فرمولی مغذی و ملایم، چربی اضافه را بدون ایجاد خشکی از بین می‌برد. روغن آرگان سرشار از اسیدهای چرب و ویتامین E، به تقویت و محافظت از پوست کمک می‌کند و عصاره خیار پوست را تسکین داده و پس از شستشو، پوست را نرم و لطیف باقی می‌گذارد.",
+      "digikala": {
+        "id": 21651763,
+        "url": "https://www.digikala.com/product/dkp-21651763/",
+        "title_fa": "ژل شست‌وشوی صورت اس تی.ایوز مدل HYDRATING مناسب برای پوست انواع پوست حجم 200 میلی‌لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 6,
@@ -47,7 +69,14 @@
       "variant_fa": "مناسب پوست حساس",
       "packshot": "page-06-photo-06.jpg",
       "desc_en": "This mild, hydrating cleansing gel effectively removes makeup and impurities from the skin. Aloe vera soothes the skin and helps reduce irritation, while hyaluronic acid locks in moisture, keeping the skin soft, smooth, and refreshed. After use, the skin feels clean, hydrated, and revitalized.",
-      "desc_fa": "این ژل شستشو با فرمولی ملایم و آبرسان، آرایش و آلودگی‌های پوست را به‌طور مؤثر پاک می‌کند. آلوئه ورا پوست را تسکین داده و التهاب را کاهش می‌دهد، هیالورونیک اسید رطوبت را حفظ کرده و آن را نرم و شاداب نگه می‌دارد. پس از استفاده، پوست تمیز، نرم و مرطوب باقی می‌ماند."
+      "desc_fa": "این ژل شستشو با فرمولی ملایم و آبرسان، آرایش و آلودگی‌های پوست را به‌طور مؤثر پاک می‌کند. آلوئه ورا پوست را تسکین داده و التهاب را کاهش می‌دهد، هیالورونیک اسید رطوبت را حفظ کرده و آن را نرم و شاداب نگه می‌دارد. پس از استفاده، پوست تمیز، نرم و مرطوب باقی می‌ماند.",
+      "digikala": {
+        "id": 14870882,
+        "url": "https://www.digikala.com/product/dkp-14870882/",
+        "title_fa": "ژل شسشتو صورت اس تی.ایوز مدل روشن کننده حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 11,
@@ -58,7 +87,14 @@
       "variant_fa": "مناسب پوست حساس",
       "packshot": "page-11-photo-05.jpg",
       "desc_en": "This facial cleansing foam gently removes impurities and excess oil from the skin. Chamomile flower extract provides soothing and anti-inflammatory benefits, helping to reduce redness, while rose flower extract delivers moisturizing properties that preserve the skin's softness and freshness.",
-      "desc_fa": "فوم شستشوی صورت به طور ملایم آلودگی‌ها و چربی اضافه پوست را پاک می‌کند. عصاره گل بابونه خاصیت ضدالتهابی و آرام‌بخش داشته و قرمزی پوست را کاهش می‌دهد. عصاره گل رز ویژگی‌های مرطوب‌کننده دارد و نرمی و شادابی پوست را حفظ می‌کند."
+      "desc_fa": "فوم شستشوی صورت به طور ملایم آلودگی‌ها و چربی اضافه پوست را پاک می‌کند. عصاره گل بابونه خاصیت ضدالتهابی و آرام‌بخش داشته و قرمزی پوست را کاهش می‌دهد. عصاره گل رز ویژگی‌های مرطوب‌کننده دارد و نرمی و شادابی پوست را حفظ می‌کند.",
+      "digikala": {
+        "id": 22080749,
+        "url": "https://www.digikala.com/product/dkp-22080749/",
+        "title_fa": "ژل شست‌و شوی صورت اس تی.ایوز مدل Soothing مناسب برای انواع پوست حجم 200 میلی‌لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 7,
@@ -72,7 +108,7 @@
       "desc_fa": "عصاره درخت چای به کاهش باکتری‌ها و التهاب کمک می‌کند، در حالی که آلوئه ورا پوست را آبرسانی و تسکین می‌دهد. با فرمول ملایم و مؤثر، این محلول آلودگی‌ها را بدون ایجاد خشکی پاک می‌کند و پوست را تمیز، نرم و متعادل نگه می‌دارد.",
       "digikala": {
         "id": 14870800,
-        "url": "https://www.digikala.com/product/dkp-14870800/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-چای-حجم-400-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-14870800/",
         "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل چای حجم 400 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/264761b43e95dedecf43d15e3804baf2f8c1d4ca_1710760371.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -93,7 +129,7 @@
       "desc_fa": "با فرمولی ملایم و بازسازی‌کننده، آرایش و آلودگی‌های سطح پوست را به‌طور مؤثر پاک می‌کند و پوست را احساس کشیدگی نمی‌دهد. کلاژن موجود در فرمول باعث تقویت، سفتی و جوانی پوست شده و ویتامین E با خاصیت آنتی‌اکسیدانی قوی از پوست در برابر عوامل مخرب محیطی محافظت می‌کند.",
       "digikala": {
         "id": 14870772,
-        "url": "https://www.digikala.com/product/dkp-14870772/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-کلاژن-حجم-400-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-14870772/",
         "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل کلاژن حجم 400 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/d6e823b67892fdf3d7b045d87dd8e42911a9ed79_1710760083.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -115,7 +151,7 @@
       "_data_issue": "The ENGLISH description block on this page is about an Argan & Macadamia hair conditioning spray and does not match the micellar-water product. The Persian block in the same asset DOES match this product. Imported with the Persian copy and no English copy; the English is missing rather than wrong.",
       "digikala": {
         "id": 14870742,
-        "url": "https://www.digikala.com/product/dkp-14870742/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-آرگان-و-خیار-حجم-400-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-14870742/",
         "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل آرگان و خیار حجم 400 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/f7ea76f5c302f4031fbe7ba0a98a3e878f5d3c7f_1710759849.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -137,7 +173,7 @@
       "_data_issue": "The ENGLISH description block on this page is about a Post-Shower Hair Cream with Argan & Macadamia Oils and does not match the micellar-water product. The Persian block in the same asset DOES match this product. Imported with the Persian copy and no English copy; the English is missing rather than wrong.",
       "digikala": {
         "id": 14870785,
-        "url": "https://www.digikala.com/product/dkp-14870785/محلول-پاک-کننده-آرایش-صورت-اس-تیایوز-مدل-آلوئه-ورا-و-هیالورونیک-حجم-400-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-14870785/",
         "title_fa": "محلول پاک کننده آرایش صورت اس تی.ایوز مدل آلوئه ورا و هیالورونیک حجم 400 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/80351d3509ff80ebf09e52d9cd9ae2a35fbece59_1710760229.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -155,7 +191,14 @@
       "variant_fa": "مناسب پوست چرب",
       "packshot": "page-09-photo-06.jpg",
       "desc_en": "This facial cleansing solution, formulated with salicylic acid and tea tree extract, penetrates deep into the pores to effectively remove excess oil. Its gentle yet powerful formula helps reduce acne, control sebum production, and maintain the skin's natural balance.",
-      "desc_fa": null
+      "desc_fa": null,
+      "digikala": {
+        "id": 2610794,
+        "url": "https://www.digikala.com/product/dkp-2610794/",
+        "title_fa": "اسکراب لایه بردار پوست اس تی.ایوز مدل Black Head Clearing حجم 170 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 9,
@@ -177,7 +220,14 @@
       "variant_fa": "مناسب پوست متوسط",
       "packshot": "page-09-photo-08.jpg",
       "desc_en": "This facial cleansing solution gently exfoliates dead skin cells, helping to renew and smooth the skin's surface. Its nourishing formula preserves the skin's natural moisture and supports skin balance, resulting in a clear, soft, and healthy-looking complexion.",
-      "desc_fa": null
+      "desc_fa": null,
+      "digikala": {
+        "id": 14871533,
+        "url": "https://www.digikala.com/product/dkp-14871533/",
+        "title_fa": "اسکراب لایه بردار صورت اس تی.ایوز مدل زردآلو حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 10,
@@ -188,7 +238,14 @@
       "variant_fa": null,
       "packshot": "page-10-photo-05.jpg",
       "desc_en": "Formulated with tea tree extract and niacinamide, it effectively reduces excess oil and helps regulate sebum production. Its anti-inflammatory combination refines the appearance of pores, leaving the skin clear, balanced, and refreshed.",
-      "desc_fa": null
+      "desc_fa": null,
+      "digikala": {
+        "id": 14870946,
+        "url": "https://www.digikala.com/product/dkp-14870946/",
+        "title_fa": "ژل شسشتو صورت اس تی.ایوز مدل ضدجوش حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 10,
@@ -199,7 +256,14 @@
       "variant_fa": "مناسب پوست خشک",
       "packshot": "page-10-photo-06.jpg",
       "desc_en": "Enriched with watermelon extract and aloe vera, this formula gently cleanses the skin of impurities and excess oil. Its hydrating properties help soothe the skin, maintain natural moisture levels, and prevent excessive dryness.",
-      "desc_fa": null
+      "desc_fa": null,
+      "digikala": {
+        "id": 14870920,
+        "url": "https://www.digikala.com/product/dkp-14870920/",
+        "title_fa": "ژل شسشتو صورت اس تی.ایوز مدل آبرسان حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 11,
@@ -212,9 +276,9 @@
       "desc_en": "Its lightweight, gentle formula combines natural apricot extract with hyaluronic acid to deliver clean, clear, and well-hydrated skin. Rich in antioxidants, apricot extract supports deep cleansing, improves skin texture, and helps reduce signs of fatigue.",
       "desc_fa": "فرمول سبک و ملایم ترکیبی از عصاره طبیعی زردآلو و هیالورونیک اسید را برای پاکسازی و آبرسانی به پوست ارائه می‌دهد. غنی از آنتی‌اکسیدان‌ها، عصاره زردآلو به پاکسازی عمیق کمک کرده و آثار خستگی را کاهش می‌دهد.",
       "digikala": {
-        "id": 15649176,
-        "url": "https://www.digikala.com/product/dkp-15649176/ژل-شستشو-صورت-اس-تی-ایوز-مدل-glow-plus-حجم-200-میلی-لیتر",
-        "title_fa": "ژل شستشو صورت اس تی ایوز مدل GLOW plus حجم 200 میلی لیتر",
+        "id": 6811731,
+        "url": "https://www.digikala.com/product/dkp-6811731/",
+        "title_fa": "ژل پاک کننده آرایش صورت اس تی.ایوز سری درخشان کننده مدل زردآلو حجم 200 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/24961d25bb95217d385f609d80ad929bb62da20d_1717454940.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
           "https://dkstatics-public.digikala.com/digikala-products/24961d25bb95217d385f609d80ad929bb62da20d_1717454954.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90"
@@ -234,7 +298,7 @@
       "desc_fa": "شامپو اسکراب بدن حاوی نمک دریا و عصاره جلبک دریایی، به‌طور عمیق پوست را پاکسازی کرده و سلول‌های مرده و آلودگی‌ها را به‌طور مؤثر از بین می‌برد، در حالی که پوست را نرم و تازه رها می‌کند. ترکیب مواد معدنی نمک دریا و جلبک دریایی به تسکین پوست، بهبود گردش خون و افزایش شفافیت و نرمی طبیعی آن کمک می‌کند.",
       "digikala": {
         "id": 4896103,
-        "url": "https://www.digikala.com/product/dkp-4896103/شامپو-بدن-اس-تیایوز-مدل-نمک-دریا-و-جلبک-دریایی-حجم-650-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-4896103/",
         "title_fa": "شامپو بدن اس تی.ایوز مدل نمک دریا و جلبک دریایی حجم 650 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/cd9541f744af63e171c2e5c6bcc7e59cf57d9df0_1790077303.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -256,7 +320,7 @@
       "desc_fa": "شامپو اسکراب بدن حاوی عصاره هلو و گل یاس، به‌طور ملایم سلول‌های مرده پوست را از بین می‌برد تا پوستی نرم‌تر و درخشان‌تر نمایان شود. ویژگی‌های آبرسان هلو به همراه اثرات آرام‌بخش یاس، رطوبت عمیق را به پوست رسانده و آن را نرم، تازه و درخشان نگه می‌دارد.",
       "digikala": {
         "id": 12525087,
-        "url": "https://www.digikala.com/product/dkp-12525087/شامپو-بدن-اس-تیایوز-مدل-fresh-peach-and-jasmine-حجم-650-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-12525087/",
         "title_fa": "شامپو بدن اس تی.ایوز مدل Fresh peach and jasmine حجم 650 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/2ff83cac866a63293311c1b127fd975a9bd8f290_1693286799.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -277,7 +341,7 @@
       "desc_fa": "شامپو بدن حاوی عصاره آلوئه ورا و گل رز با فرمول آرام‌بخش و آبرسان، پوست را به‌طور ملایم پاکسازی کرده و رطوبت طبیعی آن را حفظ می‌کند. آلوئه ورا مزایای آرام‌بخش و تسکین‌دهنده دارد و عصاره گل رز به نرمی و تجدید و افزایش طراوت پوست کمک می‌کند.",
       "digikala": {
         "id": 4896806,
-        "url": "https://www.digikala.com/product/dkp-4896806/شامپو-بدن-اس-تیایوز-مدل-رز-و-آلوئه-ورا-حجم-650-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-4896806/",
         "title_fa": "شامپو بدن اس تی.ایوز\r\nمدل رز و آلوئه‌ ورا حجم 650 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/9b03169c0173bc03b3b7e980b5335807285a0366_1618310056.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -298,7 +362,7 @@
       "desc_fa": "ترکیب روغن نارگیل با ویژگی‌های آبرسان و ترمیم‌کننده، به تقویت سد دفاعی پوست و جلوگیری از خشکی کمک می‌کند. عصاره نارگیل از نوسازی پوست حمایت کرده و آسایش، شفافیت و تازگی را به همراه نرمی طولانی‌مدت و حس ابریشمی فراهم می‌کند.",
       "digikala": {
         "id": 4896633,
-        "url": "https://www.digikala.com/product/dkp-4896633/شامپو-بدن-اس-تیایوز-مدل-نارگیل-و-ارکیده-حجم-650-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-4896633/",
         "title_fa": "شامپو بدن اس تی.ایوز مدل نارگیل و ارکیده حجم 650 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/3b1a73dd8c6342d3bf32d866119a05874d72d9a1_1618309239.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -319,7 +383,7 @@
       "desc_fa": "فرمول تسکین‌دهنده غنی از عصاره جو دوسر و شی باتر، پوست را به‌طور ملایم پاکسازی کرده و آبرسانی عمیق فراهم می‌کند و خشکی و حساسیت را کاهش می‌دهد. این ترکیب مغذی به تقویت سد طبیعی پوست کمک کرده و پوست را نرم، صاف و آرام با حس تازگی طولانی‌مدت پس از هر دوش باقی می‌گذارد.",
       "digikala": {
         "id": 4897848,
-        "url": "https://www.digikala.com/product/dkp-4897848/شامپو-بدن-اس-تیایوز-مدل-جو-دو-سر-و-شی-باتر-حجم-650-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-4897848/",
         "title_fa": "شامپو بدن اس تی.ایوز مدل جو دو سر و شی باتر حجم 650 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/73935577d92e0319617d70fb70532c0e30b1b01b_1618314398.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -340,7 +404,7 @@
       "desc_fa": null,
       "digikala": {
         "id": 17919284,
-        "url": "https://www.digikala.com/product/dkp-17919284/لوسیون-بدن-ضد-خشکی-اس-تیایوز-مدل-رز-و-روغن-آرگان-حجم-621-میلیلیتر-مناسب-انواع-پوست-مرطوبکننده-و-نرمکننده-قوی-پوست",
+        "url": "https://www.digikala.com/product/dkp-17919284/",
         "title_fa": "لوسیون بدن ضد خشکی اس تی.ایوز مدل رز و روغن آرگان حجم 621 میلی‌لیتر مناسب انواع پوست، مرطوب‌کننده و نرم‌کننده قوی پوست",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/f573755d032d5d5d67ff4dc4f02a75b13ac9cd65_1788947578.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -362,7 +426,7 @@
       "desc_fa": "فرمول مرطوب‌رسان غنی‌شده با عصاره نارگیل و ارکیده به عمق لایه‌های پوست نفوذ کرده و با تقویت سد محافظتی پوست، نرمی، لطافت و سلامت پوست را به همراه درخشش طبیعی و تغذیه عمیق پوست فراهم می‌کند.",
       "digikala": {
         "id": 17785348,
-        "url": "https://www.digikala.com/product/dkp-17785348/لوسیون-بدن-اس-تیایوز-مدل-نارگیل-و-ارکیده-حجم-621-میلیلیتر-ضد-خشکی-مناسب-پوست-خشک-و-حساس",
+        "url": "https://www.digikala.com/product/dkp-17785348/",
         "title_fa": "لوسیون بدن اس تی.ایوز مدل نارگیل و ارکیده حجم 621 میلی‌لیتر ضد خشکی مناسب پوست خشک و حساس",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/8ad48749593b72e9dab3746805fe6f8427e196a3_1788947574.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -382,7 +446,14 @@
       "variant_fa": "تسکین دهنده",
       "packshot": "page-15-photo-05.jpg",
       "desc_en": "Body lotion enriched with oat extract and shea butter features a rich formula that deeply moisturizes and softens the skin while helping protect it from dryness and surface irritation. The soothing properties of oat extract combined with the nourishing benefits of shea butter support skin renewal, improve elasticity, and promote a healthy, revitalized appearance.",
-      "desc_fa": "لوسیون بدن حاوی جو دو سر و شی باتر، فرمولی غنی دارد که به عمق پوست رطوبت رسانده و نرم می‌کند و از خشکی و تحریک سطحی پوست محافظت می‌نماید. خواص تسکین‌دهنده عصاره جو با فواید مغذی شی باتر ترکیب شده و از نو شدن پوست، بهبود انعطاف‌پذیری و شادابی آن پشتیبانی می‌کند."
+      "desc_fa": "لوسیون بدن حاوی جو دو سر و شی باتر، فرمولی غنی دارد که به عمق پوست رطوبت رسانده و نرم می‌کند و از خشکی و تحریک سطحی پوست محافظت می‌نماید. خواص تسکین‌دهنده عصاره جو با فواید مغذی شی باتر ترکیب شده و از نو شدن پوست، بهبود انعطاف‌پذیری و شادابی آن پشتیبانی می‌کند.",
+      "digikala": {
+        "id": 21145802,
+        "url": "https://www.digikala.com/product/dkp-21145802/",
+        "title_fa": "لوسیون بدن اس تی.ایوز مدل جو دوسر و شی باتر مرطوب‌کننده و ضد خشکی حجم 621 میلی‌لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 15,
@@ -396,7 +467,7 @@
       "desc_fa": "لوسیون بدن حاوی کلاژن و الاستین با فرمولی تخصصی و اثربخش، ساختار پوست را بازسازی کرده و به افزایش سفتی و کشسانی آن کمک می‌کند و در عین حال اثر عمیق مرطوب‌کننده، پوست را نرم و صاف و جوان نگه می‌دارد.",
       "digikala": {
         "id": 17785215,
-        "url": "https://www.digikala.com/product/dkp-17785215/لوسیون-بدن-اس-تیایوز-مدل-کلاژن-و-الاستین-حجم-621-میلیلیتر-ضد-خشکی-مخصوص-پوست-خشک-و-بازسازیکننده",
+        "url": "https://www.digikala.com/product/dkp-17785215/",
         "title_fa": "لوسیون بدن اس تی.ایوز مدل کلاژن و الاستین حجم 621 میلی‌لیتر ضد خشکی مخصوص پوست خشک و بازسازی‌کننده",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/f1aae85d5180a107a96c836fe4757ae57c9fcc61_1788947573.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -419,7 +490,7 @@
       "desc_fa": "اسکراب لایه بردار با عملکرد دوگانه فیزیکی و شیمیایی، سلول‌های مرده و آلودگی‌های عمقی پوست را به طور موثر پاک می‌کند. اسید سالیسیلیک با نفوذ به منافذ پوست، چربی اضافه و ترشحات را کاهش می‌دهد و خاصیت آنتی‌اکسیدان و ضدالتهاب چای سبز، به تعادل پوست کمک می‌کند.",
       "digikala": {
         "id": 18479245,
-        "url": "https://www.digikala.com/product/dkp-18479245/اسکراب-لایه-بردار-پوست-اس-تیایوز-مدل-چای-سبز-و-بامبو-وزن-170-گرم",
+        "url": "https://www.digikala.com/product/dkp-18479245/",
         "title_fa": "اسکراب لایه بردار پوست اس تی.ایوز مدل چای سبز و بامبو وزن 170 گرم",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/38ed416d27e0b6db817c4dd0256e470739b74a5d_1740778290.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -453,7 +524,7 @@
       "_data_issue": "Page 17 pairs ONE name block ('ACNE CONTROL SCRUB / Tea tree & Apricot Extract') with TWO different jars (a 'Fresh Skin Scrub' apricot jar and an 'Acne Control Scrub' tea-tree jar) and TWO descriptions, neither of which names green tea as the scrub's own hero. The packshot above is ambiguous between the two jars. This product needs a human decision before it can be imported.",
       "digikala": {
         "id": 14871563,
-        "url": "https://www.digikala.com/product/dkp-14871563/اسکراب-لایه-بردار-صورت-و-بدن-اس-تیایوز-مدل-درخت-چای-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-14871563/",
         "title_fa": "اسکراب لایه بردار صورت و بدن اس تی.ایوز مدل درخت چای حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/8c37690c3cddc6493ecd1507d65697149b955667_1788944883.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -477,7 +548,7 @@
       "_data_issue": "This product's name and variant were read off the jar's own printed label ('FRESH SKIN SCRUB / APRICOT EXTRACT') because the page has no separate name block for it. Name is lower confidence than the rest of the set.",
       "digikala": {
         "id": 10482456,
-        "url": "https://www.digikala.com/product/dkp-10482456/اسکراب-لایه-بردار-پوست-اس-تی-ایوز-مدل-fresh-skin-حجم-170-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-10482456/",
         "title_fa": "اسکراب لایه بردار  پوست اس تی ایوز مدل FRESH SKIN حجم 170 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/4351f544016cbef3f3cda812a7535fd6aef70b07_1674241626.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -497,7 +568,14 @@
       "size": "90ML",
       "tag_en": "PARABEN FREE",
       "desc_en": null,
-      "desc_fa": "کرم مرطوب‌کننده پوست حاوی کلاژن و الاستین با فرمولی غنی، آبرسانی عمیقی را برای پوست فراهم می‌کند و همزمان از پوست در برابر خشکی و آسیب‌های محیطی محافظت می‌کند. کلاژن و الاستین به تقویت ساختار پوست و حفظ سفتی و انعطاف‌پذیری آن کمک می‌کنند و در نرمی طبیعی پوست حفظ می‌کنند."
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی کلاژن و الاستین با فرمولی غنی، آبرسانی عمیقی را برای پوست فراهم می‌کند و همزمان از پوست در برابر خشکی و آسیب‌های محیطی محافظت می‌کند. کلاژن و الاستین به تقویت ساختار پوست و حفظ سفتی و انعطاف‌پذیری آن کمک می‌کنند و در نرمی طبیعی پوست حفظ می‌کنند.",
+      "digikala": {
+        "id": 15434219,
+        "url": "https://www.digikala.com/product/dkp-15434219/",
+        "title_fa": "کرم مرطوب کننده اس تی.ایوز مدل کلاژن وزن 283 گرم",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 18,
@@ -510,7 +588,14 @@
       "size": "621ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Moisturizing Cream enriched with Argan Oil and Grape Seed Oil features a rich formula that provides deep hydration while protecting the skin against environmental damage. Argan oil nourishes the skin and helps improve elasticity, while grape seed oil, with its antioxidant properties, enhances the skin's protective defense.",
-      "desc_fa": "کرم مرطوب‌کننده پوست حاوی روغن آرگان و هسته انگور با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و آن را در برابر آسیب‌های محیطی محافظت می‌کند. روغن آرگان پوست را تغذیه کرده و به بهبود کشسانی آن کمک می‌کند، در حالی که روغن هسته انگور با خواص آنتی‌اکسیدانی، دفاع طبیعی پوست را تقویت می‌کند."
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی روغن آرگان و هسته انگور با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و آن را در برابر آسیب‌های محیطی محافظت می‌کند. روغن آرگان پوست را تغذیه کرده و به بهبود کشسانی آن کمک می‌کند، در حالی که روغن هسته انگور با خواص آنتی‌اکسیدانی، دفاع طبیعی پوست را تقویت می‌کند.",
+      "digikala": {
+        "id": 14871078,
+        "url": "https://www.digikala.com/product/dkp-14871078/",
+        "title_fa": "کرم مغذی اس تی.ایوز مدل آرگان و هسته انگور حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 18,
@@ -523,7 +608,14 @@
       "size": "621ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Moisturizing Cream enriched with Aloe Vera and Vitamin C provides deep hydration while protecting the skin from dryness and environmental damage. Aloe vera enhances the skin's soothing and restorative properties, while vitamin C, with its antioxidant action, helps improve skin clarity and promote a youthful appearance.",
-      "desc_fa": "کرم مرطوب‌کننده پوست حاوی آلوئه ورا و ویتامین سی با فرمولی غنی، آبرسانی عمیقی برای پوست فراهم می‌کند. آلوئه ورا خواص آرام‌بخش و ترمیم‌کننده پوست را افزایش می‌دهد و ویتامین سی به دلیل خاصیت آنتی‌اکسیدانی، به روشنی و جوانی پوست را تقویت می‌کند."
+      "desc_fa": "کرم مرطوب‌کننده پوست حاوی آلوئه ورا و ویتامین سی با فرمولی غنی، آبرسانی عمیقی برای پوست فراهم می‌کند. آلوئه ورا خواص آرام‌بخش و ترمیم‌کننده پوست را افزایش می‌دهد و ویتامین سی به دلیل خاصیت آنتی‌اکسیدانی، به روشنی و جوانی پوست را تقویت می‌کند.",
+      "digikala": {
+        "id": 11378696,
+        "url": "https://www.digikala.com/product/dkp-11378696/",
+        "title_fa": "کرم مرطوب کننده اس تی.ایوز\r\n مدل LIGHTENING حجم 90 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 19,
@@ -537,7 +629,14 @@
       "tag_en": "PARABEN FREE",
       "desc_en": "Moisturizing Cream enriched with collagen and elastin features a rich formula that delivers deep hydration while protecting the skin from dryness and environmental damage. Collagen helps strengthen the skin's structure and maintain firmness, supporting improved elasticity, flexibility and the skin's natural softness and smoothness.",
       "desc_fa": "کرم مرطوب‌کننده پوست حاوی کلاژن و الاستین با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و همزمان از آن در برابر خشکی و آسیب‌های محیطی محافظت می‌کند. کلاژن و الاستین به تقویت ساختار پوست و حفظ سفتی آن کمک می‌کنند، انعطاف‌پذیری، نرمی و لطافت طبیعی پوست را تقویت می‌کنند.",
-      "_data_issue": "Same product name as page 18's 90ML tube. These are two different pack sizes (90ML tube vs 170G jar). Kept as separate SKUs; decide whether to list one as a size variant."
+      "_data_issue": "Same product name as page 18's 90ML tube. These are two different pack sizes (90ML tube vs 170G jar). Kept as separate SKUs; decide whether to list one as a size variant.",
+      "digikala": {
+        "id": 15434219,
+        "url": "https://www.digikala.com/product/dkp-15434219/",
+        "title_fa": "کرم مرطوب کننده اس تی.ایوز مدل کلاژن وزن 283 گرم",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 19,
@@ -551,7 +650,14 @@
       "tag_en": "PARABEN FREE",
       "desc_en": "Moisturizing Cream enriched with Argan Oil and Grape Seed Oil features a rich formula that provides deep hydration while protecting the skin against environmental damage. Argan oil nourishes the skin and helps improve elasticity, while grape seed oil, with its antioxidant properties, enhances the skin's protective defense.",
       "desc_fa": "کرم مرطوب‌کننده پوست حاوی روغن آرگان و هسته انگور با فرمولی غنی، رطوبت عمیقی را برای پوست فراهم می‌کند و آن را در برابر آسیب‌های محیطی محافظت می‌کند. روغن آرگان پوست را تغذیه کرده و به بهبود کشسانی آن کمک می‌کند، در حالی که روغن هسته انگور با خواص آنتی‌اکسیدانی، دفاع طبیعی پوست را تقویت می‌کند.",
-      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant."
+      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant.",
+      "digikala": {
+        "id": 14871078,
+        "url": "https://www.digikala.com/product/dkp-14871078/",
+        "title_fa": "کرم مغذی اس تی.ایوز مدل آرگان و هسته انگور حجم 300 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 19,
@@ -565,7 +671,14 @@
       "tag_en": "PARABEN FREE",
       "desc_en": "Moisturizing Cream enriched with Aloe Vera and Vitamin C provides deep hydration while protecting the skin from dryness and environmental damage. Aloe vera enhances the skin's soothing and restorative properties, while vitamin C, with its antioxidant action, helps improve skin clarity and promote a youthful appearance.",
       "desc_fa": "کرم مرطوب‌کننده پوست حاوی آلوئه ورا و ویتامین سی با فرمولی غنی، آبرسانی عمیقی برای پوست فراهم می‌کند. آلوئه ورا خواص آرام‌بخش و ترمیم‌کننده پوست را افزایش می‌دهد و ویتامین سی به دلیل خاصیت آنتی‌اکسیدانی، به روشنی و جوانی پوست را تقویت می‌کند.",
-      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant."
+      "_data_issue": "Same product name as page 18's 621ML entry. Two pack sizes. Kept as separate SKUs; decide whether to list one as a size variant.",
+      "digikala": {
+        "id": 11378696,
+        "url": "https://www.digikala.com/product/dkp-11378696/",
+        "title_fa": "کرم مرطوب کننده اس تی.ایوز\r\n مدل LIGHTENING حجم 90 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 22,
@@ -631,7 +744,7 @@
       "desc_fa": "ماسک موی بوتاکس یک فرمول پیشرفته مغذی و احیاکننده است که به عمق ساقه مو نفوذ می‌کند تا سلول‌های آسیب‌دیده را ترمیم کرده و تعادل رطوبت و پروتئین را برقرار کند. با تشکیل یک لایه محافظ روی مو، از فرسایش، وز شدن و شکستگی مو جلوگیری می‌کند.",
       "digikala": {
         "id": 11380405,
-        "url": "https://www.digikala.com/product/dkp-11380405/ماسک-مو-اس-تیایوز-مدل-nourishing-سری-botox-حجم-500-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11380405/",
         "title_fa": "ماسک مو اس تی.ایوز مدل NOURISHING سری BOTOX حجم 500 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/7c634f31a889f130fea8ca10cd82dcca553a9669_1685296531.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -652,7 +765,14 @@
       "size": "500ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Botox Shampoo is a specialized cleaner formulated with nourishing and repairing ingredients to help restore damaged and weakened hair. Through deep hydration and structural strengthening, it reduces frizz and dryness, leaving the hair soft, smooth, and shiny while providing a healthy, well-prepared foundation for restorative treatments such as hair botox.",
-      "desc_fa": "شامپو بوتاکس یک شامپوی تخصصی است که با فرمولی مغذی و ترمیم‌کننده، موهای آسیب‌دیده و ضعیف‌شده را بازسازی می‌کند. با آبرسانی عمیق و تقویت ساختاری، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند و زمینه‌ای سالم برای درمان‌های ترمیمی مانند بوتاکس مو فراهم می‌آورد."
+      "desc_fa": "شامپو بوتاکس یک شامپوی تخصصی است که با فرمولی مغذی و ترمیم‌کننده، موهای آسیب‌دیده و ضعیف‌شده را بازسازی می‌کند. با آبرسانی عمیق و تقویت ساختاری، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند و زمینه‌ای سالم برای درمان‌های ترمیمی مانند بوتاکس مو فراهم می‌آورد.",
+      "digikala": {
+        "id": 11379796,
+        "url": "https://www.digikala.com/product/dkp-11379796/",
+        "title_fa": "شامپو تقویت کننده مو اس تی.ایوز مدل NOURISHING سری BOTOX حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 26,
@@ -668,7 +788,7 @@
       "desc_fa": "اسپری نرم کننده مو بوتاکس یک فرمول پیشرفته مغذی و احیاکننده است که به عمق ساقه مو نفوذ می‌کند تا سلول‌های آسیب‌دیده را ترمیم کرده و تعادل رطوبت و پروتئین را برقرار کند. با تشکیل یک لایه محافظ روی مو، آن را نرم و قابل کنترل می‌سازد.",
       "digikala": {
         "id": 11381013,
-        "url": "https://www.digikala.com/product/dkp-11381013/اسپری-مو-سنت-ایوز-مدل-nourishing-سری-botox-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11381013/",
         "title_fa": "اسپری مو اس تی ایوز مدل NOURISHING سری BOTOX حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/b9fec6430e1d2c672e6197bc82939d2b6b8f9263_1685295632.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -689,7 +809,14 @@
       "size": "300ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Leave-in Hair Botox Cream is a lightweight professional treatment for damaged hair that continuously provides moisture and nutrients. By forming a protective layer on the hair shaft, it helps prevent heat and environmental damage while enhancing the hair's longevity, softness, and shine.",
-      "desc_fa": "کرم موی بوتاکس بدون آبکشش یک درمان حرفه‌ای سبک برای موهای آسیب‌دیده است که به طور مداوم رطوبت و مواد مغذی را تأمین می‌کند. با ایجاد لایه‌ای محافظ روی ساقه مو، از آسیب‌های حرارتی و محیطی جلوگیری کرده و ماندگاری، نرمی و درخشش مو را افزایش می‌دهد."
+      "desc_fa": "کرم موی بوتاکس بدون آبکشش یک درمان حرفه‌ای سبک برای موهای آسیب‌دیده است که به طور مداوم رطوبت و مواد مغذی را تأمین می‌کند. با ایجاد لایه‌ای محافظ روی ساقه مو، از آسیب‌های حرارتی و محیطی جلوگیری کرده و ماندگاری، نرمی و درخشش مو را افزایش می‌دهد.",
+      "digikala": {
+        "id": 11380405,
+        "url": "https://www.digikala.com/product/dkp-11380405/",
+        "title_fa": "ماسک مو اس تی.ایوز مدل NOURISHING سری BOTOX حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 27,
@@ -705,7 +832,7 @@
       "desc_fa": "ماسک موی کراتین و کلاژن با ترمیم فیبرهای مو و تقویت ساقه مو، نرمی و درخشش و استحکام طبیعی را بازمی‌گرداند. سپس کاهش وز، پیچیدگی مو و آسیب‌های حرارتی، مدیریت‌پذیری طولانی‌مدت، سادگی و حفاظت از مو را به ارمغان می‌آورد. استفاده منظم، نتایج قابل مشاهده و موهایی سالم و مقاوم را تضمین می‌کند.",
       "digikala": {
         "id": 11380735,
-        "url": "https://www.digikala.com/product/dkp-11380735/ماسک-مو-اس-تیایوز-مدل-repairing-سری-keratin-collagen-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11380735/",
         "title_fa": "ماسک مو اس تی.ایوز مدل REPAIRING سری KERATIN COLLAGEN حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/5521bc885154c55f19157b79dbe3f8cd6d3132cc_1685296071.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -726,7 +853,14 @@
       "size": "500ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Keratin & Collagen Shampoo is a specialized strengthening cleanser that helps restore the structure of damaged hair while enhancing its strength and flexibility. By deeply penetrating with keratin and collagen, it reduces frizz and dryness leaving the hair soft, smooth, and shiny, and provides a healthy foundation for styling and daily care.",
-      "desc_fa": "شامپو کراتین و کلاژن یک شامپوی تخصصی تقویتی است که به بازسازی ساختار موهای آسیب‌دیده و افزایش استحکام و انعطاف‌پذیری آن‌ها کمک می‌کند. با نفوذ عمیق کراتین و کلاژن، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند."
+      "desc_fa": "شامپو کراتین و کلاژن یک شامپوی تخصصی تقویتی است که به بازسازی ساختار موهای آسیب‌دیده و افزایش استحکام و انعطاف‌پذیری آن‌ها کمک می‌کند. با نفوذ عمیق کراتین و کلاژن، وز شدن و خشکی مو را کاهش داده و مو را نرم، صاف و براق می‌کند.",
+      "digikala": {
+        "id": 11379571,
+        "url": "https://www.digikala.com/product/dkp-11379571/",
+        "title_fa": "شامپو تقویت کننده و ترمیم کننده مو اس تی.ایوز سری KERATIN COLLAGEN حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 28,
@@ -742,7 +876,7 @@
       "desc_fa": "اسپری نرم کننده کراتین و کلاژن با فرمولی سبک، موها را تغذیه و تقویت کرده و نرمی و درخشش طبیعی را بازمی‌گرداند. این اسپری وز و گره خوردن مو را کاهش داده و حالتی ابریشمی، حفاظت در برابر آسیب‌های حرارتی و محیطی را فراهم می‌کند.",
       "digikala": {
         "id": 11381065,
-        "url": "https://www.digikala.com/product/dkp-11381065/اسپری-مو-اس-تی-ایوز-مدل-repairing-سری-keratin-collagen-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11381065/",
         "title_fa": "اسپری مو اس تی ایوز مدل REPAIRING سری KERATIN COLLAGEN حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/3cad8c9b2345bd6f0e2d2c562fa973875e1aca9d_1685295018.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -764,7 +898,14 @@
       "tag_en": "SULFATE FREE",
       "desc_en": "Leave-in Keratin & Collagen Cream penetrates the hair shaft quickly to repair and strengthen each strand while enhancing natural shine. Its specialized formula controls frizz and improves manageability, leaving the hair soft, silky, and ready for effortless styling.",
       "desc_fa": "اسپری نرم کننده کراتین و کلاژن به سرعت در عمق ساقه مو نفوذ کرده و هر تار مو را ترمیم و تقویت می‌کند. این فرمول تخصصی وز مو را کنترل کرده و مدیریت‌پذیری را بهبود می‌بخشد و مو را نرم و ابریشمی می‌کند.",
-      "_data_issue": "The Persian copy on this page is the SAME text as the English description of the product above it (the spray). The Persian paragraph for the leave-in cream appears to be missing or duplicated in the source PDF. Recorded verbatim as printed; needs a Persian translation written by a human before this product can be published."
+      "_data_issue": "The Persian copy on this page is the SAME text as the English description of the product above it (the spray). The Persian paragraph for the leave-in cream appears to be missing or duplicated in the source PDF. Recorded verbatim as printed; needs a Persian translation written by a human before this product can be published.",
+      "digikala": {
+        "id": 11380600,
+        "url": "https://www.digikala.com/product/dkp-11380600/",
+        "title_fa": "ماسک مو اس تی.ایوز مدل REPAIRING سری KERATI  COLLAGEN حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 29,
@@ -780,7 +921,7 @@
       "desc_fa": "ماسک موی آرگان و ماکادمیا با فرمولی غنی و مغذی به تقویت و استحکام تارهای مو کمک کرده و درخشش طبیعی و نرمی مو را بهبود می‌بخشد. با تقویت ساقه مو و کاهش وز و گره‌خوردگی، حالتی ابریشمی و محافظت از مو در برابر آسیب‌های محیطی و حرارتی را ارائه می‌کند.",
       "digikala": {
         "id": 11380806,
-        "url": "https://www.digikala.com/product/dkp-11380806/ماسک-مو-اس-تیایوز-مدل-booster-سری-ragan-macadamia-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11380806/",
         "title_fa": "ماسک مو اس تی.ایوز مدل BOOSTER سری RAGAN MACADAMIA حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/25d30b589a56d0da3f2aa8167cca59e5ec4a4f25_1685295935.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -801,7 +942,14 @@
       "size": "500ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Argan & Macadamia Shampoo features a rich formula that gently cleanses the hair while strengthening and reinforcing each strand. By nourishing the hair shaft and controlling dryness and frizz, it leaves the hair healthy-looking, soft and beautifully manageable.",
-      "desc_fa": "شامپو آرگان و ماکادمیا با فرمولی غنی، موها را به طور ملایم پاکسازی کرده و باعث تقویت و استحکام تارهای مو می‌شود. این محصول با تغذیه ساقه مو و کنترل خشکی و وز، موها را سالم، نرم و خوش‌حالت به موها می‌بخشد."
+      "desc_fa": "شامپو آرگان و ماکادمیا با فرمولی غنی، موها را به طور ملایم پاکسازی کرده و باعث تقویت و استحکام تارهای مو می‌شود. این محصول با تغذیه ساقه مو و کنترل خشکی و وز، موها را سالم، نرم و خوش‌حالت به موها می‌بخشد.",
+      "digikala": {
+        "id": 17573321,
+        "url": "https://www.digikala.com/product/dkp-17573321/",
+        "title_fa": "شامپو تقویت کننده مو اس تی.ایوز مدل آرگان و ماکادمیا مناسب برای انواع پوست حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 30,
@@ -817,7 +965,7 @@
       "desc_fa": "اسپری نرم‌کننده حاوی روغن آرگان و ماکادمیا، با تأمین مواد مغذی به تقویت و حفظ سلامت مو کمک می‌کند. این محصول گره‌های مو را باز کرده، وز را کاهش می‌دهد و شانه‌پذیری را بهبود می‌بخشد و در عین حال بدون افزودن وزن، محافظ مؤثری در برابر عوامل محیطی و حرارتی فراهم می‌کند.",
       "digikala": {
         "id": 11380944,
-        "url": "https://www.digikala.com/product/dkp-11380944/اسپری-مو-سنت-ایوزمدل-booster-سری-argan-macadamia-حجم-300-میلی-لیتر",
+        "url": "https://www.digikala.com/product/dkp-11380944/",
         "title_fa": "اسپری مو اس تی.ایوز مدل BOOSTER سری ARGAN MACADAMIA حجم 300 میلی لیتر",
         "gallery": [
           "https://dkstatics-public.digikala.com/digikala-products/868e518dee1d0142499e6962d1c69375152362a9_1685295756.jpg?x-oss-process=image/resize,m_lfit,h_800,w_800/quality,q_90",
@@ -838,7 +986,14 @@
       "size": "300ML",
       "tag_en": "SULFATE FREE",
       "desc_en": "Post-Shower Hair Cream with Argan & Macadamia Oils is an ideal daily care solution designed to support hair strength and overall hair health. With fast absorption, it helps lock in moisture and essential nutrients, protects against dryness and frizz, and delivers a smooth, radiant, and polished finish without weighing the hair down.",
-      "desc_fa": "کرم مو بعد از حمام حاوی روغن آرگان و ماکادمیا، یک راه‌حل ایده‌آل برای مراقبت روزانه است. این محصول با جذب سریع، رطوبت و مواد مغذی را در ساقه مو حفظ کرده و از خشکی و وز مو جلوگیری می‌کند و جلوه‌ای صاف، درخشان و مرتب به مو می‌بخشد، بدون آن‌که حس سنگینی ایجاد کند."
+      "desc_fa": "کرم مو بعد از حمام حاوی روغن آرگان و ماکادمیا، یک راه‌حل ایده‌آل برای مراقبت روزانه است. این محصول با جذب سریع، رطوبت و مواد مغذی را در ساقه مو حفظ کرده و از خشکی و وز مو جلوگیری می‌کند و جلوه‌ای صاف، درخشان و مرتب به مو می‌بخشد، بدون آن‌که حس سنگینی ایجاد کند.",
+      "digikala": {
+        "id": 11380511,
+        "url": "https://www.digikala.com/product/dkp-11380511/",
+        "title_fa": "ماسک مو اس تی.ایوز مدل BOOSTER سری ARGAN MACADAMIA حجم 500 میلی لیتر",
+        "gallery": [],
+        "description_fa": ""
+      }
     },
     {
       "page": 31,

@@ -11,6 +11,29 @@
 
 ---
 
+## 2026-10-18 — St. Ives: Digikala matching widened from 22 to 44 of 51
+
+The Browser pane refuses digikala.com and WebSearch returns nothing for it, but the
+container reaches `api.digikala.com` fine — that is the route that worked.
+`docker/digikala-find.php` searches per SKU and prints candidates;
+`docker/digikala-enrich.php` holds the curated SKU → `dkp-*` map and applies it
+(meta + append gallery + fill an empty description). Galleries are **appended**,
+never replaced: the catalogue packshot stays the primary image.
+
+- 44 of 51 SKUs now carry `_digikala_id` / `_digikala_url` / `_digikala_title`, 88 Digikala image URLs, 84 gallery images + 51 thumbnails = 135 images per host.
+- **7 still unlinked, deliberately:** `ET-AHA-5LACTIC-ROSE` and `SCRUB-BHA2-APRICOT` (Digikala has no exfoliant toner and no 2%-BHA apricot scrub), `SPF50-COLLAGENELASTIN`, the three curl-range SKUs, and `HO-ARGANOIL-100`.
+- **Matching is best-effort, on purpose** (owner chose "apply all plausible"). Read `_meta.digikala_match_note` in `new_products/stives-products.json` before trusting a 1:1: some SKUs map to a neighbouring formula or a different pack size, and the exfoliant toners map to Digikala's *scrubs*.
+- `STIVES-HM-CURLREVIVE-SOFTSHINY` had no image on either host; its packshot `new_products/photos/page-23-photo-04.jpg` is now the thumbnail. All 51 products have a featured image.
+
+Deploy went through the standard probe route twice. **The first pass set meta but
+downloaded zero images** — the probe skipped every product that already had a
+thumbnail, and after enrichment that was all of them. A probe that reports
+`img=kept` proves nothing about images; check the gallery counts before believing
+a sync. Fixed by comparing the host's gallery count against `_digikala_image_urls`
+and fetching only the delta (43 downloaded, 0 errors).
+
+---
+
 ## 2026-10-17 — St. Ives range: brand name, Digikala galleries, live sync
 
 All 51 St. Ives products (local IDs 4684–4783, live IDs 1894–1907) updated on both hosts.

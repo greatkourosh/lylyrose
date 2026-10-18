@@ -35,7 +35,6 @@ foreach ($d['products'] as $r) {
 
     wp_set_object_terms($id, $brand_id, 'product_brand', false);
 
-    // digikala meta + gallery (skip downloads when featured image already set)
     $dg = $r['digikala'];
     if ($dg && !empty($dg['id'])) {
         update_post_meta($id, '_digikala_id', $dg['id']);
@@ -44,27 +43,36 @@ foreach ($d['products'] as $r) {
     }
 
     $gallery = ($dg && !empty($dg['gallery'])) ? $dg['gallery'] : [];
-    $have_img = (bool)get_post_thumbnail_id($id);
+    $seen = (array) get_post_meta($id, '_digikala_image_urls', true);
+    $have = wc_get_product($id)->get_gallery_image_ids();
 
-    if (!$have_img && $gallery) {
-        $ids = [];
-        foreach ($gallery as $i => $u) {
-            $tmp = download_url($u, 60);
-            if (is_wp_error($tmp)) { $n_err++; continue; }
-            $file = ['name' => basename(parse_url($u, PHP_URL_PATH)), 'tmp_name' => $tmp];
-            $att = media_handle_sideload($file, $id, $title . ' - ' . ($i + 1));
-            if (!is_wp_error($att)) { $ids[] = $att; $n_img++; }
-            else { @unlink($tmp); $n_err++; }
-        }
-        if ($ids) {
-            set_post_thumbnail($id, $ids[0]);
-            if (count($ids) > 1) {
-                update_post_meta($id, '_product_image_gallery', implode(',', array_slice($ids, 1)));
-            }
-        }
+    // Only fetch what is still missing: skip URLs already imported, and skip
+    // entirely once this host holds the same number of Digikala images.
+    if ($seen && count($have) >= count($seen)) {
+        $report[] = $r['sku'] . ':img-complete';
+        continue;
     }
 
-    $report[] = $r['sku'] . ':ok img=' . ($have_img ? 'kept' : count($ids ?? []));
+    if ($gallery) {
+        $new = [];
+        foreach ($gallery as $i => $u) {
+            if (in_array($u, $seen, true)) continue;
+            $tmp = download_url($u, 90);
+            if (is_wp_error($tmp)) { $n_err++; continue; }
+            $file = ['name' => basename(parse_url($u, PHP_URL_PATH)) ?: "dk.jpg", 'tmp_name' => $tmp];
+            $att = media_handle_sideload($file, $id, $title . ' - ' . ($i + 1));
+            if (!is_wp_error($att)) { $new[] = $att; $n_img++; $seen[] = $u; }
+            else { @unlink($tmp); $n_err++; }
+        }
+        $have = array_values(array_unique(array_merge($have, $new)));
+        if (!$have) { $report[] = $r['sku'] . ':no-images'; continue; }
+        if (!get_post_thumbnail_id($id)) set_post_thumbnail($id, $have[0]);
+        $rest = array_values(array_diff($have, [(int) get_post_thumbnail_id($id)]));
+        update_post_meta($id, '_product_image_gallery', implode(',', $rest));
+        update_post_meta($id, '_digikala_image_urls', $seen);
+    }
+
+    $report[] = $r['sku'] . ':ok img=' . count($have);
 }
 
 echo implode("\n", $report) . "\nimg_downloaded=$n_img err=$n_err";

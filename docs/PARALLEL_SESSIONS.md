@@ -1,7 +1,7 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-17 against git and the live host (St. Ives title/digikala sync added in §0i). Several Claude
+name. Last reconciled 2026-10-18 against git and the live host (St. Ives Digikala matching widened to 44/51 in §0j). Several Claude
 sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
@@ -9,6 +9,15 @@ owns what, what is blocked, and what must not be committed until a decision land
 human-blocked per-host credentials and content decisions. The live list is §6.
 Sections 0–5 are the record of how the work got here; where they disagree with §6,
 §6 wins.
+
+---
+
+## 0j. Digikala matching widened to 44 of 51 St. Ives SKUs — deployed (2026-10-18)
+
+- **The route that works for Digikala is `api.digikala.com` from inside the container**, not the website: `/v1/search/?q=` for candidates, `/v2/product/{id}/` for images + description. The Browser pane refuses digikala.com and WebSearch returns nothing for it. `docker/digikala-find.php` (search only, writes nothing) and `docker/digikala-enrich.php` (curated map, applies it) are the two halves.
+- Galleries are **appended** to the existing packshot, never replacing it, and the enrichment is idempotent via `_digikala_image_urls` so a re-run downloads nothing.
+- **The 7 left unlinked are unlinked on purpose** — no counterpart exists there: two exfoliant toners, the SPF50, the three curl products, the argan oil. `_meta.digikala_match_note` in `new_products/stives-products.json` records this and the fact that the remaining matches are best-effort, not 1:1.
+- **Do not trust a probe that prints `img=kept`.** The 2026-10-18 sync wrote all the meta and downloaded zero images, because the guard skipped every product that already had a thumbnail. Verify image work by comparing the host's gallery count with `_digikala_image_urls`, not by the probe's own log line.
 
 ---
 
