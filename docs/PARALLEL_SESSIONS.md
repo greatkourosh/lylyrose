@@ -18,6 +18,8 @@ Sections 0–5 are the record of how the work got here; where they disagree with
 - Galleries are **appended** to the existing packshot, never replacing it, and the enrichment is idempotent via `_digikala_image_urls` so a re-run downloads nothing.
 - **The 7 left unlinked are unlinked on purpose** — no counterpart exists there: two exfoliant toners, the SPF50, the three curl products, the argan oil. `_meta.digikala_match_note` in `new_products/stives-products.json` records this and the fact that the remaining matches are best-effort, not 1:1.
 - **Do not trust a probe that prints `img=kept`.** The 2026-10-18 sync wrote all the meta and downloaded zero images, because the guard skipped every product that already had a thumbnail. Verify image work by comparing the host's gallery count with `_digikala_image_urls`, not by the probe's own log line.
+- **The probe must not run `sanitize_title()` on an incoming slug.** On the live host it transliterates Persian to ASCII (`ژل` → `uou`); it left 12 of 51 products with slugs like `uou-uu-ooo-oo-ouou` before this was caught. Write the payload's slug through verbatim. Audit with "slugs containing no `%`" — 0 is the target on both hosts.
+- **Read the served page, not just the probe's echo.** After a sync, fetch a product permalink and count `wp-content/uploads/` hits. A probe can report success for data that renders as a 404 or a placeholder.
 
 ---
 

@@ -30,7 +30,11 @@ foreach ($d['products'] as $r) {
     if (!$id) { $report[] = $r['sku'] . ':MISSING'; continue; }
 
     $title = sanitize_text_field($r['title']);
-    $slug  = sanitize_title(rawurldecode($r['slug']));
+    // post_name is already the canonical percent-encoded slug from the source host.
+    // Do NOT run sanitize_title() here: on this host it transliterates Persian to
+    // ASCII ("ژل" -> "uou"), which is how 12 products ended up with slugs like
+    // "uou-uu-ooo-oo-ouou" while the source host keeps %d8%a7-style slugs.
+    $slug = $r['slug'];
     wp_update_post(['ID' => $id, 'post_title' => $title, 'post_name' => $slug]);
 
     wp_set_object_terms($id, $brand_id, 'product_brand', false);
