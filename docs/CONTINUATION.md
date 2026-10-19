@@ -36,12 +36,17 @@
 > Left for a later pass. See `docs/PLUGIN_SPLIT_PLAN.md`.
 
 > **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
-> - Live: WP Super Cache **deactivated** 2026-10-11 (LiteSpeed is the only page cache; old files
->   moved to `wp-content/cache/supercache-old-20261011/`). **Clean-check ran 2026-10-19** (the
->   2026-10-18 11:17 reminder, ~8 days on): `/`, `/shop/`, `/perfume-finder/`, `/cart/`,
->   `/checkout/` all 200, and `/` + `/shop/` return `x-litespeed-cache: hit`. No regression from
->   the plugin swap. **The folder is NOT deleted** — deletion is still owner-gated and needs an
->   explicit yes. Expert blocked by the plugin's page check;
+> - Live: **the "WP Super Cache deactivated 2026-10-11, LiteSpeed now the only page cache" claim
+>   is wrong — correct as of 2026-10-19.** WP Super Cache is still wired up (`WP_CACHE` true,
+>   `advanced-cache.php` present, `$cache_enabled`/`$super_cache_enabled` true) and its footer is
+>   in the served HTML; LiteSpeed is active too, so **two page caches run at once**.
+>   `wp-content/cache/supercache-old-20261011/` **does not exist** — a 2026-10-19 read-only FTP
+>   sweep of 504 docroot dirs found no `supercache-old*` at all, so **there is nothing to delete**
+>   and the reminder is moot. No WP Super Cache writes since 2026-10-11 (whole tree is one 0-byte
+>   `index.html`), though `$cache_max_time = 1800` means a served footer can be a stale file.
+>   Details and the open question in PRODUCTION_UPDATE_RUNBOOK.md. Clean-check: `/`, `/shop/`,
+>   `/perfume-finder/`, `/cart/`, `/checkout/` all 200; `/` + `/shop/` `x-litespeed-cache: hit`.
+>   Expert blocked by the plugin's page check;
 >   **LiteSpeed Cache installed and active 2026-10-11** (`/shop/` hits ~0.09 s; cart/checkout/search
 >   never cached; logged-in vs logged-out checked in a browser, no cross-user leak).
 > - Local: WP Super Cache in Simple mode; LiteSpeed Cache installed then deactivated, since the
