@@ -11,6 +11,29 @@
 
 ---
 
+## 2026-10-19 — Digikala link mu-plugin: direct-access and front-end guards
+
+`wp-content/mu-plugins/digikala-product-link.php` shipped in `9b1f8bbb` (2026-10-17) and was
+already in git — an earlier note calling it uncommitted was wrong. Two real defects, both fixed
+in `fe5e32b2`:
+
+- **Direct file access could execute it** — no `ABSPATH` guard. Added.
+- **`$post->ID` read off a `global $post` that can be null** is a fatal on any screen where the
+  global is unset. Replaced with `get_the_ID()`, which returns `false` and makes `get_post_meta()`
+  empty, so the existing `empty($digikala_url)` bail covers it. Added an explicit `is_admin()` guard.
+- **Escaping was already correct** on every dynamic value (`esc_url` on both links, `esc_html` on
+  id and title). Nothing to change there — check before "fixing" what is not broken.
+
+Verified in-container against a renamed temp copy (the `wp-content` bind mount comes from the main
+repo, not this worktree): function loads on both hosts' copies, hooks register, a front-end call
+returns 0 bytes, and a null-post admin call is silent instead of fatal. Suite 412/0 before and
+after the upstream merge.
+
+**Committed here, not deployed.** Both the local container and lylyrose.ir still run the pre-fix
+copy, which is functionally equivalent unless the file is hit directly or `$post` is unset.
+
+---
+
 ## 2026-10-18 — St. Ives: Digikala matching widened from 22 to 44 of 51
 
 The Browser pane refuses digikala.com and WebSearch returns nothing for it, but the
@@ -43,7 +66,7 @@ All 51 St. Ives products (local IDs 4684–4783, live IDs 1894–1907) updated o
 - **Size suffixes restored** on the 6 moisturizing-cream SKUs (`۹۰ میل`, `۶۲۱ گرم`, `۱۷۰ میل/گرم`) — the first revisit dropped them.
 - **Slugs rebuilt** canonically: `post_name = strtolower(rawurlencode(title, spaces→hyphens, parens stripped))`; the `sku-{ID}` path segment comes from the permalink structure, NOT `post_name` — putting it in the slug double-prefixed every URL.
 - **Digikala enrichment (22 of 51):** gallery images re-imported fresh into the media library from Digikala CDN (old attachments deleted locally), plus `_digikala_id` / `_digikala_url` / `_digikala_title` meta.
-- **New mu-plugin** `wp-content/mu-plugins/digikala-product-link.php`: blue "محصول در دیجی‌کالا" box on every linked product edit page (title + کد + view button) and an icon column in the product list. §7 of PARALLEL_SESSIONS.md said mu-plugins aren't loaded — that is **outdated**, it loads now.
+- **New mu-plugin** `wp-content/mu-plugins/digikala-product-link.php`: blue "محصول در دیجی‌کالا" box on every linked product edit page (title + کد + view button) and an icon column in the product list. §7 of PARALLEL_SESSIONS.md said mu-plugins aren't loaded — that is **outdated**, it loads now. Hardened 2026-10-19 (`fe5e32b2`): `ABSPATH` + `is_admin()` guards, id via `get_the_ID()`.
 - **Live deploy** via one-shot FTP probe (`docker/stives-sync-probe.php` + JSON payload, random-named, php -l'd locally, deleted after, 404-confirmed). Titles, slugs, brand and metas sync; no image downloads needed — live already had its galleries. Probe deleted, payload deleted.
 
 Open: 29 of 51 have no Digikala counterpart (no gallery fetched); prices still unset per owner decision; English descriptions missing on several SKUs (see `new_products/stives-products.json` `_data_issue` notes).
