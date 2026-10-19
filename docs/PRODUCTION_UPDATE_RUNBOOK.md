@@ -1,15 +1,20 @@
 # Production update runbook — `lylyrose.ir`
 
-> **Caching status, 2026-10-11 — local and live differ on purpose.**
-> - **Live (`lylyrose.ir`):** WP Super Cache active in Simple mode (`WP_CACHE`, `WPCACHEHOME`,
->   `$wp_cache_no_cache_for_get = 1`). Expert (mod_rewrite) not enabled: the plugin's
->   byte-for-byte page check fails on per-request nonces, so it always refuses to write rules.
->   **LiteSpeed Cache is installed and active on live (2026-10-11).** Anonymous `/shop/` and
->   `/perfume-finder/` are cache hits (~0.09 s TTFB); cart, checkout and search are never cached.
->   Logged-in vs logged-out was checked in a real browser: logged-out shows "ورود | ثبت نام",
->   logged-in shows "حساب کاربری", so no cross-user leak. **WP Super Cache is deactivated on
->   live** (plugin files kept). LiteSpeed is the only page cache. Its old cache files were moved
->   to `wp-content/cache/supercache-old-20261011/`, not deleted. The homepage is a LiteSpeed hit.
+> **Caching status, 2026-10-11 / clean-checked 2026-10-19 — local and live differ on purpose.**
+> - **Live (`lylyrose.ir`):** WP Super Cache **deactivated** 2026-10-11 (plugin files kept); it was
+>   active in Simple mode until then (`WP_CACHE`, `WPCACHEHOME`, `$wp_cache_no_cache_for_get = 1`,
+>   now vestigial). Expert (mod_rewrite) was never enabled — the plugin's byte-for-byte page check
+>   fails on per-request nonces, so it always refused to write rules; the whole plugin is moot now,
+>   not just Expert. Its old cache files were moved (not deleted) to
+>   `wp-content/cache/supercache-old-20261011/` and **not deleted as of 2026-10-19** (host
+>   presence not re-read — that needs a probe write). The ~7-day clean-check passed (`/`,
+>   `/shop/`, `/perfume-finder/`, `/cart/`, `/checkout/` all 200) but deletion is owner-gated
+>   and has not been approved.
+>   **LiteSpeed Cache is installed and active on live (2026-10-11) and is the only page cache.**
+>   Anonymous `/shop/` and `/perfume-finder/` are cache hits (~0.09 s TTFB); cart, checkout and
+>   search are never cached. Logged-in vs logged-out was checked in a real browser: logged-out
+>   shows "ورود | ثبت نام", logged-in shows "حساب کاربری", so no cross-user leak. Re-confirmed
+>   2026-10-19: `/` and `/shop/` both return `x-litespeed-cache: hit`.
 > - **Local (`lylyrose.local`):** WP Super Cache active in Simple mode. LiteSpeed Cache was
 >   installed and tested, then **deactivated** locally because the local stack is Apache-style
 >   with no LiteSpeed web server, so the plugin shows no cache hits and cannot be measured here.

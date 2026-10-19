@@ -11,6 +11,24 @@
 
 ---
 
+## 2026-10-19 — supercache-old-20261011 clean-check: passed, folder NOT deleted
+
+The 2026-10-18 11:17 reminder (moved the WP Super Cache files aside 2026-10-11, wait ~7 days,
+then remove). Ran the check, did not delete.
+
+- **5 routes 200:** `/` (0.28 s), `/shop/` (4.71 s), `/perfume-finder/` (0.95 s), `/cart/`
+  (0.71 s), `/checkout/` (0.63 s).
+- **`x-litespeed-cache: hit` on both `/` and `/shop/`** — LiteSpeed is serving, which is what
+  the folder's removal depends on. The 4.71 s on `/shop/` is a cold render, not an error.
+- **Removal is still owner-gated.** The task file says do not delete automatically; nothing was
+  deleted and the folder stands on live.
+- **Not verified:** that the folder is still present on the host, or that it holds only the 8
+  regenerable cache files. Reading the host needs a probe file (a write), so that check belongs
+  with the deletion decision, not before it.
+- Suite **412 passed, 0 failed** (whole docker stack was down 11 h; brought up unchanged).
+
+---
+
 ## 2026-10-19 — Digikala link mu-plugin: direct-access and front-end guards
 
 `wp-content/mu-plugins/digikala-product-link.php` shipped in `9b1f8bbb` (2026-10-17) and was

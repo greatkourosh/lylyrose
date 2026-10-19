@@ -37,8 +37,11 @@
 
 > **Caching, 2026-10-11 — local and live differ on purpose (read this first).**
 > - Live: WP Super Cache **deactivated** 2026-10-11 (LiteSpeed is the only page cache; old files
->   moved to `wp-content/cache/supercache-old-20261011/`). **Reminder set for 2026-10-18 11:17
->   (+03:30):** confirm the site is clean, then delete that folder on live. Not automatic. Expert blocked by the plugin's page check;
+>   moved to `wp-content/cache/supercache-old-20261011/`). **Clean-check ran 2026-10-19** (the
+>   2026-10-18 11:17 reminder, ~8 days on): `/`, `/shop/`, `/perfume-finder/`, `/cart/`,
+>   `/checkout/` all 200, and `/` + `/shop/` return `x-litespeed-cache: hit`. No regression from
+>   the plugin swap. **The folder is NOT deleted** — deletion is still owner-gated and needs an
+>   explicit yes. Expert blocked by the plugin's page check;
 >   **LiteSpeed Cache installed and active 2026-10-11** (`/shop/` hits ~0.09 s; cart/checkout/search
 >   never cached; logged-in vs logged-out checked in a browser, no cross-user leak).
 > - Local: WP Super Cache in Simple mode; LiteSpeed Cache installed then deactivated, since the
