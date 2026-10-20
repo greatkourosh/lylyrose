@@ -19,6 +19,7 @@ TREES = [
     "wp-content/plugins/lylyrose-core",
     "wp-content/plugins/kstore",
     "wp-content/themes/lylyrose",
+    "wp-content/mu-plugins",
 ]
 SKIP_DIRS = {"__pycache__", ".git", "node_modules"}
 SKIP_EXT = {".pyc", ".log", ".sql", ".gz", ".bak", ".orig", ".rej"}

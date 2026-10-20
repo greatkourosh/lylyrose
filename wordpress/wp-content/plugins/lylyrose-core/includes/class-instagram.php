@@ -126,7 +126,7 @@ class ASC_Instagram {
 		$feed = self::get_feed();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'اینستاگرام لیلی رز', 'lylyrose-core' ); ?></h1>
+			<h1><?php echo esc_html( apply_filters( 'asc_instagram_menu_title', __( 'اینستاگرام لیلی رز', 'lylyrose-core' ) ) ); ?></h1>
 			<p><?php esc_html_e( 'تصاویر پست‌های اینستاگرام را (مثلاً از یک CDN یا ذخیره‌ساز تصویر) اینجا وارد کنید تا نوار «اینستاگرام ما» در صفحه اصلی نمایش داده شود. خالی بودن = مخفی.', 'lylyrose-core' ); ?></p>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'asc_instagram' ); ?>

@@ -71,7 +71,7 @@ services:
         condition: service_healthy
 
   cron:
-    image: 192.168.1.40:5001/curlimages/curl:8.22.0
+    image: 192.168.1.40:5001/curlimages/curl:8.23.0
     container_name: lylyrose-cron
     restart: unless-stopped
     entrypoint: ["/bin/sh", "-c"]
@@ -92,7 +92,7 @@ services:
 
   redis:
     # image: 192.168.1.40:5001/library/redis:7-alpine
-    image: 192.168.1.40:5001/library/redis:8.10.1-alpine
+    image: 192.168.1.40:5001/library/redis:8.10.2-alpine
     container_name: lylyrose-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
