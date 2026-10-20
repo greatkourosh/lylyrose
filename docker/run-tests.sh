@@ -1806,11 +1806,16 @@ section "32. Upstream/downstream class parity"
 # (its budget-tier editor) landed. Both are downstream-only: they configure the
 # finder rather than mirror an upstream feature. 22 with ASC_Needs_Finder (the
 # skin and hair needs quizzes), also downstream-only.
+#
+# 2026-10-20: the count now spans BOTH plugins. It used to list only
+# lylyrose-core/includes/, so the 12 classes that moved to kstore were invisible
+# to it -- a class added to kstore could not fail this assertion, which is the
+# whole point of pinning it. 17 in lylyrose-core + 12 in kstore = 29.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
-  "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "17" ] \
-  && pass "core plugin exposes 17 ASC_ classes ($CLASS_COUNT)" \
-  || fail "core plugin exposes ${CLASS_COUNT:-0} classes, expected 17 — a new class needs mirroring and a doc count update"
+  "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ /var/www/html/wp-content/plugins/kstore/includes/ 2>/dev/null | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
+[ "${CLASS_COUNT:-0}" = "29" ] \
+  && pass "the two plugins expose 29 ASC_ classes ($CLASS_COUNT)" \
+  || fail "the two plugins expose ${CLASS_COUNT:-0} classes, expected 29 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 

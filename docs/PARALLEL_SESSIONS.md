@@ -12,6 +12,57 @@ Sections 0–5 are the record of how the work got here; where they disagree with
 
 ---
 
+## 0k. Verification pass — the four "never checked on live" features all work (2026-10-20)
+
+Session goal: check the live features the docs recorded as unverified, settle the
+uncommitted files, and correct the docs. Commit `7c2beda5`.
+
+**All four unverified features are confirmed working on `lylyrose.ir`:**
+
+| Feature | How it was checked | Result |
+|---|---|---|
+| Typo-tolerant search | `/?s=ژاوورو&post_type=product` | 3 product cards; a nonsense query returns 0. **Works.** |
+| National-ID checkout field | added product 1299 to a live cart, read the checkout HTML | `billing_national_id` renders, `maxlength=10`, `pattern="[0-9]{10}"`, required. **Works.** The cart was emptied afterwards and no order was created. |
+| AVIF upload path | side-loaded a generated WebP through `media_handle_sideload` on live | both the original and the `-100x100` size got an `.avif` sibling. **Works.** The probe attachments (2026, 2027) and their files were deleted, and the upload dir was confirmed clean. |
+| Palette switcher | read the served HTML and the Autoptimize bundle | 4 swatch buttons render, `lylyrosePalette` ships as a base64 data URI with 4 choices, and the bundle `986f2682` is the minified local `palette.js`. **Works.** |
+
+**Two traps that cost time, both worth keeping:**
+
+- **A search URL without `post_type=product` returns 0 cards even on a site that
+  works.** The first probe looked like a dead feature. The suite's own section 38
+  uses the parameter, and the count must be `grep -o` — the HTML is one line, so
+  `grep -c` reports 1 whether there are 3 cards or 12.
+- **`grep -c 'palette.js'` is a false positive.** The `.` matched inside a base64
+  blob. Count the exact string in Python, or the count means nothing.
+
+**Live and local serve different palettes — and that is not a bug.**
+
+`lylyrose.ir` serves `ivory`; `lylyrose.local` serves the teal `lylyrose` preset.
+Same code, different data: the `asc_palette` option is **unset on live**, so it
+falls through to the hardcoded `'ivory'` fallback in `class-palette.php`. Local has
+the option explicitly set to `lylyrose`.
+
+Live's `ivory` tokens are `--dk-bg:#f8f3ee`, `--dk-ink:#302522`, `--dk-red:#9c5c5f`
+— exactly the recorded brand decision (Ivory `#F8F3EE` 60%, Espresso `#302522` 15%,
+Dusty Rose `#C98F91` 20%). The teal preset was made the *theme* default by
+`2827066c` on 2026-10-10, but the **live site was never switched to it**, because
+that commit only touched `style.css` and the plugin's preset list, never the DB
+option. **Decide which palette the owner actually wants** — this is a content
+decision, not a bug to fix.
+
+**`diff-host.py` did not walk `wp-content/mu-plugins`.** That is why §0i's claim that
+the Digikala mu-plugin guard was "in git only" survived so long: the one
+first-party tree the drift check could not see. It walks mu-plugins now. The
+baseline went from 67 to 68 files and the guard turned out to be live all along.
+
+**Settled:** `docker-compose.yml` (curl `8.22.0`→`8.23.0`, redis
+`8.10.1-alpine`→`8.10.2-alpine`) is committed — the registry no longer carries the
+old tags, so the old pins cannot be pulled again. `docker/run-tier-tests.sh` stays
+**untracked**; it is a peer's file. Its header says "ONLY section 35" but it now
+runs sections 35–47 (83 assertions) — stale, but not ours to rewrite.
+
+---
+
 ## 0j. Digikala matching widened to 44 of 51 St. Ives SKUs — deployed (2026-10-18)
 
 - **The route that works for Digikala is `api.digikala.com` from inside the container**, not the website: `/v1/search/?q=` for candidates, `/v2/product/{id}/` for images + description. The Browser pane refuses digikala.com and WebSearch returns nothing for it. `docker/digikala-find.php` (search only, writes nothing) and `docker/digikala-enrich.php` (curated map, applies it) are the two halves.
@@ -31,7 +82,7 @@ Owner decisions embedded here so the next session does not re-do them:
 - **Title order:** brand comes AFTER the product type, not first. `فوم شستشو صورت سنت ایوز حاوی بابونه` — not `سنت ایوز فوم شستشو صورت ...`. A previous pass that prefixed the brand was wrong.
 - **Size suffixes are part of the title** on the moisturizing-cream SKUs (`... ۹۰ میل`, `... ۶۲۱ گرم`, `... ۱۷۰ گرم`). Do not strip them.
 - **Slug convention:** `post_name = strtolower(rawurlencode(title with spaces→hyphens and parens removed))`. The `sku-{ID}` segment comes from the permalink structure — never put it into `post_name` (double-prefixes every URL).
-- **Digikala link field** lives in `wp-content/mu-plugins/digikala-product-link.php` (blue box on product edit page + icon column in product list), fed by `_digikala_id` / `_digikala_url` / `_digikala_title` meta. Tracked in git since `9b1f8bbb`; guarded with `ABSPATH` + `is_admin()` and reading the id via `get_the_ID()` since `fe5e32b2` (2026-10-19). 44 of 51 products have Digikala data (2026-10-18); the other 7 have no counterpart there. **The guard commit is in git only — the container and lylyrose.ir both still run the pre-guard copy.**
+- **Digikala link field** lives in `wp-content/mu-plugins/digikala-product-link.php` (blue box on product edit page + icon column in product list), fed by `_digikala_id` / `_digikala_url` / `_digikala_title` meta. Tracked in git since `9b1f8bbb`; guarded with `ABSPATH` + `is_admin()` and reading the id via `get_the_ID()` since `fe5e32b2` (2026-10-19). 44 of 51 products have Digikala data (2026-10-18); the other 7 have no counterpart there. **Corrected 2026-10-20: the guard IS live.** The live file is 3,041 B, which is the guarded size (the pre-guard file was 2,939 B) — so the earlier "in git only" line was wrong. `docker/diff-host.py` could not see this because it did not walk `wp-content/mu-plugins`; it does now (`7c2beda5`).
 - **Live deploy used the standard probe route** (§7 below): FTTP probe + JSON payload, php -l local first, random name, deleted after, 404-confirmed. Live already had its galleries, so zero images were downloaded.
 - §7's "mu-plugins not loaded" trap is **outdated** — mu-plugins load fine in the container now. The §7 text stays as history; this note supersedes it.
 - Brand archive URL is `/{برند}/st-ives/` (taxonomy slug is `برند`, not `product-brand`). Verified: local 200, live 200 (2026-10-17).
@@ -641,6 +692,7 @@ wanted, that is a build, not a missing label.
 | ~~`lylyrose/functions.php`~~ | **RESOLVED — no longer applies.** The `LRPROBE` shutdown block was removed in `8932318b`. Verified 2026-10-06: `grep -rn LRPROBE --include=*.php` matches nothing outside `docker/reveal-fatal.php`'s comment, and `git log -S LRPROBE` names that commit as the only one. It is gone from HEAD *and* from the working tree, so it was never lost by a later patch. |
 | ~~`lylyrose-core/includes/class-finder-tiers.php`~~, ~~`class-finder-weights.php`~~ | **RESOLVED** — tracked in `8f175393`; `git status` is clean for `lylyrose-core/`. |
 | ~~`lylyrose-navy/` (31 files)~~ | **RESOLVED** — deleted in `50a8c651`. |
+| `docker/run-tier-tests.sh` | **Not ours.** Owned by a peer session; still untracked. Its header says "ONLY section 35" but it now runs 35–47 (83 assertions) — stale, but leave it to its owner. |
 
 Stray scratch `header.php.fixed` removed 2026-10-10 (root-owned; deleted via
 `docker exec -u root lylyrose-wp`).
