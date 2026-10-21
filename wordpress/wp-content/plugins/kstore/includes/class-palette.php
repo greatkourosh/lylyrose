@@ -19,7 +19,7 @@
  * Storage is one associative array, matching every other setting here
  * (asc_finder_weights, asc_instagram). Shape:
  *
- *   { enabled: bool, active: 'ivory', presets: { slug => { token => hex } } }
+ *   { enabled: bool, active: 'lylyrose', presets: { slug => { token => hex } } }
  *
  * Only the 8 brand colours are editable. The remaining tokens --dk-red-dark,
  * --dk-red-light, --dk-green, --dk-orange, --dk-white, --dk-star, the radii and
@@ -121,7 +121,7 @@ class ASC_Palette {
 		}
 		$active = isset( $saved['active'] ) && isset( $presets[ $saved['active'] ] )
 			? $saved['active']
-			: 'ivory';
+			: 'lylyrose';
 
 		return array(
 			'enabled' => isset( $saved['enabled'] ) ? (bool) $saved['enabled'] : true,

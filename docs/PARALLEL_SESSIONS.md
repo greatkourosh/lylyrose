@@ -1,7 +1,8 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-18 against git and the live host (St. Ives Digikala matching widened to 44/51 in §0j). Several Claude
+name. Last reconciled 2026-10-21 against git and the live host (the site palette is
+now the teal `lylyrose` preset on both hosts, §0l). Several Claude
 sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
@@ -35,20 +36,20 @@ uncommitted files, and correct the docs. Commit `7c2beda5`.
 - **`grep -c 'palette.js'` is a false positive.** The `.` matched inside a base64
   blob. Count the exact string in Python, or the count means nothing.
 
-**Live and local serve different palettes — and that is not a bug.**
+**Live and local served different palettes — and that was not a bug.**
 
-`lylyrose.ir` serves `ivory`; `lylyrose.local` serves the teal `lylyrose` preset.
-Same code, different data: the `asc_palette` option is **unset on live**, so it
-falls through to the hardcoded `'ivory'` fallback in `class-palette.php`. Local has
+`lylyrose.ir` served `ivory`; `lylyrose.local` served the teal `lylyrose` preset.
+Same code, different data: the `asc_palette` option was **unset on live**, so it
+fell through to the hardcoded `'ivory'` fallback in `class-palette.php`. Local had
 the option explicitly set to `lylyrose`.
 
-Live's `ivory` tokens are `--dk-bg:#f8f3ee`, `--dk-ink:#302522`, `--dk-red:#9c5c5f`
+Live's `ivory` tokens were `--dk-bg:#f8f3ee`, `--dk-ink:#302522`, `--dk-red:#9c5c5f`
 — exactly the recorded brand decision (Ivory `#F8F3EE` 60%, Espresso `#302522` 15%,
 Dusty Rose `#C98F91` 20%). The teal preset was made the *theme* default by
 `2827066c` on 2026-10-10, but the **live site was never switched to it**, because
 that commit only touched `style.css` and the plugin's preset list, never the DB
-option. **Decide which palette the owner actually wants** — this is a content
-decision, not a bug to fix.
+option. **The owner has since chosen the teal preset for both hosts — see §0l.**
+
 
 **`diff-host.py` did not walk `wp-content/mu-plugins`.** That is why §0i's claim that
 the Digikala mu-plugin guard was "in git only" survived so long: the one
@@ -62,6 +63,67 @@ old tags, so the old pins cannot be pulled again. `docker/run-tier-tests.sh` sta
 runs sections 35–47 (83 assertions) — stale, but not ours to rewrite.
 
 ---
+
+## 0l. The site palette is now the teal `lylyrose` preset on both hosts (2026-10-21)
+
+The owner decided the site should show the **teal `lylyrose`** palette, not ivory. That
+closes the open question in §0k, where live and local served different palettes.
+
+**The cause was never the code.** The `asc_palette` option was **unset on live**, so
+`class-palette.php` fell through to its hardcoded `'ivory'` fallback; local had the
+option explicitly set to `lylyrose`. The teal-default commit `2827066c` only touched
+`style.css` and the preset list, never the DB option, so the live site was never
+switched.
+
+- **Live:** the option is now `{enabled: true, active: 'lylyrose'}` (written through a
+  docroot probe). The served homepage carries `--dk-red:#064048`, `--dk-bg:#ffffff`.
+- **Code:** the fallback in `class-palette.php` is now `'lylyrose'`, so a fresh install
+  with no option gets the brand default rather than ivory. Deployed; `diff-host.py`
+  68 identical / 0 differing.
+- **Local:** the option was already `lylyrose`. The fallback change was **proved** by
+  deleting the option and confirming the site still served teal, then restoring it.
+
+**A palette change does not purge the page cache.** The first live check after writing
+the option still showed ivory: the homepage was a `x-litespeed-cache: hit` serving the
+pre-change page. Purging via the `litespeed_purge_all` action (probe, then delete) fixed
+it. After any palette or option change on live, check the **plain** URL, not
+`?nocache=`, and purge if it still shows the old colours.
+
+## 0m. The 8 uploads with no AVIF sibling are fixed, and the tool is repeatable (2026-10-21)
+
+`ASC_Avif::generate()` fires on `wp_generate_attachment_metadata`, so it only covers
+uploads that went through the media library. Files that land in `wp-content/uploads`
+another way — a Digikala sync writing straight to the folder, an image pushed over FTP —
+never get an AVIF sibling.
+
+**8 of 2,593 uploads on `lylyrose.ir` were in that state**: two `dk-stives-*` products
+(5 and 2 size variants) and `hero-banner.webp`. They were uploaded on 2026-10-11/14,
+before or outside the media library. Every upload that went through the library had its
+sibling. **All 8 are now encoded** with the same `ASC_Avif::encode()` the plugin uses,
+so the output matches the existing 2,585 files (~68% smaller). Live is now
+**2,593 avif / 2,593 webp, 0 orphans**, and the hero slide serves `.avif` to AVIF
+browsers and `.webp` to everyone else, with `Vary: Accept` intact.
+
+**`docker/avif-backfill.php` is the repeatable version** — it walks the uploads folder
+and encodes any `.webp` that has no `.avif`, then reports what it made. Locally it found
+**7 more orphans** (the WooCommerce placeholder sizes), which are now encoded too;
+2,804/2,804 locally, 0 failures. It is idempotent — a second run creates nothing — and
+it was mutation-tested: deleting one `.avif` and re-running brings it back.
+
+**Two traps in that script, both worth keeping:**
+
+- **A local variable named `$wp` fatals the whole WordPress bootstrap.** WordPress keeps
+  the `WP` object in a global named `$wp`; a file-scope `$wp` in the including script
+  leaks into `$GLOBALS` and `register_taxonomy()` then calls `add_query_var()` on a
+  string. The symptom is `Call to a member function add_query_var() on string`.
+- **In CLI, set `$_SERVER['HTTP_HOST']` before `wp-load.php`** or WordPress builds its
+  rewrite rules from an empty site URL and dies with the same message. Do **not** also
+  `define('WP_HOME')` — the container's config defines those itself, and a duplicate
+  `define()` collides with it.
+
+**Do not leave the tool in the docroot.** An unauthenticated URL that burns CPU is a
+denial-of-service lever. On live, copy it in under a random name, request it once,
+delete it immediately, and confirm the 404.
 
 ## 0j. Digikala matching widened to 44 of 51 St. Ives SKUs — deployed (2026-10-18)
 
