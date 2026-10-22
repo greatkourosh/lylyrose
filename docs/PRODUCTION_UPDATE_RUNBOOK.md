@@ -715,6 +715,21 @@ Two consequences:
   one by hand: `rm -rf wp-content/cache` recreates the directory root-owned and
   `www-data` can no longer write, which breaks the homepage and the suite for a
   reason unrelated to your change.
+- **But the LiteSpeed *page* cache is a separate layer and it does not rebuild.**
+  After a `style.css` upload, Autoptimize may already be serving a new bundle
+  (`ver=1.27.10`) while the plain homepage is still a `x-litespeed-cache: hit`
+  linking the **old** bundle. That is a stale cache hit, not a failed deploy, and
+  `?nocache=` URLs will show the fix while the plain URL does not. **Check the plain
+  URL.** If it still links the old `ver`, fire `litespeed_purge_all` through a
+  temporary docroot PHP probe (upload, request once, delete, confirm 404), then
+  re-check the plain URL. Hit on 2026-10-12 and again on 2026-10-22.
+- **Do not judge a text change by its computed style.** The hero's copy sits on a
+  photo, so legibility is a pixel question, not a CSS question: hide the text,
+  screenshot the photo alone, then screenshot it with the text, and compare the
+  rendered pixels. Antialiased glyph edges count as background, so define the
+  background as the pixels the shadow *darkened* — otherwise every block reads
+  1.0:1. And freeze the hero carousel first (it advances every 5 s), or the two
+  screenshots are of different slides.
 
 **Theme files are `www-data`-owned locally** and the host user is not in that group,
 so edit them through the container (`docker exec -u www-data lylyrose-wp`) or the

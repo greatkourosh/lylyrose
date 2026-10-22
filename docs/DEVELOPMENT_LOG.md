@@ -11,6 +11,58 @@
 
 ---
 
+## 2026-10-22 — the hero's gradient scrim is gone; the copy carries its own shadow
+
+The homepage hero's gradient was the `::after` scrim on `.dk-hero-slide`
+(`linear-gradient(to left, rgba(48, 37, 34, .92) …)`) — the element's own
+background was always `none`. Removed at the owner's request.
+
+**Removing it alone made the text unreadable.** The hero photo is bright on the
+left: measured from rendered pixels, 90% of the region behind the copy sat at
+L ≥ 0.68 against white text. Three fixes were tried:
+
+| Attempt | Outcome |
+|---|---|
+| Flat panel behind `.dk-hero-copy` (`rgba(48,37,34,.86)`) | Readable, **rejected on sight** — "the box looks bad" |
+| Light text shadow only | Paragraph contrast still **2.44:1** |
+| Heavy shadow + 1px outline | **Kept** — paragraph **6.11:1**, h1 **8.52:1** |
+
+Kept rule in `lylyrose/style.css`:
+
+```css
+.dk-hero-copy h1, .dk-hero-copy h2,
+.dk-hero-copy p, .dk-hero-copy .dk-kicker {
+    text-shadow: 0 2px 6px #000, 0 0 4px #000, 0 0 14px rgba(0, 0, 0, 1),
+        1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000;
+}
+```
+
+`opacity: .85` was also removed from `.dk-hero-copy p` — it was halving the
+paragraph's contrast by itself, which is the worst case rather than the average.
+
+**A separate defect surfaced while checking mobile:** in the one-column layout
+both hero arrows landed on top of the paragraph. The `max-width: 768px` block now
+moves `.dk-hero-nav` to `bottom: 14px` instead of the vertical centre.
+
+**Two measurement traps, both of which produce a confident wrong number:**
+
+- **Antialiased glyph edges count as background.** "Brightest pixel near a glyph"
+  reads 1.0:1 for every block, because the edge pixels *are* the text. The
+  background has to be defined as pixels the shadow *darkened*, with the glyph
+  mask eroded by one pixel.
+- **The hero carousel advances every 5 s** (`hero.js`, `INTERVAL = 5000`), so two
+  screenshots taken seconds apart are of different slides and are not comparable.
+  Freeze the timers before capturing.
+
+Deployed: `style.css` only, `Version:` 1.27.4 → **1.27.10**, uploaded with
+`deploy-targeted.py` (size-verified). The plain homepage was then a stale
+LiteSpeed hit still linking `ver=1.27.5`, so `litespeed_purge_all` was fired
+through a temporary docroot probe (uploaded, fired, deleted, 404 + FTP listing
+confirmed); the plain URL then linked `ver=1.27.10`. Live verified at 1440px
+and 375px. Local suite **412/0**.
+
+---
+
 ## 2026-10-19 — the supercache-old reminder was chasing a folder that does not exist
 
 The 2026-10-18 11:17 reminder (moved the WP Super Cache files aside 2026-10-11, wait ~7 days,

@@ -903,9 +903,11 @@ correction above.
 
 ## 6. Roadmap
 
+> **2026-10-22 update.** Hero's gradient scrim removed; the copy now carries its own text shadow, and the mobile hero arrows moved below the copy. Theme `Version:` → **1.27.10**, deployed and verified on lylyrose.ir at 1440px and 375px. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all`; it now serves `ver=1.27.10`. Full notes in §0n.
+>
 > **2026-10-12 update (accounting).** Accounting REST API (`ASC_Accounting`, `/wp-json/aroma/v1/`) is in `lylyrose-core` at `f85af88f`/`adaf57e6`, mirrored from aroma_store `493c324c`. Covers sales, summary, invoices, unit cost, and expenses with operating profit. Deployed to lylyrose.ir 2026-10-13 (`diff-host.py` 67/0/0 on 2026-10-14). Digikala adapter is blocked until seller file formats or an API are available. Full notes in `docs/DEVELOPMENT_LOG.md`.
 
-> **2026-10-12 update.** Hero empty strip fixed in `lylyrose/style.css` with `min-height: 300px` on `.dk-hero-slide` (the padding edits were reverted; they only masked it). Theme `Version:` → **1.27.4**. Uploaded and verified on lylyrose.ir. Render checked at 1440px and 375px via `?nocache=` URLs. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all` on 2026-10-12; it now serves `ver=1.27.4`.
+> **2026-10-12 update.** Hero empty strip fixed in `lylyrose/style.css` with `min-height: 300px` on `.dk-hero-slide` (the padding edits were reverted; they only masked it). Theme `Version:` → **1.27.4**. Uploaded and verified on lylyrose.ir. Render checked at 1440px and 375px via `?nocache=` URLs. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all` on 2026-10-12. (The theme is now at **1.27.10** — see the 2026-10-22 entry above.)
 >
 > **2026-10-11 update.** Finder result panels (`.asc-finder__meta`, `.asc-finder__notes`) had a hardcoded `#fdfcfa` surface, so night palette rendered light text on a light panel. Fixed to `var(--dk-white)` in `perfume-finder.css` (3 lines), committed 2026-10-11, and **deployed to lylyrose.ir 2026-10-11** with theme `Version:` 1.27.1. Verified on the served asset. Not checked: ivory palette, narrow viewports.
 >
