@@ -1,9 +1,9 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-21 against git and the live host (the site palette is
-now the teal `lylyrose` preset on both hosts, §0l). Several Claude
-sessions share this one working tree. This file is the handover surface: who
+name. Last reconciled 2026-10-22 against git and the live host (the hero's
+gradient scrim is gone and the copy carries its own text shadow, §0n). Several
+Claude sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
 **Current state, in one line:** no code blocker remains. The only open items are
@@ -88,6 +88,64 @@ the option still showed ivory: the homepage was a `x-litespeed-cache: hit` servi
 pre-change page. Purging via the `litespeed_purge_all` action (probe, then delete) fixed
 it. After any palette or option change on live, check the **plain** URL, not
 `?nocache=`, and purge if it still shows the old colours.
+
+## 0n. The hero's gradient scrim is gone; the copy carries its own shadow (2026-10-22)
+
+`/html/body/div[5]/main/div[1]/section/div[1]/div[1]` on the homepage is
+`.dk-hero-slide is-active has-photo`. Its gradient was **not** its own background
+(`background-image: none`) — it was the `::after` scrim, `linear-gradient(to left,
+rgba(48, 37, 34, .92) …)`, layered under the copy over the photo. The owner asked
+for that gradient removed.
+
+**Removing it alone made the text unreadable**, because the photo behind the copy is
+bright: the hero art has a large near-white area on the left. Measured from the
+rendered pixels, the region behind the copy had 90% of pixels at L ≥ 0.68 and 99% at
+L ≥ 0.84, while the text is white — white on white.
+
+**Three fixes were tried; only the third was kept.**
+
+| Attempt | Result |
+|---|---|
+| Flat panel behind `.dk-hero-copy` (`rgba(48,37,34,.86)`) | Rejected by the owner — "the box you added looks bad" |
+| Text shadow only, first pass (`0 2px 14px rgba(0,0,0,.95), 0 0 4px …`) | Measured paragraph contrast still only **2.44** |
+| Heavy shadow + outline + full-opacity paragraph | **Kept** — paragraph median **6.11**, h1 **8.52** |
+
+The kept rule, in `lylyrose/style.css`:
+
+```css
+.dk-hero-copy h1, .dk-hero-copy h2,
+.dk-hero-copy p, .dk-hero-copy .dk-kicker {
+    text-shadow: 0 2px 6px #000, 0 0 4px #000, 0 0 14px rgba(0, 0, 0, 1),
+        1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000;
+}
+```
+
+**`opacity: .85` was also removed from `.dk-hero-copy p`** — it was halving the
+paragraph's contrast on its own, and a dimmed white glyph over a shadowed photo is
+the worst case, not the average.
+
+**Two things the measurement got wrong first, both worth knowing.**
+
+- **Antialiased glyph edges count as background.** A naive "brightest pixel near a
+  glyph" metric reports 1.0:1 contrast, because the edge pixels *are* the text. The
+  background has to be defined as pixels the shadow **darkened** (rendered darker than
+  the bare photo), and the glyph mask has to be eroded by one pixel.
+- **The hero carousel auto-advances every 5 s** (`hero.js`, `INTERVAL = 5000`), so
+  two screenshots taken seconds apart are of *different slides* and the numbers are
+  not comparable. Freeze the timers before capturing.
+
+**Mobile had a second, separate defect:** in the one-column layout both arrows
+landed on top of the paragraph (`next_over_p: true`, `prev_over_p: true`). Fixed in
+the `max-width: 768px` block by moving `.dk-hero-nav` to `bottom: 14px` instead of
+the vertical centre.
+
+**Deployed.** `style.css` only, `Version:` 1.27.4 → **1.27.10**. Uploaded with
+`deploy-targeted.py` (size-verified). The plain homepage was a stale LiteSpeed hit
+still linking `ver=1.27.5` afterwards, so `litespeed_purge_all` was fired through a
+temporary docroot probe (uploaded, fired, deleted, 404 + FTP listing confirmed). The
+plain URL then linked `ver=1.27.10`. Live verified at 1440px and 375px: `afterBg:
+none`, `copyBg: transparent`, the shadow present, no arrow/text overlap. Local suite
+**412/0**.
 
 ## 0m. The 8 uploads with no AVIF sibling are fixed, and the tool is repeatable (2026-10-21)
 
@@ -580,7 +638,7 @@ would pin every later visitor's photos to that host.
 |---|---|
 | `lylyrose/functions.php` | new `lylyrose_promo_image()` |
 | `lylyrose/front-page.php` | `'q'` on all 4 static banners + 4 hero slides; `'photo'` on the 2 finder cells; `--dk-banner-cols` resolved in PHP (`< 6` → one row, `>= 6` → `ceil(n/2)`); `--dk-banner-photo` / `--dk-hero-photo` emitted inline |
-| `lylyrose/style.css` | photo `::before` + scrim `::after` on both; `isolation: isolate` on `.dk-hero-slide`; `.dk-hero-nav` flex-centred so the **chevron inside** each button is centred (the button pair stays on the hero's left/right edges) |
+| `lylyrose/style.css` | photo `::before` on both; `isolation: isolate` on `.dk-hero-slide`; `.dk-hero-nav` flex-centred so the **chevron inside** each button is centred (the button pair stays on the hero's left/right edges) |
 
 **`isolation: isolate` on `.dk-hero-slide` is load-bearing, not decoration.**
 Without it the slides have no stacking context, the `z-index: -1` photo layers
@@ -589,6 +647,10 @@ also stay at `-1`, not `0`: a positioned pseudo-element at `z-index: 0` paints
 *after* non-positioned block children in the same context and would cover the
 copy. `h1HitAtCentre: "copy"` is the assertion that catches this — it hit-tests
 the middle of the h1 and reports what actually painted there.
+
+**The hero's scrim `::after` was removed on 2026-10-22** — see §0n. The photo
+`::before` and the `isolation`/`z-index: -1` arrangement above are unchanged and
+still load-bearing. The `.dk-banner` scrim still exists; only the hero lost its.
 
 **A wrong query is a silent content bug.** Slide 1 and slide 5 both rendered
 `dior-300x300.webp` because both reached for "any product on sale". Reading
