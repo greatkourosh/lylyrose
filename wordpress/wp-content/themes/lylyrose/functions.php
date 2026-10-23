@@ -247,6 +247,34 @@ function lylyrose_perfume_finder_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_finder_assets', 20 );
+
+/**
+ * Perfume category landing page assets — only on /perfume/.
+ */
+function lylyrose_perfume_landing_assets() {
+	if ( ! is_page( 'perfume' ) ) {
+		return;
+	}
+	wp_enqueue_style(
+		'lylyrose-perfume-landing',
+		get_theme_file_uri( 'assets/css/perfume-landing.css' ),
+		array( 'lylyrose-style' ),
+		lylyrose_version()
+	);
+	wp_enqueue_script(
+		'lylyrose-perfume-landing',
+		get_theme_file_uri( 'assets/js/perfume-landing.js' ),
+		array(),
+		lylyrose_version(),
+		true
+	);
+	wp_localize_script( 'lylyrose-perfume-landing', 'lylyrosePerfume', array(
+		'ajaxUrl' => add_query_arg( 'wc-ajax', 'add_to_cart', home_url( '/' ) ),
+		'added'   => __( 'به سبد خرید اضافه شد.', 'lylyrose' ),
+		'failed'  => __( 'افزودن به سبد خرید ممکن نشد.', 'lylyrose' ),
+	) );
+}
+add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_landing_assets', 20 );
 /**
  * Back-in-stock notifier script — only on out-of-stock single product pages.
  */

@@ -1,0 +1,621 @@
+/**
+ * Perfume landing page (/perfume/).
+ *
+ * Everything here is scoped under .pf- so the shop archive's own rules are
+ * untouched. Colour comes from the palette tokens, except the two rose accents
+ * the design calls for: the buy pill and the discount badge are deliberately
+ * warmer than --dk-red, which is the site's teal. They are declared once, here,
+ * so a palette change never leaves them orphaned.
+ */
+
+.pf-main {
+    --pf-rose: #c96b7f;
+    --pf-rose-dark: #ad5568;
+    --pf-blush: #fdf1f2;
+    --pf-mint: #e8f3f2;
+    --pf-on-rose: #ffffff;
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.pf-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    background: linear-gradient(120deg, var(--pf-blush) 0%, #fdf7f5 55%, #eef6f4 100%);
+    border-radius: var(--dk-radius);
+    box-shadow: var(--dk-shadow);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+.pf-hero-copy h1 {
+    font-size: 30px;
+    line-height: 1.5;
+    color: var(--dk-red);
+    margin: 0 0 10px;
+}
+.pf-hero-copy p {
+    font-size: 14px;
+    color: var(--dk-text);
+    margin: 0 0 18px;
+    max-width: 46ch;
+}
+.pf-btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--dk-red);
+    color: var(--dk-on-accent) !important;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: background .15s;
+}
+.pf-btn-pill:hover { background: var(--dk-red-dark); }
+.pf-btn-dark { background: var(--dk-red); }
+
+.pf-hero-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+}
+.pf-hero-art img {
+    max-height: 240px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px rgba(48, 37, 34, .18));
+}
+
+/* ==========================================================================
+   Quick access cards
+   ========================================================================== */
+.pf-quick {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.35fr);
+    gap: 14px;
+    margin-bottom: 26px;
+}
+.pf-quick-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    padding: 16px 18px;
+    color: var(--dk-text);
+    position: relative;
+    transition: box-shadow .15s, transform .15s;
+}
+.pf-quick-card:hover { box-shadow: var(--dk-shadow-hover); transform: translateY(-2px); }
+.pf-quick-card b { display: block; font-size: 14px; color: var(--dk-ink); }
+.pf-quick-card small { display: block; font-size: 12px; color: var(--dk-muted); line-height: 1.8; }
+.pf-quick-icon,
+.pf-quick-badge {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dk-red);
+    background: var(--dk-red-light);
+}
+.pf-quick-icon svg, .pf-quick-badge svg { width: 22px; height: 22px; }
+.pf-quick-go { margin-inline-start: auto; color: var(--dk-muted); font-size: 18px; }
+
+.pf-quick-finder {
+    background: var(--pf-mint);
+    border-color: transparent;
+    align-items: flex-start;
+}
+.pf-quick-finder-copy b { font-size: 15px; color: var(--dk-red); }
+.pf-quick-cta {
+    align-self: flex-end;
+    margin-inline-start: auto;
+    background: var(--dk-red);
+    color: var(--dk-on-accent);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.pf-quick-finder:hover .pf-quick-cta { background: var(--dk-red-dark); }
+
+/* ==========================================================================
+   Scent families
+   ========================================================================== */
+.pf-section-title {
+    font-size: 16px;
+    color: var(--dk-ink);
+    margin: 0 0 12px;
+}
+.pf-families { margin-bottom: 26px; }
+.pf-family-row {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+}
+.pf-family {
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    overflow: hidden;
+    color: var(--dk-ink);
+    transition: box-shadow .15s, border-color .15s;
+}
+.pf-family:hover { box-shadow: var(--dk-shadow-hover); border-color: var(--pf-rose); }
+.pf-family.is-active { border-color: var(--pf-rose); box-shadow: 0 0 0 2px var(--pf-rose); }
+.pf-family-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 92px;
+    background: var(--pf-blush);
+    color: var(--dk-muted);
+    font-size: 22px;
+}
+.pf-family-img img { width: 100%; height: 100%; object-fit: cover; }
+.pf-family-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dk-red);
+}
+
+/* ==========================================================================
+   Layout: filter rail + product grid
+   ========================================================================== */
+.pf-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 26px;
+}
+.pf-filters { scroll-margin-top: 140px; }
+
+.pf-filter-form { display: block; }
+
+.pf-apply {
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px;
+    border: none;
+    border-radius: var(--dk-radius-sm);
+    background: var(--dk-red);
+    color: var(--dk-on-accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.pf-apply:hover { background: var(--dk-red-dark); }
+.pf-clear {
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--dk-muted);
+}
+.pf-clear:hover { color: var(--pf-rose); }
+
+/* Brand search box */
+.pf-brand-search {
+    position: relative;
+    margin-bottom: 8px;
+}
+.pf-brand-search svg {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 10px;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--dk-muted);
+    pointer-events: none;
+}
+.pf-brand-search input {
+    width: 100%;
+    border: 1px solid var(--dk-border);
+    border-radius: 999px;
+    padding: 7px 32px 7px 12px;
+    font-size: 12.5px;
+    background: var(--dk-white);
+    color: var(--dk-text);
+    outline: none;
+}
+.pf-brand-search input:focus { border-color: var(--dk-red); }
+
+/* Radio marks for the volume bucket (the checkboxes reuse .dk-check) */
+.pf-radio { display: none; }
+.pf-radio-mark {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--dk-border);
+    border-radius: 50%;
+    background: var(--dk-white);
+    position: relative;
+    transition: border-color .15s;
+}
+.pf-radio:checked + .pf-radio-mark { border-color: var(--pf-rose); }
+.pf-radio:checked + .pf-radio-mark::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--pf-rose);
+}
+
+/* ==========================================================================
+   Toolbar
+   ========================================================================== */
+.pf-products { min-width: 0; }
+.pf-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--dk-white);
+    border-radius: var(--dk-radius);
+    box-shadow: var(--dk-shadow);
+    padding: 12px 18px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.pf-products-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: var(--dk-red);
+    margin: 0;
+}
+.pf-products-title svg { width: 20px; height: 20px; }
+.pf-toolbar-sort { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dk-muted); }
+.pf-toolbar-sort select {
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+    padding: 7px 10px;
+    font-size: 12.5px;
+    background: var(--dk-white);
+    color: var(--dk-text);
+    outline: none;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   Product cards
+   ========================================================================== */
+.pf-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.pf-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    padding: 12px;
+    transition: box-shadow .15s, transform .15s;
+}
+.pf-card:hover { box-shadow: var(--dk-shadow-hover); transform: translateY(-3px); }
+
+.pf-card-media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 168px;
+    margin-bottom: 10px;
+    background: var(--pf-blush);
+    border-radius: var(--dk-radius-sm);
+}
+.pf-card-photo { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.pf-card-photo img { max-height: 100%; width: auto; object-fit: contain; }
+
+.pf-badge {
+    position: absolute;
+    top: 8px;
+    inset-inline-end: 8px;
+    background: var(--pf-rose);
+    color: var(--pf-on-rose);
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 2px 9px;
+    z-index: 2;
+}
+.pf-wish {
+    position: absolute;
+    top: 8px;
+    inset-inline-start: 8px;
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    color: var(--dk-muted);
+    z-index: 2;
+}
+.pf-wish svg { width: 18px; height: 18px; }
+.pf-wish:hover, .pf-wish.is-on { color: var(--pf-rose); }
+
+.pf-card-title {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.9;
+    color: var(--dk-text);
+    margin: 0 0 6px;
+    height: 47px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.pf-card-title a { color: inherit; }
+.pf-card-title a:hover { color: var(--dk-ink); }
+
+.pf-card-tags {
+    font-size: 11.5px;
+    color: var(--dk-muted);
+    margin: 0 0 6px;
+}
+.pf-tag-sep { margin: 0 4px; }
+
+.pf-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--dk-muted);
+    margin-bottom: 8px;
+}
+.pf-card-rating .dk-stars { font-size: 11px; letter-spacing: .5px; }
+.pf-rating-num { color: var(--dk-text); }
+.pf-rating-count { color: var(--dk-muted); }
+
+.pf-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: auto;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    color: var(--dk-muted);
+}
+.pf-card-price del { font-size: 11.5px; }
+.pf-card-price strong { font-size: 14px; color: var(--dk-ink); }
+
+.pf-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    background: var(--pf-rose);
+    color: var(--pf-on-rose);
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.pf-add:hover { background: var(--pf-rose-dark); }
+.pf-add svg { width: 16px; height: 16px; }
+.pf-add.is-loading { opacity: .65; pointer-events: none; }
+.pf-add.is-done { background: var(--dk-green); }
+.pf-add-link { text-decoration: none; }
+
+.pf-empty {
+    background: var(--dk-white);
+    border-radius: var(--dk-radius);
+    box-shadow: var(--dk-shadow);
+    padding: 48px 24px;
+    text-align: center;
+}
+.pf-empty h2 { font-size: 16px; color: var(--dk-ink); margin: 0 0 8px; }
+.pf-empty p { font-size: 13px; color: var(--dk-muted); margin: 0 0 18px; }
+
+.pf-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 18px;
+}
+
+/* ==========================================================================
+   Finder banner
+   ========================================================================== */
+.pf-guide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 24px;
+    background: var(--pf-mint);
+    border-radius: var(--dk-radius);
+    padding: 26px 30px;
+    margin-bottom: 26px;
+}
+.pf-guide-copy h2 { font-size: 19px; color: var(--dk-red); margin: 0 0 8px; }
+.pf-guide-copy p { font-size: 13px; color: var(--dk-text); margin: 0 0 16px; }
+.pf-guide-badges {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.pf-guide-badges li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--dk-text);
+}
+.pf-guide-badges span {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.4px solid var(--dk-red);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dk-red);
+}
+.pf-guide-badges svg { width: 22px; height: 22px; }
+
+/* ==========================================================================
+   Best sellers rail
+   ========================================================================== */
+.pf-best { margin-bottom: 26px; }
+.pf-best-rail { position: relative; }
+.pf-best-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 4 * 10px) / 5);
+    gap: 10px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+}
+.pf-best-track::-webkit-scrollbar { display: none; }
+.pf-best-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    padding: 10px;
+    color: var(--dk-text);
+    transition: box-shadow .15s;
+}
+.pf-best-card:hover { box-shadow: var(--dk-shadow-hover); }
+.pf-best-card .pf-card-media { height: 130px; margin: 0; }
+.pf-best-name {
+    font-size: 12px;
+    line-height: 1.8;
+    height: 43px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.pf-best-rating { font-size: 11px; color: var(--dk-muted); }
+.pf-best-rating .dk-stars { font-size: 10.5px; }
+.pf-best-price { font-size: 12.5px; font-weight: 700; color: var(--dk-ink); }
+
+.pf-rail-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--dk-border);
+    background: var(--dk-white);
+    color: var(--dk-ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--dk-shadow);
+}
+.pf-rail-nav::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid currentColor;
+    border-inline-end: 2px solid currentColor;
+}
+.pf-rail-prev { inset-inline-end: -6px; }
+.pf-rail-prev::before { transform: rotate(45deg); }
+.pf-rail-next { inset-inline-start: -6px; }
+.pf-rail-next::before { transform: rotate(-135deg); }
+
+/* ==========================================================================
+   Toast
+   ========================================================================== */
+.pf-toast {
+    position: fixed;
+    inset-block-end: 24px;
+    inset-inline-start: 50%;
+    transform: translate(-50%, 20px);
+    background: var(--dk-ink);
+    color: var(--dk-on-ink);
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 12.5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 9999;
+}
+.pf-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1100px) {
+    .pf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pf-family-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pf-best-track { grid-auto-columns: calc((100% - 3 * 10px) / 4); }
+}
+
+@media (max-width: 900px) {
+    .pf-layout { grid-template-columns: 1fr; }
+    .pf-filters { position: static; }
+    .pf-quick { grid-template-columns: 1fr; }
+    .pf-hero { grid-template-columns: 1fr; text-align: center; }
+    .pf-hero-copy p { margin-inline: auto; }
+    .pf-hero-art { min-height: 140px; }
+    .pf-hero-art img { max-height: 180px; }
+    .pf-guide { grid-template-columns: 1fr; }
+    .pf-guide-badges { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    .pf-hero { padding: 22px 18px; }
+    .pf-hero-copy h1 { font-size: 22px; }
+    .pf-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pf-family-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pf-best-track { grid-auto-columns: calc((100% - 2 * 10px) / 3); }
+    .pf-guide { padding: 20px 18px; }
+    .pf-guide-badges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pf-quick-finder { flex-wrap: wrap; }
+    .pf-quick-cta { margin-inline-start: 0; }
+}
+
+@media (max-width: 480px) {
+    .pf-family-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pf-best-track { grid-auto-columns: calc((100% - 10px) / 2); }
+    .pf-card-media { height: 140px; }
+    .pf-toolbar { padding: 10px 12px; }
+    .pf-toolbar-sort { width: 100%; justify-content: space-between; }
+    .pf-rail-nav { display: none; }
+}
