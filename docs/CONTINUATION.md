@@ -1,3 +1,29 @@
+> **2026-10-23: /perfume/ landing page — design plan written; WIP checkpointed.**
+>
+> **What exists.** WP page **6544** (`perfume`) is served by
+> `lylyrose/page-perfume.php` + `assets/css/perfume-landing.css` +
+> `assets/js/perfume-landing.js`, enqueued only on that page. The pre-plan WIP is
+> committed as **`2be8cefa`**; theme `Version:` is **1.27.11**. It returns 200 and
+> its AJAX add-to-cart works.
+>
+> **What does not match the comp.** The hero is a packshot card with the copy on
+> the right; the quick cards are in reverse RTL order; all six family tiles render
+> a bare letter because attribute terms have no `thumbnail_id`; the guide and
+> best-seller sections sit full-width below the 2-column layout; the sidebar shows
+> counts and all 51 brand checkboxes (49 used by perfumes) with an Apply button;
+> the grid is 12/page without a brand line.
+>
+> **Plan.** [PERFUME_LANDING_PLAN.md](PERFUME_LANDING_PLAN.md) has the comp, the
+> section spec, the gap table, five open decisions and a seven-phase plan. **No
+> design work has started.** Open: image source, whether to fork the global
+> header/footer, real taxonomy vs the comp's facets, 8/page + pagination, and the
+> hero copy side.
+>
+> **Verified for the plan.** `/perfume/` 200, `php -l` clean, AJAX add-to-cart
+> returns a WooCommerce fragment, 110/110 product thumbnails, local suite
+> **412/0**, renders inspected at 1440 and 390. **Not verified:** mobile/tablet
+> sign-off, accessibility audit.
+>
 > **2026-10-22: the hero's gradient scrim is removed; the copy carries its own text shadow.**
 >
 > **What changed.** The gradient on the homepage hero (`/html/body/div[5]/main/div[1]/section/div[1]/div[1]` = `.dk-hero-slide is-active has-photo`) was the `::after` scrim, not the element's own background — `linear-gradient(to left, rgba(48, 37, 34, .92) …)`. That rule is deleted from `lylyrose/style.css`; the photo `::before` and the `isolation: isolate` / `z-index: -1` arrangement are unchanged and still load-bearing. Theme `Version:` → **1.27.10**.

@@ -11,6 +11,55 @@
 
 ---
 
+## 2026-10-23 — the /perfume/ landing page has a design plan and a checkpointed WIP
+
+The owner asked for `/perfume/` to match the supplied comp. The page is WP
+**6544** (`perfume`), served by `page-perfume.php`. A pre-existing WIP (created
+2026-10-22) already covered the section list and the data layer; it is now
+checkpointed at **`2be8cefa`** as the baseline for the design pass. The plan is
+[PERFUME_LANDING_PLAN.md](PERFUME_LANDING_PLAN.md), with the comp at
+[assets/perfume-landing-comp.jpg](assets/perfume-landing-comp.jpg).
+
+**What was verified for the plan.**
+
+| Check | Result |
+| --- | --- |
+| `GET /perfume/` | **200** on `https://lylyrose.local` |
+| `php -l` on the template + `functions.php` | clean |
+| AJAX add-to-cart from a card button | WooCommerce JSON fragment returned |
+| Catalogue | 110 perfumes; 6 families, 49 brands (108 assignments), 3 genders, 6 occasions, 3 longevity; **110/110** thumbnails |
+| Renders | 1440 and 390 inspected against the comp |
+| Full suite | **412 passed, 0 failed** |
+
+**What the WIP does well.** The facet parsing and shareable GET URLs, volume
+parsing, sorting, pagination, empty state, AJAX add-to-cart, brand search, rail
+arrows and toast all work. The design pass should keep that layer.
+
+**What is still wrong.** The hero is a product packshot in a white card with the
+copy on the right; the quick cards are in reverse RTL order and have no photo
+strips; all six family tiles render a **bare first letter** because attribute
+terms have no `thumbnail_id`; the guide and best-seller sections are full-width
+below the 2-column layout; the sidebar shows counts, all 51 brand checkboxes and an
+«اعمال فیلترها» button; the grid is 12/page (3 rows) with no brand line; the
+global 1,332 px container is wider than the comp's ≈1,220 px. Mobile puts the
+filters after the products with no drawer.
+
+**Open decisions.** (1) image source — the repo has only `hero-banner.webp` for
+lifestyle photography; (2) keep the global header/footer or fork it; (3) real
+taxonomy vs the comp's facets; (4) 8/page + pagination vs 8 + view-all; (5) hero
+copy side. None is approved; no design work has started.
+
+**Not done.** No asset was generated and no template/CSS/JS was changed in this
+pass. The plan's Phase 6 QA (mobile sign-off, full accessibility audit, visual
+comparison) is still ahead. The full suite result is above; the page itself is
+not in the suite yet.
+
+**Housekeeping.** Only the five theme files in `2be8cefa` were staged. The
+unrelated dirty language files, UpdraftPlus updates and untracked probe scripts
+in the worktree were left untouched.
+
+---
+
 ## 2026-10-22 — the hero's gradient scrim is gone; the copy carries its own shadow
 
 The homepage hero's gradient was the `::after` scrim on `.dk-hero-slide`
