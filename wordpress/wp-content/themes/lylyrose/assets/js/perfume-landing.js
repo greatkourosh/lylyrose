@@ -1,8 +1,11 @@
 /**
- * Perfume landing page behaviour: AJAX add-to-cart, brand search, the rail
- * arrows, and the search shortcut. Everything degrades to a working page
- * without it — the buy button's fallback is the product page link the
- * non-simple branch renders.
+ * Perfume landing page behaviour: AJAX add-to-cart, auto-applying filters,
+ * collapsible facet groups, brand search/show-more, the mobile filter drawer,
+ * the rail arrows, and the search shortcut.
+ *
+ * Everything degrades to a working page without JS: the filters are a plain GET
+ * form with a <noscript> apply button, the family tiles are links, and a
+ * non-simple product renders a link to its page.
  */
 (function () {
     'use strict';
@@ -86,32 +89,142 @@
         }
         var wish = event.target.closest && event.target.closest('.pf-wish');
         if (wish) {
-            wish.classList.toggle('is-on');
+            var on = wish.classList.toggle('is-on');
+            wish.setAttribute('aria-pressed', on ? 'true' : 'false');
         }
     });
 
-    // Brand search narrows the rendered list rather than re-querying, so the
-    // checkbox state the form will submit is never touched.
+    /* ---------------------------------------------------------------------
+       Filters: apply on change, collapse groups, search / expand brands.
+       --------------------------------------------------------------------- */
+    var filterForm = document.getElementById('pf-filter-form');
+    if (filterForm) {
+        filterForm.addEventListener('change', function (event) {
+            var target = event.target;
+            if (!target || !target.matches) { return; }
+            if (target.matches('input[type="checkbox"], input[type="radio"]')) {
+                filterForm.submit();
+            }
+        });
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('.pf-filter-group-title'), function (button) {
+        var panel = document.getElementById(button.getAttribute('aria-controls'));
+        if (!panel) { return; }
+        button.addEventListener('click', function () {
+            var open = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', open ? 'false' : 'true');
+            panel.hidden = open;
+        });
+    });
+
     var brandSearch = document.getElementById('pf-brand-search');
     var brandList = document.getElementById('pf-brand-list');
+    var brandMore = document.querySelector('[data-pf-brand-more]');
+
     if (brandSearch && brandList) {
+        brandSearch.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') { event.preventDefault(); }
+        });
         brandSearch.addEventListener('input', function () {
             var needle = brandSearch.value.trim().toLowerCase();
-            Array.prototype.forEach.call(brandList.children, function (item) {
-                var name = (item.getAttribute('data-pf-brand-name') || '').toLowerCase();
-                item.style.display = (!needle || name.indexOf(needle) !== -1) ? '' : 'none';
+            Array.prototype.forEach.call(brandList.querySelectorAll('.pf-brand-row'), function (row) {
+                var name = (row.getAttribute('data-pf-brand-name') || '').toLowerCase();
+                if (!needle) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = name.indexOf(needle) !== -1 ? 'flex' : 'none';
+                }
             });
         });
     }
 
-    var searchShortcut = document.querySelector('[data-pf-focus-search]');
-    if (searchShortcut) {
-        searchShortcut.addEventListener('click', function () {
-            var input = document.querySelector('.dk-search-input');
-            if (input) { window.setTimeout(function () { input.focus(); }, 60); }
+    if (brandMore && brandList) {
+        brandMore.addEventListener('click', function () {
+            var expanded = brandList.classList.toggle('is-expanded');
+            brandMore.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            if (brandMore.firstChild && brandMore.firstChild.nodeType === 3) {
+                brandMore.firstChild.nodeValue = expanded ? 'نمایش کمتر ' : 'نمایش همه برندها ';
+            }
         });
     }
 
+    /* ---------------------------------------------------------------------
+       Mobile filter drawer.
+       --------------------------------------------------------------------- */
+    var filters = document.getElementById('pf-filters');
+    var overlay = document.querySelector('.pf-filter-overlay');
+    var trigger = document.querySelector('.pf-filter-trigger');
+    var drawerReturnFocus = null;
+
+    function isMobileFilters() {
+        return window.matchMedia('(max-width: 900px)').matches;
+    }
+
+    function openFilters() {
+        if (!filters || !isMobileFilters()) { return; }
+        drawerReturnFocus = document.activeElement;
+        filters.classList.add('is-open');
+        if (overlay) { overlay.hidden = false; }
+        document.body.classList.add('pf-lock');
+        if (trigger) { trigger.setAttribute('aria-expanded', 'true'); }
+        var close = filters.querySelector('.pf-filter-close');
+        if (close) { window.setTimeout(function () { close.focus(); }, 40); }
+    }
+
+    function closeFilters() {
+        if (!filters || !filters.classList.contains('is-open')) { return; }
+        filters.classList.remove('is-open');
+        if (overlay) { overlay.hidden = true; }
+        document.body.classList.remove('pf-lock');
+        if (trigger) { trigger.setAttribute('aria-expanded', 'false'); }
+        if (drawerReturnFocus && drawerReturnFocus.focus) { drawerReturnFocus.focus(); }
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pf-open-filters]'), function (opener) {
+        opener.addEventListener('click', function (event) {
+            if (!isMobileFilters()) { return; }
+            event.preventDefault();
+            openFilters();
+        });
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pf-close-filters]'), function (closer) {
+        closer.addEventListener('click', function (event) {
+            event.preventDefault();
+            closeFilters();
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') { closeFilters(); }
+    });
+
+    if (filters) {
+        filters.addEventListener('keydown', function (event) {
+            if (event.key !== 'Tab' || !filters.classList.contains('is-open')) { return; }
+            var focusable = filters.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select, [tabindex]:not([tabindex="-1"])');
+            var visible = Array.prototype.filter.call(focusable, function (el) { return el.offsetParent !== null; });
+            if (!visible.length) { return; }
+            var first = visible[0];
+            var last = visible[visible.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+    }
+
+    window.addEventListener('resize', function () {
+        if (!isMobileFilters()) { closeFilters(); }
+    });
+
+    /* ---------------------------------------------------------------------
+       Sort, search shortcut, best-seller rail.
+       --------------------------------------------------------------------- */
     var sortSelect = document.getElementById('pf-sort-select');
     if (sortSelect) {
         sortSelect.addEventListener('change', function () {
@@ -119,8 +232,17 @@
         });
     }
 
-    // Rail arrows step by two cards, measured from the first card so the step
-    // matches whatever the breakpoint resolved the columns to.
+    var searchShortcut = document.querySelector('[data-pf-focus-search]');
+    if (searchShortcut) {
+        searchShortcut.addEventListener('click', function (event) {
+            var input = document.querySelector('.dk-search-input');
+            if (!input) { return; }
+            event.preventDefault();
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
+
     var track = document.querySelector('[data-pf-track]');
     if (track) {
         var step = function () {

@@ -275,6 +275,22 @@ function lylyrose_perfume_landing_assets() {
 	) );
 }
 add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_landing_assets', 20 );
+
+/**
+ * Preload the landing hero so it is discovered before the CSS is parsed.
+ * Only /perfume/ has this image; the preload is emitted nowhere else.
+ */
+function lylyrose_perfume_landing_preload() {
+	if ( ! is_page( 'perfume' ) ) {
+		return;
+	}
+	printf(
+		'<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n",
+		esc_url( get_theme_file_uri( 'assets/images/perfume/hero.webp' ) )
+	);
+}
+add_action( 'wp_head', 'lylyrose_perfume_landing_preload', 2 );
+
 /**
  * Back-in-stock notifier script — only on out-of-stock single product pages.
  */
