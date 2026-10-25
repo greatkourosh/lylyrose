@@ -325,7 +325,7 @@ get_header();
 		<div class="pf-shell pf-hero-inner">
 			<div class="pf-hero-copy">
 				<h1 id="pf-hero-title"><?php esc_html_e( 'دنیای عطرها، به سلیقه تو', 'lylyrose' ); ?></h1>
-				<p><?php esc_html_e( 'از رایحه‌های خاص و روزانه تا عطرهای گرم و ماندگار، عطر دلخواهت رو پیدا کن.', 'lylyrose' ); ?></p>
+				<p><?php esc_html_e( 'از رایحه‌های خنک و روزانه تا عطرهای گرم و ماندگار، عطر دلخواهت رو پیدا کن.', 'lylyrose' ); ?></p>
 				<a class="pf-btn pf-btn-primary" href="#pf-grid"><?php esc_html_e( 'مشاهده همه عطرها', 'lylyrose' ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
 			</div>
 		</div>
@@ -341,21 +341,9 @@ get_header();
 				</span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'bottle' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'نمی‌دونم چه عطری مناسبه!', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'به چند سوال ساده جواب بده تا بهترین گزینه‌ها رو بهت پیشنهاد کنیم', 'lylyrose' ); ?></small>
+					<b><?php esc_html_e( 'کمکم کن عطر انتخاب کنم', 'lylyrose' ); ?></b>
+					<small><?php esc_html_e( 'هنوز انتخاب‌ت رو نمی‌دونی؟ با چند سوال ساده بهترین گزینه‌ها رو پیشنهاد می‌دیم', 'lylyrose' ); ?></small>
 					<span class="pf-quick-cta"><?php esc_html_e( 'شروع تست انتخاب عطر', 'lylyrose' ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-				</span>
-			</a>
-
-			<a class="pf-quick-card" href="#pf-filters" data-pf-open-filters>
-				<span class="pf-quick-img">
-					<img src="<?php echo esc_url( $pf_theme_img . 'quick-a.webp' ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
-				</span>
-				<span class="pf-quick-body">
-					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'filter' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'می‌خوام خودم بگردم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'با فیلترها و دسته‌بندی‌ها عطر مناسب خودت رو پیدا کن', 'lylyrose' ); ?></small>
-					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
 
@@ -365,8 +353,8 @@ get_header();
 				</span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'عطر رو می‌شناسم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'نام عطر یا برند مورد نظرت رو جستجو کن', 'lylyrose' ); ?></small>
+					<b><?php esc_html_e( 'عطرم رو می‌شناسم', 'lylyrose' ); ?></b>
+					<small><?php esc_html_e( 'اسم عطر یا برندش رو می‌دونی؟ همین‌جا جستجو کن', 'lylyrose' ); ?></small>
 					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
