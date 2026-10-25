@@ -3333,3 +3333,74 @@ lylyrose suite **387 passed / 0 failed**, mirroring aroma_store `493c324c`.
 Accounting is not deployed to lylyrose.ir yet.
 
 Digikala: no public seller API found, and no sample files yet. Adapter deferred until formats are known.
+
+## 2026-10-25 — `/perfume/`: the page had its own palette, and a card went missing
+
+Two owner-reported defects on the landing page, both traceable to a single commit.
+
+### 1. Button colours ignored the theme palette
+
+`perfume-landing.css` opened a token block of its own:
+
+```css
+--pf-rose: #ad5568;   --pf-blush: #fdf1f2;   --pf-mint: #e8f3f2;
+```
+
+The primary hero button already read `--dk-red`, so it followed the palette and
+looked correct. The **buy pill** (`.pf-add`), discount badge and filter checkbox
+read `--pf-rose`, and the hero scrim, product-media tiles, quiz card and guide
+banner read blush/mint — all literals. On the default `lylyrose` preset `#ad5568`
+is close enough to teal to go unnoticed; on `ivory` and `navy` the page kept a
+white ground with pink pills; on `night` the three pastel panels stayed **light
+against `#12151c`**.
+
+The block now derives from the palette. Blush and mint are mixed from `--dk-red`
+over `--dk-bg` rather than reusing `--dk-red-light`: ivory and navy carry no value
+for that token, so they would have kept `:root`'s mint behind a rose or navy
+accent.
+
+A further **40 literals in the same file** were re-pointed: hero scrims (`#fffaf8`
+and its rgba steps), hover borders (`#d7e5e3`, `#d2dddc`), form controls, the
+out-of-stock pill, star colours, and the duplicate scrims inside the 900 px and
+768 px media queries. Only `box-shadow` rgba values were left alone — a dark
+shadow at 8–12 % alpha is palette-neutral, and `--dk-ink` inverts on Night.
+
+### 2. `main` had two children, not three
+
+The owner asked for three sections side by side. `main` held `section.pf-hero`,
+one `div.pf-shell` wrapping everything else, the overlay and the toast — and the
+quick row inside the shell had only **two** cards. `6a3100b9` ("two clear entry
+paths") had deleted the "میخوام خودم بگردم" card along with its `quick-a.webp`.
+
+Restored, and the row is `1.38fr minmax(0,1fr) minmax(0,1fr)`: measuring the comp
+gives cards of 225 / 226 / **312** px, so the quiz card is the wide one, not an
+equal third. Between 768 and 900 px the quiz card takes the whole row
+(`grid-column: 1 / -1`) instead of leaving the other two orphaned beneath a
+2-column grid.
+
+### Traps hit
+
+- **The first sweep used line numbers from an earlier `grep`.** They had drifted,
+  and the script would have edited the wrong lines. Re-derived them from a fresh
+  grep and made the script assert the exact substring it expects on each line,
+  writing nothing unless every assertion matches. Same discipline as
+  [[dry-run-flag-must-match-both-spellings]]: a guard that restates the source
+  drifts, so read it out of the source.
+- **A colour sweep that only moves `var()` uses misses every literal.** The
+  original block was the *specified* palette, not an oversight, so a rename sweep
+  would have reported success while leaving 40 hex values behind — the same shape
+  as [[a-colour-rename-sweep-misses-literals]].
+- **A transition makes a correct palette read as unchanged.** `.pf-add` has
+  `transition: background .15s`, so reading `getComputedStyle` right after
+  swapping the palette returns the *interpolated* colour — the pill still measured
+  teal on all four presets and looked like a failed fix. Probe with transitions
+  disabled, or read the token rather than the painted value.
+
+### Verified
+
+Per-palette probe of the live page: buy pill, discount badge, filter checkbox and
+page background each follow all four presets with a correct on-accent label
+(`lylyrose` `#064048`/white, `ivory` `#9c5c5f`/white, `navy` `#070f27`/white,
+`night` `#789df9`/`#0d1016`). Quick row measured at 1440 (470/341/341, ratio 1.38),
+860 (quiz full-width, two below) and 375 (single column), with zero horizontal
+overflow at each. Suite **412 passed / 0 failed**. Not deployed.

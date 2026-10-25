@@ -347,6 +347,18 @@ get_header();
 				</span>
 			</a>
 
+			<a class="pf-quick-card" href="#pf-filters" data-pf-open-filters>
+				<span class="pf-quick-img">
+					<img src="<?php echo esc_url( $pf_theme_img . 'quick-a.webp' ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
+				</span>
+				<span class="pf-quick-body">
+					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'filter' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
+					<b><?php esc_html_e( 'می‌خوام خودم بگردم', 'lylyrose' ); ?></b>
+					<small><?php esc_html_e( 'با فیلترها و دسته‌بندی‌ها عطر مناسب خودت رو پیدا کن', 'lylyrose' ); ?></small>
+					<span class="pf-quick-go" aria-hidden="true">‹</span>
+				</span>
+			</a>
+
 			<a class="pf-quick-card" href="#pf-grid" data-pf-focus-search>
 				<span class="pf-quick-img">
 					<img src="<?php echo esc_url( $pf_theme_img . 'quick-b.webp' ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">

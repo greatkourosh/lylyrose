@@ -9,12 +9,12 @@
  */
 
 .pf-main {
-    --pf-rose: #ad5568;        /* 4.91:1 on white — the comp's #c96b7f is 3.56 */
-    --pf-rose-dark: #96485a;
-    --pf-blush: #fdf1f2;
-    --pf-blush-soft: #fdf8f6;
-    --pf-mint: #e8f3f2;
-    --pf-mint-soft: #f4fbfa;
+    --pf-rose: var(--dk-red);       /* accent / CTA / active state */
+    --pf-rose-dark: var(--dk-red-dark);
+    --pf-blush: color-mix(in srgb, var(--dk-red) 7%, var(--dk-bg));
+    --pf-blush-soft: color-mix(in srgb, var(--dk-red) 4%, var(--dk-bg));
+    --pf-mint: color-mix(in srgb, var(--dk-red) 13%, var(--dk-bg));
+    --pf-mint-soft: color-mix(in srgb, var(--dk-red) 8%, var(--dk-bg));
     --pf-teal: var(--dk-red);
     --pf-teal-dark: var(--dk-red-dark);
     --pf-on-teal: var(--dk-on-accent);
@@ -83,12 +83,12 @@
     z-index: -1;
     background: linear-gradient(
         90deg,
-        #fffaf8 0%,
-        #fffaf8 55%,
-        rgba(255, 250, 248, .998) 58%,
-        rgba(255, 250, 248, .9) 62%,
-        rgba(255, 250, 248, .45) 67%,
-        rgba(255, 250, 248, 0) 73%
+        var(--dk-bg) 0%,
+        var(--dk-bg) 55%,
+        color-mix(in srgb, var(--dk-bg) 99.8%, transparent) 58%,
+        color-mix(in srgb, var(--dk-bg) 90%, transparent) 62%,
+        color-mix(in srgb, var(--dk-bg) 45%, transparent) 67%,
+        transparent 73%
     );
 }
 .pf-hero-inner {
@@ -118,7 +118,9 @@
    ========================================================================== */
 .pf-quick {
     display: grid;
-    grid-template-columns: 1.35fr 1fr;
+    /* The quiz card is the wider one in the comp (312 px vs 225): it carries a
+       photo and a CTA where the other two carry a photo strip and a chevron. */
+    grid-template-columns: 1.38fr minmax(0, 1fr) minmax(0, 1fr);
     gap: 14px;
     margin: 0 0 30px;
 }
@@ -137,7 +139,7 @@
 .pf-quick-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 30px rgba(6, 64, 72, .09);
-    border-color: #d7e5e3;
+    border-color: var(--dk-border);
 }
 .pf-quick-img {
     position: relative;
@@ -151,7 +153,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 42%, var(--dk-white) 100%);
+    background: linear-gradient(180deg, transparent 42%, var(--dk-white) 100%);
 }
 .pf-quick-body {
     position: relative;
@@ -205,7 +207,7 @@
 .pf-quick-finder {
     flex-direction: row;
     align-items: stretch;
-    background: linear-gradient(120deg, #e4f2f0 0%, var(--pf-mint) 52%, #f5fbfa 100%);
+    background: linear-gradient(120deg, var(--pf-mint) 0%, var(--pf-mint) 52%, var(--pf-mint-soft) 100%);
     border-color: transparent;
 }
 .pf-quick-finder .pf-quick-img {
@@ -218,7 +220,7 @@
 }
 .pf-quick-finder .pf-quick-img img { object-position: 58% 30%; }
 .pf-quick-finder .pf-quick-img::after {
-    background: linear-gradient(90deg, var(--pf-mint) 0%, rgba(232, 243, 242, .35) 16%, rgba(232, 243, 242, 0) 46%);
+    background: linear-gradient(90deg, var(--pf-mint) 0%, color-mix(in srgb, var(--pf-mint) 35%, transparent) 16%, transparent 46%);
 }
 .pf-quick-finder .pf-quick-body {
     order: 2;
@@ -232,8 +234,8 @@
     height: 36px;
     margin: 0;
     box-shadow: none;
-    background: rgba(255, 255, 255, .55);
-    border-color: rgba(6, 64, 72, .12);
+    background: color-mix(in srgb, var(--dk-white) 55%, transparent);
+    border-color: var(--dk-border);
 }
 .pf-quick-finder .pf-quick-body b {
     margin: 0;
@@ -297,9 +299,9 @@
 .pf-family:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 22px rgba(6, 64, 72, .09);
-    border-color: rgba(173, 85, 104, .35);
+    border-color: color-mix(in srgb, var(--pf-rose) 35%, transparent);
 }
-.pf-family.is-active { border-color: var(--pf-rose); box-shadow: 0 0 0 2px rgba(173, 85, 104, .18); }
+.pf-family.is-active { border-color: var(--pf-rose); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pf-rose) 18%, transparent); }
 .pf-family-img {
     display: block;
     height: 92px;
@@ -437,7 +439,7 @@
     flex: 0 0 auto;
     width: 16px;
     height: 16px;
-    border: 1.5px solid #d2dddc;
+    border: 1.5px solid var(--dk-border);
     border-radius: 4px;
     background: var(--dk-white);
     transition: border-color .15s, background .15s;
@@ -454,7 +456,7 @@
     left: 4.5px;
     width: 4px;
     height: 8px;
-    border: solid #fff;
+    border: solid var(--dk-on-accent);
     border-width: 0 1.8px 1.8px 0;
     transform: rotate(45deg);
 }
@@ -466,7 +468,7 @@
     height: 7px;
     border: 0;
     border-radius: 50%;
-    background: #fff;
+    background: var(--dk-on-accent);
     transform: none;
 }
 .pf-check input:focus-visible + .pf-box { outline: 2px solid var(--pf-teal); outline-offset: 2px; }
@@ -581,7 +583,7 @@
     padding-inline: 5px;
     border-radius: 999px;
     background: var(--pf-rose);
-    color: #fff;
+    color: var(--dk-on-accent);
     font-size: 10.5px;
     font-weight: 700;
 }
@@ -651,7 +653,7 @@
 .pf-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 28px rgba(6, 64, 72, .09);
-    border-color: #d7e5e3;
+    border-color: var(--dk-border);
 }
 .pf-card-media {
     position: relative;
@@ -662,7 +664,7 @@
     margin-bottom: 10px;
     border-radius: var(--pf-radius-sm);
     overflow: hidden;
-    background: linear-gradient(160deg, var(--pf-blush) 0%, var(--pf-blush-soft) 62%, #fdfcfb 100%);
+    background: linear-gradient(160deg, var(--pf-blush) 0%, var(--pf-blush-soft) 62%, var(--dk-white) 100%);
 }
 .pf-card-photo {
     display: flex;
@@ -688,8 +690,8 @@
     z-index: 2;
     padding: 2px 8px;
     border-radius: 999px;
-    background: var(--pf-rose);
-    color: #fff;
+    background: var(--dk-badge-red);
+    color: var(--dk-on-accent);
     font-size: 10.5px;
     font-weight: 800;
     line-height: 1.7;
@@ -701,8 +703,8 @@
     z-index: 2;
     padding: 3px 8px;
     border-radius: 6px;
-    background: rgba(26, 26, 26, .72);
-    color: #fff;
+    background: color-mix(in srgb, var(--dk-bar) 72%, transparent);
+    color: var(--dk-on-bar);
     font-size: 10px;
     font-weight: 600;
 }
@@ -718,13 +720,13 @@
     padding: 0;
     border: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, .72);
+    background: color-mix(in srgb, var(--dk-white) 72%, transparent);
     color: var(--dk-muted);
     cursor: pointer;
     transition: color .15s, background .15s;
 }
 .pf-wish svg { width: 16px; height: 16px; }
-.pf-wish:hover, .pf-wish.is-on { color: var(--pf-rose); background: #fff; }
+.pf-wish:hover, .pf-wish.is-on { color: var(--pf-rose); background: var(--dk-white); }
 .pf-wish.is-on svg { fill: currentColor; }
 
 .pf-card-title {
@@ -763,7 +765,7 @@
 }
 .pf-card-rating.is-empty { color: var(--dk-muted); font-size: 10px; }
 .pf-stars { position: relative; display: inline-flex; direction: ltr; line-height: 1; font-size: 11px; letter-spacing: 1px; }
-.pf-stars-base { color: #e4d9d2; }
+.pf-stars-base { color: var(--dk-border); }
 .pf-stars-fill {
     position: absolute;
     top: 0;
@@ -771,7 +773,7 @@
     width: calc(var(--pf-rating) / 5 * 100%);
     overflow: hidden;
     white-space: nowrap;
-    color: #d9a300;
+    color: var(--dk-star);
 }
 .pf-rating-num { color: var(--dk-text); }
 .pf-rating-count { color: var(--dk-muted); }
@@ -800,18 +802,18 @@
     border: 0;
     border-radius: 999px;
     background: var(--pf-rose);
-    color: #fff;
+    color: var(--dk-on-accent);
     font: inherit;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     transition: background .15s;
 }
-.pf-add:hover { background: var(--pf-rose-dark); color: #fff; }
+.pf-add:hover { background: var(--pf-rose-dark); color: var(--dk-on-accent); }
 .pf-add svg { width: 15px; height: 15px; }
 .pf-add.is-loading { opacity: .65; pointer-events: none; }
 .pf-add.is-done { background: var(--dk-green); }
-.pf-add.is-disabled { background: #e9e3e1; color: var(--dk-muted); cursor: not-allowed; }
+.pf-add.is-disabled { background: color-mix(in srgb, var(--dk-border) 70%, var(--dk-white)); color: var(--dk-muted); cursor: not-allowed; }
 .pf-add-link { text-decoration: none; }
 .pf-card.is-out .pf-product-img { opacity: .62; }
 
@@ -859,7 +861,7 @@
     gap: 16px;
     padding: 16px 20px;
     border-radius: var(--pf-radius);
-    background: linear-gradient(115deg, #f7fbfa 0%, #eef7f5 46%, #e4f2f0 100%);
+    background: linear-gradient(115deg, var(--dk-white) 0%, var(--pf-mint-soft) 46%, var(--pf-mint) 100%);
     overflow: hidden;
 }
 .pf-guide-copy h2 { margin: 0 0 5px; font-size: 20px; font-weight: 800; color: var(--pf-teal); }
@@ -888,7 +890,7 @@
     place-items: center;
     width: 38px;
     height: 38px;
-    border: 1px solid rgba(6, 64, 72, .3);
+    border: 1px solid var(--dk-border);
     border-radius: 50%;
     color: var(--pf-teal);
 }
@@ -905,7 +907,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(238, 247, 245, 0) 42%, rgba(238, 247, 245, .96) 100%);
+    background: linear-gradient(90deg, transparent 42%, color-mix(in srgb, var(--pf-mint) 96%, transparent) 100%);
 }
 
 /* ==========================================================================
@@ -939,7 +941,7 @@
     scroll-snap-align: start;
     transition: box-shadow .16s, border-color .16s;
 }
-.pf-best-card:hover { box-shadow: 0 8px 22px rgba(6, 64, 72, .08); border-color: #d7e5e3; }
+.pf-best-card:hover { box-shadow: 0 8px 22px rgba(6, 64, 72, .08); border-color: var(--dk-border); }
 .pf-best-media {
     position: relative;
     display: flex;
@@ -1060,15 +1062,18 @@ body.pf-lock { overflow: hidden; }
     .pf-hero-copy { width: 58%; }
     .pf-hero-copy h1 { font-size: clamp(26px, 3.5vw, 34px); }
     .pf-hero-scrim {
-        background: linear-gradient(90deg, #fffaf8 0%, #fffaf8 34%, rgba(255, 250, 248, .97) 44%, rgba(255, 250, 248, .65) 58%, rgba(255, 250, 248, .1) 78%);
+        background: linear-gradient(90deg, var(--dk-bg) 0%, var(--dk-bg) 34%, color-mix(in srgb, var(--dk-bg) 97%, transparent) 44%, color-mix(in srgb, var(--dk-bg) 65%, transparent) 58%, color-mix(in srgb, var(--dk-bg) 10%, transparent) 78%);
     }
+    /* Two cards fit at this width, so the quiz card takes the full row and the
+       other two sit under it rather than leaving a third orphaned on its own. */
     .pf-quick { grid-template-columns: 1fr 1fr; }
+    .pf-quick-finder { grid-column: 1 / -1; }
     .pf-quick-card { min-height: 210px; }
     .pf-guide { grid-template-columns: 1fr 1fr; }
     .pf-guide-copy { grid-column: 1 / -1; order: 1; }
     .pf-guide-badges { order: 2; }
     .pf-guide-media { order: 3; height: 130px; }
-    .pf-guide-media::after { background: linear-gradient(90deg, rgba(238, 247, 245, 0), rgba(238, 247, 245, .7)); }
+    .pf-guide-media::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pf-mint) 70%, transparent)); }
 }
 
 @media (max-width: 768px) {
@@ -1077,7 +1082,7 @@ body.pf-lock { overflow: hidden; }
     .pf-hero-copy { width: 100%; max-width: 440px; text-align: center; margin-inline: auto; }
     .pf-hero-copy p { margin-inline: auto; font-size: 13.5px; }
     .pf-hero-scrim {
-        background: linear-gradient(180deg, #fffaf8 0%, rgba(255, 250, 248, .97) 46%, rgba(255, 250, 248, .9) 68%, rgba(255, 250, 248, .58) 100%);
+        background: linear-gradient(180deg, var(--dk-bg) 0%, color-mix(in srgb, var(--dk-bg) 97%, transparent) 46%, color-mix(in srgb, var(--dk-bg) 90%, transparent) 68%, color-mix(in srgb, var(--dk-bg) 58%, transparent) 100%);
     }
     .pf-hero-img { object-position: 90% 45%; }
 
@@ -1115,7 +1120,7 @@ body.pf-lock { overflow: hidden; }
     .pf-guide-badges li { font-size: 9.5px; }
     .pf-guide-badges li span { width: 34px; height: 34px; }
     .pf-guide-media { height: 140px; order: 4; }
-    .pf-guide-media::after { background: linear-gradient(0deg, rgba(238, 247, 245, .9), rgba(238, 247, 245, 0)); }
+    .pf-guide-media::after { background: linear-gradient(0deg, color-mix(in srgb, var(--pf-mint) 90%, transparent), transparent); }
 
     .pf-best-track { grid-auto-columns: calc((100% - 2 * 10px) / 3); gap: 10px; }
     .pf-best-name { font-size: 11px; }
@@ -1142,7 +1147,7 @@ body.pf-lock { overflow: hidden; }
     .pf-quick-finder { flex-direction: column; }
     .pf-quick-finder .pf-quick-img { width: 100%; flex-basis: auto; height: 130px; }
     .pf-quick-finder .pf-quick-img img { object-position: 58% 62%; }
-    .pf-quick-finder .pf-quick-img::after { background: linear-gradient(180deg, rgba(232, 243, 242, 0), var(--pf-mint) 100%); }
+    .pf-quick-finder .pf-quick-img::after { background: linear-gradient(180deg, transparent, var(--pf-mint) 100%); }
     .pf-quick-finder .pf-quick-body { padding: 16px; }
     .pf-quick-cta { align-self: flex-start; }
     .pf-guide-badges { grid-template-columns: repeat(2, minmax(0, 1fr)); }

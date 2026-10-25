@@ -3,6 +3,15 @@
 **Status:** plan only. The page exists as a pre-plan WIP, checkpointed at
 **`2be8cefa`**; the design pass described here has **not** started.
 **Date:** 2026-10-23
+
+> **2026-10-25 — two defects fixed, plan otherwise unchanged.** The page defined
+> its own colour literals (`--pf-rose: #ad5568`, blush `#fdf1f2`, mint `#e8f3f2`),
+> so the buy pill and panels ignored the active palette and stayed pink on all
+> four presets — light panels on Night's dark ground. Those six tokens now derive
+> from `--dk-*`, and 40 more literals in the same file (scrims, borders, badges,
+> checkbox, stars) were re-pointed at tokens. Separately, the third quick-entry
+> card `6a3100b9` deleted is restored, and the row is `1.38fr 1fr 1fr` — the comp's
+> 312 px quiz card against 225 px others. See §4's token table and the log entry.
 **Page:** WordPress page **6544**, slug `perfume`, title «عطر و ادکلن» —
 <https://lylyrose.local/perfume/>
 **Comp:** [attached reference](assets/perfume-landing-comp.jpg) (915×1280 screenshot,
@@ -98,11 +107,19 @@ data task (new attribute + tagging 110 products) and is **not** recommended.
 | Token | Value | Use |
 | --- | --- | --- |
 | Teal | `--dk-red` `#064048` | headings, primary CTA, active nav |
-| Rose (CTA) | `#ad5568` | buy pill, discount badge — comp rose `#c96b7f` is **3.56:1** on white and fails AA; `#ad5568` is **4.91:1** |
-| Blush | `#fdf1f2` | product media, soft panels |
-| Mint | `#e8f3f2` | quiz card, guide banner |
-| Ink / muted / border | `#1a1a1a` / `#737373` / `#e8eeee` | existing tokens |
+| Rose (CTA) | `var(--dk-red)` | buy pill, discount badge, active filters |
+| Blush | `color-mix(--dk-red 7%, --dk-bg)` | product media, soft panels |
+| Mint | `color-mix(--dk-red 13%, --dk-bg)` | quiz card, guide banner |
+| Ink / muted / border | `--dk-ink` / `--dk-muted` / `--dk-border` | existing tokens |
 | Radius | 12 px cards, 8 px controls, 999 px pills | existing |
+
+**Superseded 2026-10-25.** This table originally fixed Rose at `#ad5568`, Blush at
+`#fdf1f2` and Mint at `#e8f3f2` as literals. That graded contrast against one
+palette only: on ivory, navy and night the page kept teal-rose pills on a white
+page, and on Night the three pastel panels stayed light against `#12151c`. Every
+token here now derives from the active palette, so the page follows all four
+presets — see the status note at the top and the log entry for the same date.
+
 | Container | **≈1,220 px**, page-scoped | comp ≈1,200 at 1440; global stays 1,332 |
 | Type | IRANYekanX; h1 38/800, section 20/700, card title 14/700, body 12.5–14 | |
 
