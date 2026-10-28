@@ -1145,7 +1145,7 @@ body.pf-lock { overflow: hidden; }
     .pf-add { font-size: 10.5px; min-height: 34px; gap: 4px; }
     .pf-add svg { width: 13px; height: 13px; }
     .pf-quick-finder { flex-direction: column; }
-    .pf-quick-finder .pf-quick-img { width: 100%; flex-basis: auto; height: 130px; }
+    .pf-quick-finder .pf-quick-img { width: 100%; flex-basis: auto; height: 130px; min-height: 0; }
     .pf-quick-finder .pf-quick-img img { object-position: 58% 62%; }
     .pf-quick-finder .pf-quick-img::after { background: linear-gradient(180deg, transparent, var(--pf-mint) 100%); }
     .pf-quick-finder .pf-quick-body { padding: 16px; }
