@@ -284,9 +284,21 @@ $shop_url   = function_exists( 'wc_get_page_id' ) ? get_permalink( wc_get_page_i
         $dk_done = array();
         foreach ( $dk_drawer as $dk_row ) {
             $dk_items = array();
+            // The four section slugs resolve to their landing page, exactly as
+            // the matching mega panel headings do, so a standalone row and the
+            // panel teach the same destination. Anything else is the category.
+            $dk_landing_slugs = array(
+                'perfume'   => 'perfume',
+                'makeup'    => 'makeup',
+                'skin-care' => 'skincare',
+                'hair-care' => 'haircare',
+            );
             foreach ( $dk_row['cats'] as $slug ) {
                 $dk_done[] = $slug;
-                if ( isset( $dk_cats[ $slug ] ) ) {
+                $dk_page = isset( $dk_landing_slugs[ $slug ] ) ? get_page_by_path( $dk_landing_slugs[ $slug ] ) : null;
+                if ( $dk_page ) {
+                    $dk_items[] = array( $dk_page->post_title, (string) get_permalink( $dk_page ) );
+                } elseif ( isset( $dk_cats[ $slug ] ) ) {
                     $dk_items[] = $dk_cats[ $slug ];
                 }
             }

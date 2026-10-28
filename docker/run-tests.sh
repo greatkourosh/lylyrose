@@ -2374,6 +2374,28 @@ fi
 html_has "$HOME_HTML" "$SITE_URL/perfume-finder/" \
   && pass "the finder is linked from the storefront (nav or home banner)" \
   || fail "no link to /perfume-finder/ in the homepage markup — the feature is unreachable"
+
+# 34.5 The mobile drawer's section rows must land on the same pages the desktop
+# mega panel headings do. A row keyed by a product_cat slug silently resolved to
+# the bare archive (/product-category/perfume/) while the panel sent the same
+# label to /perfume/, so the two menus disagreed and the drawer skipped the
+# landing pages the owner built. Assert per row, from the drawer markup alone:
+# a regex over the whole page would match the panel's own heading and pass on
+# the very build this is meant to catch.
+DRAWER_HTML=$(printf '%s' "$HOME_HTML" | python3 -c '
+import re,sys
+h=sys.stdin.read()
+m=re.search(r"dk-drawer-nav\">(.*?)</nav>", h, re.S)
+print(m.group(1) if m else "")
+')
+for DRAWER_SLUG in perfume makeup skincare haircare; do
+  printf '%s' "$DRAWER_HTML" | grep -q "href=\"$SITE_URL/$DRAWER_SLUG/\"" \
+    && pass "mobile drawer links /$DRAWER_SLUG/ like the desktop panel" \
+    || fail "mobile drawer has no /$DRAWER_SLUG/ landing link — the row is pointing at the archive instead"
+done
+printf '%s' "$DRAWER_HTML" | grep -qE 'href="'"$SITE_URL"'/product-category/(perfume|makeup|skin-care|hair-care)/"' \
+  && fail "a drawer section row still points at the bare product-category archive" \
+  || pass "no drawer section row points at the bare archive"
 # 35. Price-tier settings. The tiers used to be four hardcoded boundaries, so
 # this asserts the two properties that make them safe to expose to the owner: a
 # saved manual set actually reaches the quiz, and a bad one cannot.
