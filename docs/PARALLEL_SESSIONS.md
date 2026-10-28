@@ -13,6 +13,57 @@ Sections 0–5 are the record of how the work got here; where they disagree with
 
 ---
 
+## 0p. The self-hosted font was live and uncommitted (2026-10-28)
+
+`style.css` gained the `@font-face` for the self-hosted
+`lylyrose/assets/fonts/vazirmatn.woff2` and `functions.php` dropped the
+`cdn.jsdelivr.net` enqueue on 2026-10-26. Both were serving on `lylyrose.ir`.
+Neither was in git: `git log -S'vazirmatn.woff2'` matches **nothing on any
+branch**, and no branch's `style.css` contains the face. Committed now, together
+with `lylyrose-core/assets/needs-quiz.css`.
+
+**Verified, not assumed.** Live `style.css` and the live `woff2` hash-match
+local (`694fd10c…`, `84a382e4…`); live sends the `@font-face` with **0**
+jsdelivr references and renders it (`document.fonts` Vazirmatn **loaded**).
+`python3 docker/diff-host.py` → **101 identical / 0 differing / 0 absent**. The
+font is the only one that ever resolved (IRANYekanX/IRANYekan/IRANSans ship only
+inside the inactive `gateland` plugin), so this is not cosmetic.
+
+**`needs-quiz.css` is the same defect class.** `class-needs-quiz.php` is tracked
+and calls `plugins_url( 'assets/needs-quiz.css', … )`; the stylesheet was live
+(200, sha256 `0084cce8…`) and in no commit, so a fresh clone loads a tracked file
+whose asset does not exist. See [[plugin-requires-files-it-never-tracked]].
+
+### The trap: Autoptimize bakes the requesting `HTTP_HOST` into the CSS bundle
+
+Autoptimize rewrites the relative `url('assets/fonts/vazirmatn.woff2')` to an
+absolute `//host/...` when it aggregates `style.css`. **The bundle filename hash
+is derived from the source set, not the host** — so the bundle is shared, and
+whichever host first generated it wins for every later visitor.
+
+The compose `WORDPRESS_CONFIG_EXTRA` allow-lists `localhost` alongside
+`lylyrose.local` and bare IPs, so a request to `127.0.0.1:8030` (or anything
+sending `Host: localhost`) generates a bundle reading `//localhost/...`. That
+bundle is then served for `https://lylyrose.local` as well, and the dev box
+renders Tahoma. A reload does not help; the hash is identical.
+
+Prove it or fix it the same way — delete the bundle cache and regenerate through
+the canonical host, never `localhost`:
+
+```
+docker exec -u www-data lylyrose-wp sh -c 'rm -f /var/www/html/wp-content/cache/autoptimize/autoptimize_single_*.php*'
+curl -sk -H 'Host: lylyrose.local' 'http://127.0.0.1:8030/' -o /dev/null
+```
+
+Then the bundle reads `//lylyrose.local/...`. **Live is unaffected** — nothing
+there ever asks it as `localhost`, and its bundle reads `//lylyrose.ir/...`.
+
+`document.fonts` is the probe that sees this; nothing else does. `getComputedStyle`
+`fontFamily` still lists `Vazirmatn` (the stack is unchanged), and the suite has
+no font assertion, so **417/0 is green through a font that never loaded**.
+
+---
+
 ## 0o. Mobile drawer landed on the wrong pages, and four live pages did not exist (2026-10-28)
 
 Two independent defects, reported by the owner as one symptom — «in mobile the
@@ -887,6 +938,10 @@ wanted, that is a build, not a missing label.
 | ~~`lylyrose-core/includes/class-finder-tiers.php`~~, ~~`class-finder-weights.php`~~ | **RESOLVED** — tracked in `8f175393`; `git status` is clean for `lylyrose-core/`. |
 | ~~`lylyrose-navy/` (31 files)~~ | **RESOLVED** — deleted in `50a8c651`. |
 | `docker/run-tier-tests.sh` | **Not ours.** Owned by a peer session; still untracked. Its header says "ONLY section 35" but it now runs 35–47 (83 assertions) — stale, but leave it to its owner. |
+| `plugins/updraftplus/**` (129 paths) | **Not this session's, and already live.** `1.26.8 → 1.26.13`, which adds `udcentral_keys_revocation()` for the 2026-10-18 security incident. Live bytes match local (sampled: `updraftplus.php`, `class-updraftplus.php`, `readme.txt` all sha256-equal). Left for whoever ran the update. |
+| `wp-content/languages/**` (52 paths) | **Not this session's, and already live.** WP language packs pulled 2026-10-17 (`fa_IR.po` sha256-equal on host). |
+| `docker-compose.yml` | **Not this session's.** Registry move `192.168.1.40:5001 → 192.168.1.13:7001`; `192.168.1.13:7001` answers `/v2/` with 401 (alive), `192.168.1.40:5001` does not. The last commit here is `7c2beda5`. |
+| `plugins/litespeed-cache/**` (323 files) | **Never tracked, deliberately** — a third-party plugin, live at 200. Not a gap. |
 
 Stray scratch `header.php.fixed` removed 2026-10-10 (root-owned; deleted via
 `docker exec -u root lylyrose-wp`).

@@ -11,6 +11,60 @@
 
 ---
 
+## 2026-10-28 — the self-hosted font is committed; the local Autoptimize host trap
+
+**The font fix was live for two days and in no commit.** `style.css` gained the
+`@font-face` for the self-hosted `assets/fonts/vazirmatn.woff2` and
+`functions.php` dropped the `cdn.jsdelivr.net` enqueue on 2026-10-26, and both
+went to `lylyrose.ir` — but `git log -S'vazirmatn.woff2'` matched **nothing on
+any branch**. The tree served the fix; the repo had never heard of it. This is
+[[green-suite-is-not-deployed-diff-host-finds-it]] running backwards: deployed
+and green, but uncommitted.
+
+**Verified before committing, not assumed.** Live `style.css` and the live
+`woff2` are byte-identical to local (sha256 `694fd10c…`, `84a382e4…`), live
+serves `@font-face` with `0` jsdelivr references, and the font actually renders
+there — `document.fonts` reports Vazirmatn **loaded**. `python3
+docker/diff-host.py`: **101 identical, 0 differing, 0 absent**.
+
+**A trap that only bites locally.** On `lylyrose.local` the font failed:
+`document.fonts` reported Vazirmatn **error**, requesting
+`https://localhost/.../vazirmatn.woff2`. Autoptimize rewrites the CSS's relative
+`url('assets/fonts/vazirmatn.woff2')` to an absolute `//host/...` when it
+aggregates `style.css`, and it bakes in whichever `HTTP_HOST` first generated
+the bundle. A request carrying `Host: localhost` — the LAN/`127.0.0.1:8030`
+form the compose allow-list accepts — poisons the cached bundle for every later
+visitor, including `https://lylyrose.local`. Live is unaffected because nothing
+there ever asks it as `localhost`.
+
+Diagnosis, and the reason a fresh reload kept showing the bad URL: the hash in
+the bundle filename is derived from the **source set, not the host**, so a
+poisoned bundle is served for `lylyrose.local` too. Prove it by deleting
+`wp-content/cache/autoptimize/autoptimize_single_*.php*` and re-requesting with
+an explicit `-H 'Host: lylyrose.local'`; the regenerated bundle then reads
+`//lylyrose.local/...`. **Clear the bundle cache and request through the
+canonical host — never `localhost`** — or the theme's only real font silently
+falls back to Tahoma on the dev box while the suite stays green (no assertion
+covers font loading).
+
+**Also committed:** `lylyrose-core/assets/needs-quiz.css`. `class-needs-quiz.php`
+is tracked and calls `plugins_url( 'assets/needs-quiz.css', … )`, but the
+stylesheet was never added to git — it was live (200, sha256 `0084cce8…`) and
+absent from the repo, the same shape as
+[[plugin-requires-files-it-never-tracked]]: a tracked file loading an asset no
+clone would have.
+
+**Left uncommitted on purpose — not this session's work, and all already live:**
+the UpdraftPlus `1.26.8 → 1.26.13` vendor update (`class-updraftplus.php` gains
+the 2026-10-18 security-incident key revocation), 52 WP language-pack files, and
+`docker-compose.yml`'s registry move `192.168.1.40:5001 → 192.168.1.13:7001`.
+Live bytes match local for the sampled vendor files. See
+[PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) §3.
+
+Suite **417 passed, 0 failed**.
+
+---
+
 ## 2026-10-28 — drawer, missing live pages, blank mobile card: all three live
 
 Three defects the owner hit as one report. Full narrative, including what was

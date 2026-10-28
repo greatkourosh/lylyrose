@@ -13,6 +13,19 @@ Tags: e-commerce, rtl-language-support, custom-menu, custom-logo
 */
 
 /* ==========================================================================
+   Vazirmatn — self-hosted. The jsdelivr CDN this used to load from is
+   unreachable from Iran, so the site silently fell back to Tahoma. The
+   variable file serves every weight in one 45KB request.
+   ========================================================================== */
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('assets/fonts/vazirmatn.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ==========================================================================
    Design tokens  —  Lyly Rose is the default (2026-10-10)
    ========================================================================== */
 :root {

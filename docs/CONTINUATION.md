@@ -1,3 +1,15 @@
+> **2026-10-28: the self-hosted Vazirmatn fix was live for two days and in no commit; it is committed now, with `needs-quiz.css`.**
+>
+> **What was wrong.** `style.css` carried the `@font-face` for `assets/fonts/vazirmatn.woff2` and `functions.php` had dropped the `cdn.jsdelivr.net` enqueue since 2026-10-26, and both were serving on `lylyrose.ir` — but `git log -S'vazirmatn.woff2'` matched **nothing on any branch**. Deployed and green, never committed.
+>
+> **Verified before committing.** Live `style.css` and the live `woff2` are byte-identical to local (sha256 `694fd10c…`, `84a382e4…`); live serves the `@font-face` with **0** jsdelivr references, and the font really renders there (`document.fonts` Vazirmatn **loaded**). `python3 docker/diff-host.py`: **101 identical / 0 differing / 0 absent**.
+>
+> **Trap: Autoptimize bakes the requesting host into the CSS bundle.** It rewrites the relative `url('assets/fonts/vazirmatn.woff2')` to `//host/...`, and the bundle filename hash comes from the **source set, so it is host-independent**. One request carrying `Host: localhost` — which the compose allow-list accepts, alongside `127.0.0.1:8030` — poisons that bundle for `https://lylyrose.local` too, and the theme's only real font silently falls back to Tahoma on the dev box. `document.fonts` reports the face **error** and requests `https://localhost/...`; no assertion covers font loading, so the suite stays green. **Clear `wp-content/cache/autoptimize/autoptimize_single_*.php*` and regenerate through the canonical host, never `localhost`.** Live is unaffected — nothing there asks it as `localhost`, and its bundle correctly reads `//lylyrose.ir/...`.
+>
+> **Also committed:** `lylyrose-core/assets/needs-quiz.css` — `class-needs-quiz.php` is tracked and calls `plugins_url( 'assets/needs-quiz.css', … )`, but the file was live (200, sha256 `0084cce8…`) and absent from the repo, so a clone had a tracked file whose asset did not exist.
+>
+> **Left uncommitted on purpose, all already live and none of it this session's:** UpdraftPlus `1.26.8 → 1.26.13` (adds the 2026-10-18 security-incident key revocation), 52 WP language-pack files, `docker-compose.yml`'s registry move `192.168.1.40:5001 → 192.168.1.13:7001`. Suite **417/0**.
+>
 > **2026-10-23: /perfume/ landing page — design plan written; WIP checkpointed.**
 >
 > **What exists.** WP page **6544** (`perfume`) is served by

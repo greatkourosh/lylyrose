@@ -105,9 +105,10 @@ add_action( 'after_setup_theme', 'lylyrose_setup' );
  * Scripts & styles
  */
 function lylyrose_scripts() {
-    // IRANYekan is Digikala's actual font; Vazirmatn is the free fallback.
-    wp_enqueue_style( 'lylyrose-font-vazirmatn', 'https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css', array(), '33.003' );
-    wp_enqueue_style( 'lylyrose-style', get_stylesheet_uri(), array( 'lylyrose-font-vazirmatn' ), lylyrose_version() );
+    // Vazirmatn is self-hosted (assets/fonts/vazirmatn.woff2, @font-face in
+    // style.css). It used to load from cdn.jsdelivr.net, which is unreachable
+    // from Iran — when it timed out the site fell back to Tahoma.
+    wp_enqueue_style( 'lylyrose-style', get_stylesheet_uri(), array(), lylyrose_version() );
 
     // The base stylesheet is RTL-native (html{direction:rtl}); for LTR locales
     // (e.g. English) layer a small override on top.
