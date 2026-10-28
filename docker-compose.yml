@@ -71,7 +71,7 @@ services:
         condition: service_healthy
 
   cron:
-    image: 192.168.1.40:5001/curlimages/curl:8.23.0
+    image: 192.168.1.13:7001/curlimages/curl:8.23.0
     container_name: lylyrose-cron
     restart: unless-stopped
     entrypoint: ["/bin/sh", "-c"]
@@ -91,8 +91,8 @@ services:
       start_period: 40s
 
   redis:
-    # image: 192.168.1.40:5001/library/redis:7-alpine
-    image: 192.168.1.40:5001/library/redis:8.10.2-alpine
+    # image: 192.168.1.13:7001/library/redis:7-alpine
+    image: 192.168.1.13:7001/library/redis:8.10.2-alpine
     container_name: lylyrose-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
@@ -100,8 +100,8 @@ services:
       - redis_data:/data
 
   db:
-    # image: 192.168.1.40:5001/library/mariadb:10.11
-    image: 192.168.1.40:5001/library/mariadb:13.0.2
+    # image: 192.168.1.13:7001/library/mariadb:10.11
+    image: 192.168.1.13:7001/library/mariadb:13.0.2
     container_name: lylyrose-db
     restart: unless-stopped
     environment:
@@ -124,7 +124,7 @@ services:
       start_period: 30s
 
   phpmyadmin:
-    image: 192.168.1.40:5001/library/phpmyadmin:5.2.3-apache
+    image: 192.168.1.13:7001/library/phpmyadmin:5.2.3-apache
     container_name: lylyrose-pma
     restart: unless-stopped
     ports:
