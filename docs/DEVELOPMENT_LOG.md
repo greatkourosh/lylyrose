@@ -11,6 +11,30 @@
 
 ---
 
+## 2026-10-28 — drawer, missing live pages, blank mobile card: all three live
+
+Three defects the owner hit as one report. Full narrative, including what was
+ruled out, is in [PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) §0o.
+
+| # | Symptom | Cause | Fix |
+| --- | --- | --- | --- |
+| 1 | عطر و ادکلن missing from the mobile drawer | row keyed by product_cat slug resolved to the archive, while the panel heading resolved to the landing page | `header.php`: section rows map to their landing page, category as fallback (`11cb14fe`) |
+| 2 | four landing pages 404 on live | live DB had only `perfume`; the **templates were already deployed** and identical | created 4 page rows via the docroot probe (live ids 2029–2032) |
+| 3 | `/perfume/` quick card blank on mobile | `min-height: 100%` left on the image when the card flips to `column` at ≤480px | `min-height: 0` in that breakpoint (`c17bff5f`) |
+
+**Live as of this entry:** `style.css` Version **1.27.20**; `/perfume/`,
+`/makeup/`, `/skincare/`, `/haircare/`, `/brands/` all **200**; mega-panel
+empty hrefs **0** (was 4); both page caches purged, so the plain URL serves the
+fix.
+
+**Verified by measurement, not by eye.** `docker/measure-quick-finder.py` sets
+CDP device metrics before navigation and asserts each quick card's body stays
+inside its card. Red on the reverted CSS, green after; clean at 360/375/414/480,
+unchanged at 600/900. Suite **417/0** throughout — none of the three defects was
+visible to it.
+
+---
+
 ## 2026-10-23 — the /perfume/ landing page has a design plan and a checkpointed WIP
 
 The owner asked for `/perfume/` to match the supplied comp. The page is WP

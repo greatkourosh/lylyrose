@@ -13,7 +13,77 @@ Sections 0–5 are the record of how the work got here; where they disagree with
 
 ---
 
-## 0k. Verification pass — the four "never checked on live" features all work (2026-10-20)
+## 0o. Mobile drawer landed on the wrong pages, and four live pages did not exist (2026-10-28)
+
+Two independent defects, reported by the owner as one symptom — «in mobile the
+عطر و ادکلن item is missing».
+
+**First: the drawer and the desktop panel disagreed about where a section goes.**
+Drawer rows are keyed by slug and resolved against live `product_cat` terms, so
+عطر و ادکلن pointed at `/product-category/perfume/` while the mega panel heading
+for the same label pointed at `/perfume/`. `skin-care`/`hair-care` disagreed with
+the panel too, because their *page* slugs are `skincare`/`haircare`. Fixed in
+`header.php` by mapping the four section rows to their landing page and falling
+back to the category term (commit **`11cb14fe`**).
+
+The assertion reads the drawer markup **alone** — a page-wide regex matches the
+panel's own heading and passes on exactly the build this is meant to catch.
+Proved red on the reverted header, then green. Suite **417/0**.
+
+**Second, and not visible from any local test: the live database had only one of
+the five pages the nav links.** Live held `perfume` (id **2028** — note the ids
+do *not* match local's 6544–6548). Created via the docroot probe, dry-run first,
+probe deleted after:
+
+| slug | live id | status |
+|---|---|---|
+| perfume | 2028 | pre-existing |
+| haircare | 2029 | created |
+| makeup | 2030 | created |
+| skincare | 2031 | created |
+| brands | 2032 | created |
+
+**The templates were already live.** `diff-host.py` reports the whole theme
+identical (101 files, 0 differing, 0 absent) — `care-landing.php`,
+`page-skincare.php`, `page-haircare.php` and `assets/images/skincare|haircare/`
+were all on the host. **Only the page rows were missing**, so "is the template
+uploaded" would have read as complete while all four URLs 404'd.
+
+`get_page_by_path()` returns `''` for an absent page, so `lylyrose_mega_menu()`
+was shipping **four dead `<a href="">` headings** (آرایش / مراقبت از پوست /
+مراقبت از مو / برندها). Now **0 empty hrefs**. `makeup` has no landing template
+in either place — it falls through to `page.php` and renders the `[products]`
+shortcode its body carries.
+
+`sale` and `magazine` are also absent on live and were deliberately **not**
+created: both use `$dk_landing()` fallbacks to real pages, so neither is a dead
+link. `brands` had no fallback, which is why it was the one that mattered.
+
+**Third, a mobile-only defect on `/perfume/`.** `.pf-quick-finder` is a row with
+`min-height: 100%` on its image. In the `≤480px` block the card flips to
+`column`, where that `100%` resolves against the card's *own* height: the 130px
+image grew to **336px of a 338px card** and pushed the body — headline, copy and
+CTA — out past `overflow: hidden`. The card rendered blank on every phone.
+Fixed with `min-height: 0` in the same breakpoint (commit **`c17bff5f`**).
+Measured before: image 336 / card 338, body bottom 309 past card bottom 104.
+After: image 130, body bottom 103 inside card bottom 104.
+
+**`style.css` Version 1.27.14 (HEAD) → 1.27.20.** Live had already reached
+1.27.19 through a peer session's uncommitted page work, so the bump clears it.
+
+**A green suite cannot see any of this.** 417/0 was passing through all three
+defects — no test renders the nav against live data, and none renders at a phone
+width. The guard is `docker/measure-quick-finder.py`, which sets CDP device
+metrics *before* navigation and asserts each card's body stays inside its card;
+it was proved red on the reverted CSS and green after.
+
+**Deploy.** `header.php` first (size **and** sha256 verified byte-identical to
+local), then the two CSS files. **Both** page caches needed purging — LiteSpeed
+*and* WP Super Cache, live runs both — after which the plain URL served the fix
+without `?nocache=`. All five URLs return **200** on `lylyrose.ir`.
+
+---
+
 
 Session goal: check the live features the docs recorded as unverified, settle the
 uncommitted files, and correct the docs. Commit `7c2beda5`.
