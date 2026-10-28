@@ -285,7 +285,9 @@
 
 .pf-family-row {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    /* --pf-tiles defaults to 7 for /perfume/'s seven scent families; the care
+       pages set their own count so a shorter row does not leave a hole. */
+    grid-template-columns: repeat(var(--pf-tiles, 7), minmax(0, 1fr));
     gap: 10px;
 }
 .pf-family {
@@ -1026,7 +1028,7 @@ body.pf-lock { overflow: hidden; }
     .pf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .pf-family-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .pf-best-track { grid-auto-columns: calc((100% - 3 * 12px) / 4); }
-    .pf-family-row { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .pf-family-row { grid-template-columns: repeat(var(--pf-tiles, 7), minmax(0, 1fr)); }
     .pf-hero { min-height: 300px; }
     .pf-quick-card { min-height: 200px; }
 }

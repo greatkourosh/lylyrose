@@ -249,10 +249,24 @@ function lylyrose_perfume_finder_assets() {
 add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_finder_assets', 20 );
 
 /**
- * Perfume category landing page assets — only on /perfume/.
+ * Landing-page slugs that share the perfume landing assets.
+ *
+ * The care pages (/skincare/, /haircare/) render the same components with fewer
+ * facet groups, so they reuse perfume-landing.css and perfume-landing.js rather
+ * than forking them. The JS is plain DOM work keyed on `.pf-` selectors and its
+ * only localised payload is an ajax URL plus two strings, so the
+ * `lylyrosePerfume` object name is cosmetic — renaming it would churn a working
+ * page for no gain.
+ */
+function lylyrose_landing_slugs() {
+	return array( 'perfume', 'skincare', 'haircare' );
+}
+
+/**
+ * Perfume and care landing page assets — only on those pages.
  */
 function lylyrose_perfume_landing_assets() {
-	if ( ! is_page( 'perfume' ) ) {
+	if ( ! is_page( lylyrose_landing_slugs() ) ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -277,16 +291,23 @@ function lylyrose_perfume_landing_assets() {
 add_action( 'wp_enqueue_scripts', 'lylyrose_perfume_landing_assets', 20 );
 
 /**
- * Preload the landing hero so it is discovered before the CSS is parsed.
- * Only /perfume/ has this image; the preload is emitted nowhere else.
+ * Preload each landing page's own hero so it is discovered before the CSS is
+ * parsed. One image per page; the preload is emitted nowhere else.
  */
 function lylyrose_perfume_landing_preload() {
-	if ( ! is_page( 'perfume' ) ) {
+	$slug = '';
+	foreach ( lylyrose_landing_slugs() as $candidate ) {
+		if ( is_page( $candidate ) ) {
+			$slug = $candidate;
+			break;
+		}
+	}
+	if ( ! $slug ) {
 		return;
 	}
 	printf(
 		'<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n",
-		esc_url( get_theme_file_uri( 'assets/images/perfume/hero.webp' ) )
+		esc_url( get_theme_file_uri( 'assets/images/' . $slug . '/hero.webp' ) )
 	);
 }
 add_action( 'wp_head', 'lylyrose_perfume_landing_preload', 2 );
