@@ -1,8 +1,8 @@
 # Parallel sessions — ownership, blockers, roadmap
 
 Written 2026-10-05 by the session fixing product-card links and the offers-rail
-name. Last reconciled 2026-10-22 against git and the live host (the hero's
-gradient scrim is gone and the copy carries its own text shadow, §0n). Several
+name. Last reconciled 2026-10-30 against git and the live host (the care pages'
+quick boxes now carry a full-bleed photo each, §0q). Several
 Claude sessions share this one working tree. This file is the handover surface: who
 owns what, what is blocked, and what must not be committed until a decision lands.
 
@@ -10,6 +10,42 @@ owns what, what is blocked, and what must not be committed until a decision land
 human-blocked per-host credentials and content decisions. The live list is §6.
 Sections 0–5 are the record of how the work got here; where they disagree with §6,
 §6 wins.
+
+---
+
+## 0q. Care quick boxes got a full-bleed photo each (2026-10-30)
+
+`/skincare/` and `/haircare/` rendered `.pf-quick` as bare text cards — no photo
+at all — where `/perfume/` has a strip image in each. Each of the 3 boxes now
+carries an absolutely-positioned `<img class="pf-quick-bg">` (`object-fit: cover`)
+with a `.pf-quick-scrim` gradient and a `pf-quick-card--photo` modifier. Six
+1200×640 webp under `assets/images/{skincare,haircare}/quick-bg-{quiz,a,b}.webp`,
+built by the new `docker/compose-care-quick-bg.py`.
+
+**Scoped, not shared.** Every new rule hangs off `.pf-quick-card--photo`, which
+only `care-landing.php` emits, so the `.pf-quick` rules shared with `/perfume/`
+are byte-untouched. Full detail in
+[CARE_LANDING_PLAN.md](CARE_LANDING_PLAN.md) §8b.
+
+**The trap that cost the time: a thumbnail hides baked copy.** A contact sheet
+whose caption bar drew across the top of each cell covered exactly the Persian
+marketing copy a first-round crop had let through. Two "looks clean" passes
+survived on thumbnails; the copy only showed at 1440. Verify crops numerically
+or at full resolution. The converse also bit: `BOT02`'s dark pixels at full size
+are the *sphere's shadow*, not glyphs — locate dark pixels before condemning a
+crop.
+
+**Deploy trap (the usual one).** After upload, `/haircare/` was new but
+`/skincare/` was stale while `?nocache=` served it — a LiteSpeed page-cache hit,
+not an upload failure. LiteSpeed and WP Super Cache are both live; purge both.
+And `diff-host.py` called `style.css` **identical** while it had changed: the
+1.27.20 → 1.27.21 bump is byte-length-neutral, so only a `RETR` + hash sees it
+([[diff-host-compares-size-not-hash]]).
+
+**Live, verified:** both pages serve 3 `pf-quick-bg` on their plain URLs,
+`/perfume/` serves 0, all 6 assets 200 `image/webp`, all 3 images `complete` at
+`naturalWidth` 1200, contrast 9.8–10.3:1. `docker/diff-host.py` 107 identical /
+0 differing (the 6 absent rows are only the superseded `quick-*.webp`).
 
 ---
 
