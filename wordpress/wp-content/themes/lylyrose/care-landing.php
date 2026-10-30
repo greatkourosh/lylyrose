@@ -298,7 +298,9 @@ get_header();
 
 		<!-- ================= Quick access ================= -->
 		<section class="pf-quick" aria-label="<?php echo esc_attr( $care['quick_label'] ); ?>">
-			<a class="pf-quick-card pf-quick-finder" href="<?php echo esc_url( $care_quiz_url ); ?>">
+			<a class="pf-quick-card pf-quick-finder pf-quick-card--photo" href="<?php echo esc_url( $care_quiz_url ); ?>">
+				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-quiz.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'drop' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
 					<b><?php echo esc_html( $care['quiz_card_title'] ); ?></b>
@@ -307,7 +309,9 @@ get_header();
 				</span>
 			</a>
 
-			<a class="pf-quick-card" href="#pf-filters" data-pf-open-filters>
+			<a class="pf-quick-card pf-quick-card--photo" href="#pf-filters" data-pf-open-filters>
+				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-a.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'filter' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
 					<b><?php esc_html_e( 'می‌خوام خودم بگردم', 'lylyrose' ); ?></b>
@@ -316,7 +320,9 @@ get_header();
 				</span>
 			</a>
 
-			<a class="pf-quick-card" href="#care-grid" data-pf-focus-search>
+			<a class="pf-quick-card pf-quick-card--photo" href="#care-grid" data-pf-focus-search>
+				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-b.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
 					<b><?php esc_html_e( 'محصول رو می‌شناسم', 'lylyrose' ); ?></b>

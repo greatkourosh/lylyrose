@@ -1178,3 +1178,56 @@ body.pf-lock { overflow: hidden; }
         animation-iteration-count: 1 !important;
     }
 }
+
+/* ==========================================================================
+   Care landing pages (/skincare/, /haircare/) — quick cards as a full-bleed
+   photo instead of the top-strip the perfume page uses.
+
+   .pf-quick is shared with /perfume/, so every rule here is scoped to
+   .pf-quick-card--photo, a modifier only care-landing.php emits.
+   ========================================================================== */
+.pf-quick-card--photo {
+    background: var(--pf-blush);
+    min-height: 190px;
+}
+.pf-quick-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Washes the photo into the card. Transparent at the top edge, opaque by the
+   baseline the body text sits on, so the headline reads over any scene. */
+.pf-quick-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dk-white) 10%, transparent) 0%,
+        color-mix(in srgb, var(--dk-white) 46%, transparent) 26%,
+        color-mix(in srgb, var(--dk-white) 88%, transparent) 42%,
+        var(--dk-white) 100%
+    );
+}
+.pf-quick-card--photo .pf-quick-body { justify-content: flex-end; }
+/* The icon chip floats over the photo's top corner rather than mid-card. */
+.pf-quick-card--photo .pf-quick-icon { top: 12px; inset-inline-end: 12px; }
+
+/* The quiz card drops its mint gradient and its side-by-side split: the photo
+   is now the whole card, as on the other two. */
+.pf-quick-card--photo.pf-quick-finder {
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--pf-blush);
+    border-color: var(--pf-line);
+}
+.pf-quick-card--photo.pf-quick-finder .pf-quick-body {
+    justify-content: flex-end;
+    padding: 0 18px 18px;
+    gap: 5px;
+}
+
+@media (max-width: 640px) {
+    .pf-quick-card--photo { min-height: 150px; }
+}
