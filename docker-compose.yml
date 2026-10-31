@@ -92,7 +92,7 @@ services:
 
   redis:
     # image: 192.168.1.13:7001/library/redis:7-alpine
-    image: 192.168.1.13:7001/library/redis:8.10.2-alpine
+    image: 192.168.1.13:7001/library/redis:8.10.3-alpine
     container_name: lylyrose-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
