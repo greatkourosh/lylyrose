@@ -3020,3 +3020,16 @@ AVIF through the metadata hook, which was tested on the local stack only.
 sandbox) failed once in a run, passed on rerun, and the sandbox was up. Treat that
 section as flaky, not as a regression.
 
+
+
+## 2026-10-31 — Comprehensive Plugin Settings Audit and Automated SMTP Setup
+
+Full audit of live database options (`wp_options`) across all 12 installed plugins, prioritizing unconfigured and broken services (P0 through P3).
+
+- **Detailed Audit Documents:**
+  - `docs/PLUGIN_SETTINGS_AUDIT.md`: In-depth analysis of options, keys, and live database state.
+  - `docs/LYLYROSE_SETTINGS_CHECKLIST_AND_AUTOMATION.md`: Segregated checklist splitting tasks into AI-automated fixes vs Human-only credentials.
+- **Automated Fix — WP Mail SMTP (`AUTO-7`):**
+  - Host mail server verified (`mail.lylyrose.ir:587` with STARTTLS / Auth).
+  - Injected `WPMS_*` constants into live `wp-config.php` via FTP with automated backup.
+  - Test email dispatch from `info@lylyrose.ir` successfully verified.
