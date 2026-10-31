@@ -1008,10 +1008,15 @@ function lylyrose_customize_register( $wp_customize ) {
 			'transport'         => 'refresh',
 		) );
 
-		$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'lylyrose_hero_photo_' . $key, array(
+		// Media_Control, not Image_Control: Image_Control writes the attachment
+		// URL into the setting, which absint() then reduces to 0 — the choice
+		// saved as "no photo". Media_Control writes the attachment ID, which is
+		// what lylyrose_hero_photo() expects.
+		$wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'lylyrose_hero_photo_' . $key, array(
 			'label'       => $label,
 			'section'     => 'lylyrose_hero',
 			'settings'    => 'lylyrose_hero_photo_' . $key,
+			'mime_type'   => 'image',
 			'description' => __( 'تصویر عریض (حداقل ۱۶۰۰ پیکسل عرض) مناسب است.', 'lylyrose' ),
 		) ) );
 	}

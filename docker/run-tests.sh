@@ -2742,6 +2742,27 @@ html_has "$VARY" "Accept" \
   && pass "front-end responses carry Vary: Accept" \
   || fail "no Vary: Accept header — a shared cache could serve AVIF to every visitor"
 
+section "39b. Hero slide photo control stores an attachment ID"
+# The Image_Control/absint mismatch saved every pick as 0 and no slide ever got
+# .has-photo. Nothing else asserted this, so the bug shipped with a green suite.
+docker cp "$SCRIPT_DIR/hero-photo-control-check.php" lylyrose-wp:/tmp/hero-photo-control-check.php >/dev/null
+HP_OUT=$(docker exec "$WP_CONTAINER" php /tmp/hero-photo-control-check.php 2>/dev/null)
+hp_has() { printf '%s' "$HP_OUT" | grep -q "$1"; }
+hp_has "STORES_ID: yes" \
+  && pass "hero photo control stores an attachment ID, not a URL" \
+  || fail "hero photo control is not ID-based (Image_Control writes a URL that absint eats): $(printf '%s' "$HP_OUT" | grep CONTROL_CLASS)"
+hp_has "SANITIZE_URL: 0" \
+  && pass "a URL still sanitizes to 0, so the old control could never save" \
+  || fail "the sanitizer no longer rejects a URL — the guard this pins may have changed"
+hp_has "PATH_ON_DISK: yes" \
+  && pass "the picked hero photo resolves to a file on disk" \
+  || fail "no hero photo is picked, or its path does not resolve: $(printf '%s' "$HP_OUT" | grep HERO_PATH)"
+# The photo must actually reach the slide markup, not just the theme mod.
+HERO_HTML=$(curl -s --max-time 30 "$SITE_URL/?cb=$RANDOM")
+html_has "$HERO_HTML" "dk-hero-slide is-active has-photo" \
+  && pass "the front page renders the photo slide with .has-photo" \
+  || fail "no .has-photo slide on the front page — the background stays empty"
+
 section "40. Hidden palettes stay in admin, leave the visitor switcher"
 HIDE_OUT=$(docker exec "$WP_CONTAINER" php -r '
 require("/var/www/html/wp-load.php");
