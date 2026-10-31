@@ -1158,9 +1158,11 @@ correction above.
 
 > **2026-10-31 update (AUTO-* rows run).** The ai-doable half of the plugin-settings
 > audit was executed on live: email brand colour → `#064048`; wishlist page wired
-> and its shortcode fixed; draft terms page created and linked; the Persian shipping
-> plugin activated with 31 states / 1394 cities and an «ایران» zone carrying پست
-> پیشتاز + پیک موتوری; Dokan Lite deactivated (20 → 19 plugins). **Two rows cannot
+> and its shortcode fixed; the terms page published and the checkout terms checkbox
+> turned on (it exposed and we fixed two hidden defects — an English privacy sentence
+> and a 404 privacy link); the Persian shipping plugin activated with 31 states /
+> 1394 cities and an «ایران» zone carrying پست پیشتاز + پیک موتوری; Dokan Lite
+> deactivated (20 → 19 plugins). **Two rows cannot
 > close as written:** AUTO-6 (Redis) is impossible on this host (no `Redis` class,
 > 6379 refused — the container is local-only), and AUTO-5 (Rank Math) stays inactive
 > by the owner's decision. **AUTO-4 stops at the money:** zones and methods exist but
