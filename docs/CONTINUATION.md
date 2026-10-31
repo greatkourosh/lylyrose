@@ -3085,15 +3085,45 @@ shipping method is offered at checkout. Rates were deliberately not invented.
 theme already emits `title-tag`, and activation rewrites sitewide meta plus wants
 a wizard).
 
-**AUTO-3 published, and it is still orphaned.** The terms page was published on
-the owner's instruction: `/terms/` returns 200 and renders 1278 chars of copy.
-The placeholder sentence *"این متن پیش‌نویس است و پیش از انتشار باید … بازبینی
-شود"* was removed first — I had written it while the page was a draft, and
-publishing made the live page call itself unpublished. **Two things still don't
-connect it to a customer:** `woocommerce_checkout_show_terms` is `false`, so no
-terms checkbox appears at checkout, and the footer links no page to `/terms/`
-(it does link `/faq/` and `/about/`). Until one of those is wired the page is
-reachable only by direct URL. The legal copy is also still unreviewed.
+**The checkout terms checkbox is on, and it exposed two live defects.** The terms
+page was published on the owner's instruction — `/terms/` returns 200 and renders
+1278 chars of copy, after the placeholder sentence *"این متن پیش‌نویس است و پیش از
+انتشار باید … بازبینی شود"* was removed (I wrote it while the page was a draft;
+publishing made the live page call itself unpublished).
+
+Then `woocommerce_checkout_show_terms` was set to `yes` so the checkbox appears
+at checkout. **Proven from the source, not by restating the guard:** WooCommerce
+adds the `terms` error only when `terms-field` is posted and `terms` is not
+(`class-wc-checkout.php:1011`). Calling that validator with the two posted
+shapes gives `terms` + the Persian message *"لطفا شرایط و ضوابط را برای ادامه
+سفارش خود مطالعه و قبول کنید"* on the unticked shape and no `terms` error on the
+ticked one. My **first** version of that test posted neither field on the
+unticked case, so the gate was skipped and it would have read as "does not
+block" — the shape of the posted data is the whole assertion.
+
+**Enabling it made two previously-suppressed defects customer-visible.** The
+whole `woocommerce-terms-and-conditions-wrapper` is rendered only when the
+checkbox is enabled — so while `show_terms` was `false`, both of these were
+hidden and nothing in the suite could see them:
+
+1. `woocommerce_checkout_privacy_policy_text` was WooCommerce's **English**
+   default, on a `fa_IR` store, right above the payment button.
+2. Its `[privacy_policy]` link pointed at page **#3**, which is a **draft** — the
+   notice shipped a **404 link** in the purchase flow.
+
+Both fixed: a Persian `privacy` page was created and published (**#2038**), the
+option now points at it, and the checkout and registration privacy sentences are
+Persian. Page #3 was left untouched (the option simply no longer references it).
+Verified on the live checkout in the browser with a real cart: checkbox visible
+and unticked, `required` mark present, label «من شرایط و مقررات سایت را خوانده ام
+و آن را می‌پذیرم», terms link → `/terms/` (200), privacy link → `/privacy/` (200),
+privacy text Persian.
+
+**Still open on this row:** the footer links no page to `/terms/`, the test
+postcode (`1234567890`) is unchanged, and neither the terms nor the privacy copy
+has had a legal review. The checkbox lives in the theme's step-2 card, so it is
+`display:none` until «ادامه به پرداخت» is clicked — that is the stepper working,
+not the checkbox failing to render.
 
 **Rollback.** Every touched option is snapshotted in the **`_asc_auto_backup_20261031`**
 option (keys: `asc_palette`, `woocommerce_email_base_color`,
