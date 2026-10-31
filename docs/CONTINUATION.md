@@ -3103,3 +3103,46 @@ Page/plugin changes are reversible from wp-admin.
 **Cache.** After the changes the plain homepage was still a LiteSpeed hit serving
 the Dokan assets; `docker/purge-cache-probe.php` purges LiteSpeed **and** WP Super Cache
 and the assets were gone on the plain URL afterwards.
+
+---
+
+## 2026-10-31 — the landing pages became owner-editable (landing content panel)
+
+The last settings tab in the admin hub, **Settings → گزینههای کوییزها → صفحات فرود**.
+Every image and marketing string on the three landing pages was hardcoded in the
+theme; they are now editable from wp-admin, with the bundled file or inline string as
+the fallback. Full detail and the deliberate decisions are in
+[PARALLEL_SESSIONS.md](PARALLEL_SESSIONS.md) §0r; the roadmap entry is
+[FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) "Done — landing content panel".
+
+**How it joins.** The theme asks through two filters — `lylyrose_asset( $key, $fallback )`
+and `lylyrose_text( $key, $default )` in `themes/lylyrose/functions.php` — and
+`ASC_Landing_Settings` (`lylyrose-core/includes/class-landing-settings.php`) answers
+them. With the plugin switched off nothing answers and every call falls back, so the
+theme renders exactly as before. The theme never names an `asc_*` option.
+
+**Coverage.** `/perfume/` — 12 images + 14 strings. `/skincare/` and `/haircare/` —
+the same template behind two configs, so their schema is generated: 5 fixed images,
+one field per subcategory tile, 18 strings. Plus a store-wide `asc_contact` area for
+the four footer socials, the footer about/©/service chips, the contact lead and the
+support phone.
+
+**Four options, not one**, because `sanitize_callback` replaces the whole array — a
+shared option would let a save on the perfume tab blank the care pages. Images are
+attachment IDs, never URLs.
+
+**Two side effects.** The hub's `unwrap()` had only been demoting the opening `<h1>`,
+so **all three pre-existing tabs** were emitting `<h2>…</h1>`; fixed in place. And
+`lylyrose_perfume_landing_preload()` pointed at the bundled hero directly, so it kept
+preloading the replaced file — it now asks `lylyrose_asset()` too.
+
+**Verified locally, not on live: 424/0**, and nothing is uploaded to either host.
+Fallback, override and clear were each checked on the served HTML for a perfume image,
+a care hero + tile + string, and the footer socials/phone; option isolation confirmed
+(overriding skincare left `/haircare/` untouched); the hero call site was reverted to
+prove the assertion goes red; `sanitize()` was exercised for pick / remove / reset and
+for a `javascript:` URL. The `?tab=landing` UI was **not** driven by hand in a browser.
+
+**Not covered, by design:** the header nav and mega-menu, the homepage hero slides and
+promo banners, and the FAQ and about-page copy are still literal PHP. The panel does
+not claim "every hardcoded string in the theme".

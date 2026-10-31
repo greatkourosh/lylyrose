@@ -15,15 +15,29 @@ get_header();
 	<div class="dk-container dk-page-narrow">
 		<article class="dk-page-card">
 			<h1 class="dk-page-title"><?php esc_html_e( 'تماس با ما', 'lylyrose' ); ?></h1>
-			<p class="dk-page-lead"><?php esc_html_e( 'هر سؤال، انتقاد یا پیشنهادی دارید برای ما بنویسید. پیام‌ها در ساعات کاری بررسی و پاسخ داده می‌شوند.', 'lylyrose' ); ?></p>
+			<p class="dk-page-lead"><?php echo esc_html( lylyrose_contact( 'contact.contact_lead', __( 'هر سؤال، انتقاد یا پیشنهادی دارید برای ما بنویسید. پیام‌ها در ساعات کاری بررسی و پاسخ داده می‌شوند.', 'lylyrose' ) ) ); ?></p>
 
 			<div class="dk-contact-grid">
 				<div class="dk-contact-info">
+					<?php
+					/*
+					 * The number shown is the owner's display string (it can carry the
+					 * opening hours); the dial link is a separate digits-only field,
+					 * because a tel: href with a Persian digit or a parenthetical in it
+					 * does not dial on any phone.
+					 */
+					$lylyrose_phone      = lylyrose_contact( 'contact.phone', __( '۰۲۱-۰۰۰۰۰۰۰۰ (شنبه تا پنجشنبه، ۹ تا ۱۸)', 'lylyrose' ) );
+					$lylyrose_phone_link = lylyrose_contact( 'contact.phone_link' );
+					?>
 					<div class="dk-contact-item">
 						<span class="ico">☎️</span>
 						<div>
 							<strong><?php esc_html_e( 'تلفن پشتیبانی', 'lylyrose' ); ?></strong>
-							<span><?php esc_html_e( '۰۲۱-۰۰۰۰۰۰۰۰ (شنبه تا پنجشنبه، ۹ تا ۱۸)', 'lylyrose' ); ?></span>
+							<?php if ( $lylyrose_phone_link ) : ?>
+								<span><a href="tel:<?php echo esc_attr( $lylyrose_phone_link ); ?>" dir="ltr"><?php echo esc_html( $lylyrose_phone ); ?></a></span>
+							<?php else : ?>
+								<span><?php echo esc_html( $lylyrose_phone ); ?></span>
+							<?php endif; ?>
 						</div>
 					</div>
 					<div class="dk-contact-item">

@@ -28,6 +28,7 @@ class ASC_Admin_Hub {
 			'perfume' => __( 'عطر', 'lylyrose-core' ),
 			'skin'    => __( 'پوست', 'lylyrose-core' ),
 			'hair'    => __( 'مو', 'lylyrose-core' ),
+			'landing' => __( 'صفحات فرود', 'lylyrose-core' ),
 		);
 	}
 
@@ -83,10 +84,31 @@ class ASC_Admin_Hub {
 
 		if ( 'perfume' === $current ) {
 			self::render_perfume();
+		} elseif ( 'landing' === $current ) {
+			self::render_landing();
 		} else {
 			self::render_needs( $current );
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * One form per landing page. Each posts to options.php with its own option, so
+	 * saving /perfume/ cannot blank the care pages' fields.
+	 */
+	private static function render_landing() {
+		if ( ! class_exists( 'ASC_Landing_Settings' ) ) {
+			echo '<p>' . esc_html__( 'پنل محتوای صفحات در این فروشگاه فعال نیست.', 'lylyrose-core' ) . '</p>';
+			return;
+		}
+		// The section's own <h1> carries the page name; unwrap() demotes it to the
+		// <h2> the hub wants, so no separate heading is printed here.
+		foreach ( ASC_Landing_Settings::PAGES as $page => $option ) {
+			if ( ! ASC_Landing_Settings::schema( $page ) ) {
+				continue;
+			}
+			echo self::unwrap( self::capture( 'ASC_Landing_Settings', $page ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- section markup
+		}
 	}
 
 	private static function render_perfume() {
@@ -109,19 +131,28 @@ class ASC_Admin_Hub {
 		}
 	}
 
-	private static function capture( $class ) {
+	private static function capture( $class, $arg = null ) {
 		ob_start();
-		call_user_func( array( $class, 'render_admin' ) );
+		if ( null === $arg ) {
+			call_user_func( array( $class, 'render_admin' ) );
+		} else {
+			call_user_func( array( $class, 'render_admin' ), $arg );
+		}
 		return ob_get_clean();
 	}
 
 	/**
 	 * Anchored, so only the section's own outer wrapper is removed.
+	 *
+	 * The closing </h1> has to be demoted too: replacing only the opening tag left
+	 * every grafted section emitting <h2>...</h1>, which has been invalid markup in
+	 * all three existing tabs.
 	 */
 	private static function unwrap( $html ) {
 		$html = preg_replace( '/^\s*<div class="wrap"[^>]*>/', '', $html, 1 );
 		$html = preg_replace( '/<\/div>\s*$/', '', $html, 1 );
-		return preg_replace( '/<h1([^>]*)>/', '<h2$1>', $html, 1 );
+		$html = preg_replace( '/<h1([^>]*)>/', '<h2$1>', $html, 1 );
+		return preg_replace( '/<\/h1>/', '</h2>', $html );
 	}
 
 	private static function render_needs( $tab ) {

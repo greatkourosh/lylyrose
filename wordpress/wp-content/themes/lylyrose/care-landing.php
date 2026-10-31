@@ -283,13 +283,13 @@ get_header();
 
 	<!-- ================= Hero ================= -->
 	<section class="pf-hero" aria-labelledby="care-hero-title">
-		<img class="pf-hero-img" src="<?php echo esc_url( $care_img . 'hero.webp' ); ?>" alt="" width="1680" height="403" fetchpriority="high" decoding="async">
+		<img class="pf-hero-img" src="<?php echo esc_url( lylyrose_asset( $care['slug'] . '.hero', $care_img . 'hero.webp' ) ); ?>" alt="" width="1680" height="403" fetchpriority="high" decoding="async">
 		<span class="pf-hero-scrim" aria-hidden="true"></span>
 		<div class="pf-shell pf-hero-inner">
 			<div class="pf-hero-copy">
-				<h1 id="care-hero-title"><?php echo esc_html( $care['hero_title'] ); ?></h1>
-				<p><?php echo esc_html( $care['hero_copy'] ); ?></p>
-				<a class="pf-btn pf-btn-primary" href="#care-grid"><?php echo esc_html( $care['hero_cta'] ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
+				<h1 id="care-hero-title"><?php echo esc_html( lylyrose_text( $care['slug'] . '.hero_title', $care['hero_title'] ) ); ?></h1>
+				<p><?php echo esc_html( lylyrose_text( $care['slug'] . '.hero_copy', $care['hero_copy'] ) ); ?></p>
+				<a class="pf-btn pf-btn-primary" href="#care-grid"><?php echo esc_html( lylyrose_text( $care['slug'] . '.hero_cta', $care['hero_cta'] ) ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
 			</div>
 		</div>
 	</section>
@@ -299,34 +299,34 @@ get_header();
 		<!-- ================= Quick access ================= -->
 		<section class="pf-quick" aria-label="<?php echo esc_attr( $care['quick_label'] ); ?>">
 			<a class="pf-quick-card pf-quick-finder pf-quick-card--photo" href="<?php echo esc_url( $care_quiz_url ); ?>">
-				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-quiz.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<img class="pf-quick-bg" src="<?php echo esc_url( lylyrose_asset( $care['slug'] . '.quick_quiz', $care_img . 'quick-bg-quiz.webp' ) ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
 				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'drop' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php echo esc_html( $care['quiz_card_title'] ); ?></b>
-					<small><?php echo esc_html( $care['quiz_card_copy'] ); ?></small>
-					<span class="pf-quick-cta"><?php echo esc_html( $care['quiz_card_cta'] ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
+					<b><?php echo esc_html( lylyrose_text( $care['slug'] . '.quiz_card_title', $care['quiz_card_title'] ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( $care['slug'] . '.quiz_card_copy', $care['quiz_card_copy'] ) ); ?></small>
+					<span class="pf-quick-cta"><?php echo esc_html( lylyrose_text( $care['slug'] . '.quiz_card_cta', $care['quiz_card_cta'] ) ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
 				</span>
 			</a>
 
 			<a class="pf-quick-card pf-quick-card--photo" href="#pf-filters" data-pf-open-filters>
-				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-a.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<img class="pf-quick-bg" src="<?php echo esc_url( lylyrose_asset( $care['slug'] . '.quick_a', $care_img . 'quick-bg-a.webp' ) ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
 				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'filter' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'می‌خوام خودم بگردم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'با فیلتر نوع و نیاز، محصول مناسب خودت رو پیدا کن', 'lylyrose' ); ?></small>
+					<b><?php echo esc_html( lylyrose_text( $care['slug'] . '.quick_a_title', __( 'می‌خوام خودم بگردم', 'lylyrose' ) ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( $care['slug'] . '.quick_a_copy', __( 'با فیلتر نوع و نیاز، محصول مناسب خودت رو پیدا کن', 'lylyrose' ) ) ); ?></small>
 					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
 
 			<a class="pf-quick-card pf-quick-card--photo" href="#care-grid" data-pf-focus-search>
-				<img class="pf-quick-bg" src="<?php echo esc_url( $care_img . 'quick-bg-b.webp' ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
+				<img class="pf-quick-bg" src="<?php echo esc_url( lylyrose_asset( $care['slug'] . '.quick_b', $care_img . 'quick-bg-b.webp' ) ); ?>" alt="" width="1200" height="640" loading="lazy" decoding="async">
 				<span class="pf-quick-scrim" aria-hidden="true"></span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $care_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'محصول رو می‌شناسم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'اسم محصول یا برندش رو می‌دونی؟ همین‌جا جستجو کن', 'lylyrose' ); ?></small>
+					<b><?php echo esc_html( lylyrose_text( $care['slug'] . '.quick_b_title', __( 'محصول رو می‌شناسم', 'lylyrose' ) ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( $care['slug'] . '.quick_b_copy', __( 'اسم محصول یا برندش رو می‌دونی؟ همین‌جا جستجو کن', 'lylyrose' ) ) ); ?></small>
 					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
@@ -336,7 +336,7 @@ get_header();
 		<?php if ( $care_tiles ) : ?>
 			<section class="pf-families" aria-labelledby="care-tiles-title">
 				<div class="pf-section-head">
-					<h2 id="care-tiles-title"><?php echo esc_html( $care['tiles_title'] ); ?></h2>
+					<h2 id="care-tiles-title"><?php echo esc_html( lylyrose_text( $care['slug'] . '.tiles_title', $care['tiles_title'] ) ); ?></h2>
 				</div>
 				<div class="pf-family-row" style="--pf-tiles:<?php echo (int) count( $care_tiles ); ?>">
 					<?php foreach ( $care_tiles as $care_tile ) :
@@ -345,11 +345,20 @@ get_header();
 						/* A composed lifestyle photo per subcategory, built by
 						 * docker/compose-care-images.py. Falls back to the term's own
 						 * product image so a tile for a new subcategory still shows
-						 * something real without a rebuild. */
+						 * something real without a rebuild.
+						 *
+						 * lylyrose_asset() takes the bundled file's path as its default,
+						 * so its own "nothing picked" answer is a path — which is only
+						 * right when that file exists. Hence the existence test around
+						 * it, not inside: an override is used whether or not the
+						 * bundled tile was ever generated. */
 						$care_tile_rel = 'assets/images/' . $care['slug'] . '/tile-' . $care_tile->slug . '.webp';
-						$care_tile_img = file_exists( get_theme_file_path( $care_tile_rel ) )
-							? get_theme_file_uri( $care_tile_rel )
-							: lylyrose_term_image( $care_tile );
+						$care_tile_img = lylyrose_asset( $care['slug'] . '.tile.' . $care_tile->slug, '' );
+						if ( ! $care_tile_img ) {
+							$care_tile_img = file_exists( get_theme_file_path( $care_tile_rel ) )
+								? get_theme_file_uri( $care_tile_rel )
+								: lylyrose_term_image( $care_tile );
+						}
 						?>
 						<a class="pf-family<?php echo $care_tile_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( $care_tile_url ); ?>"<?php echo $care_tile_active ? ' aria-current="true"' : ''; ?>>
 							<span class="pf-family-img">
@@ -527,9 +536,9 @@ get_header();
 					<?php endif; ?>
 				<?php else : ?>
 					<div class="pf-empty">
-						<h2><?php echo esc_html( $care['empty_title'] ); ?></h2>
-						<p><?php esc_html_e( 'فیلترها را تغییر دهید یا همه محصولات را ببینید.', 'lylyrose' ); ?></p>
-						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $care_base_url ); ?>"><?php echo esc_html( $care['empty_cta'] ); ?></a>
+						<h2><?php echo esc_html( lylyrose_text( $care['slug'] . '.empty_title', $care['empty_title'] ) ); ?></h2>
+						<p><?php echo esc_html( lylyrose_text( $care['slug'] . '.empty_copy', __( 'فیلترها را تغییر دهید یا همه محصولات را ببینید.', 'lylyrose' ) ) ); ?></p>
+						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $care_base_url ); ?>"><?php echo esc_html( lylyrose_text( $care['slug'] . '.empty_cta', $care['empty_cta'] ) ); ?></a>
 					</div>
 				<?php endif; ?>
 				<?php wp_reset_postdata(); ?>
@@ -537,9 +546,9 @@ get_header();
 				<!-- ================= Guide banner ================= -->
 				<section class="pf-guide" aria-labelledby="care-guide-title">
 					<div class="pf-guide-copy">
-						<h2 id="care-guide-title"><?php echo esc_html( $care['guide_title'] ); ?></h2>
-						<p><?php echo esc_html( $care['guide_copy'] ); ?></p>
-						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $care_quiz_url ); ?>"><?php echo esc_html( $care['guide_cta'] ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
+						<h2 id="care-guide-title"><?php echo esc_html( lylyrose_text( $care['slug'] . '.guide_title', $care['guide_title'] ) ); ?></h2>
+						<p><?php echo esc_html( lylyrose_text( $care['slug'] . '.guide_copy', $care['guide_copy'] ) ); ?></p>
+						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $care_quiz_url ); ?>"><?php echo esc_html( lylyrose_text( $care['slug'] . '.guide_cta', $care['guide_cta'] ) ); ?> <?php echo $care_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
 					</div>
 					<ul class="pf-guide-badges">
 						<?php
@@ -557,7 +566,7 @@ get_header();
 						<?php endforeach; ?>
 					</ul>
 					<div class="pf-guide-media">
-						<img src="<?php echo esc_url( $care_img . 'guide.webp' ); ?>" alt="" width="600" height="480" loading="lazy" decoding="async">
+						<img src="<?php echo esc_url( lylyrose_asset( $care['slug'] . '.guide', $care_img . 'guide.webp' ) ); ?>" alt="" width="600" height="480" loading="lazy" decoding="async">
 					</div>
 				</section>
 
@@ -565,7 +574,7 @@ get_header();
 				<?php if ( $care_new->have_posts() ) : ?>
 					<section class="pf-best" aria-labelledby="care-new-title">
 						<div class="pf-section-head">
-							<h2 id="care-new-title"><?php echo esc_html( $care['rail_title'] ); ?></h2>
+							<h2 id="care-new-title"><?php echo esc_html( lylyrose_text( $care['slug'] . '.rail_title', $care['rail_title'] ) ); ?></h2>
 							<a class="pf-section-more" href="<?php echo esc_url( care_url( $care_base_url, array( 'care_sort' => '' ) ) . '#care-grid' ); ?>"><?php esc_html_e( 'مشاهده همه ‹', 'lylyrose' ); ?></a>
 						</div>
 						<div class="pf-best-rail">

@@ -72,6 +72,12 @@ class Lylyrose_Core {
             return require LYLYROSE_CORE_PLUGIN_DIR . 'includes/palette-presets.php';
         } );
         ASC_Palette::init();
+
+        // The landing-page panel answers the theme's lylyrose_asset()/lylyrose_text()
+        // filters, which the front end asks on every render — so it belongs here and
+        // not in the admin-only path.
+        require_once LYLYROSE_CORE_PLUGIN_DIR . 'includes/class-landing-settings.php';
+        ASC_Landing_Settings::init();
     }
 
     protected function includes_woocommerce() {

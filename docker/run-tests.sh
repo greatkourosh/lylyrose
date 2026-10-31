@@ -1811,11 +1811,15 @@ section "32. Upstream/downstream class parity"
 # lylyrose-core/includes/, so the 12 classes that moved to kstore were invisible
 # to it -- a class added to kstore could not fail this assertion, which is the
 # whole point of pinning it. 17 in lylyrose-core + 12 in kstore = 29.
+#
+# 2026-10-31: 30 with ASC_Landing_Settings (the landing-page content panel).
+# Downstream-only like the finder editors above: it exposes what the lylyrose
+# theme hardcodes, and the digikala theme upstream has no such page.
 CLASS_COUNT=$(docker exec "$WP_CONTAINER" sh -c \
   "ls /var/www/html/wp-content/plugins/lylyrose-core/includes/ /var/www/html/wp-content/plugins/kstore/includes/ 2>/dev/null | grep -c '^class-'" 2>/dev/null | tr -dc '0-9')
-[ "${CLASS_COUNT:-0}" = "29" ] \
-  && pass "the two plugins expose 29 ASC_ classes ($CLASS_COUNT)" \
-  || fail "the two plugins expose ${CLASS_COUNT:-0} classes, expected 29 — a new class needs mirroring and a doc count update"
+[ "${CLASS_COUNT:-0}" = "30" ] \
+  && pass "the two plugins expose 30 ASC_ classes ($CLASS_COUNT)" \
+  || fail "the two plugins expose ${CLASS_COUNT:-0} classes, expected 30 — a new class needs mirroring and a doc count update"
 
 section "34. Perfume finder (عطرت رو پیدا کن)"
 
@@ -2952,9 +2956,9 @@ echo "$EXP_OUT" | grep -q '"badStatus":400' \
   || fail "negative expense accepted: $EXP_OUT"
 section "44. Admin hub (گزینههای کوییزها)"
 HUB_TABS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"perfume"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo preg_match_all("/<a [^>]*class=\"nav-tab/",$h);' 2>/dev/null | tr -dc '0-9')
-[ "$HUB_TABS" = "3" ] \
-  && pass "admin hub renders three tabs" \
-  || fail "admin hub rendered '$HUB_TABS' tab links, expected 3"
+[ "$HUB_TABS" = "4" ] \
+  && pass "admin hub renders four tabs" \
+  || fail "admin hub rendered '$HUB_TABS' tab links, expected 4"
 HUB_MENU=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); do_action("admin_menu"); global $submenu; $s=array_map(fn($x)=>$x[2], $submenu["options-general.php"] ?? array()); echo (in_array("asc-finder-hub",$s,true)?"1":"0").(in_array("asc-quiz-menu",$s,true)?"1":"0");' 2>/dev/null)
 [ "$HUB_MENU" = "10" ] \
   && pass "menu lists the hub and hides the old standalone pages" \
@@ -2967,6 +2971,29 @@ HUB_EDIT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.ph
 [ "$HUB_EDIT" = "yes" ] \
   && pass "the hair tab renders an editable form posting to options.php" \
   || fail "the hair tab has no editable weight form (got '$HUB_EDIT')"
+# The landing tab: a form per page, and the perfume form must carry the hero
+# photo's hidden input — the media picker writes it, so nothing else proves the
+# field exists. Asserting the option name also pins the key, which is what the
+# theme's lylyrose_asset() looks up.
+HUB_LANDING=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"landing"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo (strpos($h,"name=\"asc_landing_perfume[perfume.hero]\"")!==false && strpos($h,"action=\"options.php\"")!==false)?"yes":"no";' 2>/dev/null)
+[ "$HUB_LANDING" = "yes" ] \
+  && pass "the landing tab renders an editable form with the hero photo field" \
+  || fail "the landing tab has no hero-photo form (got '$HUB_LANDING')"
+# The care pages are one shared template behind two configs, so their schema is
+# generated rather than written out. Prove it produced a field per page, including
+# a per-subcategory tile key — the tile keys are the part a template change could
+# silently stop generating.
+HUB_CARE=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"landing"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); $skin=strpos($h,"name=\"asc_landing_skincare[skincare.hero]\""); $hair=strpos($h,"name=\"asc_landing_haircare[haircare.hero]\""); $tile=strpos($h,"name=\"asc_landing_skincare[skincare.tile.sunscreen]\""); echo ($skin!==false && $hair!==false && $tile!==false && substr_count($h,"action=\"options.php\"")===4)?"yes":"no";' 2>/dev/null)
+[ "$HUB_CARE" = "yes" ] \
+  && pass "the landing tab renders a form per page, with a per-tile field" \
+  || fail "care-page forms missing from the landing tab (got '$HUB_CARE')"
+# The store-wide contact area. A url field must render as type="url" (not a text
+# input) and the four social keys must all be present — they ship with no default,
+# so a schema typo would drop them silently and the footer would fall back to "#".
+HUB_CONTACT=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"landing"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); $url=strpos($h,"type=\"url\" id=\"asc-f-contact-social_instagram\""); $ph=strpos($h,"name=\"asc_contact[contact.phone]\""); $n=0; foreach(array("instagram","telegram","twitter","linkedin") as $s){ if(strpos($h,"name=\"asc_contact[contact.social_$s]\"")!==false){$n++;} } echo ($url!==false && $ph!==false && $n===4)?"yes":"no";' 2>/dev/null)
+[ "$HUB_CONTACT" = "yes" ] \
+  && pass "the landing tab renders the contact form with its four social fields" \
+  || fail "contact form incomplete (got '$HUB_CONTACT')"
 
 section "45. Purchases and stock in (خرید و ورود کالا)"
 PUR_OUT=$(docker exec "$WP_CONTAINER" php -r '
@@ -3079,9 +3106,9 @@ echo "$BS_OUT" | grep -q '"inputVatD":91' \
 section ""
 section "45. Admin hub (گزینههای کوییزها)"
 HUB_TABS=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); $_GET=array("page"=>"asc-finder-hub","tab"=>"perfume"); ob_start(); ASC_Admin_Hub::render(); $h=ob_get_clean(); echo preg_match_all("/<a [^>]*class=\"nav-tab/",$h);' 2>/dev/null | tr -dc '0-9')
-[ "$HUB_TABS" = "3" ] \
-  && pass "admin hub renders three tabs" \
-  || fail "admin hub rendered '$HUB_TABS' tab links, expected 3"
+[ "$HUB_TABS" = "4" ] \
+  && pass "admin hub renders four tabs" \
+  || fail "admin hub rendered '$HUB_TABS' tab links, expected 4"
 HUB_MENU=$(docker exec "$WP_CONTAINER" php -r 'require("/var/www/html/wp-load.php"); wp_set_current_user(1); do_action("admin_menu"); global $submenu; $s=array_map(fn($x)=>$x[2], $submenu["options-general.php"] ?? array()); echo (in_array("asc-finder-hub",$s,true)?"1":"0").(in_array("asc-quiz-menu",$s,true)?"1":"0");' 2>/dev/null)
 [ "$HUB_MENU" = "10" ] \
   && pass "menu lists the hub and hides the old standalone pages" \

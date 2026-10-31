@@ -308,7 +308,11 @@ function lylyrose_perfume_landing_preload() {
 	}
 	printf(
 		'<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n",
-		esc_url( get_theme_file_uri( 'assets/images/' . $slug . '/hero.webp' ) )
+		// Through lylyrose_asset() so an overridden hero is the one preloaded; the
+		// key matches the panel's ("perfume.hero", "skincare.hero", ...). A hardcoded
+		// path here would keep fetching the bundled file at high priority after the
+		// owner replaced it, competing with the photo actually on the page.
+		esc_url( lylyrose_asset( $slug . '.hero', get_theme_file_uri( 'assets/images/' . $slug . '/hero.webp' ) ) )
 	);
 }
 add_action( 'wp_head', 'lylyrose_perfume_landing_preload', 2 );
@@ -977,6 +981,50 @@ function lylyrose_hero_photo( $key ) {
 		return '';
 	}
 	return wp_parse_url( $url, PHP_URL_PATH ) ?: '';
+}
+
+/**
+ * An image the owner replaced from the landing-page panel, else the bundled one.
+ *
+ * The theme never names the plugin or its option, only this filter: with
+ * lylyrose-core switched off nothing answers, every call falls back to the
+ * file in assets/, and the page renders exactly as it did before the panel
+ * existed. That is the same boundary the upstream/downstream split needs
+ * (docs/UPSTREAM_RELATIONSHIP.md) — an asc_* option name must not reach in here.
+ *
+ * $key is semantic ("perfume.hero"), not the file path: the value behind it is an
+ * attachment id, so renaming the bundled file on disk would orphan a path-keyed
+ * field into a silent no-op.
+ */
+function lylyrose_asset( $key, $fallback ) {
+	$override = (string) apply_filters( 'lylyrose_asset_url', '', $key );
+	return $override ? $override : $fallback;
+}
+
+/**
+ * A string the owner rewrote from the landing-page panel, else its default.
+ *
+ * Same filter-not-option rule as lylyrose_asset(); the default is passed in at
+ * the call site so the template still reads as the plain text it renders.
+ */
+function lylyrose_text( $key, $default ) {
+	$override = (string) apply_filters( 'lylyrose_text_value', '', $key );
+	return '' === $override ? $default : $override;
+}
+
+/**
+ * A store-wide value the owner set in the panel, else its default.
+ *
+ * Same filter, so the theme keeps naming no option and no plugin. Used for the
+ * footer and contact details, which belong to every page rather than to one
+ * landing page — the reason the panel gives them their own 'contact' area.
+ *
+ * An empty result is returned as-is, not swapped for the default: the four social
+ * links ship with no URL at all, and a template needs to tell "unset" from a value
+ * so it can render its placeholder rather than an empty href.
+ */
+function lylyrose_contact( $key, $default = '' ) {
+	return (string) apply_filters( 'lylyrose_text_value', $default, $key );
 }
 
 /**

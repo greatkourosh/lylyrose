@@ -320,13 +320,13 @@ get_header();
 
 	<!-- ================= Hero ================= -->
 	<section class="pf-hero" aria-labelledby="pf-hero-title">
-		<img class="pf-hero-img" src="<?php echo esc_url( $pf_theme_img . 'hero.webp' ); ?>" alt="" width="1680" height="403" fetchpriority="high" decoding="async">
+		<img class="pf-hero-img" src="<?php echo esc_url( lylyrose_asset( 'perfume.hero', $pf_theme_img . 'hero.webp' ) ); ?>" alt="" width="1680" height="403" fetchpriority="high" decoding="async">
 		<span class="pf-hero-scrim" aria-hidden="true"></span>
 		<div class="pf-shell pf-hero-inner">
 			<div class="pf-hero-copy">
-				<h1 id="pf-hero-title"><?php esc_html_e( 'دنیای عطرها، به سلیقه تو', 'lylyrose' ); ?></h1>
-				<p><?php esc_html_e( 'از رایحه‌های خنک و روزانه تا عطرهای گرم و ماندگار، عطر دلخواهت رو پیدا کن.', 'lylyrose' ); ?></p>
-				<a class="pf-btn pf-btn-primary" href="#pf-grid"><?php esc_html_e( 'مشاهده همه عطرها', 'lylyrose' ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
+				<h1 id="pf-hero-title"><?php echo esc_html( lylyrose_text( 'perfume.hero_title', __( 'دنیای عطرها، به سلیقه تو', 'lylyrose' ) ) ); ?></h1>
+				<p><?php echo esc_html( lylyrose_text( 'perfume.hero_copy', __( 'از رایحه‌های خنک و روزانه تا عطرهای گرم و ماندگار، عطر دلخواهت رو پیدا کن.', 'lylyrose' ) ) ); ?></p>
+				<a class="pf-btn pf-btn-primary" href="#pf-grid"><?php echo esc_html( lylyrose_text( 'perfume.hero_cta', __( 'مشاهده همه عطرها', 'lylyrose' ) ) ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
 			</div>
 		</div>
 	</section>
@@ -337,36 +337,36 @@ get_header();
 		<section class="pf-quick" aria-label="<?php esc_attr_e( 'راه‌های پیدا کردن عطر', 'lylyrose' ); ?>">
 			<a class="pf-quick-card pf-quick-finder" href="<?php echo esc_url( $pf_finder_url ); ?>">
 				<span class="pf-quick-img">
-					<img src="<?php echo esc_url( $pf_theme_img . 'quiz.webp' ); ?>" alt="" width="360" height="580" loading="lazy" decoding="async">
+					<img src="<?php echo esc_url( lylyrose_asset( 'perfume.quiz', $pf_theme_img . 'quiz.webp' ) ); ?>" alt="" width="360" height="580" loading="lazy" decoding="async">
 				</span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'bottle' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'کمکم کن عطر انتخاب کنم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'هنوز انتخاب‌ت رو نمی‌دونی؟ با چند سوال ساده بهترین گزینه‌ها رو پیشنهاد می‌دیم', 'lylyrose' ); ?></small>
-					<span class="pf-quick-cta"><?php esc_html_e( 'شروع تست انتخاب عطر', 'lylyrose' ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
+					<b><?php echo esc_html( lylyrose_text( 'perfume.quiz_title', __( 'کمکم کن عطر انتخاب کنم', 'lylyrose' ) ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( 'perfume.quiz_copy', __( 'هنوز انتخاب‌ت رو نمی‌دونی؟ با چند سوال ساده بهترین گزینه‌ها رو پیشنهاد می‌دیم', 'lylyrose' ) ) ); ?></small>
+					<span class="pf-quick-cta"><?php echo esc_html( lylyrose_text( 'perfume.quiz_cta', __( 'شروع تست انتخاب عطر', 'lylyrose' ) ) ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
 				</span>
 			</a>
 
 			<a class="pf-quick-card" href="#pf-filters" data-pf-open-filters>
 				<span class="pf-quick-img">
-					<img src="<?php echo esc_url( $pf_theme_img . 'quick-a.webp' ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
+					<img src="<?php echo esc_url( lylyrose_asset( 'perfume.quick_a', $pf_theme_img . 'quick-a.webp' ) ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
 				</span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'filter' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'می‌خوام خودم بگردم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'با فیلترها و دسته‌بندی‌ها عطر مناسب خودت رو پیدا کن', 'lylyrose' ); ?></small>
+					<b><?php echo esc_html( lylyrose_text( 'perfume.quick_a_title', __( 'می‌خوام خودم بگردم', 'lylyrose' ) ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( 'perfume.quick_a_copy', __( 'با فیلترها و دسته‌بندی‌ها عطر مناسب خودت رو پیدا کن', 'lylyrose' ) ) ); ?></small>
 					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
 
 			<a class="pf-quick-card" href="#pf-grid" data-pf-focus-search>
 				<span class="pf-quick-img">
-					<img src="<?php echo esc_url( $pf_theme_img . 'quick-b.webp' ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
+					<img src="<?php echo esc_url( lylyrose_asset( 'perfume.quick_b', $pf_theme_img . 'quick-b.webp' ) ); ?>" alt="" width="600" height="432" loading="lazy" decoding="async">
 				</span>
 				<span class="pf-quick-body">
 					<span class="pf-quick-icon" aria-hidden="true"><?php echo $pf_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></span>
-					<b><?php esc_html_e( 'عطرم رو می‌شناسم', 'lylyrose' ); ?></b>
-					<small><?php esc_html_e( 'اسم عطر یا برندش رو می‌دونی؟ همین‌جا جستجو کن', 'lylyrose' ); ?></small>
+					<b><?php echo esc_html( lylyrose_text( 'perfume.quick_b_title', __( 'عطرم رو می‌شناسم', 'lylyrose' ) ) ); ?></b>
+					<small><?php echo esc_html( lylyrose_text( 'perfume.quick_b_copy', __( 'اسم عطر یا برندش رو می‌دونی؟ همین‌جا جستجو کن', 'lylyrose' ) ) ); ?></small>
 					<span class="pf-quick-go" aria-hidden="true">‹</span>
 				</span>
 			</a>
@@ -375,7 +375,7 @@ get_header();
 		<!-- ================= Scent families ================= -->
 		<section class="pf-families" aria-labelledby="pf-families-title">
 			<div class="pf-section-head">
-				<h2 id="pf-families-title"><?php esc_html_e( 'انتخاب سریع بر اساس رایحه', 'lylyrose' ); ?></h2>
+				<h2 id="pf-families-title"><?php echo esc_html( lylyrose_text( 'perfume.families_title', __( 'انتخاب سریع بر اساس رایحه', 'lylyrose' ) ) ); ?></h2>
 			</div>
 			<div class="pf-family-row">
 				<?php foreach ( $pf_family_tiles as $pf_tile_key => $pf_tile ) :
@@ -392,7 +392,7 @@ get_header();
 					?>
 					<a class="pf-family<?php echo $pf_tile_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( $pf_tile_url ); ?>"<?php echo $pf_tile_active ? ' aria-current="true"' : ''; ?>>
 						<span class="pf-family-img">
-							<img src="<?php echo esc_url( $pf_theme_img . $pf_tile['image'] ); ?>" alt="<?php echo esc_attr( $pf_tile['alt'] ); ?>" width="320" height="154" loading="lazy" decoding="async">
+							<img src="<?php echo esc_url( lylyrose_asset( 'perfume.family.' . $pf_tile_key, $pf_theme_img . $pf_tile['image'] ) ); ?>" alt="<?php echo esc_attr( $pf_tile['alt'] ); ?>" width="320" height="154" loading="lazy" decoding="async">
 						</span>
 						<span class="pf-family-name"><?php echo esc_html( $pf_tile['label'] ); ?> <span aria-hidden="true">‹</span></span>
 					</a>
@@ -670,9 +670,9 @@ get_header();
 				<!-- ================= Guide banner ================= -->
 				<section class="pf-guide" aria-labelledby="pf-guide-title">
 					<div class="pf-guide-copy">
-						<h2 id="pf-guide-title"><?php esc_html_e( 'راهنمای انتخاب عطر', 'lylyrose' ); ?></h2>
-						<p><?php esc_html_e( 'با چند سوال کوتاه، عطر مناسب شخصیت و سلیقه‌ات رو پیدا کن.', 'lylyrose' ); ?></p>
-						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $pf_finder_url ); ?>"><?php esc_html_e( 'شروع تست انتخاب عطر', 'lylyrose' ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
+						<h2 id="pf-guide-title"><?php echo esc_html( lylyrose_text( 'perfume.guide_title', __( 'راهنمای انتخاب عطر', 'lylyrose' ) ) ); ?></h2>
+						<p><?php echo esc_html( lylyrose_text( 'perfume.guide_copy', __( 'با چند سوال کوتاه، عطر مناسب شخصیت و سلیقه‌ات رو پیدا کن.', 'lylyrose' ) ) ); ?></p>
+						<a class="pf-btn pf-btn-primary" href="<?php echo esc_url( $pf_finder_url ); ?>"><?php echo esc_html( lylyrose_text( 'perfume.guide_cta', __( 'شروع تست انتخاب عطر', 'lylyrose' ) ) ); ?> <?php echo $pf_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput -- static markup ?></a>
 					</div>
 					<ul class="pf-guide-badges">
 						<?php
@@ -690,7 +690,7 @@ get_header();
 						<?php endforeach; ?>
 					</ul>
 					<div class="pf-guide-media">
-						<img src="<?php echo esc_url( $pf_theme_img . 'guide.webp' ); ?>" alt="" width="600" height="480" loading="lazy" decoding="async">
+						<img src="<?php echo esc_url( lylyrose_asset( 'perfume.guide', $pf_theme_img . 'guide.webp' ) ); ?>" alt="" width="600" height="480" loading="lazy" decoding="async">
 					</div>
 				</section>
 
