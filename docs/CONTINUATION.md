@@ -3047,7 +3047,7 @@ was read back.
 |---|---|---|
 | AUTO-2 | `woocommerce_email_base_color` `#ef394e` → `#064048` | read back; `#064048` is the active `lylyrose` palette's `red` token |
 | AUTO-1 | page **#225** wired to `tinvwl-page`; its shortcode fixed | `/wishlist/` returns 200 and renders `.tinv-wishlist` |
-| AUTO-3 | draft page **#2035** created and linked to `woocommerce_terms_page_id` | read back, `status=draft` |
+| AUTO-3 | page **#2035** created, linked, and **published** | `/terms/` returns 200 and renders the copy |
 | AUTO-4 | PWS plugin activated; **31 states + 1394 cities** imported; «ایران» zone with پست پیشتاز + پیک موتوری | probe: 1 zone, 2 methods `enabled=yes` |
 | AUTO-7 | Dokan Lite deactivated | 20 → 19 active plugins; the plain homepage loads **0** `dokan-lite/assets` |
 
@@ -3083,8 +3083,17 @@ shipping method is offered at checkout. Rates were deliberately not invented.
 
 **Decided, not done:** AUTO-5 Rank Math stays **inactive** (owner's call — the
 theme already emits `title-tag`, and activation rewrites sitewide meta plus wants
-a wizard). AUTO-3's page is a **draft** and its copy needs an owner review before
-publish.
+a wizard).
+
+**AUTO-3 published, and it is still orphaned.** The terms page was published on
+the owner's instruction: `/terms/` returns 200 and renders 1278 chars of copy.
+The placeholder sentence *"این متن پیش‌نویس است و پیش از انتشار باید … بازبینی
+شود"* was removed first — I had written it while the page was a draft, and
+publishing made the live page call itself unpublished. **Two things still don't
+connect it to a customer:** `woocommerce_checkout_show_terms` is `false`, so no
+terms checkbox appears at checkout, and the footer links no page to `/terms/`
+(it does link `/faq/` and `/about/`). Until one of those is wired the page is
+reachable only by direct URL. The legal copy is also still unreviewed.
 
 **Rollback.** Every touched option is snapshotted in the **`_asc_auto_backup_20261031`**
 option (keys: `asc_palette`, `woocommerce_email_base_color`,
