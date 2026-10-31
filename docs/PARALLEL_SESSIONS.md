@@ -1068,6 +1068,18 @@ correction above.
 
 ## 6. Roadmap
 
+> **2026-10-31 update (AUTO-* rows run).** The ai-doable half of the plugin-settings
+> audit was executed on live: email brand colour → `#064048`; wishlist page wired
+> and its shortcode fixed; draft terms page created and linked; the Persian shipping
+> plugin activated with 31 states / 1394 cities and an «ایران» zone carrying پست
+> پیشتاز + پیک موتوری; Dokan Lite deactivated (20 → 19 plugins). **Two rows cannot
+> close as written:** AUTO-6 (Redis) is impossible on this host (no `Redis` class,
+> 6379 refused — the container is local-only), and AUTO-5 (Rank Math) stays inactive
+> by the owner's decision. **AUTO-4 stops at the money:** zones and methods exist but
+> every per-state rate is empty, so the owner must fill rates in پیشخوان > حمل و نقل
+> before any method appears at checkout. Snapshot of every touched option is in
+> `_asc_auto_backup_20261031`. Full record in `CONTINUATION.md`, 2026-10-31.
+>
 > **2026-10-22 update.** Hero's gradient scrim removed; the copy now carries its own text shadow, and the mobile hero arrows moved below the copy. Theme `Version:` → **1.27.10**, deployed and verified on lylyrose.ir at 1440px and 375px. The plain homepage was a stale LiteSpeed hit until a `litespeed_purge_all`; it now serves `ver=1.27.10`. Full notes in §0n.
 >
 > **2026-10-12 update (accounting).** Accounting REST API (`ASC_Accounting`, `/wp-json/aroma/v1/`) is in `lylyrose-core` at `f85af88f`/`adaf57e6`, mirrored from aroma_store `493c324c`. Covers sales, summary, invoices, unit cost, and expenses with operating profit. Deployed to lylyrose.ir 2026-10-13 (`diff-host.py` 67/0/0 on 2026-10-14). Digikala adapter is blocked until seller file formats or an API are available. Full notes in `docs/DEVELOPMENT_LOG.md`.

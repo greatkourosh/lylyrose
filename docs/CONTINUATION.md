@@ -3033,3 +3033,64 @@ Full audit of live database options (`wp_options`) across all 12 installed plugi
   - Host mail server verified (`mail.lylyrose.ir:587` with STARTTLS / Auth).
   - Injected `WPMS_*` constants into live `wp-config.php` via FTP with automated backup.
   - Test email dispatch from `info@lylyrose.ir` successfully verified.
+
+## 2026-10-31 — the AUTO-* rows run against live
+
+Follow-up to the audit above: the ai-doable rows were executed on `lylyrose.ir`.
+Everything below was applied through the docroot probe (random name, `php -l` +
+a **local container run** first, deleted after, 404-confirmed), and every write
+was read back.
+
+**Applied and verified live**
+
+| Row | Change | Evidence |
+|---|---|---|
+| AUTO-2 | `woocommerce_email_base_color` `#ef394e` → `#064048` | read back; `#064048` is the active `lylyrose` palette's `red` token |
+| AUTO-1 | page **#225** wired to `tinvwl-page`; its shortcode fixed | `/wishlist/` returns 200 and renders `.tinv-wishlist` |
+| AUTO-3 | draft page **#2035** created and linked to `woocommerce_terms_page_id` | read back, `status=draft` |
+| AUTO-4 | PWS plugin activated; **31 states + 1394 cities** imported; «ایران» zone with پست پیشتاز + پیک موتوری | probe: 1 zone, 2 methods `enabled=yes` |
+| AUTO-7 | Dokan Lite deactivated | 20 → 19 active plugins; the plain homepage loads **0** `dokan-lite/assets` |
+
+**Three things the docs had wrong, and the checks that caught them**
+
+- **The finder coverage line said "10 of 165".** A live probe of `profile()` answers
+  **165 published, 110 rankable** — the 10 was measured 2026-10-08, before the
+  seed. `FEATURES_ROADMAP.md` is corrected.
+- **AUTO-6 (Redis object cache) is impossible on this host, not merely undone.** The
+  live PHP has **no `Redis` class** and `127.0.0.1:6379` refuses. The redis
+  container is local-only. The runbook's "WP Super Cache is off" row was also
+  wrong: `WP_CACHE` is **`true`** on live and both page caches run at once.
+- **The wishlist shortcode was never `[tinvwl_wishlist]`.** TI Wishlist registers
+  `[ti_wishlistsview]`; the literal `[tinvwl_wishlist]` is registered nowhere.
+  Proved by `do_shortcode()`: the wrong tag renders **17 chars of raw text**, the
+  right one **404 chars of `.tinv-wishlist` markup**. Both live pages carried the
+  wrong tag, so setting the option alone would have shipped a page printing a
+  shortcode at the customer.
+
+**The pre-existing defect AUTO-1 walked into.** Two **published** pages both held
+the slug `wishlist` (#225 authored by 0, #242 by 1) — WP normally forbids that, so
+it was created around. Any `wp_update_post()` on one makes WP rename it to
+`wishlist-2` and the option/URL split silently. Resolved non-destructively: #225
+kept the slug, #242 was demoted to **draft** `wishlist-duplicate-242` (nothing
+deleted). This only surfaced because the script was run against the local clone
+first, where the rename was visible.
+
+**AUTO-4 stops where money starts.** Zones and methods are in place, but every
+per-state rate option is empty. PWS adds **no rate** when its option is empty
+(verified: a Tehran cart returns **zero** rates), so nothing displays a false
+"ارسال رایگان" — but until the owner fills the rates in پیشخوان > حمل و نقل no
+shipping method is offered at checkout. Rates were deliberately not invented.
+
+**Decided, not done:** AUTO-5 Rank Math stays **inactive** (owner's call — the
+theme already emits `title-tag`, and activation rewrites sitewide meta plus wants
+a wizard). AUTO-3's page is a **draft** and its copy needs an owner review before
+publish.
+
+**Rollback.** Every touched option is snapshotted in the **`_asc_auto_backup_20261031`**
+option (keys: `asc_palette`, `woocommerce_email_base_color`,
+`woocommerce_email_text_color`, `woocommerce_terms_page_id`, `tinvwl-page`).
+Page/plugin changes are reversible from wp-admin.
+
+**Cache.** After the changes the plain homepage was still a LiteSpeed hit serving
+the Dokan assets; `docker/purge-cache-probe.php` purges LiteSpeed **and** WP Super Cache
+and the assets were gone on the plain URL afterwards.

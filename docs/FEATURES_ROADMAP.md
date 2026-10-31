@@ -50,9 +50,11 @@ still true at the time, by absence of any reference in the theme or the suite). 
 and typo-tolerant search both shipped 2026-10-10 (see CONTINUATION.md). What remains
 absent: per-host credentials for SMS, payments and SMTP. The last is item 2 in `CONTINUATION.md` and is human-blocked.
 
-**Perfume Finder content coverage: 10 of 165 products** (re-verified 2026-10-08 —
-`_asc_notes_*` on 10 products, 0 rows of finder-factor data). The remaining 155 are
-content authoring, not code. See `CONTINUATION.md` §"Open items, re-verified".
+**Perfume Finder content coverage: 110 of 165 products** (corrected 2026-10-31 —
+this line said "10 of 165", which was measured 2026-10-08 before the seed; the seed
+shipped 2026-10-10 and `profile()` now ranks **110 of 165**. `CONTINUATION.md`
+carries the coverage table. The remaining 55 are non-perfume hair/body care, not a
+code gap). See `CONTINUATION.md` §"Open items, re-verified".
 
 ---
 
